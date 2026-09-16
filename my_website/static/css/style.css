@@ -991,3 +991,54 @@ a.expandable-panel .panel-item,
 .code-chapter:hover { color: rgba(140, 100, 70, 0.44); }
 .hp-hero .code-chapter { text-align: center; margin-bottom: 36px; }
 .code-chapter-section  { margin-bottom: 20px; }
+
+/* ── Google Search UI ── */
+.google-search-box {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    max-width: 584px;
+    height: 48px;
+    background: #fff;
+    border: 1px solid #dfe1e5;
+    border-radius: 24px;
+    padding: 0 14px 0 14px;
+    box-shadow: none;
+    transition: box-shadow 200ms cubic-bezier(0.4, 0.0, 0.2, 1);
+}
+.google-search-box:hover, .google-search-box:focus-within {
+    box-shadow: 0 1px 6px rgba(32,33,36,.28);
+    border-color: rgba(223,225,229,0);
+}
+.google-search-input {
+    flex: 1;
+    border: none;
+    outline: none;
+    font-size: 16px;
+    padding: 0 10px;
+    color: #202124;
+}
+.search-icon { color: #9aa0a6; font-size: 20px; }
+.mic-icon { color: #4285F4; font-size: 24px; cursor: pointer; }
+.google-buttons { display: flex; justify-content: center; margin-top: 18px; }
+.google-btn {
+    background-color: #f8f9fa;
+    border: 1px solid #f8f9fa;
+    border-radius: 4px;
+    color: #3c4043;
+    font-size: 14px;
+    margin: 11px 4px;
+    padding: 0 16px;
+    line-height: 34px;
+    height: 36px;
+    min-width: 54px;
+    text-align: center;
+    cursor: pointer;
+    text-decoration: none;
+}
+.google-btn:hover {
+    box-shadow: 0 1px 1px rgba(0,0,0,.1);
+    background-color: #f8f9fa;
+    border: 1px solid #dadce0;
+    color: #202124;
+}

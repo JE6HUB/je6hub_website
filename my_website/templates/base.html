@@ -35,71 +35,30 @@
     <a class="visually-hidden-focusable" href="#content">Skip to content</a>
 
     <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg glass-navbar fixed-top" aria-label="Main navigation" style="padding:0 0;">
-        <div class="container-xl d-flex align-items-center" style="height:var(--navbar-height);">
+    <nav class="navbar navbar-expand-lg fixed-top" aria-label="Main navigation" style="padding:0; background:#ffffff; border-bottom:none;">
+        <div class="container-fluid d-flex align-items-center justify-content-between px-3" style="height:var(--navbar-height);">
+            <div class="d-flex align-items-center gap-3">
+                <a class="nav-link" href="{% url 'core:resume' %}" style="font-size:14px; color:#202124; text-decoration:none;">Resume</a>
+                <a class="nav-link" href="{% url 'core:contact' %}" style="font-size:14px; color:#202124; text-decoration:none;">Contact</a>
+            </div>
 
-            <a class="navbar-brand d-flex align-items-center gap-2 fw-bold me-4" href="/" style="font-size:0.95rem;color:#1a1a2e;letter-spacing:-0.01em;text-decoration:none;">
-                <span class="material-symbols-outlined" aria-hidden="true" style="font-size:20px;color:var(--ios-glass-accent);">grid_view</span>
-                Y.K. Nexus
-            </a>
-
-            <button class="navbar-toggler border-0 ms-auto" type="button" data-mdb-toggle="collapse" data-mdb-target="#navbarNav"
-                    aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation"
-                    style="box-shadow:none;padding:4px 8px;">
-                <span class="material-symbols-outlined" style="font-size:22px;color:#1a1a2e;">menu</span>
-            </button>
-
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav mx-auto mb-0 gap-1">
-                    <li class="nav-item">
-                        <a class="nav-link" href="/" style="font-size:0.85rem;font-weight:500;color:#1a1a2e;padding:6px 12px;">{% trans "Home" %}</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'photraveler:map' %}" style="font-size:0.85rem;font-weight:500;color:#1a1a2e;padding:6px 12px;">{% trans "WanderLens" %}</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% if user.is_authenticated %}{% url 'community:list' %}{% else %}{% url 'login' %}?next={% url 'community:list' %}{% endif %}" style="font-size:0.85rem;font-weight:500;color:#1a1a2e;padding:6px 12px;">{% trans "Lounge" %}</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'core:resume' %}" style="font-size:0.85rem;font-weight:500;color:#1a1a2e;padding:6px 12px;">{% trans "Resume" %}</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'core:contact' %}" style="font-size:0.85rem;font-weight:500;color:#1a1a2e;padding:6px 12px;">{% trans "Contact" %}</a>
-                    </li>
-                </ul>
-
-                <div class="d-flex align-items-center gap-2">
-                    <form action="{% url 'set_language' %}" method="post">
-                        {% csrf_token %}
-                        <input name="next" type="hidden" value="{{ redirect_to }}">
-                        <select name="language" class="form-select form-select-sm glass-select-trigger"
-                                onchange="this.form.submit()"
-                                style="font-size:0.78rem;border:1px solid rgba(0,0,0,0.12);border-radius:8px;padding:3px 8px;background:rgba(255,255,255,0.6);backdrop-filter:blur(12px);cursor:pointer;width:auto;">
-                            {% get_current_language as LANGUAGE_CODE %}
-                            {% get_available_languages as LANGUAGES %}
-                            {% for lang in LANGUAGES %}
-                                <option value="{{ lang.0 }}" {% if lang.0 == LANGUAGE_CODE %}selected{% endif %}>{{ lang.1 }}</option>
-                            {% endfor %}
-                        </select>
-                    </form>
-
-                    {% if user.is_authenticated %}
-                        <a href="{% url 'profile' %}" class="btn btn-sm ios-glass-btn" aria-label="{{ user.username }}" title="{{ user.username }}" style="padding:5px 14px;font-size:0.82rem;">
-                            <i class="fas fa-user" aria-hidden="true" style="margin-right:4px;"></i>{{ user.username|truncatechars:10 }}
-                        </a>
-                        {% if user.is_staff %}
-                            <a href="{% url 'admin:index' %}" class="btn btn-sm ios-glass-btn" aria-label="{% trans '管理画面' %}" style="padding:5px 12px;">
-                                <i class="fas fa-cog" aria-hidden="true"></i>
-                            </a>
-                        {% endif %}
-                        <form action="{% url 'logout' %}" method="post" class="m-0 p-0">
-                            {% csrf_token %}
-                            <button type="submit" class="btn btn-sm ios-glass-btn" style="padding:5px 14px;font-size:0.82rem;">{% trans "Logout" %}</button>
-                        </form>
-                    {% else %}
-                        <a href="{% url 'login' %}" class="btn btn-sm ios-glass-btn" style="padding:5px 18px;font-size:0.82rem;font-weight:600;">{% trans "Login" %}</a>
-                    {% endif %}
-                </div>
+            <div class="d-flex align-items-center gap-3">
+                <a class="nav-link" href="{% url 'photraveler:map' %}" style="font-size:14px; color:#202124; text-decoration:none;">WanderLens</a>
+                <a class="nav-link" href="{% if user.is_authenticated %}{% url 'community:list' %}{% else %}{% url 'login' %}?next={% url 'community:list' %}{% endif %}" style="font-size:14px; color:#202124; text-decoration:none;">Lounge</a>
+                
+                <a href="#" class="d-flex align-items-center justify-content-center text-dark" style="width:40px;height:40px;border-radius:50%;text-decoration:none;" aria-label="Google Apps">
+                    <span class="material-symbols-outlined" style="font-size:24px; color:#5f6368;">apps</span>
+                </a>
+                
+                {% if user.is_authenticated %}
+                    <a href="{% url 'profile' %}" aria-label="{{ user.username }}" title="{{ user.username }}" style="text-decoration:none;">
+                        <div style="width:32px; height:32px; border-radius:50%; background:#1a73e8; color:#fff; display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:500;">
+                            {{ user.username.0|upper }}
+                        </div>
+                    </a>
+                {% else %}
+                    <a href="{% url 'login' %}" class="btn" style="background:#1a73e8; color:#ffffff; padding:8px 24px; font-size:14px; font-weight:500; border-radius:4px; box-shadow:none; text-transform:none;">ログイン</a>
+                {% endif %}
             </div>
         </div>
     </nav>
@@ -114,18 +73,17 @@
     {% endblock %}
 
     <!-- Footer -->
-    <footer class="glass-footer py-5" style="color:#1a1a2e;">
-        <div class="container-xl">
+    <footer class="py-3" style="background:#f2f2f2; color:#70757a; font-size:14px; border-top: 1px solid #dadce0;">
+        <div class="container-fluid px-4">
             <div class="d-flex flex-column flex-md-row justify-content-between align-items-center gap-3">
                 <div>
-                    <span class="fw-bold" style="font-size:0.9rem;">Y.K. Nexus</span>
-                    <span class="ms-3 text-muted" style="font-size:0.82rem;">© 2026 Yuta Kumadaki</span>
+                    <span style="font-size:15px; color:#70757a;">Japan</span>
                 </div>
-                <div class="d-flex gap-4" style="font-size:0.82rem;">
-                    <a href="{% url 'core:resume' %}" class="text-muted text-decoration-none">Resume</a>
-                    <a href="{% url 'photraveler:map' %}" class="text-muted text-decoration-none">WanderLens</a>
-                    <a href="{% url 'community:list' %}" class="text-muted text-decoration-none">Lounge</a>
-                    <a href="{% url 'core:contact' %}" class="text-muted text-decoration-none">Contact</a>
+                <div class="d-flex gap-4" style="font-size:14px;">
+                    <a href="{% url 'core:resume' %}" class="text-decoration-none" style="color:#70757a;">About</a>
+                    <a href="{% url 'core:contact' %}" class="text-decoration-none" style="color:#70757a;">Contact</a>
+                    <a href="{% url 'photraveler:map' %}" class="text-decoration-none" style="color:#70757a;">WanderLens</a>
+                    <a href="{% url 'community:list' %}" class="text-decoration-none" style="color:#70757a;">Lounge</a>
                 </div>
             </div>
         </div>

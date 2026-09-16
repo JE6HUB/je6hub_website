@@ -65,214 +65,34 @@
 
     {% else %}
 
-    <section class="hp-hero" aria-label="Introduction">
-        <div>
-            <p class="hp-eyebrow" aria-hidden="true">Tokyo · AI Architect &amp; Photographer</p>
-            <h1 class="hp-display">Yuta<br>Kumadaki</h1>
-            <p class="hp-lead">
-                LLMの内部構造を探求しながら、<br>
-                Leica Q3 で世界の瞬間を記録する。
-            </p>
-            <div class="hp-cta-row">
-                <a href="#work" class="hp-btn-primary">
-                    <span class="material-symbols-outlined" aria-hidden="true" style="font-size:18px;">arrow_downward</span>
-                    View My Work
-                </a>
-                <a href="{% url 'core:contact' %}" class="hp-btn-ghost">
-                    Get In Touch
-                    <span class="material-symbols-outlined" aria-hidden="true" style="font-size:18px;">arrow_forward</span>
-                </a>
-            </div>
+    <div style="display:flex; flex-direction:column; justify-content:center; align-items:center; min-height:75vh;">
+        <!-- Logo -->
+        <div style="font-size: 5rem; font-family: 'Product Sans', Arial, sans-serif; font-weight: 500; letter-spacing: -2px; margin-bottom: 28px;">
+            <span style="color:#4285F4">Y</span><span style="color:#EA4335">u</span><span style="color:#FBBC05">t</span><span style="color:#4285F4">a</span>
+            <span style="color:#34A853">K</span><span style="color:#EA4335">u</span><span style="color:#FBBC05">m</span><span style="color:#4285F4">a</span><span style="color:#34A853">d</span><span style="color:#EA4335">a</span><span style="color:#FBBC05">k</span><span style="color:#4285F4">i</span>
         </div>
-        <div class="hp-scroll-cue" aria-hidden="true">
-            <span>scroll</span>
+
+        <!-- Search Bar -->
+        <div class="google-search-box">
+            <span class="material-symbols-outlined search-icon">search</span>
+            <input type="text" class="google-search-input" placeholder="Search portfolio or enter a URL" value="">
+            <span class="material-symbols-outlined mic-icon">mic</span>
         </div>
-    </section>
 
-    <section class="hp-section">
-        <div class="container-xl">
-            <div class="row align-items-end mb-5">
-                <div class="col-lg-6">
-                    <span class="hp-section-eyebrow hp-reveal">Expertise</span>
-                    <h2 class="hp-section-heading hp-reveal hp-reveal-d1">What I&nbsp;bring<br>to the table.</h2>
-                </div>
-                <div class="col-lg-5 offset-lg-1 mt-3 mt-lg-0">
-                    <p class="hp-section-sub hp-reveal hp-reveal-d2">
-                        AI アーキテクチャ、写真、コミュニティ構築の3つの軸で活動。技術と創造性の交差点に立つ。
-                    </p>
-                </div>
-            </div>
-
-            <div class="row g-4">
-                <div class="col-md-4 hp-reveal hp-reveal-d1">
-                    <div class="hp-card">
-                        <div class="hp-icon-wrap" style="background:rgba(10,132,255,0.15);">
-                            <span class="material-symbols-outlined" aria-hidden="true" style="color:#0a84ff;">psychology</span>
-                        </div>
-                        <h3 class="hp-card-title">AI Architecture</h3>
-                        <p class="hp-card-body">大規模言語モデルの社会実装とシステム設計。Mechanistic Interpretability の研究を通じて LLM の内部構造を解明する。</p>
-                    </div>
-                </div>
-                <div class="col-md-4 hp-reveal hp-reveal-d2">
-                    <div class="hp-card">
-                        <div class="hp-icon-wrap" style="background:rgba(255,159,10,0.15);">
-                            <span class="material-symbols-outlined" aria-hidden="true" style="color:#ff9f0a;">photo_camera</span>
-                        </div>
-                        <h3 class="hp-card-title">Photography</h3>
-                        <p class="hp-card-body">Leica Q3 による都市・旅・自然のスナップショット。世界中の記憶を地図にピン留めして共有する WanderLens を開発。</p>
-                    </div>
-                </div>
-                <div class="col-md-4 hp-reveal hp-reveal-d3">
-                    <div class="hp-card">
-                        <div class="hp-icon-wrap" style="background:rgba(52,199,89,0.15);">
-                            <span class="material-symbols-outlined" aria-hidden="true" style="color:#34c759;">groups</span>
-                        </div>
-                        <h3 class="hp-card-title">Community</h3>
-                        <p class="hp-card-body">AI・クラフトビール・写真をテーマにしたプライベートコミュニティ Lounge を運営。知識と情熱を共有する場を作る。</p>
-                    </div>
-                </div>
-            </div>
+        <!-- Buttons -->
+        <div class="google-buttons mt-4 gap-2 d-flex">
+            <a href="{% url 'core:resume' %}" class="google-btn">Google 検索</a>
+            <a href="{% url 'core:contact' %}" class="google-btn">I'm Feeling Lucky</a>
         </div>
-    </section>
 
-    <section class="hp-section" id="work">
-        <div class="container-xl">
-            <div class="row align-items-end mb-5">
-                <div class="col-lg-6">
-                    <span class="hp-section-eyebrow hp-reveal">Featured Work</span>
-                    <h2 class="hp-section-heading hp-reveal hp-reveal-d1">Projects I'm<br>proud of.</h2>
-                </div>
-                <div class="col-lg-4 offset-lg-2 mt-3 mt-lg-0">
-                    <a href="{% url 'core:resume' %}" class="hp-btn-ghost hp-reveal hp-reveal-d2">
-                        View Full Resume
-                        <span class="material-symbols-outlined" aria-hidden="true" style="font-size:16px;">arrow_forward</span>
-                    </a>
-                </div>
-            </div>
-
-            <div class="row g-4">
-                <!-- WanderLens -->
-                <div class="col-md-4 hp-reveal hp-reveal-d1">
-                    <a href="{% url 'photraveler:map' %}" class="hp-work-card text-decoration-none">
-                        <div class="hp-work-card-visual" style="background:linear-gradient(135deg,rgba(78,124,95,0.40),rgba(90,150,160,0.35));">
-                            <span class="material-symbols-outlined" aria-hidden="true" style="color:rgba(255,255,255,0.88);">map</span>
-                        </div>
-                        <div class="hp-work-card-content">
-                            <p class="hp-work-card-tag">Photography · Maps</p>
-                            <h3 class="hp-work-card-title">WanderLens</h3>
-                            <p class="hp-work-card-desc">旅の記憶を世界地図にピン留めするフォトトラベルジャーナル。Leaflet.js と Django で構築。</p>
-                            <div class="d-flex gap-1 flex-wrap">
-                                <span class="hp-chip">Django</span>
-                                <span class="hp-chip">Leaflet.js</span>
-                                <span class="hp-chip">PostgreSQL</span>
-                            </div>
-                        </div>
-                    </a>
-                </div>
-
-                <!-- Community Lounge -->
-                <div class="col-md-4 hp-reveal hp-reveal-d2">
-                    <a href="{% if user.is_authenticated %}{% url 'community:list' %}{% else %}{% url 'login' %}{% endif %}" class="hp-work-card text-decoration-none">
-                        <div class="hp-work-card-visual" style="background:linear-gradient(135deg,rgba(192,88,62,0.38),rgba(160,120,200,0.32));">
-                            <span class="material-symbols-outlined" aria-hidden="true" style="color:rgba(255,255,255,0.88);">forum</span>
-                        </div>
-                        <div class="hp-work-card-content">
-                            <p class="hp-work-card-tag">Community</p>
-                            <h3 class="hp-work-card-title">Community Lounge</h3>
-                            <p class="hp-work-card-desc">AI・写真・クラフトビールをテーマにしたチャンネル型ディスカッションコミュニティ。</p>
-                            <div class="d-flex gap-1 flex-wrap">
-                                <span class="hp-chip">Django</span>
-                                <span class="hp-chip">Channels</span>
-                                <span class="hp-chip">Docker</span>
-                            </div>
-                        </div>
-                    </a>
-                </div>
-
-                <!-- Y.K. Nexus (this site) -->
-                <div class="col-md-4 hp-reveal hp-reveal-d3">
-                    <a href="{% url 'core:resume' %}" class="hp-work-card text-decoration-none">
-                        <div class="hp-work-card-visual" style="background:linear-gradient(135deg,rgba(124,110,166,0.38),rgba(192,160,90,0.30));">
-                            <span class="material-symbols-outlined" aria-hidden="true" style="color:rgba(255,255,255,0.88);">grid_view</span>
-                        </div>
-                        <div class="hp-work-card-content">
-                            <p class="hp-work-card-tag">Portfolio · Design</p>
-                            <h3 class="hp-work-card-title">Y.K. Nexus</h3>
-                            <p class="hp-work-card-desc">このポートフォリオサイト本体。Liquid Glass デザインシステムを Django + Docker で実装。</p>
-                            <div class="d-flex gap-1 flex-wrap">
-                                <span class="hp-chip">Django 6</span>
-                                <span class="hp-chip">Liquid Glass</span>
-                                <span class="hp-chip">Docker</span>
-                            </div>
-                        </div>
-                    </a>
-                </div>
-            </div>
+        <!-- Language or Links below -->
+        <div class="mt-4" style="font-size:13px; color:#4d5156;">
+            ポートフォリオ提供: 
+            <a href="{% url 'core:resume' %}" style="color:#1a0dab; text-decoration:none; margin-left:8px;">Resume</a>
+            <a href="{% url 'photraveler:map' %}" style="color:#1a0dab; text-decoration:none; margin-left:8px;">WanderLens</a>
+            <a href="{% if user.is_authenticated %}{% url 'community:list' %}{% else %}{% url 'login' %}{% endif %}" style="color:#1a0dab; text-decoration:none; margin-left:8px;">Lounge</a>
         </div>
-    </section>
-
-    {% if user.is_authenticated and user.favorite_track_title %}
-    <section class="hp-section">
-        <div class="container-xl">
-            <div class="row justify-content-center">
-                <div class="col-lg-8 hp-reveal">
-                    <span class="hp-section-eyebrow">Now Listening</span>
-                    <div class="hp-now-playing mt-3">
-                        <div class="d-flex align-items-center gap-4">
-                            {% if user.favorite_track_image_url %}
-                            <img src="{{ user.favorite_track_image_url }}"
-                                 alt="{{ user.favorite_track_title }}"
-                                 style="width:88px;height:88px;border-radius:14px;object-fit:cover;flex-shrink:0;box-shadow:0 8px 24px rgba(0,0,0,0.4);">
-                            {% endif %}
-                            <div style="flex:1;min-width:0;">
-                                <p class="fw-bold mb-1" style="color:var(--ios-glass-text);font-size:1.1rem;line-height:1.2;">{{ user.favorite_track_title }}</p>
-                                <p class="mb-3" style="color:var(--ios-glass-text-muted);font-size:0.9rem;">{{ user.favorite_track_artist }}</p>
-                                <div class="d-flex gap-2 flex-wrap">
-                                    <button type="button" class="hp-btn-ghost" data-playbar-open="1" data-playbar-autoplay="1" style="padding:8px 20px;font-size:0.85rem;">
-                                        <span class="material-symbols-outlined" aria-hidden="true" style="font-size:18px;">play_arrow</span>
-                                        {% trans "再生" %}
-                                    </button>
-                                    {% if user.favorite_track_apple_music_url %}
-                                    <a href="{{ user.favorite_track_apple_music_url }}" target="_blank" rel="noopener noreferrer" class="hp-btn-ghost" style="padding:8px 20px;font-size:0.85rem;">
-                                        <i class="fab fa-apple" aria-hidden="true"></i> Apple Music
-                                    </a>
-                                    {% endif %}
-                                    <a href="{% url 'profile' %}" class="hp-btn-ghost" style="padding:8px 20px;font-size:0.85rem;">
-                                        <span class="material-symbols-outlined" aria-hidden="true" style="font-size:16px;">edit</span>
-                                        {% trans "変更" %}
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-    {% endif %}
-
-    <section class="hp-cta-banner" aria-label="Contact call to action">
-        <div class="container-xl">
-            <div class="hp-reveal">
-                <h2 class="hp-cta-banner-title">
-                    Let's build<br>something together.
-                </h2>
-                <p class="hp-cta-banner-sub">
-                    プロジェクト相談、コラボレーション、または単純に話したいことがあれば、いつでもどうぞ。
-                </p>
-                <div class="d-flex gap-3 justify-content-center flex-wrap">
-                    <a href="{% url 'core:contact' %}" class="hp-btn-primary">
-                        <span class="material-symbols-outlined" aria-hidden="true" style="font-size:18px;">mail</span>
-                        Start a Conversation
-                    </a>
-                    <a href="{% url 'core:resume' %}" class="hp-btn-ghost">
-                        View Resume
-                        <span class="material-symbols-outlined" aria-hidden="true" style="font-size:18px;">arrow_forward</span>
-                    </a>
-                </div>
-            </div>
-        </div>
-    </section>
+    </div>
 
     {% endif %}{# end not q #}
 
