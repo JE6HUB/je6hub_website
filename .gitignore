@@ -1,0 +1,16 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+
+# Django
+my_website/db.sqlite3
+my_website/staticfiles/
+my_website/locale/*/LC_MESSAGES/*.mo
+
+# Env
+.env
+
+# Editors / OS
+.vscode/
+.DS_Store

@@ -1,0 +1,420 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block title %}{{ channel.name }} — Community Lounge{% endblock %}
+
+{% block extra_head %}
+<style>
+/* ── メッセージバブル ── */
+.msg-bubble { padding: 10px 16px; }
+.msg-bubble-self  { border-radius: 18px 18px 4px 18px; background: rgba(10,132,255,0.75); border: 1px solid rgba(10,132,255,0.4); }
+.msg-bubble-other { border-radius: 18px 18px 18px 4px; background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.14); }
+.msg-bubble p { color: #fff; font-size: 0.9rem; line-height: 1.5; margin: 0; }
+.msg-bubble p:empty { display: none; }
+
+/* ── メディア表示 ── */
+.msg-media {
+    max-width: 320px;
+    border-radius: 14px;
+    overflow: hidden;
+    margin-bottom: 4px;
+}
+.msg-media img { width: 100%; display: block; cursor: pointer; }
+.msg-media video { width: 100%; display: block; border-radius: 14px; }
+
+/* ── 添付プレビュー（入力エリア） ── */
+#mediaPreviewWrap {
+    display: none;
+    margin-bottom: 8px;
+    position: relative;
+}
+#mediaPreviewImg  { max-height: 180px; max-width: 100%; border-radius: 12px; object-fit: cover; }
+#mediaPreviewVid  { max-height: 180px; max-width: 100%; border-radius: 12px; }
+#mediaRemoveBtn {
+    position: absolute; top: 6px; right: 6px;
+    width: 26px; height: 26px; border-radius: 50%;
+    background: rgba(0,0,0,0.55); border: none; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    color: #fff; font-size: 14px; line-height: 1;
+}
+#mediaRemoveBtn:hover { background: rgba(0,0,0,0.8); }
+
+/* ── 入力エリア ── */
+.chat-input-bar {
+    background: rgba(255,255,255,0.10);
+    border: 1px solid rgba(255,255,255,0.18);
+    border-radius: 20px;
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    padding: 10px 14px;
+}
+.attach-btn {
+    background: none; border: none; cursor: pointer;
+    color: rgba(200,220,255,0.55); transition: color 0.2s;
+    padding: 4px; border-radius: 8px; display: flex; align-items: center;
+}
+.attach-btn:hover { color: var(--ios-glass-accent); }
+#chatTextInput {
+    flex: 1; background: none; border: none; outline: none;
+    color: #fff; font-size: 0.92rem; line-height: 1.5;
+    resize: none; min-height: 24px; max-height: 120px;
+    font-family: inherit; padding: 2px 4px;
+}
+#chatTextInput::placeholder { color: rgba(200,220,255,0.4); }
+#sendBtn {
+    width: 36px; height: 36px; border-radius: 50%;
+    background: var(--ios-glass-accent); border: none; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    color: #fff; transition: background 0.2s, transform 0.15s;
+    flex-shrink: 0;
+}
+#sendBtn:hover  { background: #0062d1; }
+#sendBtn:active { transform: scale(0.92); }
+#sendBtn:disabled { background: rgba(10,132,255,0.35); cursor: default; }
+
+/* ── 画像ライトボックス ── */
+#lightbox {
+    display: none; position: fixed; inset: 0; z-index: 2000;
+    background: rgba(0,0,0,0.88); align-items: center; justify-content: center;
+}
+#lightbox.open { display: flex; }
+#lightboxImg { max-width: 94vw; max-height: 92vh; border-radius: 12px; }
+#lightboxClose {
+    position: absolute; top: 18px; right: 22px;
+    background: none; border: none; color: rgba(255,255,255,0.7);
+    font-size: 32px; cursor: pointer; line-height: 1;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-3" style="max-width:900px;">
+
+    <!-- ヘッダー -->
+    <div class="d-flex align-items-center gap-3 mb-3 flex-wrap">
+        <a href="{% url 'community:list' %}" style="color:rgba(160,200,255,0.7);text-decoration:none;">
+            <span class="material-symbols-outlined align-middle" aria-hidden="true" style="font-size:20px;">arrow_back</span>
+        </a>
+        <div style="flex:1;min-width:0;">
+            <h2 class="fw-bold mb-0" style="color:#fff;font-size:1.1rem;">
+                {% if channel.channel_type == 'private' %}
+                <span class="material-symbols-outlined align-middle me-1" aria-hidden="true" style="font-size:17px;color:#bf5fff;">lock</span>
+                {% else %}
+                <span class="material-symbols-outlined align-middle me-1" aria-hidden="true" style="font-size:17px;color:var(--ios-glass-accent);">tag</span>
+                {% endif %}
+                {{ channel.name }}
+            </h2>
+            {% if channel.description %}
+            <p class="mb-0 mt-1" style="color:rgba(200,215,255,0.45);font-size:0.8rem;">{{ channel.description }}</p>
+            {% endif %}
+        </div>
+        {% if membership and membership.role != 'owner' %}
+        <form method="post" action="{% url 'community:leave' channel.id %}" class="js-confirm"
+              data-confirm="チャンネルを退出しますか？">
+            {% csrf_token %}
+            <button type="submit" class="hp-btn-ghost" style="padding:5px 12px;font-size:0.76rem;color:rgba(255,140,140,0.7);border-color:rgba(255,100,100,0.22);">
+                <span class="material-symbols-outlined align-middle me-1" aria-hidden="true" style="font-size:13px;">logout</span>{% trans "退出" %}
+            </button>
+        </form>
+        {% endif %}
+    </div>
+
+    <div class="{% if is_owner and channel.channel_type == 'private' %}row g-3{% endif %}">
+
+        <!-- ── チャットエリア ── -->
+        <div class="{% if is_owner and channel.channel_type == 'private' %}col-lg-8{% endif %}">
+
+            <!-- メッセージ一覧 -->
+            <div class="hp-card mb-3" style="padding:0;overflow:hidden;">
+                <div id="msgList" style="height:60vh;overflow-y:auto;padding:16px 20px;display:flex;flex-direction:column;gap:14px;">
+                    {% for msg in messages %}
+                    <div class="d-flex {% if msg.sender == request.user %}justify-content-end{% else %}justify-content-start{% endif %}">
+                        <div style="max-width:75%;">
+                            {% if msg.sender != request.user %}
+                            <p class="mb-1" style="font-size:0.7rem;color:rgba(200,215,255,0.45);padding-left:4px;">{{ msg.sender.username }}</p>
+                            {% endif %}
+
+                            <!-- メディア（バブル外、上に表示） -->
+                            {% if msg.has_media %}
+                            <div class="msg-media {% if msg.sender == request.user %}ms-auto{% endif %}">
+                                {% if msg.media_type == 'image' %}
+                                <img src="{{ msg.media.url }}" alt="shared image"
+                                     onclick="openLightbox(this.src)" style="cursor:zoom-in;">
+                                {% elif msg.media_type == 'video' %}
+                                <video src="{{ msg.media.url }}" controls preload="metadata" playsinline></video>
+                                {% endif %}
+                            </div>
+                            {% endif %}
+
+                            <!-- テキストバブル（テキストがある場合のみ） -->
+                            {% if msg.text %}
+                            <div class="msg-bubble {% if msg.sender == request.user %}msg-bubble-self{% else %}msg-bubble-other{% endif %}">
+                                <p>{{ msg.text }}</p>
+                            </div>
+                            {% endif %}
+
+                            <p class="mt-1 mb-0 {% if msg.sender == request.user %}text-end{% endif %}"
+                               style="font-size:0.66rem;color:rgba(200,215,255,0.3);padding:0 4px;">
+                                {{ msg.created_at|date:"m/d H:i" }}
+                            </p>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="text-center py-5">
+                        <span class="material-symbols-outlined" aria-hidden="true" style="font-size:42px;color:rgba(200,215,255,0.18);">chat_bubble</span>
+                        <p class="mt-2 mb-0" style="color:rgba(200,215,255,0.3);font-size:0.86rem;">{% trans "まだメッセージがありません。" %}</p>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- ── 入力エリア（SNS スタイル） ── -->
+            <form method="post" enctype="multipart/form-data" id="msgForm">
+                {% csrf_token %}
+                <input type="file" id="mediaInput" name="media" accept="image/*,video/*" style="display:none;">
+
+                <!-- 添付プレビュー -->
+                <div id="mediaPreviewWrap">
+                    <img id="mediaPreviewImg" src="" alt="preview" style="display:none;">
+                    <video id="mediaPreviewVid" style="display:none;" muted></video>
+                    <button type="button" id="mediaRemoveBtn" aria-label="添付を削除">✕</button>
+                </div>
+
+                <!-- 入力バー -->
+                <div class="chat-input-bar d-flex align-items-end gap-2">
+
+                    <!-- 添付ボタン群 -->
+                    <div class="d-flex gap-1 align-items-center mb-1">
+                        <button type="button" class="attach-btn" id="attachImageBtn"
+                                title="{% trans '画像を添付' %}" aria-label="{% trans '画像を添付' %}">
+                            <span class="material-symbols-outlined" aria-hidden="true" style="font-size:20px;">image</span>
+                        </button>
+                        <button type="button" class="attach-btn" id="attachVideoBtn"
+                                title="{% trans '動画を添付' %}" aria-label="{% trans '動画を添付' %}">
+                            <span class="material-symbols-outlined" aria-hidden="true" style="font-size:20px;">videocam</span>
+                        </button>
+                    </div>
+
+                    <!-- テキスト入力 -->
+                    <textarea id="chatTextInput" name="message" rows="1"
+                              placeholder="{% trans 'メッセージを入力…' %}"
+                              aria-label="{% trans 'メッセージを入力' %}"></textarea>
+
+                    <!-- 送信 -->
+                    <button type="submit" id="sendBtn" disabled aria-label="{% trans '送信' %}">
+                        <span class="material-symbols-outlined" aria-hidden="true" style="font-size:18px;">send</span>
+                    </button>
+                </div>
+
+                <!-- ファイルサイズ等のヒント -->
+                <p class="mt-1 mb-0 text-end" style="font-size:0.66rem;color:rgba(200,215,255,0.3);">
+                    {% trans "画像: 最大20MB  /  動画: 最大200MB（MP4・MOV・WebM）" %}
+                </p>
+            </form>
+        </div>
+
+        <!-- ── オーナー管理パネル（プライベートチャンネルのみ） ── -->
+        {% if is_owner and channel.channel_type == 'private' %}
+        <div class="col-lg-4">
+            <div class="hp-card" style="padding:24px;border-color:rgba(160,120,255,0.25);">
+                <h4 class="fw-bold mb-4" style="color:#fff;font-size:0.95rem;">
+                    <span class="material-symbols-outlined align-middle me-2" aria-hidden="true" style="font-size:18px;color:#bf5fff;">manage_accounts</span>
+                    {% trans "メンバー管理" %}
+                </h4>
+
+                <!-- 招待フォーム -->
+                <form method="post" action="{% url 'community:invite' channel.id %}" class="mb-4">
+                    {% csrf_token %}
+                    <p class="mb-2" style="color:rgba(220,230,255,0.75);font-size:0.82rem;font-weight:600;">{% trans "ユーザーを招待" %}</p>
+                    <div class="d-flex gap-2">
+                        <input type="text" name="username" placeholder="{% trans 'ユーザー名' %}" required
+                               class="form-control" style="background:rgba(255,255,255,0.70);color:#1a1a2e;border-radius:10px;border:1px solid rgba(255,255,255,0.35);padding:8px 12px;font-size:0.85rem;">
+                        <button type="submit" class="hp-btn-primary" style="padding:8px 14px;border-radius:10px;font-size:0.82rem;white-space:nowrap;">{% trans "招待" %}</button>
+                    </div>
+                </form>
+
+                <!-- 参加リクエスト -->
+                {% if pending_requests %}
+                <div class="mb-4">
+                    <p class="mb-2" style="color:rgba(255,200,80,0.85);font-size:0.82rem;font-weight:600;">
+                        <span class="material-symbols-outlined align-middle me-1" aria-hidden="true" style="font-size:14px;">hourglass_empty</span>
+                        {% trans "参加リクエスト" %} ({{ pending_requests|length }})
+                    </p>
+                    {% for m in pending_requests %}
+                    <div class="d-flex align-items-center gap-2 mb-2 p-2" style="background:rgba(255,200,80,0.08);border:1px solid rgba(255,200,80,0.18);border-radius:10px;">
+                        <span class="material-symbols-outlined" aria-hidden="true" style="font-size:20px;color:rgba(220,230,255,0.5);">account_circle</span>
+                        <span style="color:#fff;font-size:0.85rem;flex:1;">{{ m.user.username }}</span>
+                        <form method="post" action="{% url 'community:approve' channel.id m.user.id %}">{% csrf_token %}
+                            <button type="submit" class="hp-btn-primary" style="padding:4px 10px;font-size:0.75rem;background:rgba(52,199,89,0.8);" title="{% trans '承認' %}">
+                                <span class="material-symbols-outlined" aria-hidden="true" style="font-size:14px;">check</span>
+                            </button>
+                        </form>
+                        <form method="post" action="{% url 'community:decline' channel.id m.user.id %}">{% csrf_token %}
+                            <button type="submit" class="hp-btn-ghost" style="padding:4px 10px;font-size:0.75rem;color:rgba(255,150,150,0.8);" title="{% trans '拒否' %}">
+                                <span class="material-symbols-outlined" aria-hidden="true" style="font-size:14px;">close</span>
+                            </button>
+                        </form>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                <!-- 招待済み -->
+                {% if invited %}
+                <div class="mb-4">
+                    <p class="mb-2" style="color:rgba(160,200,255,0.75);font-size:0.82rem;font-weight:600;">
+                        <span class="material-symbols-outlined align-middle me-1" aria-hidden="true" style="font-size:14px;">mail</span>
+                        {% trans "招待済み" %}
+                    </p>
+                    {% for m in invited %}
+                    <div class="d-flex align-items-center gap-2 mb-1 px-1">
+                        <span class="material-symbols-outlined" aria-hidden="true" style="font-size:18px;color:rgba(220,230,255,0.4);">account_circle</span>
+                        <span style="color:rgba(220,230,255,0.65);font-size:0.85rem;flex:1;">{{ m.user.username }}</span>
+                        <form method="post" action="{% url 'community:decline' channel.id m.user.id %}">{% csrf_token %}
+                            <button type="submit" class="hp-btn-ghost" style="padding:2px 6px;color:rgba(255,150,150,0.6);">
+                                <span class="material-symbols-outlined" aria-hidden="true" style="font-size:12px;">close</span>
+                            </button>
+                        </form>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                <!-- アクティブメンバー -->
+                {% if members %}
+                <div>
+                    <p class="mb-2" style="color:rgba(52,199,89,0.85);font-size:0.82rem;font-weight:600;">
+                        <span class="material-symbols-outlined align-middle me-1" aria-hidden="true" style="font-size:14px;">people</span>
+                        {% trans "メンバー" %} ({{ members|length }})
+                    </p>
+                    {% for m in members %}
+                    <div class="d-flex align-items-center gap-2 mb-1 px-1">
+                        <span class="material-symbols-outlined" aria-hidden="true" style="font-size:18px;color:rgba(220,230,255,0.3);">account_circle</span>
+                        <span style="color:rgba(220,230,255,0.65);font-size:0.85rem;flex:1;">{{ m.user.username }}</span>
+                        {% if m.role == 'owner' %}
+                        <span style="font-size:0.66rem;padding:2px 8px;background:rgba(255,200,80,0.15);border:1px solid rgba(255,200,80,0.25);border-radius:999px;color:rgba(255,200,80,0.8);">Owner</span>
+                        {% else %}
+                        <form method="post" action="{% url 'community:decline' channel.id m.user.id %}"
+                              class="js-confirm" data-confirm="{{ m.user.username }}を削除しますか？">
+                            {% csrf_token %}
+                            <button type="submit" class="hp-btn-ghost" style="padding:2px 6px;color:rgba(255,150,150,0.5);">
+                                <span class="material-symbols-outlined" aria-hidden="true" style="font-size:12px;">person_remove</span>
+                            </button>
+                        </form>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+
+    </div>
+</div>
+
+<!-- ── 画像ライトボックス ── -->
+<div id="lightbox" role="dialog" aria-label="拡大画像" tabindex="-1">
+    <button id="lightboxClose" aria-label="閉じる">✕</button>
+    <img id="lightboxImg" src="" alt="拡大表示">
+</div>
+
+<script>
+/* ── 最下部スクロール ── */
+(function(){ const el = document.getElementById('msgList'); if(el) el.scrollTop = el.scrollHeight; })();
+
+/* ── data-confirm フォーム ── */
+document.querySelectorAll('form.js-confirm').forEach(function(f){
+    f.addEventListener('submit', function(e){ if(!confirm(f.dataset.confirm||'実行しますか？')) e.preventDefault(); });
+});
+
+/* ── メディア添付 ── */
+const mediaInput      = document.getElementById('mediaInput');
+const attachImageBtn  = document.getElementById('attachImageBtn');
+const attachVideoBtn  = document.getElementById('attachVideoBtn');
+const mediaRemoveBtn  = document.getElementById('mediaRemoveBtn');
+const previewWrap     = document.getElementById('mediaPreviewWrap');
+const previewImg      = document.getElementById('mediaPreviewImg');
+const previewVid      = document.getElementById('mediaPreviewVid');
+const textInput       = document.getElementById('chatTextInput');
+const sendBtn         = document.getElementById('sendBtn');
+
+/* 画像ボタン → accept=image のみ */
+attachImageBtn.addEventListener('click', function(){
+    mediaInput.accept = 'image/*';
+    mediaInput.click();
+});
+/* 動画ボタン → accept=video のみ */
+attachVideoBtn.addEventListener('click', function(){
+    mediaInput.accept = 'video/*';
+    mediaInput.click();
+});
+
+/* ファイル選択時: プレビュー表示 */
+mediaInput.addEventListener('change', function(){
+    const file = this.files[0];
+    if(!file){ clearPreview(); return; }
+
+    previewImg.style.display = 'none';
+    previewVid.style.display = 'none';
+    previewWrap.style.display = 'block';
+
+    const url = URL.createObjectURL(file);
+    if(file.type.startsWith('image/')){
+        previewImg.src = url;
+        previewImg.style.display = 'block';
+    } else {
+        previewVid.src = url;
+        previewVid.style.display = 'block';
+        previewVid.load();
+    }
+    updateSendBtn();
+});
+
+/* ✕ ボタン: 添付解除 */
+mediaRemoveBtn.addEventListener('click', clearPreview);
+
+function clearPreview(){
+    mediaInput.value = '';
+    previewImg.src = ''; previewImg.style.display = 'none';
+    previewVid.src = ''; previewVid.style.display = 'none';
+    previewWrap.style.display = 'none';
+    updateSendBtn();
+}
+
+/* テキスト入力: auto-resize + 送信ボタン状態更新 */
+textInput.addEventListener('input', function(){
+    this.style.height = 'auto';
+    this.style.height = Math.min(this.scrollHeight, 120) + 'px';
+    updateSendBtn();
+});
+
+/* Enter で送信（Shift+Enter は改行） */
+textInput.addEventListener('keydown', function(e){
+    if(e.key === 'Enter' && !e.shiftKey){
+        e.preventDefault();
+        if(!sendBtn.disabled) document.getElementById('msgForm').submit();
+    }
+});
+
+function updateSendBtn(){
+    const hasText  = textInput.value.trim().length > 0;
+    const hasMedia = mediaInput.files && mediaInput.files.length > 0;
+    sendBtn.disabled = !(hasText || hasMedia);
+}
+
+/* ── ライトボックス ── */
+const lightbox     = document.getElementById('lightbox');
+const lightboxImg  = document.getElementById('lightboxImg');
+const lightboxClose = document.getElementById('lightboxClose');
+
+function openLightbox(src){
+    lightboxImg.src = src;
+    lightbox.classList.add('open');
+    lightbox.focus();
+}
+lightboxClose.addEventListener('click', function(){ lightbox.classList.remove('open'); });
+lightbox.addEventListener('click', function(e){ if(e.target === lightbox) lightbox.classList.remove('open'); });
+document.addEventListener('keydown', function(e){ if(e.key === 'Escape') lightbox.classList.remove('open'); });
+</script>
+{% endblock %}

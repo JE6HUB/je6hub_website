@@ -1,0 +1,427 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block title %}{{ profile_user.username }} — WanderLens{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<style>
+.wanderlens-map { height: 65vh; width: 100%; border-radius: 20px; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+
+    <!-- Header -->
+    <div class="d-flex align-items-start justify-content-between mb-3 flex-wrap gap-2">
+        <div>
+            <div class="d-flex align-items-center gap-2 mb-1">
+                <a href="{% url 'photraveler:map' %}" style="color:rgba(160,200,255,0.7);text-decoration:none;font-size:0.85rem;">
+                    <span class="material-symbols-outlined align-middle" aria-hidden="true" style="font-size:18px;">arrow_back</span>
+                </a>
+                <h2 class="fw-bold mb-0" style="color:#fff;font-size:1.2rem;">
+                    <span class="material-symbols-outlined align-middle me-1" aria-hidden="true" style="color:var(--ios-glass-accent);font-size:20px;">map</span>
+                    {{ profile_user.username }}'s WanderLens
+                </h2>
+            </div>
+            <p style="color:rgba(200,215,255,0.5);font-size:0.82rem;margin-left:28px;">
+                {{ pin_count }} {% trans "ヶ所の記憶" %}
+            </p>
+        </div>
+        {% if can_edit %}
+        <button type="button" class="hp-btn-primary" style="padding:10px 22px;font-size:0.88rem;" id="addPinBtn">
+            <span class="material-symbols-outlined" aria-hidden="true" style="font-size:18px;">add_location</span>
+            {% trans "ピンを追加" %}
+        </button>
+        {% endif %}
+    </div>
+
+    {% if can_edit %}
+    <div class="hp-card mb-3 d-flex align-items-center gap-2" style="padding:12px 18px;font-size:0.83rem;color:rgba(200,215,255,0.6);border-color:rgba(10,132,255,0.25);">
+        <span class="material-symbols-outlined" aria-hidden="true" style="font-size:16px;color:var(--ios-glass-accent);">info</span>
+        {% trans "「ピンを追加」ボタンを押してから地図をクリックすると位置を選択できます。ピンのポップアップから編集・削除も可能です。" %}
+    </div>
+    {% endif %}
+
+    <!-- Map -->
+    <div class="hp-card mb-4" style="padding:0;overflow:hidden;border-radius:24px;">
+        <div id="map" class="wanderlens-map"></div>
+    </div>
+
+    <!-- Pin grid (thumbnails) -->
+    {% if pin_count > 0 %}
+    <h3 class="fw-bold mb-3" style="color:rgba(200,215,255,0.7);font-size:0.8rem;letter-spacing:0.12em;text-transform:uppercase;">
+        <span class="material-symbols-outlined align-middle me-1" aria-hidden="true" style="font-size:14px;">photo_library</span>
+        {% trans "ピン一覧" %}
+    </h3>
+    <div id="pinGrid" class="row g-3"></div>
+    {% endif %}
+
+</div>
+
+<!-- ─── Add Pin Modal ────────────────────────── -->
+{% if can_edit %}
+<div class="modal fade" id="addPinModal" tabindex="-1" aria-labelledby="addPinModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content ios-glass-card liquid-glass-card border-0" style="color:var(--ios-glass-text);">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold" id="addPinModalLabel">{% trans "ピンを追加" %}</h5>
+                <button type="button" class="btn btn-sm ios-glass-btn" data-mdb-dismiss="modal" aria-label="{% trans '閉じる' %}">
+                    <span class="material-symbols-outlined" aria-hidden="true" style="font-size:16px;">close</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form method="post" action="{% url 'photraveler:add_pin' profile_user.username %}" enctype="multipart/form-data" id="addPinForm">
+                    {% csrf_token %}
+                    <input type="hidden" name="latitude"  id="addLat">
+                    <input type="hidden" name="longitude" id="addLng">
+
+                    <div class="mb-3">
+                        <label for="addTitle" class="form-label fw-semibold small">{% trans "タイトル" %} <span style="color:red;">*</span></label>
+                        <input type="text" id="addTitle" name="title" class="form-control" required maxlength="200"
+                               placeholder="e.g. Eiffel Tower at Sunset">
+                    </div>
+                    <div class="mb-3">
+                        <label for="addDesc" class="form-label fw-semibold small">{% trans "説明" %}</label>
+                        <textarea id="addDesc" name="description" class="form-control" rows="3"
+                                  placeholder="{% trans 'このピンについて説明してください。' %}"></textarea>
+                    </div>
+                    <div class="row mb-3 g-2">
+                        <div class="col-6">
+                            <label class="form-label fw-semibold small">{% trans "緯度" %}</label>
+                            <input type="text" id="addLatDisplay" class="form-control" readonly
+                                   placeholder="{% trans '地図をクリック' %}" style="background:rgba(255,255,255,0.5);">
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label fw-semibold small">{% trans "経度" %}</label>
+                            <input type="text" id="addLngDisplay" class="form-control" readonly
+                                   placeholder="{% trans '地図をクリック' %}" style="background:rgba(255,255,255,0.5);">
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="addImage" class="form-label fw-semibold small">{% trans "写真" %} <span style="color:rgba(0,0,0,0.4);font-weight:400;">（{% trans "任意" %}）</span></label>
+                        <input type="file" id="addImage" name="image" class="form-control" accept="image/*">
+                    </div>
+                    <div class="d-flex gap-2 justify-content-end">
+                        <button type="button" class="btn btn-sm ios-glass-btn" data-mdb-dismiss="modal">{% trans "キャンセル" %}</button>
+                        <button type="submit" class="btn ios-glass-btn" id="addPinSubmit">
+                            <span class="material-symbols-outlined align-middle me-1" aria-hidden="true" style="font-size:16px;">add_location</span>
+                            {% trans "追加する" %}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ─── Edit Pin Modal ───────────────────────── -->
+<div class="modal fade" id="editPinModal" tabindex="-1" aria-labelledby="editPinModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content ios-glass-card liquid-glass-card border-0" style="color:var(--ios-glass-text);">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold" id="editPinModalLabel">{% trans "ピンを編集" %}</h5>
+                <button type="button" class="btn btn-sm ios-glass-btn" data-mdb-dismiss="modal" aria-label="{% trans '閉じる' %}">
+                    <span class="material-symbols-outlined" aria-hidden="true" style="font-size:16px;">close</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form method="post" id="editPinForm" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <input type="hidden" name="latitude"  id="editLat">
+                    <input type="hidden" name="longitude" id="editLng">
+
+                    <div class="mb-3">
+                        <label for="editTitle" class="form-label fw-semibold small">{% trans "タイトル" %}</label>
+                        <input type="text" id="editTitle" name="title" class="form-control" required maxlength="200">
+                    </div>
+                    <div class="mb-3">
+                        <label for="editDesc" class="form-label fw-semibold small">{% trans "説明" %}</label>
+                        <textarea id="editDesc" name="description" class="form-control" rows="3"></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="editImage" class="form-label fw-semibold small">{% trans "写真を変更" %} <span style="color:rgba(0,0,0,0.4);font-weight:400;">（{% trans "任意" %}）</span></label>
+                        <input type="file" id="editImage" name="image" class="form-control" accept="image/*">
+                    </div>
+                    <div class="d-flex gap-2 justify-content-end">
+                        <button type="button" class="btn btn-sm ios-glass-btn" data-mdb-dismiss="modal">{% trans "キャンセル" %}</button>
+                        <button type="submit" class="btn ios-glass-btn">
+                            <span class="material-symbols-outlined align-middle me-1" aria-hidden="true" style="font-size:16px;">save</span>
+                            {% trans "保存する" %}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- ─── Pin View Modal (for non-owners / all users) ── -->
+<div class="modal fade" id="photoModal" tabindex="-1" aria-labelledby="photoModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content ios-glass-card liquid-glass-card border-0 shadow-5-strong">
+            <div class="modal-header border-0 pb-0 d-flex align-items-center justify-content-between">
+                <h5 class="modal-title fw-bold" id="photoModalLabel"></h5>
+                <button type="button" class="btn btn-sm ios-glass-btn" data-mdb-dismiss="modal" aria-label="Close">
+                    <span class="material-symbols-outlined" aria-hidden="true">close</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <img src="" id="modalImage" class="w-100 mb-3 shadow-3-strong" alt="Travel Photo"
+                     style="max-height:400px;object-fit:cover;border-radius:16px;display:none;">
+                <p id="modalDesc" class="text-muted fs-6"></p>
+
+                {% if can_edit %}
+                <div class="d-flex gap-2 mb-4">
+                    <button type="button" class="btn btn-sm ios-glass-btn" id="openEditBtn">
+                        <span class="material-symbols-outlined align-middle me-1" aria-hidden="true" style="font-size:14px;">edit</span>{% trans "編集" %}
+                    </button>
+                    <form method="post" id="deletePinForm" class="js-confirm" data-confirm="{% trans 'このピンを削除しますか？' %}">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-sm ios-glass-btn" style="border-color:rgba(255,100,100,0.3);color:rgba(220,60,60,0.9);">
+                            <span class="material-symbols-outlined align-middle me-1" aria-hidden="true" style="font-size:14px;">delete</span>{% trans "削除" %}
+                        </button>
+                    </form>
+                </div>
+                {% endif %}
+
+                <hr class="my-3" style="border-color:rgba(255,255,255,0.15);">
+                <h6 class="fw-bold mb-3">
+                    <span class="material-symbols-outlined me-2" aria-hidden="true">chat_bubble</span>{% trans "Comments" %}
+                </h6>
+                <div id="commentSection" class="mb-3" style="max-height:200px;overflow-y:auto;"></div>
+                <form id="commentForm" novalidate data-comments-url="{% url 'photraveler:pin_comments' pin_id=0 %}">
+                    {% csrf_token %}
+                    <div class="input-group glass-panel p-2">
+                        <label for="photoCommentInput" class="visually-hidden">{% trans "コメントを書く" %}</label>
+                        <input type="text" id="photoCommentInput" class="ios-glass-input"
+                               placeholder="{% trans 'コメントを書く...' %}" maxlength="500" required>
+                        <button id="commentSubmitBtn" class="btn ios-glass-btn px-4 shadow-0" type="submit"
+                                aria-label="{% trans '送信' %}">
+                            <span class="material-symbols-outlined" aria-hidden="true">send</span>
+                        </button>
+                    </div>
+                    <p id="commentError" class="text-danger small mt-1 d-none"></p>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<!-- URL registry: Django template tags are in HTML attributes, not inside JS strings -->
+<div id="urlData" aria-hidden="true" style="display:none;"
+     data-comments-url="{% url 'photraveler:pin_comments' pin_id=0 %}"
+     data-edit-url="{% url 'photraveler:edit_pin' pin_id=0 %}"
+     data-delete-url="{% url 'photraveler:delete_pin' pin_id=0 %}"
+     data-can-edit="{% if can_edit %}1{% else %}0{% endif %}"
+     data-pins="{{ pins_json|escape }}">
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+
+    /* ── Data — all Django values come from data attributes, never from inline template tags ── */
+    const urlData  = document.getElementById('urlData').dataset;
+    const pinsData = JSON.parse(urlData.pins);
+    const canEdit  = urlData.canEdit === '1';
+
+    function commentsUrl(id) { return urlData.commentsUrl.replace('/0/', '/' + id + '/'); }
+    function editUrl(id)     { return urlData.editUrl.replace('/0/',     '/' + id + '/'); }
+    function deleteUrl(id)   { return urlData.deleteUrl.replace('/0/',   '/' + id + '/'); }
+
+    /* ── Map ── */
+    const map = L.map('map').setView([30, 10], 2);
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>',
+        maxZoom: 19
+    }).addTo(map);
+
+    if (pinsData.length > 0) {
+        const bounds = L.latLngBounds(pinsData.map(p => [p.lat, p.lng]));
+        map.fitBounds(bounds, { padding: [40, 40], maxZoom: 10 });
+    }
+
+    /* ── Pin Grid ── */
+    const pinGrid = document.getElementById('pinGrid');
+
+    /* ── Shared: open photo modal ── */
+    let currentPinId = null;
+
+    function openPhotoModal(pin) {
+        currentPinId = pin.id;
+        document.getElementById('photoModalLabel').textContent = pin.title;
+        const img = document.getElementById('modalImage');
+        if (pin.image_url) { img.src = pin.image_url; img.style.display = 'block'; img.alt = pin.title; }
+        else                { img.style.display = 'none'; }
+        document.getElementById('modalDesc').textContent = pin.desc || '';
+        document.getElementById('photoCommentInput').value = '';
+        document.getElementById('commentError').classList.add('d-none');
+
+        if (canEdit) {
+            document.getElementById('deletePinForm').action = deleteUrl(pin.id);
+            document.getElementById('openEditBtn').dataset.pinId = pin.id;
+        }
+
+        loadComments(pin.id);
+        new mdb.Modal(document.getElementById('photoModal')).show();
+    }
+
+    /* ── Place markers ── */
+    pinsData.forEach(function (pin) {
+        const marker = L.marker([pin.lat, pin.lng]).addTo(map);
+        marker.on('click', function () { openPhotoModal(pin); });
+
+        // Pin thumbnail card
+        if (pinGrid) {
+            const col = document.createElement('div');
+            col.className = 'col-6 col-md-4 col-lg-3';
+            col.innerHTML = `
+                <div class="hp-card" style="padding:0;overflow:hidden;cursor:pointer;" onclick="">
+                    ${pin.image_url
+                        ? `<img src="${pin.image_url}" alt="${pin.title}" style="width:100%;height:120px;object-fit:cover;">`
+                        : `<div style="width:100%;height:120px;background:rgba(10,132,255,0.12);display:flex;align-items:center;justify-content:center;">
+                               <span class="material-symbols-outlined" style="font-size:36px;color:rgba(100,170,255,0.4);">location_on</span>
+                           </div>`
+                    }
+                    <div style="padding:10px 12px;">
+                        <p class="fw-bold mb-0" style="color:#fff;font-size:0.85rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${pin.title}</p>
+                    </div>
+                </div>`;
+            col.querySelector('.hp-card').addEventListener('click', function () { openPhotoModal(pin); });
+            pinGrid.appendChild(col);
+        }
+    });
+
+    /* ── Add Pin mode ── */
+    if (canEdit) {
+        let addingMode = false;
+        let tempMarker = null;
+        const addBtn   = document.getElementById('addPinBtn');
+        const addModal = document.getElementById('addPinModal') ? new mdb.Modal(document.getElementById('addPinModal')) : null;
+
+        addBtn.addEventListener('click', function () {
+            addingMode = true;
+            addBtn.textContent = '地図をクリックして位置を選択…';
+            addBtn.style.opacity = '0.7';
+            map.getContainer().style.cursor = 'crosshair';
+        });
+
+        map.on('click', function (e) {
+            if (!addingMode) return;
+            addingMode = false;
+            addBtn.innerHTML = '<span class="material-symbols-outlined" style="font-size:18px;margin-right:6px;vertical-align:middle;">add_location</span>ピンを追加';
+            addBtn.style.opacity = '';
+            map.getContainer().style.cursor = '';
+
+            const lat = e.latlng.lat.toFixed(6);
+            const lng = e.latlng.lng.toFixed(6);
+            document.getElementById('addLat').value         = lat;
+            document.getElementById('addLng').value         = lng;
+            document.getElementById('addLatDisplay').value  = lat;
+            document.getElementById('addLngDisplay').value  = lng;
+
+            if (tempMarker) map.removeLayer(tempMarker);
+            tempMarker = L.marker([e.latlng.lat, e.latlng.lng], {
+                icon: L.divIcon({ className: '', html: '<span style="font-size:28px;">📍</span>', iconSize:[28,28], iconAnchor:[14,28] })
+            }).addTo(map);
+
+            if (addModal) addModal.show();
+        });
+
+        // Reset temp marker on modal hide
+        document.getElementById('addPinModal').addEventListener('hidden.mdb.modal', function () {
+            if (tempMarker) { map.removeLayer(tempMarker); tempMarker = null; }
+            addingMode = false;
+            addBtn.innerHTML = '<span class="material-symbols-outlined" style="font-size:18px;margin-right:6px;vertical-align:middle;">add_location</span>ピンを追加';
+            addBtn.style.opacity = '';
+            map.getContainer().style.cursor = '';
+        });
+
+        /* Edit pin */
+        const editModal = new mdb.Modal(document.getElementById('editPinModal'));
+        document.getElementById('openEditBtn').addEventListener('click', async function () {
+            if (!currentPinId) return;
+            try {
+                const resp = await fetch(editUrl(currentPinId), {
+                    headers: { 'Accept': 'application/json' }
+                });
+                if (!resp.ok) throw new Error();
+                const d = await resp.json();
+                document.getElementById('editTitle').value = d.title;
+                document.getElementById('editDesc').value  = d.description;
+                document.getElementById('editLat').value   = d.latitude;
+                document.getElementById('editLng').value   = d.longitude;
+                document.getElementById('editPinForm').action = editUrl(currentPinId);
+                mdb.Modal.getInstance(document.getElementById('photoModal')).hide();
+                editModal.show();
+            } catch { alert('ピン情報の取得に失敗しました。'); }
+        });
+    }
+
+    /* ── Comments ── */
+    function escHtml(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+
+    async function loadComments(pinId) {
+        const section = document.getElementById('commentSection');
+        section.innerHTML = '<p class="text-muted small text-center">読み込み中…</p>';
+        try {
+            const resp = await fetch(commentsUrl(pinId), { headers: { 'Accept': 'application/json' } });
+            const data = await resp.json();
+            section.innerHTML = '';
+            if (!data.comments.length) {
+                section.innerHTML = '<p class="text-muted small text-center">まだコメントがありません。</p>';
+            } else {
+                data.comments.forEach(c => {
+                    const el = document.createElement('div');
+                    el.className = 'd-flex gap-2 mb-2';
+                    el.innerHTML = `<span class="material-symbols-outlined" style="font-size:28px;flex-shrink:0;color:rgba(0,0,0,0.3);">account_circle</span>
+                        <div class="ios-glass-card p-2 rounded w-100" style="padding:8px 12px !important;">
+                            <span class="fw-bold small">${escHtml(c.author_name)}</span>
+                            <span class="text-muted small ms-2">${escHtml(c.created_at)}</span>
+                            <p class="mb-0 small mt-1">${escHtml(c.text)}</p>
+                        </div>`;
+                    section.appendChild(el);
+                });
+            }
+        } catch { section.innerHTML = '<p class="text-danger small text-center">コメントを読み込めませんでした。</p>'; }
+    }
+
+    document.getElementById('commentForm').addEventListener('submit', async function (e) {
+        e.preventDefault();
+        if (!currentPinId) return;
+        const input  = document.getElementById('photoCommentInput');
+        const btn    = document.getElementById('commentSubmitBtn');
+        const errEl  = document.getElementById('commentError');
+        const text   = input.value.trim();
+        if (!text) return;
+        btn.disabled = true; errEl.classList.add('d-none');
+        const csrf = document.querySelector('[name=csrfmiddlewaretoken]').value;
+        try {
+            const resp = await fetch(commentsUrl(currentPinId), {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrf, 'Accept': 'application/json' },
+                body: JSON.stringify({ text })
+            });
+            if (!resp.ok) throw new Error();
+            await loadComments(currentPinId);
+            input.value = '';
+        } catch { errEl.textContent = '送信に失敗しました。'; errEl.classList.remove('d-none'); }
+        finally { btn.disabled = false; input.focus(); }
+    });
+
+    /* ── Delete confirm ── */
+    document.querySelectorAll('form.js-confirm').forEach(function (form) {
+        form.addEventListener('submit', function (e) {
+            const msg = form.dataset.confirm || '実行しますか？';
+            if (!window.confirm(msg)) e.preventDefault();
+        });
+    });
+
+});
+</script>
+{% endblock %}

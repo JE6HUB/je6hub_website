@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block title %}{% trans "Login" %} - Y.K. Nexus{% endblock %}
+
+{% block content %}
+<div class="container glass-section py-5 h-100">
+    <div class="row d-flex justify-content-center align-items-center h-100">
+        <div class="col-12 col-md-8 col-lg-6 col-xl-5">
+            <div class="ios-glass-card liquid-glass-card glass-card-rounded-sm shadow-4-strong border-0">
+                <div class="card-body p-4 text-center">
+
+                    <!-- アイコンとタイトル -->
+                    <div class="mb-3">
+                        <span class="material-symbols-outlined" aria-hidden="true" style="font-size:48px;color:var(--ios-glass-accent);">account_circle</span>
+                        <h3 class="fw-bold">{% trans "Welcome Back" %}</h3>
+                        <p class="text-muted dynamic-text">{% trans "アカウント情報を入力してログインしてください" %}</p>
+                    </div>
+
+                    <!-- エラーメッセージの表示 -->
+                    {% if form.errors %}
+                        <div class="alert alert-danger" role="alert">
+                            <i class="fas fa-exclamation-circle me-2" aria-hidden="true"></i>
+                            {% trans "ユーザー名またはパスワードが正しくありません。" %}
+                        </div>
+                    {% endif %}
+
+                    <!-- ログインフォーム -->
+                    <form method="post" action="{% url 'login' %}">
+                        {% csrf_token %}
+                        
+                        <!-- ログイン後に元のページへ戻るための隠しフィールド -->
+                        <input type="hidden" name="next" value="{{ next|default:'/' }}">
+
+                        <!-- Username input -->
+                        <div class="mb-3 text-start">
+                            <label class="form-label small text-muted dynamic-text" for="id_username">{% trans "Username" %}</label>
+                            <input type="text" name="username" id="id_username" class="ios-glass-input" required autofocus />
+                        </div>
+
+                        <!-- Password input -->
+                        <div class="mb-4 text-start">
+                            <label class="form-label small text-muted dynamic-text" for="id_password">{% trans "Password" %}</label>
+                            <input type="password" name="password" id="id_password" class="ios-glass-input" required />
+                        </div>
+
+                        <!-- Submit button -->
+                        <button class="btn ios-glass-btn btn-lg btn-block shadow-0" type="submit">
+                            {% trans "Login" %} <span class="material-symbols-outlined ms-2" aria-hidden="true">login</span>
+                        </button>
+                    </form>
+
+                    <div class="text-center mt-4">
+                        <p class="mb-0 text-muted dynamic-text">
+                            {% trans "アカウントをお持ちでないですか？" %} 
+                            <a href="{% url 'signup' %}" class="text-primary fw-bold">{% trans "新規会員登録" %}</a>
+                        </p>
+                    </div>
+                    
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // MDBootstrapの入力フォームアニメーション（フローティングラベル）を初期化
+    document.querySelectorAll('.form-outline').forEach((formOutline) => {
+        new mdb.Input(formOutline).init();
+    });
+</script>
+{% endblock %}

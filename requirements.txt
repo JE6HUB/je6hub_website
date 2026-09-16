@@ -1,0 +1,12 @@
+Django==6.0.5
+asgiref==3.11.1
+sqlparse==0.5.5
+psycopg[binary]==3.3.4
+pillow==12.2.0
+whitenoise==6.11.0
+gunicorn==23.0.0
+python-dotenv==1.1.1
+
+# Testing
+pytest==8.4.2
+pytest-django==4.11.1

@@ -1,0 +1,260 @@
+{% load static i18n %}
+<!DOCTYPE html>
+<html lang="{{ LANGUAGE_CODE }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Portfolio & Apps{% endblock %}</title>
+
+    <!-- Roboto (Google style) + JetBrains Mono -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,300;0,400;0,500;0,700;1,400&family=JetBrains+Mono:wght@300;400&display=swap" rel="stylesheet">
+
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,400,0,0" rel="stylesheet" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/6.4.0/mdb.min.css" rel="stylesheet" />
+
+    <link href="{% static 'css/style.css' %}?v=5" rel="stylesheet" />
+
+    <!-- SVG Filter for Liquid Glass Distortion -->
+    <svg width="0" height="0" style="position:absolute;pointer-events:none;" aria-hidden="true">
+        <defs>
+            <filter id="glass-distortion" x="0%" y="0%" width="100%" height="100%">
+                <feTurbulence type="fractalNoise" baseFrequency="0.025 0.025" numOctaves="2" seed="92" result="noise"/>
+                <feGaussianBlur in="noise" stdDeviation="2" result="blurred"/>
+                <feDisplacementMap in="SourceGraphic" in2="blurred" scale="55" xChannelSelector="R" yChannelSelector="G"/>
+            </filter>
+        </defs>
+    </svg>
+
+    {% block extra_head %}{% endblock %}
+</head>
+<body class="glass-page" style="font-family:'Roboto',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; background-color:#ffffff; color:#202124;">
+
+    <a class="visually-hidden-focusable" href="#content">Skip to content</a>
+
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg glass-navbar fixed-top" aria-label="Main navigation" style="padding:0 0;">
+        <div class="container-xl d-flex align-items-center" style="height:var(--navbar-height);">
+
+            <a class="navbar-brand d-flex align-items-center gap-2 fw-bold me-4" href="/" style="font-size:0.95rem;color:#1a1a2e;letter-spacing:-0.01em;text-decoration:none;">
+                <span class="material-symbols-outlined" aria-hidden="true" style="font-size:20px;color:var(--ios-glass-accent);">grid_view</span>
+                Y.K. Nexus
+            </a>
+
+            <button class="navbar-toggler border-0 ms-auto" type="button" data-mdb-toggle="collapse" data-mdb-target="#navbarNav"
+                    aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation"
+                    style="box-shadow:none;padding:4px 8px;">
+                <span class="material-symbols-outlined" style="font-size:22px;color:#1a1a2e;">menu</span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav mx-auto mb-0 gap-1">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/" style="font-size:0.85rem;font-weight:500;color:#1a1a2e;padding:6px 12px;">{% trans "Home" %}</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'photraveler:map' %}" style="font-size:0.85rem;font-weight:500;color:#1a1a2e;padding:6px 12px;">{% trans "WanderLens" %}</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% if user.is_authenticated %}{% url 'community:list' %}{% else %}{% url 'login' %}?next={% url 'community:list' %}{% endif %}" style="font-size:0.85rem;font-weight:500;color:#1a1a2e;padding:6px 12px;">{% trans "Lounge" %}</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'core:resume' %}" style="font-size:0.85rem;font-weight:500;color:#1a1a2e;padding:6px 12px;">{% trans "Resume" %}</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'core:contact' %}" style="font-size:0.85rem;font-weight:500;color:#1a1a2e;padding:6px 12px;">{% trans "Contact" %}</a>
+                    </li>
+                </ul>
+
+                <div class="d-flex align-items-center gap-2">
+                    <form action="{% url 'set_language' %}" method="post">
+                        {% csrf_token %}
+                        <input name="next" type="hidden" value="{{ redirect_to }}">
+                        <select name="language" class="form-select form-select-sm glass-select-trigger"
+                                onchange="this.form.submit()"
+                                style="font-size:0.78rem;border:1px solid rgba(0,0,0,0.12);border-radius:8px;padding:3px 8px;background:rgba(255,255,255,0.6);backdrop-filter:blur(12px);cursor:pointer;width:auto;">
+                            {% get_current_language as LANGUAGE_CODE %}
+                            {% get_available_languages as LANGUAGES %}
+                            {% for lang in LANGUAGES %}
+                                <option value="{{ lang.0 }}" {% if lang.0 == LANGUAGE_CODE %}selected{% endif %}>{{ lang.1 }}</option>
+                            {% endfor %}
+                        </select>
+                    </form>
+
+                    {% if user.is_authenticated %}
+                        <a href="{% url 'profile' %}" class="btn btn-sm ios-glass-btn" aria-label="{{ user.username }}" title="{{ user.username }}" style="padding:5px 14px;font-size:0.82rem;">
+                            <i class="fas fa-user" aria-hidden="true" style="margin-right:4px;"></i>{{ user.username|truncatechars:10 }}
+                        </a>
+                        {% if user.is_staff %}
+                            <a href="{% url 'admin:index' %}" class="btn btn-sm ios-glass-btn" aria-label="{% trans '管理画面' %}" style="padding:5px 12px;">
+                                <i class="fas fa-cog" aria-hidden="true"></i>
+                            </a>
+                        {% endif %}
+                        <form action="{% url 'logout' %}" method="post" class="m-0 p-0">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-sm ios-glass-btn" style="padding:5px 14px;font-size:0.82rem;">{% trans "Logout" %}</button>
+                        </form>
+                    {% else %}
+                        <a href="{% url 'login' %}" class="btn btn-sm ios-glass-btn" style="padding:5px 18px;font-size:0.82rem;font-weight:600;">{% trans "Login" %}</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main content — pages override main_content for full-width layouts -->
+    {% block main_content %}
+    <main id="content" class="glass-main" role="main">
+        <div class="container py-5 mt-3">
+            {% block content %}{% endblock %}
+        </div>
+    </main>
+    {% endblock %}
+
+    <!-- Footer -->
+    <footer class="glass-footer py-5" style="color:#1a1a2e;">
+        <div class="container-xl">
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-center gap-3">
+                <div>
+                    <span class="fw-bold" style="font-size:0.9rem;">Y.K. Nexus</span>
+                    <span class="ms-3 text-muted" style="font-size:0.82rem;">© 2026 Yuta Kumadaki</span>
+                </div>
+                <div class="d-flex gap-4" style="font-size:0.82rem;">
+                    <a href="{% url 'core:resume' %}" class="text-muted text-decoration-none">Resume</a>
+                    <a href="{% url 'photraveler:map' %}" class="text-muted text-decoration-none">WanderLens</a>
+                    <a href="{% url 'community:list' %}" class="text-muted text-decoration-none">Lounge</a>
+                    <a href="{% url 'core:contact' %}" class="text-muted text-decoration-none">Contact</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Floating Playbar -->
+    {% if user.is_authenticated and user.favorite_track_title %}
+    <div class="floating-playbar is-closed" id="floatingPlaybar" data-playbar-ready="1"
+         data-apple-music-token-url="{% url 'apple_music_token' %}">
+        <div class="playbar-art">
+            {% if user.favorite_track_image_url %}
+                <img src="{{ user.favorite_track_image_url }}" alt="{{ user.favorite_track_title }}">
+            {% endif %}
+        </div>
+        <div class="playbar-info">
+            <div class="playbar-title">{{ user.favorite_track_title }}</div>
+            <div class="playbar-artist text-muted small">{{ user.favorite_track_artist }}</div>
+        </div>
+        <audio class="playbar-audio" preload="none"></audio>
+        <div class="playbar-controls">
+            <button class="play-control play" aria-label="Play"
+                    data-music-action="toggle"
+                    data-music-id="{{ user.favorite_track_apple_music_id }}"
+                    data-music-url="{{ user.favorite_track_apple_music_url }}"
+                    data-music-preview="{{ user.favorite_track_preview_url }}"
+                    data-music-artists="{{ user.favorite_track_artist }}"
+                    data-music-track="{{ user.favorite_track_title }}">
+                <span class="material-symbols-outlined" data-icon>play_arrow</span>
+            </button>
+            <button class="play-control close-playbar" aria-label="Close playbar">
+                <span class="material-symbols-outlined">close</span>
+            </button>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Mobile Bottom Navigation Toggle -->
+    <button class="bottom-nav-toggle-chip" type="button" aria-controls="mobileBottomNav" aria-expanded="false" aria-label="Open menu">
+        <span class="material-symbols-outlined bottom-nav-toggle-icon">menu</span>
+        <span class="bottom-nav-toggle-label">Menu</span>
+    </button>
+
+    <!-- Mobile Bottom Navigation -->
+    <nav id="mobileBottomNav" class="mobile-bottom-nav position-fixed bottom-0 start-50 translate-middle-x mb-3 is-collapsed"
+         style="z-index:1050;width:92%;" aria-hidden="true">
+        <div class="ios-glass-card d-flex justify-content-between align-items-center p-2">
+            <div class="text-center w-100 nav-item-chip-wrapper">
+                <a href="/" class="text-center text-decoration-none text-dark small d-block nav-item-home nav-item-expandable"
+                   data-panel="home" aria-label="Home" aria-expanded="false" aria-controls="mobileNavPanelHome">
+                    <span class="material-symbols-outlined" aria-hidden="true">home</span>
+                    <div class="d-none d-sm-block" aria-hidden="true">Home</div>
+                </a>
+                <div class="expandable-panel" id="mobileNavPanelHome" data-panel="home">
+                    <h6>Home</h6>
+                    <p>Portfolio &amp; projects.</p>
+                    <a href="{% url 'core:home' %}#work" class="panel-item"><span class="material-symbols-outlined" aria-hidden="true">folder</span><span>View Projects</span></a>
+                    <a href="{% url 'core:resume' %}" class="panel-item"><span class="material-symbols-outlined" aria-hidden="true">info</span><span>Resume</span></a>
+                </div>
+            </div>
+            <div class="text-center w-100 nav-item-chip-wrapper">
+                <a href="{% url 'photraveler:map' %}" class="text-center text-decoration-none text-dark small d-block nav-item-expandable"
+                   data-panel="wanderlens" aria-label="WanderLens" aria-expanded="false" aria-controls="mobileNavPanelWL">
+                    <span class="material-symbols-outlined" aria-hidden="true">map</span>
+                    <div class="d-none d-sm-block" aria-hidden="true">WanderLens</div>
+                </a>
+                <div class="expandable-panel" id="mobileNavPanelWL" data-panel="wanderlens">
+                    <h6>WanderLens</h6>
+                    <p>Photo travel map.</p>
+                    <a href="{% url 'photraveler:map' %}" class="panel-item"><span class="material-symbols-outlined" aria-hidden="true">photo_camera</span><span>View Map</span></a>
+                </div>
+            </div>
+            <div class="text-center w-100 nav-item-chip-wrapper">
+                <a href="{% if user.is_authenticated %}{% url 'community:list' %}{% else %}{% url 'login' %}{% endif %}"
+                   class="text-center text-decoration-none text-dark small d-block nav-item-expandable"
+                   data-panel="lounge" aria-label="Lounge" aria-expanded="false" aria-controls="mobileNavPanelLounge">
+                    <span class="material-symbols-outlined" aria-hidden="true">forum</span>
+                    <div class="d-none d-sm-block" aria-hidden="true">Lounge</div>
+                </a>
+                <div class="expandable-panel" id="mobileNavPanelLounge" data-panel="lounge">
+                    <h6>Lounge</h6>
+                    <p>Community discussions.</p>
+                    <a href="{% if user.is_authenticated %}{% url 'community:list' %}{% else %}{% url 'login' %}{% endif %}" class="panel-item"><span class="material-symbols-outlined" aria-hidden="true">chat</span><span>Channels</span></a>
+                </div>
+            </div>
+            <div class="text-center w-100 nav-item-chip-wrapper">
+                <a href="{% url 'core:contact' %}" class="text-center text-decoration-none text-dark small d-block nav-item-expandable"
+                   data-panel="contact" aria-label="Contact" aria-expanded="false" aria-controls="mobileNavPanelContact">
+                    <span class="material-symbols-outlined" aria-hidden="true">mail</span>
+                    <div class="d-none d-sm-block" aria-hidden="true">Contact</div>
+                </a>
+                <div class="expandable-panel" id="mobileNavPanelContact" data-panel="contact">
+                    <h6>Contact</h6>
+                    <p>Get in touch.</p>
+                    <a href="{% url 'core:contact' %}" class="panel-item"><span class="material-symbols-outlined" aria-hidden="true">mail</span><span>Send Message</span></a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Toast notifications -->
+    <div class="toast-container position-fixed bottom-0 end-0 p-3 glass-toast-container">
+        {% if messages %}
+            {% for message in messages %}
+            <div class="toast align-items-center glass-toast glass-toast-{% if message.tags == 'error' %}danger{% elif message.tags == 'success' %}success{% else %}primary{% endif %} border-0 mb-2"
+                 role="alert" aria-live="assertive" aria-atomic="true">
+                <div class="d-flex">
+                    <div class="toast-body fw-bold">{{ message }}</div>
+                    <button type="button" class="btn-close me-2 m-auto" data-mdb-dismiss="toast" aria-label="Close"></button>
+                </div>
+            </div>
+            {% endfor %}
+        {% endif %}
+    </div>
+
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/6.4.0/mdb.min.js"></script>
+    <script src="https://js-cdn.music.apple.com/musickit/v1/musickit.js"></script>
+    <script type="text/javascript" src="{% static 'js/main.js' %}"></script>
+
+    {% block extra_js %}{% endblock %}
+
+    <!-- Scroll reveal -->
+    <script>
+    (function() {
+        const io = new IntersectionObserver((entries) => {
+            entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); io.unobserve(e.target); } });
+        }, { threshold: 0.12 });
+        document.querySelectorAll('.hp-reveal').forEach(el => io.observe(el));
+    })();
+    </script>
+
+</body>
+</html>
