@@ -3,498 +3,261 @@
 
 {% block title %}Resume — Yuta Kumadaki{% endblock %}
 
-{% block extra_head %}
-<style>
-/* =========================================
-   Resume Page — Warm Light Theme
-========================================= */
-.resume-page {
-    min-height: 100vh;
-    padding: calc(var(--navbar-height) + 56px) 0 120px;
-}
+{% block content %}
+<div class="ap-section py-5">
+    
+    <!-- ── Hero ── -->
+    <header class="text-center mb-5 ap-reveal">
+        <div class="mx-auto mb-4" style="width: 120px; height: 120px; border-radius: 50%; background: linear-gradient(135deg, rgba(255,149,0,0.1), rgba(191,90,242,0.1)); display: flex; align-items: center; justify-content: center; box-shadow: inset 0 0 0 1px rgba(255,255,255,0.1);">
+            <span class="material-symbols-outlined" style="font-size: 64px; background: linear-gradient(135deg, #ff9f0a, #bf5af2); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">person</span>
+        </div>
+        <h1 class="ap-hero-title mb-2" style="font-size: clamp(40px, 6vw, 64px);">Yuta Kumadaki</h1>
+        <p class="ap-subhead mb-2" style="font-size: 18px;">AI Architect &amp; Photographer</p>
+        <p class="d-flex align-items-center justify-content-center gap-1 text-muted mb-4" style="font-size: 14px;">
+            <span class="material-symbols-outlined" aria-hidden="true" style="font-size: 18px;">location_on</span>
+            Tokyo, Japan
+        </p>
+        <div class="d-flex gap-3 justify-content-center flex-wrap">
+            <a href="{% url 'core:contact' %}" class="ap-btn ap-btn-primary" style="padding: 12px 28px;">
+                <span class="material-symbols-outlined align-middle me-1" aria-hidden="true" style="font-size: 18px;">mail</span>
+                {% trans "Contact Me" %}
+            </a>
+            <a href="{% url 'photraveler:map' %}" class="ap-btn ap-btn-outline" style="padding: 12px 28px;">
+                <span class="material-symbols-outlined align-middle me-1" aria-hidden="true" style="font-size: 18px;">photo_camera</span>
+                WanderLens
+            </a>
+        </div>
+    </header>
 
-/* ── Hero ── */
-.resume-hero {
-    display: flex; flex-direction: column; align-items: center;
-    text-align: center; margin-bottom: 80px;
-}
-
-.resume-avatar-ring {
-    width: 96px; height: 96px; border-radius: 50%;
-    background: linear-gradient(135deg, rgba(192,88,62,0.18), rgba(124,110,166,0.18));
-    border: 1.5px solid rgba(0,0,0,0.07);
-    display: flex; align-items: center; justify-content: center;
-    margin-bottom: 24px;
-    box-shadow: 0 0 0 6px rgba(192,88,62,0.06), 0 12px 32px rgba(60,40,20,0.12);
-}
-.resume-avatar-ring .material-symbols-outlined {
-    font-size: 52px;
-    background: linear-gradient(135deg, #c0583e, #7c6ea6);
-    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
-}
-
-.resume-hero-name {
-    font-size: clamp(36px, 6vw, 72px); font-weight: 800;
-    letter-spacing: -0.03em; line-height: 1;
-    color: var(--ios-glass-text); margin-bottom: 10px;
-}
-.resume-hero-title {
-    font-size: clamp(14px, 1.8vw, 18px); color: var(--ios-glass-text-muted);
-    margin-bottom: 6px; font-weight: 400;
-}
-.resume-hero-location {
-    display: inline-flex; align-items: center; gap: 5px;
-    font-size: 0.8rem; color: rgba(28,25,23,0.38); margin-bottom: 32px;
-}
-.resume-hero-location .material-symbols-outlined { font-size: 15px; }
-
-.resume-hero-actions { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
-
-.resume-hero-btn-primary {
-    display: inline-flex; align-items: center; gap: 8px; padding: 12px 28px;
-    background: var(--ios-glass-accent);
-    border: 1px solid rgba(192,88,62,0.28);
-    border-radius: 999px; color: #fff; font-size: 0.85rem; font-weight: 700;
-    text-decoration: none; transition: all 0.25s ease;
-    box-shadow: 0 4px 18px rgba(192,88,62,0.28);
-}
-.resume-hero-btn-primary:hover {
-    background: var(--ios-glass-accent-strong); transform: translateY(-2px);
-    box-shadow: 0 10px 28px rgba(192,88,62,0.38); color: #fff;
-}
-.resume-hero-btn-primary .material-symbols-outlined { font-size: 16px; }
-
-.resume-hero-btn-ghost {
-    display: inline-flex; align-items: center; gap: 8px; padding: 12px 28px;
-    background: rgba(28,25,23,0.06); border: 1px solid rgba(28,25,23,0.12);
-    border-radius: 999px; color: rgba(28,25,23,0.75);
-    font-size: 0.85rem; font-weight: 600; text-decoration: none;
-    backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
-    transition: all 0.25s ease;
-}
-.resume-hero-btn-ghost:hover {
-    background: rgba(28,25,23,0.10); border-color: rgba(28,25,23,0.20);
-    transform: translateY(-2px); color: var(--ios-glass-text);
-}
-.resume-hero-btn-ghost .material-symbols-outlined { font-size: 16px; }
-
-/* ── Stats ── */
-.resume-stats {
-    display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;
-    margin-bottom: 80px; max-width: 860px; margin-left: auto; margin-right: auto;
-}
-.resume-stat-card {
-    background: rgba(255,255,255,0.68); border: 1px solid rgba(0,0,0,0.07);
-    border-radius: 20px; padding: 24px 20px; text-align: center;
-    backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
-    box-shadow: 0 2px 10px rgba(60,40,20,0.07);
-    transition: background 0.25s ease, transform 0.25s ease;
-}
-.resume-stat-card:hover { background: rgba(255,255,255,0.92); transform: translateY(-3px); }
-
-.resume-stat-number {
-    font-size: clamp(28px, 4vw, 40px); font-weight: 800; letter-spacing: -0.03em;
-    background: linear-gradient(135deg, #c0583e, #7c6ea6);
-    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
-    line-height: 1; margin-bottom: 6px;
-}
-.resume-stat-label {
-    font-size: 0.75rem; font-weight: 600; letter-spacing: 0.08em;
-    text-transform: uppercase; color: var(--ios-glass-text-muted);
-}
-
-/* ── Body ── */
-.resume-body { max-width: 860px; margin: 0 auto; display: flex; flex-direction: column; gap: 40px; }
-
-.resume-section-header { display: flex; align-items: center; gap: 12px; margin-bottom: 28px; }
-.resume-section-icon {
-    width: 38px; height: 38px; border-radius: 12px;
-    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
-}
-.resume-section-icon .material-symbols-outlined { font-size: 18px; }
-.resume-section-title { font-size: 1.15rem; font-weight: 700; color: var(--ios-glass-text); margin: 0; line-height: 1; }
-.resume-section-eyebrow { font-size: 0.68rem; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ios-glass-text-muted); margin: 0; }
-
-/* Glass panel */
-.resume-panel {
-    background: rgba(255,255,255,0.72); border: 1px solid rgba(0,0,0,0.08);
-    border-radius: 28px; padding: 36px 32px;
-    backdrop-filter: blur(28px) saturate(155%); -webkit-backdrop-filter: blur(28px) saturate(155%);
-    box-shadow: inset 0 1px 0 rgba(255,255,255,0.95), 0 8px 32px rgba(60,40,20,0.08);
-}
-
-/* Summary */
-.resume-summary-text { font-size: 0.97rem; color: var(--ios-glass-text-muted); line-height: 1.85; margin: 0; }
-
-/* Timeline */
-.resume-timeline { position: relative; padding-left: 28px; }
-.resume-timeline::before {
-    content: ''; position: absolute; left: 7px; top: 8px; bottom: 8px; width: 1px;
-    background: linear-gradient(to bottom, rgba(192,88,62,0.38), rgba(124,110,166,0.18), transparent);
-}
-.resume-timeline-item { position: relative; padding-bottom: 36px; }
-.resume-timeline-item:last-child { padding-bottom: 0; }
-.resume-timeline-dot {
-    position: absolute; left: -24px; top: 6px; width: 14px; height: 14px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, #c0583e, #7c6ea6);
-    box-shadow: 0 0 0 3px rgba(192,88,62,0.14);
-}
-.resume-timeline-item:first-child .resume-timeline-dot {
-    background: linear-gradient(135deg, #34c759, #4e7c5f);
-    box-shadow: 0 0 0 3px rgba(52,199,89,0.18), 0 0 10px rgba(52,199,89,0.22);
-}
-.resume-timeline-header {
-    display: flex; justify-content: space-between; align-items: flex-start;
-    gap: 12px; flex-wrap: wrap; margin-bottom: 4px;
-}
-.resume-timeline-role { font-size: 1rem; font-weight: 700; color: var(--ios-glass-text); margin: 0; line-height: 1.2; }
-.resume-timeline-badge {
-    display: inline-flex; align-items: center; gap: 4px; padding: 3px 12px;
-    background: rgba(255,255,255,0.75); border: 1px solid rgba(0,0,0,0.08);
-    border-radius: 999px; font-size: 0.72rem; font-weight: 600;
-    color: var(--ios-glass-text-muted); white-space: nowrap; flex-shrink: 0;
-}
-.resume-timeline-company { font-size: 0.82rem; color: var(--ios-glass-text-muted); margin-bottom: 12px; font-weight: 500; }
-.resume-timeline-list { margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 5px; }
-.resume-timeline-list li { font-size: 0.875rem; color: var(--ios-glass-text-muted); line-height: 1.6; }
-.resume-timeline-divider { border: none; border-top: 1px solid rgba(0,0,0,0.07); margin: 0 0 32px; }
-
-/* Skills */
-.resume-skills-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 16px; }
-.resume-skill-group {
-    background: rgba(255,255,255,0.55); border: 1px solid rgba(0,0,0,0.07);
-    border-radius: 18px; padding: 20px 18px; transition: background 0.2s ease;
-}
-.resume-skill-group:hover { background: rgba(255,255,255,0.90); }
-.resume-skill-group-title {
-    display: flex; align-items: center; gap: 7px; font-size: 0.68rem; font-weight: 700;
-    letter-spacing: 0.12em; text-transform: uppercase; color: var(--ios-glass-text-muted); margin-bottom: 14px;
-}
-.resume-skill-group-title .material-symbols-outlined { font-size: 14px; }
-.resume-skill-chips { display: flex; flex-wrap: wrap; gap: 7px; }
-.resume-skill-chip {
-    display: inline-block; padding: 4px 12px; font-size: 0.75rem; font-weight: 600;
-    border-radius: 999px; color: var(--ios-glass-text-muted);
-    background: rgba(28,25,23,0.06); border: 1px solid rgba(28,25,23,0.09);
-    letter-spacing: 0.01em; transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease; cursor: default;
-}
-.resume-skill-chip:hover {
-    background: rgba(192,88,62,0.12); border-color: rgba(192,88,62,0.28); color: var(--ios-glass-accent-strong);
-}
-
-/* Projects */
-.resume-projects-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-.resume-project-card {
-    background: rgba(255,255,255,0.62); border: 1px solid rgba(0,0,0,0.07);
-    border-radius: 20px; overflow: hidden; text-decoration: none; color: inherit;
-    transition: background 0.25s ease, transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
-    display: flex; flex-direction: column;
-    box-shadow: 0 2px 10px rgba(60,40,20,0.07);
-}
-.resume-project-card:hover {
-    background: rgba(255,255,255,0.92); border-color: rgba(0,0,0,0.12);
-    transform: translateY(-4px); box-shadow: 0 16px 40px rgba(60,40,20,0.11); color: inherit;
-}
-.resume-project-visual {
-    height: 100px; display: flex; align-items: center; justify-content: center;
-    font-size: 38px; position: relative; overflow: hidden;
-}
-.resume-project-visual::after {
-    content: ''; position: absolute; inset: 0;
-    background: linear-gradient(to bottom, transparent 40%, rgba(255,255,255,0.30));
-}
-.resume-project-body { padding: 18px 20px 20px; flex: 1; display: flex; flex-direction: column; }
-.resume-project-name { font-size: 0.95rem; font-weight: 700; color: var(--ios-glass-text); margin-bottom: 6px; line-height: 1.2; }
-.resume-project-desc { font-size: 0.8rem; color: var(--ios-glass-text-muted); line-height: 1.6; flex: 1; margin-bottom: 14px; }
-.resume-project-chips { display: flex; flex-wrap: wrap; gap: 6px; }
-.resume-project-chip {
-    display: inline-block; padding: 3px 9px; font-size: 0.68rem; font-weight: 600;
-    border-radius: 999px; background: rgba(28,25,23,0.06); border: 1px solid rgba(28,25,23,0.09);
-    color: var(--ios-glass-text-muted);
-}
-
-/* Education */
-.resume-edu-row { display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; }
-.resume-edu-left { display: flex; align-items: center; gap: 16px; }
-.resume-edu-icon {
-    width: 48px; height: 48px; border-radius: 14px;
-    background: rgba(124,110,166,0.12); border: 1px solid rgba(124,110,166,0.18);
-    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
-}
-.resume-edu-icon .material-symbols-outlined { font-size: 22px; color: var(--accent-lavender); }
-.resume-edu-degree { font-size: 1rem; font-weight: 700; color: var(--ios-glass-text); margin: 0 0 3px; line-height: 1.2; }
-.resume-edu-school { font-size: 0.82rem; color: var(--ios-glass-text-muted); margin: 0; }
-.resume-edu-badge {
-    display: inline-flex; padding: 5px 14px;
-    background: rgba(255,255,255,0.75); border: 1px solid rgba(0,0,0,0.08);
-    border-radius: 999px; font-size: 0.75rem; font-weight: 600; color: var(--ios-glass-text-muted); white-space: nowrap;
-}
-
-/* ── Responsive ── */
-@media (max-width: 767px) {
-    .resume-stats { grid-template-columns: repeat(3,1fr); gap: 10px; }
-    .resume-stat-card { padding: 18px 12px; }
-    .resume-skills-grid { grid-template-columns: 1fr 1fr; }
-    .resume-projects-grid { grid-template-columns: 1fr; }
-    .resume-panel { padding: 24px 18px; }
-}
-@media (max-width: 520px) {
-    .resume-stats { grid-template-columns: repeat(3,1fr); gap: 8px; }
-    .resume-skills-grid { grid-template-columns: 1fr; }
-    .resume-stat-number { font-size: 24px; }
-}
-</style>
-{% endblock %}
-
-{% block main_content %}
-<main id="content" role="main" class="resume-page">
-    <div class="container-xl px-4">
-
-        <!-- ── Hero ── -->
-        <header class="resume-hero hp-reveal">
-            <div class="resume-avatar-ring" aria-hidden="true">
-                <span class="material-symbols-outlined">person</span>
-            </div>
-            <h1 class="resume-hero-name">Yuta Kumadaki</h1>
-            <p class="resume-hero-title">AI Architect &amp; Photographer</p>
-            <p class="resume-hero-location">
-                <span class="material-symbols-outlined" aria-hidden="true">location_on</span>
-                Tokyo, Japan
-            </p>
-            <nav class="resume-hero-actions" aria-label="Profile links">
-                <a href="{% url 'core:contact' %}" class="resume-hero-btn-primary">
-                    <span class="material-symbols-outlined" aria-hidden="true">mail</span>
-                    {% trans "Contact Me" %}
-                </a>
-                <a href="{% url 'photraveler:map' %}" class="resume-hero-btn-ghost">
-                    <span class="material-symbols-outlined" aria-hidden="true">photo_camera</span>
-                    WanderLens
-                </a>
-            </nav>
-        </header>
-
-        <!-- ── Stats ── -->
-        <div class="resume-stats hp-reveal hp-reveal-d1" role="list" aria-label="Career statistics">
-            <div class="resume-stat-card" role="listitem">
-                <div class="resume-stat-number">5+</div>
-                <div class="resume-stat-label">{% trans "Years" %}</div>
-            </div>
-            <div class="resume-stat-card" role="listitem">
-                <div class="resume-stat-number">10+</div>
-                <div class="resume-stat-label">{% trans "Projects" %}</div>
-            </div>
-            <div class="resume-stat-card" role="listitem">
-                <div class="resume-stat-number">3</div>
-                <div class="resume-stat-label">{% trans "Domains" %}</div>
+    <!-- ── Stats ── -->
+    <div class="row g-3 justify-content-center mb-5 ap-reveal" style="max-width: 900px; margin: 0 auto;">
+        <div class="col-4">
+            <div class="ap-glass-panel text-center p-4">
+                <div class="fw-bold mb-1" style="font-size: clamp(28px, 4vw, 40px); background: linear-gradient(135deg, #ff9f0a, #bf5af2); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; line-height: 1;">5+</div>
+                <div class="text-uppercase fw-bold text-muted" style="font-size: 11px; letter-spacing: 0.1em;">{% trans "Years" %}</div>
             </div>
         </div>
+        <div class="col-4">
+            <div class="ap-glass-panel text-center p-4">
+                <div class="fw-bold mb-1" style="font-size: clamp(28px, 4vw, 40px); background: linear-gradient(135deg, #32d74b, #0a84ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; line-height: 1;">10+</div>
+                <div class="text-uppercase fw-bold text-muted" style="font-size: 11px; letter-spacing: 0.1em;">{% trans "Projects" %}</div>
+            </div>
+        </div>
+        <div class="col-4">
+            <div class="ap-glass-panel text-center p-4">
+                <div class="fw-bold mb-1" style="font-size: clamp(28px, 4vw, 40px); background: linear-gradient(135deg, #ff3b30, #ff9f0a); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; line-height: 1;">3</div>
+                <div class="text-uppercase fw-bold text-muted" style="font-size: 11px; letter-spacing: 0.1em;">{% trans "Domains" %}</div>
+            </div>
+        </div>
+    </div>
 
-        <!-- ── Body ── -->
-        <div class="resume-body">
+    <!-- ── Body ── -->
+    <div class="d-flex flex-column gap-5" style="max-width: 900px; margin: 0 auto;">
 
-            <!-- Summary -->
-            <section class="resume-panel hp-reveal" aria-labelledby="summary-heading">
-                <div class="resume-section-header">
-                    <div class="resume-section-icon" style="background:rgba(96,165,250,0.15);">
-                        <span class="material-symbols-outlined" aria-hidden="true" style="color:#60a5fa;">person</span>
-                    </div>
-                    <div>
-                        <p class="resume-section-eyebrow">{% trans "About" %}</p>
-                        <h2 id="summary-heading" class="resume-section-title">{% trans "Summary" %}</h2>
-                    </div>
+        <!-- Summary -->
+        <section class="ap-reveal">
+            <div class="d-flex align-items-center gap-3 mb-4">
+                <div style="width: 44px; height: 44px; border-radius: 12px; background: rgba(10,132,255,0.15); display: flex; align-items: center; justify-content: center;">
+                    <span class="material-symbols-outlined" style="color: #0a84ff;">person</span>
                 </div>
-                <p class="resume-summary-text">
+                <div>
+                    <p class="text-uppercase fw-bold text-muted mb-0" style="font-size: 11px; letter-spacing: 0.1em;">{% trans "About" %}</p>
+                    <h2 class="fw-bold text-light mb-0" style="font-size: 20px;">{% trans "Summary" %}</h2>
+                </div>
+            </div>
+            <div class="ap-glass-panel p-4 p-md-5">
+                <p class="mb-0 text-muted" style="font-size: 15px; line-height: 1.8;">
                     大規模言語モデル（LLM）のシステム設計・社会実装を専門とするAIアーキテクト。Transformer内部メカニズムの研究（Mechanistic Interpretability）に取り組みながら、Leica Q3によるフォトグラフィーも並行して続けている。
                 </p>
-            </section>
+            </div>
+        </section>
 
-            <!-- Experience -->
-            <section class="resume-panel hp-reveal hp-reveal-d1" aria-labelledby="experience-heading">
-                <div class="resume-section-header">
-                    <div class="resume-section-icon" style="background:rgba(52,211,153,0.15);">
-                        <span class="material-symbols-outlined" aria-hidden="true" style="color:#34d399;">work</span>
-                    </div>
-                    <div>
-                        <p class="resume-section-eyebrow">{% trans "Career" %}</p>
-                        <h2 id="experience-heading" class="resume-section-title">{% trans "Experience" %}</h2>
-                    </div>
+        <!-- Experience -->
+        <section class="ap-reveal">
+            <div class="d-flex align-items-center gap-3 mb-4">
+                <div style="width: 44px; height: 44px; border-radius: 12px; background: rgba(50,215,75,0.15); display: flex; align-items: center; justify-content: center;">
+                    <span class="material-symbols-outlined" style="color: #32d74b;">work</span>
                 </div>
+                <div>
+                    <p class="text-uppercase fw-bold text-muted mb-0" style="font-size: 11px; letter-spacing: 0.1em;">{% trans "Career" %}</p>
+                    <h2 class="fw-bold text-light mb-0" style="font-size: 20px;">{% trans "Experience" %}</h2>
+                </div>
+            </div>
+            <div class="ap-glass-panel p-4 p-md-5">
+                <div style="position: relative; padding-left: 32px;">
+                    <!-- Timeline Line -->
+                    <div style="position: absolute; left: 7px; top: 12px; bottom: 12px; width: 2px; background: linear-gradient(to bottom, #32d74b, #0a84ff); opacity: 0.3;"></div>
 
-                <div class="resume-timeline">
                     <!-- Item 1 -->
-                    <div class="resume-timeline-item">
-                        <div class="resume-timeline-dot" aria-hidden="true"></div>
-                        <div class="resume-timeline-header">
-                            <h3 class="resume-timeline-role">AI Architect</h3>
-                            <span class="resume-timeline-badge">2023 – {% trans "Present" %}</span>
+                    <div class="mb-5 position-relative">
+                        <div style="position: absolute; left: -32px; top: 6px; width: 16px; height: 16px; border-radius: 50%; background: #32d74b; box-shadow: 0 0 0 4px rgba(50,215,75,0.2);"></div>
+                        <div class="d-flex flex-wrap justify-content-between align-items-start gap-2 mb-2">
+                            <h3 class="fw-bold text-light mb-0" style="font-size: 18px;">AI Architect</h3>
+                            <span class="fw-bold text-muted" style="font-size: 12px; padding: 4px 12px; background: rgba(255,255,255,0.05); border-radius: 12px;">2023 – {% trans "Present" %}</span>
                         </div>
-                        <p class="resume-timeline-company">Self / Freelance</p>
-                        <ul class="resume-timeline-list">
-                            <li>LLMを活用したシステム設計・プロダクト開発の技術支援</li>
-                            <li>Transformer アーキテクチャの内部解析 (Mechanistic Interpretability)</li>
+                        <p class="fw-bold mb-3" style="font-size: 14px; color: #32d74b;">Self / Freelance</p>
+                        <ul class="text-muted m-0" style="padding-left: 20px; font-size: 14px; line-height: 1.6;">
+                            <li class="mb-1">LLMを活用したシステム設計・プロダクト開発の技術支援</li>
+                            <li class="mb-1">Transformer アーキテクチャの内部解析 (Mechanistic Interpretability)</li>
                             <li>RAG / Agent ワークフロー設計および評価フレームワーク構築</li>
                         </ul>
                     </div>
 
-                    <hr class="resume-timeline-divider">
-
                     <!-- Item 2 -->
-                    <div class="resume-timeline-item">
-                        <div class="resume-timeline-dot" aria-hidden="true"></div>
-                        <div class="resume-timeline-header">
-                            <h3 class="resume-timeline-role">Software Engineer</h3>
-                            <span class="resume-timeline-badge">2020 – 2023</span>
+                    <div class="position-relative">
+                        <div style="position: absolute; left: -32px; top: 6px; width: 16px; height: 16px; border-radius: 50%; background: #0a84ff; box-shadow: 0 0 0 4px rgba(10,132,255,0.2);"></div>
+                        <div class="d-flex flex-wrap justify-content-between align-items-start gap-2 mb-2">
+                            <h3 class="fw-bold text-light mb-0" style="font-size: 18px;">Software Engineer</h3>
+                            <span class="fw-bold text-muted" style="font-size: 12px; padding: 4px 12px; background: rgba(255,255,255,0.05); border-radius: 12px;">2020 – 2023</span>
                         </div>
-                        <p class="resume-timeline-company">Various projects</p>
-                        <ul class="resume-timeline-list">
-                            <li>Webアプリケーション開発（Django / Python）</li>
+                        <p class="fw-bold mb-3" style="font-size: 14px; color: #0a84ff;">Various projects</p>
+                        <ul class="text-muted m-0" style="padding-left: 20px; font-size: 14px; line-height: 1.6;">
+                            <li class="mb-1">Webアプリケーション開発（Django / Python）</li>
                             <li>データパイプライン設計・運用</li>
                         </ul>
                     </div>
                 </div>
-            </section>
+            </div>
+        </section>
 
-            <!-- Skills -->
-            <section class="resume-panel hp-reveal hp-reveal-d2" aria-labelledby="skills-heading">
-                <div class="resume-section-header">
-                    <div class="resume-section-icon" style="background:rgba(251,191,36,0.15);">
-                        <span class="material-symbols-outlined" aria-hidden="true" style="color:#fbbf24;">engineering</span>
-                    </div>
-                    <div>
-                        <p class="resume-section-eyebrow">{% trans "Expertise" %}</p>
-                        <h2 id="skills-heading" class="resume-section-title">{% trans "Skills" %}</h2>
-                    </div>
+        <!-- Skills -->
+        <section class="ap-reveal">
+            <div class="d-flex align-items-center gap-3 mb-4">
+                <div style="width: 44px; height: 44px; border-radius: 12px; background: rgba(255,159,10,0.15); display: flex; align-items: center; justify-content: center;">
+                    <span class="material-symbols-outlined" style="color: #ff9f0a;">engineering</span>
                 </div>
-
-                <div class="resume-skills-grid">
-                    <div class="resume-skill-group">
-                        <div class="resume-skill-group-title">
-                            <span class="material-symbols-outlined" aria-hidden="true">psychology</span>
+                <div>
+                    <p class="text-uppercase fw-bold text-muted mb-0" style="font-size: 11px; letter-spacing: 0.1em;">{% trans "Expertise" %}</p>
+                    <h2 class="fw-bold text-light mb-0" style="font-size: 20px;">{% trans "Skills" %}</h2>
+                </div>
+            </div>
+            
+            <div class="row g-4">
+                <div class="col-md-4">
+                    <div class="ap-glass-panel h-100 p-4">
+                        <div class="d-flex align-items-center gap-2 mb-3 text-uppercase fw-bold text-muted" style="font-size: 12px; letter-spacing: 0.1em;">
+                            <span class="material-symbols-outlined" style="font-size: 16px;">psychology</span>
                             AI / ML
                         </div>
-                        <div class="resume-skill-chips">
-                            <span class="resume-skill-chip">LLM</span>
-                            <span class="resume-skill-chip">Transformers</span>
-                            <span class="resume-skill-chip">RAG</span>
-                            <span class="resume-skill-chip">MCP</span>
-                            <span class="resume-skill-chip">Mech. Interp.</span>
-                            <span class="resume-skill-chip">Agents</span>
+                        <div class="d-flex flex-wrap gap-2">
+                            <span class="ap-chip">LLM</span>
+                            <span class="ap-chip">Transformers</span>
+                            <span class="ap-chip">RAG</span>
+                            <span class="ap-chip">MCP</span>
+                            <span class="ap-chip">Mech. Interp.</span>
+                            <span class="ap-chip">Agents</span>
                         </div>
                     </div>
+                </div>
 
-                    <div class="resume-skill-group">
-                        <div class="resume-skill-group-title">
-                            <span class="material-symbols-outlined" aria-hidden="true">code</span>
+                <div class="col-md-4">
+                    <div class="ap-glass-panel h-100 p-4">
+                        <div class="d-flex align-items-center gap-2 mb-3 text-uppercase fw-bold text-muted" style="font-size: 12px; letter-spacing: 0.1em;">
+                            <span class="material-symbols-outlined" style="font-size: 16px;">code</span>
                             {% trans "Engineering" %}
                         </div>
-                        <div class="resume-skill-chips">
-                            <span class="resume-skill-chip">Python</span>
-                            <span class="resume-skill-chip">Django</span>
-                            <span class="resume-skill-chip">PostgreSQL</span>
-                            <span class="resume-skill-chip">Docker</span>
-                            <span class="resume-skill-chip">Git</span>
+                        <div class="d-flex flex-wrap gap-2">
+                            <span class="ap-chip">Python</span>
+                            <span class="ap-chip">Django</span>
+                            <span class="ap-chip">PostgreSQL</span>
+                            <span class="ap-chip">Docker</span>
+                            <span class="ap-chip">Git</span>
                         </div>
                     </div>
+                </div>
 
-                    <div class="resume-skill-group">
-                        <div class="resume-skill-group-title">
-                            <span class="material-symbols-outlined" aria-hidden="true">palette</span>
+                <div class="col-md-4">
+                    <div class="ap-glass-panel h-100 p-4">
+                        <div class="d-flex align-items-center gap-2 mb-3 text-uppercase fw-bold text-muted" style="font-size: 12px; letter-spacing: 0.1em;">
+                            <span class="material-symbols-outlined" style="font-size: 16px;">palette</span>
                             {% trans "Creative" %}
                         </div>
-                        <div class="resume-skill-chips">
-                            <span class="resume-skill-chip">Photography</span>
-                            <span class="resume-skill-chip">Leica Q3</span>
-                            <span class="resume-skill-chip">UI Design</span>
+                        <div class="d-flex flex-wrap gap-2">
+                            <span class="ap-chip">Photography</span>
+                            <span class="ap-chip">Leica Q3</span>
+                            <span class="ap-chip">UI Design</span>
                         </div>
                     </div>
                 </div>
-            </section>
+            </div>
+        </section>
 
-            <!-- Projects -->
-            <section class="resume-panel hp-reveal" id="projects" aria-labelledby="projects-heading">
-                <div class="resume-section-header">
-                    <div class="resume-section-icon" style="background:rgba(129,140,248,0.15);">
-                        <span class="material-symbols-outlined" aria-hidden="true" style="color:#818cf8;">folder_open</span>
-                    </div>
-                    <div>
-                        <p class="resume-section-eyebrow">{% trans "Work" %}</p>
-                        <h2 id="projects-heading" class="resume-section-title">{% trans "Projects" %}</h2>
-                    </div>
+        <!-- Projects -->
+        <section class="ap-reveal">
+            <div class="d-flex align-items-center gap-3 mb-4">
+                <div style="width: 44px; height: 44px; border-radius: 12px; background: rgba(94,92,230,0.15); display: flex; align-items: center; justify-content: center;">
+                    <span class="material-symbols-outlined" style="color: #5e5ce6;">folder_open</span>
                 </div>
+                <div>
+                    <p class="text-uppercase fw-bold text-muted mb-0" style="font-size: 11px; letter-spacing: 0.1em;">{% trans "Work" %}</p>
+                    <h2 class="fw-bold text-light mb-0" style="font-size: 20px;">{% trans "Projects" %}</h2>
+                </div>
+            </div>
 
-                <div class="resume-projects-grid">
-                    <article class="resume-project-card">
-                        <div class="resume-project-visual" style="background:linear-gradient(135deg,rgba(96,165,250,0.22),rgba(129,140,248,0.22));">
-                            <span style="position:relative;z-index:1;">🌐</span>
+            <div class="row g-4">
+                <div class="col-md-6">
+                    <a href="#" class="ap-glass-panel ap-bento-card text-decoration-none d-flex flex-column h-100 p-0 overflow-hidden">
+                        <div style="height: 120px; background: linear-gradient(135deg, rgba(94,92,230,0.2), rgba(10,132,255,0.2)); display: flex; align-items: center; justify-content: center;">
+                            <span style="font-size: 48px;">🌐</span>
                         </div>
-                        <div class="resume-project-body">
-                            <h3 class="resume-project-name">Y.K. Nexus</h3>
-                            <p class="resume-project-desc">{% trans "このサイト。Django + liquid glass UIで構築したポートフォリオ。" %}</p>
-                            <div class="resume-project-chips">
-                                <span class="resume-project-chip">Django</span>
-                                <span class="resume-project-chip">PostgreSQL</span>
-                                <span class="resume-project-chip">Docker</span>
+                        <div class="p-4 flex-grow-1 d-flex flex-column">
+                            <h3 class="fw-bold text-light mb-2" style="font-size: 18px;">Y.K. Nexus</h3>
+                            <p class="text-muted mb-4 flex-grow-1" style="font-size: 13px;">{% trans "このサイト。Django + Apple-inspired Glass UIで構築したポートフォリオ。" %}</p>
+                            <div class="d-flex flex-wrap gap-2">
+                                <span class="ap-chip">Django</span>
+                                <span class="ap-chip">PostgreSQL</span>
+                                <span class="ap-chip">Docker</span>
                             </div>
                         </div>
-                    </article>
+                    </a>
+                </div>
 
-                    <article class="resume-project-card">
-                        <div class="resume-project-visual" style="background:linear-gradient(135deg,rgba(52,211,153,0.18),rgba(96,165,250,0.18));">
-                            <span style="position:relative;z-index:1;">🗺️</span>
+                <div class="col-md-6">
+                    <a href="{% url 'photraveler:map' %}" class="ap-glass-panel ap-bento-card text-decoration-none d-flex flex-column h-100 p-0 overflow-hidden">
+                        <div style="height: 120px; background: linear-gradient(135deg, rgba(50,215,75,0.2), rgba(255,159,10,0.2)); display: flex; align-items: center; justify-content: center;">
+                            <span style="font-size: 48px;">🗺️</span>
                         </div>
-                        <div class="resume-project-body">
-                            <h3 class="resume-project-name">WanderLens</h3>
-                            <p class="resume-project-desc">{% trans "写真と地図を組み合わせた旅の記録アプリ。Leaflet.jsで世界地図にピンを表示。" %}</p>
-                            <div class="resume-project-chips">
-                                <span class="resume-project-chip">Leaflet.js</span>
-                                <span class="resume-project-chip">Django</span>
+                        <div class="p-4 flex-grow-1 d-flex flex-column">
+                            <h3 class="fw-bold text-light mb-2" style="font-size: 18px;">WanderLens</h3>
+                            <p class="text-muted mb-4 flex-grow-1" style="font-size: 13px;">{% trans "写真と地図を組み合わせた旅の記録アプリ。Leaflet.jsで世界地図にピンを表示。" %}</p>
+                            <div class="d-flex flex-wrap gap-2">
+                                <span class="ap-chip">Leaflet.js</span>
+                                <span class="ap-chip">Django</span>
                             </div>
                         </div>
-                    </article>
+                    </a>
                 </div>
-            </section>
+            </div>
+        </section>
 
-            <!-- Education -->
-            <section class="resume-panel hp-reveal hp-reveal-d1" aria-labelledby="education-heading">
-                <div class="resume-section-header">
-                    <div class="resume-section-icon" style="background:rgba(192,132,252,0.15);">
-                        <span class="material-symbols-outlined" aria-hidden="true" style="color:#c084fc;">school</span>
-                    </div>
-                    <div>
-                        <p class="resume-section-eyebrow">{% trans "Background" %}</p>
-                        <h2 id="education-heading" class="resume-section-title">{% trans "Education" %}</h2>
-                    </div>
+        <!-- Education -->
+        <section class="ap-reveal">
+            <div class="d-flex align-items-center gap-3 mb-4">
+                <div style="width: 44px; height: 44px; border-radius: 12px; background: rgba(191,90,242,0.15); display: flex; align-items: center; justify-content: center;">
+                    <span class="material-symbols-outlined" style="color: #bf5af2;">school</span>
                 </div>
+                <div>
+                    <p class="text-uppercase fw-bold text-muted mb-0" style="font-size: 11px; letter-spacing: 0.1em;">{% trans "Background" %}</p>
+                    <h2 class="fw-bold text-light mb-0" style="font-size: 20px;">{% trans "Education" %}</h2>
+                </div>
+            </div>
 
-                <div class="resume-edu-row">
-                    <div class="resume-edu-left">
-                        <div class="resume-edu-icon" aria-hidden="true">
-                            <span class="material-symbols-outlined">school</span>
+            <div class="ap-glass-panel p-4">
+                <div class="d-flex flex-wrap justify-content-between align-items-center gap-4">
+                    <div class="d-flex align-items-center gap-3">
+                        <div style="width: 56px; height: 56px; border-radius: 14px; background: rgba(255,255,255,0.05); display: flex; align-items: center; justify-content: center;">
+                            <span class="material-symbols-outlined" style="font-size: 28px; color: var(--ap-accent);">school</span>
                         </div>
                         <div>
-                            <h3 class="resume-edu-degree">{% trans "Computer Science" %}</h3>
-                            <p class="resume-edu-school">University · Japan</p>
+                            <h3 class="fw-bold text-light mb-1" style="font-size: 18px;">{% trans "Computer Science" %}</h3>
+                            <p class="text-muted mb-0" style="font-size: 14px;">University · Japan</p>
                         </div>
                     </div>
-                    <span class="resume-edu-badge">2016 – 2020</span>
+                    <span class="fw-bold text-muted" style="font-size: 13px; padding: 6px 16px; background: rgba(255,255,255,0.05); border-radius: 12px;">2016 – 2020</span>
                 </div>
-            </section>
+            </div>
+        </section>
 
-        </div>
     </div>
-</main>
-{% endblock %}
-
-{% block extra_js %}
-<script>
-(function () {
-    const io = new IntersectionObserver((entries) => {
-        entries.forEach(e => {
-            if (e.isIntersecting) { e.target.classList.add('visible'); io.unobserve(e.target); }
-        });
-    }, { threshold: 0.08 });
-    document.querySelectorAll('.hp-reveal').forEach(el => io.observe(el));
-})();
-</script>
+</div>
 {% endblock %}

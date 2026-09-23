@@ -4,104 +4,104 @@
 {% block title %}Profile - {{ user_obj.username }}{% endblock %}
 
 {% block content %}
-<div class="container glass-section py-5">
+<div class="ap-section py-5">
     <div class="row justify-content-center">
         <div class="col-md-10">
             <!-- Profile Info -->
-            <div class="ios-glass-card liquid-glass-card text-center mb-4">
+            <div class="ap-glass-panel text-center mb-4 ap-reveal">
                 <div class="mb-3">
-                    <span class="material-symbols-outlined" aria-hidden="true" style="font-size:72px;color:var(--ios-glass-accent);">account_circle</span>
-                    <h2 class="fw-bold mt-2">{{ user_obj.username }}</h2>
-                    <p class="text-muted mb-2">{% if user_obj.email %}{{ user_obj.email }}{% else %}{% trans "No email provided" %}{% endif %}</p>
+                    <span class="material-symbols-outlined" aria-hidden="true" style="font-size:72px;color:var(--ap-accent);">account_circle</span>
+                    <h2 class="ap-hero-title mt-2" style="font-size: 32px;">{{ user_obj.username }}</h2>
+                    <p class="ap-subhead mb-2" style="font-size: 17px;">{% if user_obj.email %}{{ user_obj.email }}{% else %}{% trans "No email provided" %}{% endif %}</p>
                 </div>
 
                 <div class="d-flex justify-content-center gap-3">
-                    <a href="{% url 'core:home' %}" class="btn ios-glass-btn">{% trans "Home" %}</a>
-                    <a href="{% url 'logout' %}" class="btn ios-glass-btn">{% trans "Logout" %}</a>
+                    <a href="{% url 'core:home' %}" class="ap-btn ap-btn-outline">{% trans "Home" %}</a>
+                    <a href="{% url 'logout' %}" class="ap-btn ap-btn-outline" style="border-color: rgba(255,59,48,0.5); color: #ff453a;">{% trans "Logout" %}</a>
                 </div>
             </div>
 
             <!-- Profile Edit Form -->
-            <div class="ios-glass-card liquid-glass-card">
-                <h3 class="fw-bold mb-4"><span class="material-symbols-outlined align-middle" aria-hidden="true">edit</span> {% trans "プロフィール編集" %}</h3>
+            <div class="ap-glass-panel ap-reveal">
+                <h3 class="ap-subhead mb-4 text-light fw-bold"><span class="material-symbols-outlined align-middle me-2" aria-hidden="true">edit</span> {% trans "プロフィール編集" %}</h3>
                 <form method="post" class="needs-validation">
                     {% csrf_token %}
 
                     {% if form.errors %}
-                    <div class="alert alert-danger" role="alert">
+                    <div class="alert alert-danger" style="background: rgba(255,59,48,0.1); border: 1px solid rgba(255,59,48,0.2); color: #ff453a; border-radius: 12px;">
                         {% trans "入力内容にエラーがあります。" %}
                         {{ form.errors }}
                     </div>
                     {% endif %}
 
-                    <div class="mb-3">
-                        <label class="form-label fw-bold" for="profileEmail">{% trans "メールアドレス" %}</label>
-                        <input type="email" class="form-control ios-glass-input" id="profileEmail" name="email" value="{{ form.email.value|default:'' }}">
+                    <div class="mb-4">
+                        <label class="form-label fw-bold text-muted small" for="profileEmail">{% trans "メールアドレス" %}</label>
+                        <input type="email" class="form-control ap-input" id="profileEmail" name="email" value="{{ form.email.value|default:'' }}">
                     </div>
 
-                    <div class="row mb-3">
+                    <div class="row mb-4">
                         <div class="col-md-6">
-                            <label class="form-label fw-bold" for="profileFirstName">{% trans "名" %}</label>
-                            <input type="text" class="form-control ios-glass-input" id="profileFirstName" name="first_name" value="{{ form.first_name.value|default:'' }}">
+                            <label class="form-label fw-bold text-muted small" for="profileFirstName">{% trans "名" %}</label>
+                            <input type="text" class="form-control ap-input" id="profileFirstName" name="first_name" value="{{ form.first_name.value|default:'' }}">
                         </div>
-                        <div class="col-md-6">
-                            <label class="form-label fw-bold" for="profileLastName">{% trans "姓" %}</label>
-                            <input type="text" class="form-control ios-glass-input" id="profileLastName" name="last_name" value="{{ form.last_name.value|default:'' }}">
+                        <div class="col-md-6 mt-4 mt-md-0">
+                            <label class="form-label fw-bold text-muted small" for="profileLastName">{% trans "姓" %}</label>
+                            <input type="text" class="form-control ap-input" id="profileLastName" name="last_name" value="{{ form.last_name.value|default:'' }}">
                         </div>
                     </div>
 
-                    <hr class="my-4" style="border-color: rgba(255, 255, 255, 0.2);">
+                    <hr class="my-5" style="border-color: rgba(255, 255, 255, 0.1);">
 
-                    <h4 class="fw-bold mb-3"><i class="fas fa-music text-primary me-2" aria-hidden="true"></i>{% trans "お気に入りの曲" %}</h4>
+                    <h4 class="fw-bold mb-4 text-light fs-5"><span class="material-symbols-outlined align-middle me-2" style="color: var(--ap-accent);">music_note</span>{% trans "お気に入りの曲" %}</h4>
 
-                    <div class="mb-3">
-                        <label class="form-label fw-bold" for="appleMusicSearchTerm">{% trans "Apple Music で検索" %}</label>
+                    <div class="mb-4">
+                        <label class="form-label fw-bold text-muted small" for="appleMusicSearchTerm">{% trans "Apple Music で検索" %}</label>
                         <div class="d-flex gap-2">
-                            <input type="search" class="form-control ios-glass-input" id="appleMusicSearchTerm" placeholder="曲名 / アーティスト名">
-                            <button type="button" class="btn ios-glass-btn" id="appleMusicSearchBtn">{% trans "検索" %}</button>
+                            <input type="search" class="form-control ap-input" id="appleMusicSearchTerm" placeholder="曲名 / アーティスト名">
+                            <button type="button" class="ap-btn ap-btn-primary" id="appleMusicSearchBtn">{% trans "検索" %}</button>
                         </div>
-                        <div class="small text-muted mt-2" id="appleMusicSearchHint">{% trans "検索結果から選ぶと自動入力されます。" %}</div>
+                        <div class="small text-muted mt-2">{% trans "検索結果から選ぶと自動入力されます。" %}</div>
                     </div>
 
-                    <div class="mb-3">
-                        <label class="form-label fw-bold" for="favoriteTrackTitle">{% trans "曲名" %}</label>
-                        <input type="text" class="form-control ios-glass-input" id="favoriteTrackTitle" name="favorite_track_title" value="{{ form.favorite_track_title.value|default:'' }}" placeholder="e.g., All Of Me">
+                    <div class="mb-4">
+                        <label class="form-label fw-bold text-muted small" for="favoriteTrackTitle">{% trans "曲名" %}</label>
+                        <input type="text" class="form-control ap-input" id="favoriteTrackTitle" name="favorite_track_title" value="{{ form.favorite_track_title.value|default:'' }}" placeholder="e.g., All Of Me">
                     </div>
 
-                    <div class="mb-3">
-                        <label class="form-label fw-bold" for="favoriteTrackArtist">{% trans "アーティスト名" %}</label>
-                        <input type="text" class="form-control ios-glass-input" id="favoriteTrackArtist" name="favorite_track_artist" value="{{ form.favorite_track_artist.value|default:'' }}" placeholder="e.g., Nao">
+                    <div class="mb-4">
+                        <label class="form-label fw-bold text-muted small" for="favoriteTrackArtist">{% trans "アーティスト名" %}</label>
+                        <input type="text" class="form-control ap-input" id="favoriteTrackArtist" name="favorite_track_artist" value="{{ form.favorite_track_artist.value|default:'' }}" placeholder="e.g., Nao">
                     </div>
 
-                    <div class="mb-3">
-                        <label class="form-label fw-bold" for="favoriteTrackImageUrl">{% trans "ジャケット画像URL" %}</label>
-                        <input type="url" class="form-control ios-glass-input" id="favoriteTrackImageUrl" name="favorite_track_image_url" value="{{ form.favorite_track_image_url.value|default:'' }}" placeholder="https://...">
+                    <div class="mb-4">
+                        <label class="form-label fw-bold text-muted small" for="favoriteTrackImageUrl">{% trans "ジャケット画像URL" %}</label>
+                        <input type="url" class="form-control ap-input" id="favoriteTrackImageUrl" name="favorite_track_image_url" value="{{ form.favorite_track_image_url.value|default:'' }}" placeholder="https://...">
                     </div>
 
-                    <div class="mb-3">
-                        <label class="form-label fw-bold" for="favoriteTrackAppleMusicUrl">{% trans "Apple Music リンク" %}</label>
-                        <input type="url" class="form-control ios-glass-input" id="favoriteTrackAppleMusicUrl" name="favorite_track_apple_music_url" value="{{ form.favorite_track_apple_music_url.value|default:'' }}" placeholder="https://music.apple.com/...">
+                    <div class="mb-4">
+                        <label class="form-label fw-bold text-muted small" for="favoriteTrackAppleMusicUrl">{% trans "Apple Music リンク" %}</label>
+                        <input type="url" class="form-control ap-input" id="favoriteTrackAppleMusicUrl" name="favorite_track_apple_music_url" value="{{ form.favorite_track_apple_music_url.value|default:'' }}" placeholder="https://music.apple.com/...">
                     </div>
 
                     <input type="hidden" id="favoriteTrackAppleMusicId" name="favorite_track_apple_music_id" value="{{ form.favorite_track_apple_music_id.value|default:'' }}">
                     <input type="hidden" id="favoriteTrackPreviewUrl" name="favorite_track_preview_url" value="{{ form.favorite_track_preview_url.value|default:'' }}">
 
                     {% if form.favorite_track_image_url.value %}
-                    <div class="mb-3">
-                        <label class="form-label fw-bold">{% trans "プレビュー" %}</label>
-                        <div style="display: flex; gap: 15px; align-items: center;">
+                    <div class="mb-4">
+                        <label class="form-label fw-bold text-muted small">{% trans "プレビュー" %}</label>
+                        <div style="display: flex; gap: 15px; align-items: center; background: rgba(255,255,255,0.02); padding: 16px; border-radius: 20px;">
                             <img src="{{ form.favorite_track_image_url.value }}" style="width: 80px; height: 80px; border-radius: 12px; object-fit: cover;" alt="preview">
                             <div>
-                                <p class="mb-1 fw-bold">{{ form.favorite_track_title.value|default:'' }}</p>
+                                <p class="mb-1 fw-bold text-light">{{ form.favorite_track_title.value|default:'' }}</p>
                                 <p class="text-muted small mb-0">{{ form.favorite_track_artist.value|default:'' }}</p>
                             </div>
                         </div>
                     </div>
                     {% endif %}
 
-                    <div class="mt-4">
-                        <button type="submit" class="btn ios-glass-btn me-2"><span class="material-symbols-outlined align-middle me-2" aria-hidden="true">save</span>{% trans "保存" %}</button>
-                        <a href="{% url 'core:home' %}" class="btn btn-outline-secondary">{% trans "キャンセル" %}</a>
+                    <div class="mt-5 pt-3" style="border-top: 1px solid rgba(255,255,255,0.1);">
+                        <button type="submit" class="ap-btn ap-btn-primary me-2">{% trans "保存" %}</button>
+                        <a href="{% url 'core:home' %}" class="ap-btn ap-btn-outline" style="border:none;">{% trans "キャンセル" %}</a>
                     </div>
                 </form>
             </div>
@@ -112,23 +112,38 @@
 <!-- Apple Music Search Modal -->
 <div class="modal fade" id="appleMusicSearchModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
-        <div class="modal-content ios-glass-card liquid-glass-card">
-            <div class="modal-header" style="border-bottom-color: rgba(255, 255, 255, 0.2);">
-                <h5 class="modal-title fw-bold">{% trans "Apple Music 検索" %}</h5>
-                <button type="button" class="btn-close" data-mdb-dismiss="modal" aria-label="Close"></button>
+        <div class="modal-content ap-glass-panel" style="padding: 0;">
+            <div class="modal-header" style="border-bottom: 1px solid rgba(255, 255, 255, 0.1); padding: 20px;">
+                <h5 class="modal-title fw-bold text-light">{% trans "Apple Music 検索" %}</h5>
+                <button type="button" class="btn-close btn-close-white" data-mdb-dismiss="modal" aria-label="Close"></button>
             </div>
-            <div class="modal-body">
-                <div class="small text-muted mb-2">{% trans "検索ワード" %}: <span id="appleMusicModalTerm"></span></div>
+            <div class="modal-body" style="padding: 20px;">
+                <div class="small text-muted mb-2">{% trans "検索ワード" %}: <span id="appleMusicModalTerm" class="text-light"></span></div>
                 <div id="appleMusicModalStatus" class="text-muted small"></div>
                 <div id="appleMusicModalResults" class="mt-3"></div>
             </div>
-            <div class="modal-footer" style="border-top-color: rgba(255, 255, 255, 0.2);">
-                <button type="button" class="btn ios-glass-btn" id="appleMusicLoadMoreBtn" style="display:none;">{% trans "さらに見る" %}</button>
-                <button type="button" class="btn btn-outline-secondary" data-mdb-dismiss="modal">{% trans "閉じる" %}</button>
+            <div class="modal-footer" style="border-top: 1px solid rgba(255, 255, 255, 0.1); padding: 16px 20px;">
+                <button type="button" class="ap-btn ap-btn-outline" id="appleMusicLoadMoreBtn" style="display:none; margin-right: auto;">{% trans "さらに見る" %}</button>
+                <button type="button" class="ap-btn ap-btn-primary" data-mdb-dismiss="modal">{% trans "閉じる" %}</button>
             </div>
         </div>
     </div>
 </div>
+
+<style>
+/* 検索結果のアイテムにAppleスタイルを適用 */
+.am-result-item {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.05);
+    border-radius: 16px;
+    padding: 12px;
+    margin-bottom: 8px;
+    transition: background 0.2s;
+}
+.am-result-item:hover {
+    background: rgba(255,255,255,0.06);
+}
+</style>
 
 <script>
 document.addEventListener('DOMContentLoaded', () => {
@@ -149,7 +164,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (!termEl || !btnEl || !modalEl || !modalResultsEl || !modalStatusEl || !loadMoreBtn) return;
 
-    const modalInstance = (window.mdb && window.mdb.Modal) ? window.mdb.Modal.getOrCreateInstance(modalEl) : null;
+    const modalInstance = (window.mdb && window.mdb.Modal) ? window.mdb.Modal.getOrCreateInstance(modalEl) : (window.bootstrap && window.bootstrap.Modal) ? window.bootstrap.Modal.getOrCreateInstance(modalEl) : null;
 
     const state = {
         term: '',
@@ -173,7 +188,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const createResultRow = (result) => {
         const wrapper = document.createElement('div');
-        wrapper.className = 'ios-glass-card liquid-glass-card p-3 mb-2 am-result-item';
+        wrapper.className = 'am-result-item';
 
         const row = document.createElement('div');
         row.className = 'd-flex align-items-center gap-3';
@@ -182,9 +197,9 @@ document.addEventListener('DOMContentLoaded', () => {
             const img = document.createElement('img');
             img.src = result.image_url;
             img.alt = 'art';
-            img.style.width = '56px';
-            img.style.height = '56px';
-            img.style.borderRadius = '12px';
+            img.style.width = '48px';
+            img.style.height = '48px';
+            img.style.borderRadius = '8px';
             img.style.objectFit = 'cover';
             row.appendChild(img);
         }
@@ -193,7 +208,7 @@ document.addEventListener('DOMContentLoaded', () => {
         info.className = 'flex-grow-1';
 
         const title = document.createElement('div');
-        title.className = 'fw-bold';
+        title.className = 'fw-bold text-light';
         title.textContent = result.title || '';
 
         const artist = document.createElement('div');
@@ -205,7 +220,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const btn = document.createElement('button');
         btn.type = 'button';
-        btn.className = 'btn ios-glass-btn btn-sm';
+        btn.className = 'ap-btn ap-btn-outline';
+        btn.style.padding = '4px 12px';
+        btn.style.fontSize = '13px';
         btn.textContent = '設定';
         btn.addEventListener('click', () => {
             if (titleEl) titleEl.value = result.title || '';

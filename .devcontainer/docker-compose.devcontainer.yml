@@ -1,0 +1,13 @@
+# ルートの docker-compose.yml に重ねて使う開発コンテナ用の上書き設定
+services:
+  web:
+    build:
+      context: ..
+      dockerfile: .devcontainer/Dockerfile
+    # gunicorn を自動起動せず、コンテナを待機させる (サーバーは手動で起動する)
+    entrypoint: []
+    command: sleep infinity
+    environment:
+      DJANGO_DEBUG: "True"
+      DJANGO_ALLOWED_HOSTS: localhost,127.0.0.1
+      DJANGO_SECURE_SSL_REDIRECT: "False"

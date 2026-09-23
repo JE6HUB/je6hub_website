@@ -22,12 +22,15 @@ services:
     environment:
       DB_HOST: db
       DB_PORT: 5432
+      DJANGO_DEBUG: "True"
+    command: gunicorn config.wsgi:application --bind 0.0.0.0:8000 --reload
     depends_on:
       db:
         condition: service_healthy
     ports:
       - "8000:8000"
     volumes:
+      - ./:/app
       - media_data:/app/my_website/media
 
 volumes:

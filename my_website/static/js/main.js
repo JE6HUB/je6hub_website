@@ -377,3 +377,47 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 });
+
+// Scroll-collapsing Nav → Condensed Glass Nav
+document.addEventListener('DOMContentLoaded', () => {
+    const fullNav = document.getElementById('ap-globalnav');
+    const glassNav = document.getElementById('ap-glass-navbar');
+    if (!fullNav || !glassNav) return;
+
+    const SCROLL_THRESHOLD = 80;
+    let lastState = null;
+    let ticking = false;
+
+    const syncNav = () => {
+        const isScrolled = window.scrollY > SCROLL_THRESHOLD;
+        if (isScrolled !== lastState) {
+            fullNav.classList.toggle('ap-globalnav-hidden', isScrolled);
+            glassNav.classList.toggle('ap-glass-navbar-visible', isScrolled);
+            lastState = isScrolled;
+        }
+        ticking = false;
+    };
+
+    window.addEventListener('scroll', () => {
+        if (!ticking) {
+            window.requestAnimationFrame(syncNav);
+            ticking = true;
+        }
+    }, { passive: true });
+
+    syncNav();
+});
+
+// Apple-style Reveal Animations
+document.addEventListener('DOMContentLoaded', () => {
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('visible');
+                observer.unobserve(entry.target);
+            }
+        });
+    }, { threshold: 0.15, rootMargin: '0px 0px -50px 0px' });
+
+    document.querySelectorAll('.ap-reveal').forEach(el => observer.observe(el));
+});

@@ -12,6 +12,16 @@ class CustomUser(AbstractUser):
         verbose_name=_("Privateチャンネル参加承認"),
         help_text=_("Privateチャンネルへの参加を許可する場合はチェックを入れます。")
     )
+
+    # Apple ID 連携（allauth の SocialAccount が自動管理するが、参照用に保持）
+    apple_user_id = models.CharField(
+        max_length=255,
+        blank=True,
+        default="",
+        unique=False,
+        verbose_name=_("Apple User ID"),
+        help_text=_("Sign in with Apple の sub 識別子")
+    )
     
     # Favorite Track Fields
     favorite_track_title = models.CharField(

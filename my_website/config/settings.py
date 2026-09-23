@@ -53,7 +53,14 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    
+    'django.contrib.sites',          # allauth が必要
+
+    # django-allauth (Sign in with Apple)
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount',
+    'allauth.socialaccount.providers.apple',
+
     # 自作アプリ
     'accounts',    # カスタムユーザーモデル
     'core',        # Home, Contact
@@ -61,8 +68,16 @@ INSTALLED_APPS = [
     'community',   # チャット
 ]
 
+SITE_ID = 1
+
 # カスタムユーザーモデルの指定
 AUTH_USER_MODEL = 'accounts.CustomUser'
+
+# 認証バックエンド（Django標準 + allauth）
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',       # 通常のパスワードログイン
+    'allauth.account.auth_backends.AuthenticationBackend',  # allauth（ソーシャルログイン）
+]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -74,6 +89,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'allauth.account.middleware.AccountMiddleware',     # allauth 必須
 ]
 
 ROOT_URLCONF = 'config.urls'
@@ -82,7 +98,11 @@ TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [os.path.join(BASE_DIR, 'templates')], # プロジェクト直下の templates/ を指定
-        'APP_DIRS': True,
+        # Django 6ではAPP_DIRS=Trueだと debug 値に関わらず常に cached.Loader が
+        # 使われてしまい、gunicorn --reload はテンプレート(.html)の変更を検知しないため、
+        # ローカル開発(DEBUG=True)ではキャッシュしない生のローダーを明示し、
+        # コンテナ再起動なしでテンプレート編集を即反映できるようにする。
+        'APP_DIRS': not DEBUG,
         'OPTIONS': {
             'context_processors': [
                 'django.template.context_processors.debug',
@@ -91,6 +111,12 @@ TEMPLATES = [
                 'django.contrib.messages.context_processors.messages',
                 'django.template.context_processors.i18n', # i18n用
             ],
+            **({
+                'loaders': [
+                    'django.template.loaders.filesystem.Loader',
+                    'django.template.loaders.app_directories.Loader',
+                ],
+            } if DEBUG else {}),
         },
     },
 ]
@@ -148,6 +174,11 @@ STATIC_URL = 'static/'
 STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
+# ローカル開発(DEBUG=True)では collectstatic を待たずに static/ の変更を即座に反映させるため、
+# WhiteNoise に Django の staticfiles finder を直接使わせる（コンテナ再起動不要）。
+WHITENOISE_USE_FINDERS = DEBUG
+WHITENOISE_AUTOREFRESH = DEBUG
+
 # WhiteNoiseでDjango自身が静的ファイルを圧縮配信する（Nginx等を別途用意しなくてもDockerコンテナ単体で配信可能にする）
 # Manifest方式はcollectstatic実行後のハッシュ付きファイルを前提とするため、
 # ローカル開発(DEBUG=True)ではcollectstatic不要な素のStaticFilesStorageを使う。
@@ -174,6 +205,44 @@ LOGIN_REDIRECT_URL = '/'  # ログイン成功後はトップページへ戻る
 
 # ログアウト後のリダイレクト先をトップページに設定
 LOGOUT_REDIRECT_URL = '/'
+
+# ==========================================
+# django-allauth / Sign in with Apple 設定
+# ==========================================
+# allauth: メールアドレスは任意（Apple が非公開にする場合がある）
+ACCOUNT_EMAIL_REQUIRED = False
+ACCOUNT_EMAIL_VERIFICATION = 'none'
+ACCOUNT_USERNAME_REQUIRED = True
+ACCOUNT_LOGIN_METHODS = {'username'}
+# ソーシャルログイン時の自動接続・サインアップ許可
+SOCIALACCOUNT_AUTO_SIGNUP = True
+SOCIALACCOUNT_LOGIN_ON_GET = True
+
+# Apple プロバイダ設定
+APPLE_CLIENT_ID = os.environ.get('APPLE_CLIENT_ID', '')
+APPLE_SECRET_KEY = os.environ.get('APPLE_SECRET_KEY', '')  # .p8 ファイルの内容
+APPLE_KEY_ID = os.environ.get('APPLE_KEY_ID', '')
+APPLE_TEAM_ID = os.environ.get('APPLE_TEAM_ID', '')
+
+SOCIALACCOUNT_PROVIDERS = {
+    'apple': {
+        'APP': {
+            'client_id': APPLE_CLIENT_ID,       # Services ID
+            'secret': APPLE_SECRET_KEY,         # .p8 秘密鍵の内容
+            'key': APPLE_KEY_ID,                # Key ID
+            'settings': {
+                'certificate_key': APPLE_SECRET_KEY,
+            },
+        },
+        'SCOPE': ['email', 'name'],
+        'AUTH_PARAMS': {
+            'response_mode': 'form_post',
+        },
+    }
+}
+
+# カスタムソーシャルアカウントアダプタ
+SOCIALACCOUNT_ADAPTER = 'accounts.adapters.AppleSocialAccountAdapter'
 
 # ==========================================
 # Email (お問い合わせ通知など)

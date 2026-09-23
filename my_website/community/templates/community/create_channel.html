@@ -4,76 +4,90 @@
 {% block title %}{% trans "チャンネルを作成" %} — Community Lounge{% endblock %}
 
 {% block content %}
-<div class="container py-4" style="max-width:600px;">
-    <div class="mb-4">
-        <a href="{% url 'community:list' %}" style="color:rgba(160,200,255,0.7);text-decoration:none;font-size:0.85rem;">
-            <span class="material-symbols-outlined align-middle me-1" aria-hidden="true" style="font-size:14px;">arrow_back</span>
+<div class="ap-section py-5" style="max-width:700px;">
+    <div class="mb-4 ap-reveal">
+        <a href="{% url 'community:list' %}" style="color:var(--ap-accent);text-decoration:none;font-size:15px; font-weight: 500;">
+            <span class="material-symbols-outlined align-middle me-1" aria-hidden="true" style="font-size:18px;">arrow_back</span>
             {% trans "Loungeに戻る" %}
         </a>
     </div>
 
-    <div class="hp-card" style="padding:36px;">
-        <h2 class="fw-bold mb-1" style="color:#fff;font-size:1.4rem;">{% trans "新しいチャンネルを作成" %}</h2>
-        <p class="mb-4" style="color:rgba(200,215,255,0.55);font-size:0.88rem;">{% trans "ログインしている全ユーザーがチャンネルを作成できます。" %}</p>
+    <div class="ap-glass-panel p-5 ap-reveal">
+        <h2 class="ap-hero-title mb-2" style="font-size: 28px;">{% trans "新しいチャンネルを作成" %}</h2>
+        <p class="ap-subhead mb-5" style="font-size: 15px;">{% trans "ログインしている全ユーザーがチャンネルを作成できます。" %}</p>
 
         <form method="post">
             {% csrf_token %}
 
             <div class="mb-4">
-                <label for="channel_name" class="form-label fw-semibold" style="color:rgba(220,230,255,0.85);font-size:0.88rem;">
-                    {% trans "チャンネル名" %} <span style="color:rgba(255,100,100,0.8);">*</span>
+                <label for="channel_name" class="form-label fw-bold mb-2 text-light" style="font-size: 14px;">
+                    {% trans "チャンネル名" %} <span style="color:#ff3b30;">*</span>
                 </label>
-                <input type="text" id="channel_name" name="name" class="form-control" required maxlength="100"
+                <input type="text" id="channel_name" name="name" class="ap-input" required maxlength="100"
                        placeholder="e.g. AI Architecture Discussions"
-                       value="{{ form_data.name|default:'' }}"
-                       style="background:rgba(255,255,255,0.75);color:#1a1a2e;border-radius:12px;border:1px solid rgba(255,255,255,0.4);padding:12px 16px;">
-            </div>
-
-            <div class="mb-4">
-                <label for="channel_desc" class="form-label fw-semibold" style="color:rgba(220,230,255,0.85);font-size:0.88rem;">
-                    {% trans "説明" %} <span style="color:rgba(200,215,255,0.4);font-weight:400;">（{% trans "任意" %}）</span>
-                </label>
-                <textarea id="channel_desc" name="description" class="form-control" rows="3"
-                          placeholder="{% trans 'このチャンネルの内容を簡単に説明してください。' %}"
-                          style="background:rgba(255,255,255,0.75);color:#1a1a2e;border-radius:12px;border:1px solid rgba(255,255,255,0.4);padding:12px 16px;">{{ form_data.description|default:'' }}</textarea>
+                       value="{{ form_data.name|default:'' }}">
             </div>
 
             <div class="mb-5">
-                <p class="form-label fw-semibold mb-2" style="color:rgba(220,230,255,0.85);font-size:0.88rem;">{% trans "チャンネルタイプ" %}</p>
-                <div class="d-flex gap-3">
-                    <label class="d-flex align-items-start gap-3 hp-card flex-grow-1" style="padding:18px;cursor:pointer;border-color:{% if form_data.channel_type == 'private' %}rgba(255,255,255,0.12){% else %}rgba(10,132,255,0.5){% endif %};">
+                <label for="channel_desc" class="form-label fw-bold mb-2 text-light" style="font-size: 14px;">
+                    {% trans "説明" %} <span class="text-muted fw-normal">（{% trans "任意" %}）</span>
+                </label>
+                <textarea id="channel_desc" name="description" class="ap-input" rows="3"
+                          placeholder="{% trans 'このチャンネルの内容を簡単に説明してください。' %}">{{ form_data.description|default:'' }}</textarea>
+            </div>
+
+            <div class="mb-5">
+                <p class="form-label fw-bold mb-3 text-light" style="font-size: 14px;">{% trans "チャンネルタイプ" %}</p>
+                <div class="d-flex flex-column flex-md-row gap-3">
+                    <label class="d-flex align-items-start gap-3 flex-grow-1 p-4 rounded-4" style="cursor:pointer; border: 2px solid {% if form_data.channel_type == 'private' %}transparent{% else %}var(--ap-accent){% endif %}; background: rgba(255,255,255,0.03); transition: border-color 0.2s;">
                         <input type="radio" name="channel_type" value="public"
                                {% if form_data.channel_type != 'private' %}checked{% endif %}
-                               class="mt-1" style="accent-color:var(--ios-glass-accent);">
+                               class="mt-1" style="accent-color:var(--ap-accent); width: 18px; height: 18px;">
                         <div>
-                            <div class="fw-bold" style="color:#fff;font-size:0.9rem;">
-                                <span class="material-symbols-outlined align-middle me-1" aria-hidden="true" style="font-size:16px;color:var(--ios-glass-accent);">tag</span>
+                            <div class="fw-bold mb-1 text-light" style="font-size:16px;">
+                                <span class="material-symbols-outlined align-middle me-1" aria-hidden="true" style="font-size:20px;color:var(--ap-accent);">tag</span>
                                 {% trans "パブリック" %}
                             </div>
-                            <div style="color:rgba(200,215,255,0.55);font-size:0.8rem;margin-top:4px;">{% trans "すべてのメンバーが閲覧・参加できます。" %}</div>
+                            <div class="text-muted" style="font-size:13px; line-height: 1.4;">{% trans "すべてのメンバーが閲覧・参加できます。" %}</div>
                         </div>
                     </label>
-                    <label class="d-flex align-items-start gap-3 hp-card flex-grow-1" style="padding:18px;cursor:pointer;border-color:{% if form_data.channel_type == 'private' %}rgba(160,120,255,0.5){% else %}rgba(255,255,255,0.12){% endif %};">
+                    <label class="d-flex align-items-start gap-3 flex-grow-1 p-4 rounded-4" style="cursor:pointer; border: 2px solid {% if form_data.channel_type == 'private' %}#bf5af2{% else %}transparent{% endif %}; background: rgba(255,255,255,0.03); transition: border-color 0.2s;">
                         <input type="radio" name="channel_type" value="private"
                                {% if form_data.channel_type == 'private' %}checked{% endif %}
-                               class="mt-1" style="accent-color:#bf5fff;">
+                               class="mt-1" style="accent-color:#bf5af2; width: 18px; height: 18px;">
                         <div>
-                            <div class="fw-bold" style="color:#fff;font-size:0.9rem;">
-                                <span class="material-symbols-outlined align-middle me-1" aria-hidden="true" style="font-size:16px;color:#bf5fff;">lock</span>
+                            <div class="fw-bold mb-1 text-light" style="font-size:16px;">
+                                <span class="material-symbols-outlined align-middle me-1" aria-hidden="true" style="font-size:20px;color:#bf5af2;">lock</span>
                                 {% trans "プライベート" %}
                             </div>
-                            <div style="color:rgba(200,215,255,0.55);font-size:0.8rem;margin-top:4px;">{% trans "招待・承認されたメンバーのみアクセスできます。" %}</div>
+                            <div class="text-muted" style="font-size:13px; line-height: 1.4;">{% trans "招待・承認されたメンバーのみアクセスできます。" %}</div>
                         </div>
                     </label>
                 </div>
+                <script>
+                    // Add simple JS to toggle border color when radio changes
+                    const radios = document.querySelectorAll('input[name="channel_type"]');
+                    radios.forEach(radio => {
+                        radio.addEventListener('change', (e) => {
+                            document.querySelectorAll('input[name="channel_type"]').forEach(r => {
+                                const label = r.closest('label');
+                                if (r.checked) {
+                                    label.style.borderColor = r.value === 'public' ? 'var(--ap-accent)' : '#bf5af2';
+                                } else {
+                                    label.style.borderColor = 'transparent';
+                                }
+                            });
+                        });
+                    });
+                </script>
             </div>
 
-            <div class="d-flex gap-3">
-                <button type="submit" class="hp-btn-primary" style="padding:12px 28px;">
-                    <span class="material-symbols-outlined" aria-hidden="true" style="font-size:18px;">add</span>
+            <div class="d-flex gap-3 mt-5">
+                <button type="submit" class="ap-btn ap-btn-primary" style="padding:14px 32px; font-size: 16px;">
+                    <span class="material-symbols-outlined align-middle me-1" aria-hidden="true" style="font-size:20px;">add</span>
                     {% trans "作成する" %}
                 </button>
-                <a href="{% url 'community:list' %}" class="hp-btn-ghost" style="padding:12px 24px;">{% trans "キャンセル" %}</a>
+                <a href="{% url 'community:list' %}" class="ap-btn ap-btn-outline" style="padding:14px 32px; font-size: 16px; border:none; background:rgba(255,255,255,0.05);">{% trans "キャンセル" %}</a>
             </div>
         </form>
     </div>

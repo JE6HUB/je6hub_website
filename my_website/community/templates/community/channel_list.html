@@ -4,63 +4,62 @@
 {% block title %}Community Lounge{% endblock %}
 
 {% block content %}
-<div class="container py-4">
+<div class="ap-section py-5">
 
     <!-- Header -->
-    <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-2">
+    <div class="d-flex align-items-center justify-content-between mb-5 flex-wrap gap-3 ap-reveal">
         <div>
-            <h2 class="fw-bold mb-0" style="color:#fff;">
-                <span class="material-symbols-outlined align-middle me-2" aria-hidden="true" style="font-size:24px;color:var(--ios-glass-accent);">forum</span>
+            <h2 class="ap-hero-title mb-0" style="font-size: 32px;">
+                <span class="material-symbols-outlined align-middle me-2" aria-hidden="true" style="font-size: 36px; color:var(--ap-accent);">forum</span>
                 {% trans "Community Lounge" %}
             </h2>
-            <p class="mt-1 mb-0 small" style="color:rgba(200,215,255,0.55);">{% trans "興味のあるトピックに参加して、自由に語り合いましょう。" %}</p>
+            <p class="ap-subhead mt-2 mb-0" style="font-size: 17px;">{% trans "興味のあるトピックに参加して、自由に語り合いましょう。" %}</p>
         </div>
-        <a href="{% url 'community:create' %}" class="hp-btn-primary" style="padding:10px 22px;font-size:0.88rem;">
-            <span class="material-symbols-outlined" aria-hidden="true" style="font-size:18px;">add</span>
+        <a href="{% url 'community:create' %}" class="ap-btn ap-btn-primary" style="padding: 12px 24px;">
+            <span class="material-symbols-outlined align-middle me-1" aria-hidden="true" style="font-size: 20px;">add</span>
             {% trans "チャンネルを作成" %}
         </a>
     </div>
 
     <!-- Public Channels -->
     <section class="mb-5">
-        <h3 class="fw-bold mb-3" style="color:rgba(200,215,255,0.7);font-size:0.78rem;letter-spacing:0.12em;text-transform:uppercase;">
-            <span class="material-symbols-outlined align-middle me-1" aria-hidden="true" style="font-size:14px;">tag</span>
+        <h3 class="ap-subhead fw-bold mb-4 ap-reveal" style="font-size: 13px; letter-spacing: 0.1em; text-transform: uppercase;">
+            <span class="material-symbols-outlined align-middle me-1" aria-hidden="true" style="font-size: 18px;">tag</span>
             {% trans "パブリックチャンネル" %}
         </h3>
 
         {% if public_channels %}
-        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-3">
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4 ap-reveal">
             {% for item in public_channels %}
             {% with ch=item.channel m=item.membership %}
             <div class="col">
-                <div class="hp-card h-100 d-flex flex-column" style="padding:24px;">
+                <div class="ap-glass-panel h-100 d-flex flex-column" style="padding: 24px;">
                     <div class="d-flex align-items-start gap-3 mb-3">
-                        <div style="width:44px;height:44px;border-radius:14px;background:rgba(10,132,255,0.18);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-                            <span class="material-symbols-outlined" aria-hidden="true" style="color:var(--ios-glass-accent);font-size:20px;">tag</span>
+                        <div style="width: 48px; height: 48px; border-radius: 14px; background: rgba(0,113,227,0.1); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                            <span class="material-symbols-outlined" aria-hidden="true" style="color:var(--ap-accent); font-size: 24px;">tag</span>
                         </div>
-                        <div style="flex:1;min-width:0;">
-                            <p class="fw-bold mb-0" style="color:#fff;font-size:1rem;line-height:1.2;">{{ ch.name }}</p>
-                            <p class="mb-0 mt-1" style="color:rgba(200,215,255,0.5);font-size:0.78rem;">
-                                {{ ch.active_member_count }} {% trans "メンバー" %}
-                                &nbsp;·&nbsp; {{ ch.created_by.username }}
+                        <div style="flex:1; min-width:0;">
+                            <p class="fw-bold mb-0 text-light" style="font-size: 18px; line-height: 1.2;">{{ ch.name }}</p>
+                            <p class="mb-0 mt-1 text-muted" style="font-size: 13px;">
+                                {{ ch.active_member_count }} {% trans "メンバー" %} &nbsp;·&nbsp; {{ ch.created_by.username }}
                             </p>
                         </div>
                     </div>
                     {% if ch.description %}
-                    <p class="mb-3 hp-card-body" style="font-size:0.85rem;flex:1;">{{ ch.description }}</p>
+                    <p class="mb-4 text-muted" style="font-size: 14px; flex:1;">{{ ch.description }}</p>
                     {% else %}
                     <div style="flex:1;"></div>
                     {% endif %}
-                    <div class="mt-2">
+                    <div class="mt-auto">
                         {% if m and m.status == 'active' %}
-                            <a href="{% url 'community:thread' ch.id %}" class="hp-btn-primary" style="padding:8px 20px;font-size:0.83rem;width:100%;justify-content:center;">
-                                <span class="material-symbols-outlined" aria-hidden="true" style="font-size:16px;">chat</span> {% trans "開く" %}
+                            <a href="{% url 'community:thread' ch.id %}" class="ap-btn ap-btn-primary w-100 d-flex justify-content-center">
+                                <span class="material-symbols-outlined align-middle me-1" aria-hidden="true" style="font-size:18px;">chat</span> {% trans "開く" %}
                             </a>
                         {% else %}
                             <form method="post" action="{% url 'community:join' ch.id %}">
                                 {% csrf_token %}
-                                <button type="submit" class="hp-btn-ghost" style="padding:8px 20px;font-size:0.83rem;width:100%;justify-content:center;">
-                                    <span class="material-symbols-outlined" aria-hidden="true" style="font-size:16px;">login</span> {% trans "参加する" %}
+                                <button type="submit" class="ap-btn ap-btn-outline w-100 d-flex justify-content-center">
+                                    <span class="material-symbols-outlined align-middle me-1" aria-hidden="true" style="font-size:18px;">login</span> {% trans "参加する" %}
                                 </button>
                             </form>
                         {% endif %}
@@ -71,59 +70,59 @@
             {% endfor %}
         </div>
         {% else %}
-        <p class="text-center py-4" style="color:rgba(200,215,255,0.4);">{% trans "パブリックチャンネルはまだありません。" %}</p>
+        <p class="text-center py-5 text-muted ap-reveal">{% trans "パブリックチャンネルはまだありません。" %}</p>
         {% endif %}
     </section>
 
     <!-- Private Channels -->
     <section>
-        <h3 class="fw-bold mb-3" style="color:rgba(200,215,255,0.7);font-size:0.78rem;letter-spacing:0.12em;text-transform:uppercase;">
-            <span class="material-symbols-outlined align-middle me-1" aria-hidden="true" style="font-size:14px;">lock</span>
+        <h3 class="ap-subhead fw-bold mb-4 ap-reveal" style="font-size: 13px; letter-spacing: 0.1em; text-transform: uppercase;">
+            <span class="material-symbols-outlined align-middle me-1" aria-hidden="true" style="font-size: 18px; color: #bf5af2;">lock</span>
             {% trans "プライベートチャンネル" %}
         </h3>
 
         {% if private_channels %}
-        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-3">
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4 ap-reveal">
             {% for item in private_channels %}
             {% with ch=item.channel m=item.membership %}
             <div class="col">
-                <div class="hp-card h-100 d-flex flex-column" style="padding:24px;border-color:rgba(160,120,255,0.25);">
+                <div class="ap-glass-panel h-100 d-flex flex-column" style="padding: 24px; border: 1px solid rgba(191,90,242,0.3);">
                     <div class="d-flex align-items-start gap-3 mb-3">
-                        <div style="width:44px;height:44px;border-radius:14px;background:rgba(120,0,200,0.20);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-                            <span class="material-symbols-outlined" aria-hidden="true" style="color:#bf5fff;font-size:20px;">lock</span>
+                        <div style="width: 48px; height: 48px; border-radius: 14px; background: rgba(191,90,242,0.1); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                            <span class="material-symbols-outlined" aria-hidden="true" style="color: #bf5af2; font-size: 24px;">lock</span>
                         </div>
-                        <div style="flex:1;min-width:0;">
-                            <p class="fw-bold mb-0" style="color:#fff;font-size:1rem;line-height:1.2;">{{ ch.name }}</p>
-                            <p class="mb-0 mt-1" style="color:rgba(200,215,255,0.5);font-size:0.78rem;">
+                        <div style="flex:1; min-width:0;">
+                            <p class="fw-bold mb-0 text-light" style="font-size: 18px; line-height: 1.2;">{{ ch.name }}</p>
+                            <p class="mb-0 mt-1 text-muted" style="font-size: 13px;">
                                 {% if m and m.status == 'active' %}{{ ch.active_member_count }} {% trans "メンバー" %} &nbsp;·&nbsp; {% endif %}
                                 {{ ch.created_by.username }}
                             </p>
                         </div>
                     </div>
                     {% if ch.description and m and m.status == 'active' %}
-                    <p class="mb-3 hp-card-body" style="font-size:0.85rem;flex:1;">{{ ch.description }}</p>
+                    <p class="mb-4 text-muted" style="font-size: 14px; flex:1;">{{ ch.description }}</p>
                     {% else %}
                     <div style="flex:1;"></div>
                     {% endif %}
-                    <div class="mt-2">
+                    <div class="mt-auto">
                         {% if m and m.status == 'active' %}
-                            <a href="{% url 'community:thread' ch.id %}" class="hp-btn-primary" style="padding:8px 20px;font-size:0.83rem;width:100%;justify-content:center;background:rgba(120,0,200,0.8);">
-                                <span class="material-symbols-outlined" aria-hidden="true" style="font-size:16px;">chat</span> {% trans "開く" %}
+                            <a href="{% url 'community:thread' ch.id %}" class="ap-btn ap-btn-primary w-100 d-flex justify-content-center" style="background: #bf5af2;">
+                                <span class="material-symbols-outlined align-middle me-1" aria-hidden="true" style="font-size: 18px;">chat</span> {% trans "開く" %}
                             </a>
                         {% elif m and m.status == 'invited' %}
-                            <a href="{% url 'community:accept_invite' ch.id %}" class="hp-btn-primary" style="padding:8px 20px;font-size:0.83rem;width:100%;justify-content:center;background:rgba(52,199,89,0.85);">
-                                <span class="material-symbols-outlined" aria-hidden="true" style="font-size:16px;">mail</span> {% trans "招待を承諾" %}
+                            <a href="{% url 'community:accept_invite' ch.id %}" class="ap-btn ap-btn-primary w-100 d-flex justify-content-center" style="background: #32d74b;">
+                                <span class="material-symbols-outlined align-middle me-1" aria-hidden="true" style="font-size: 18px;">mail</span> {% trans "招待を承諾" %}
                             </a>
                         {% elif m and m.status == 'pending' %}
-                            <div class="text-center" style="color:rgba(200,215,255,0.5);font-size:0.82rem;padding:8px;">
-                                <span class="material-symbols-outlined align-middle me-1" aria-hidden="true" style="font-size:14px;">hourglass_empty</span>
+                            <div class="text-center text-muted" style="font-size: 14px; padding: 12px; background: rgba(255,255,255,0.05); border-radius: 12px;">
+                                <span class="material-symbols-outlined align-middle me-1" aria-hidden="true" style="font-size: 16px;">hourglass_empty</span>
                                 {% trans "承認待ち…" %}
                             </div>
                         {% else %}
                             <form method="post" action="{% url 'community:join' ch.id %}">
                                 {% csrf_token %}
-                                <button type="submit" class="hp-btn-ghost" style="padding:8px 20px;font-size:0.83rem;width:100%;justify-content:center;border-color:rgba(160,120,255,0.35);">
-                                    <span class="material-symbols-outlined" aria-hidden="true" style="font-size:16px;">person_add</span> {% trans "参加リクエスト" %}
+                                <button type="submit" class="ap-btn ap-btn-outline w-100 d-flex justify-content-center" style="border-color: rgba(191,90,242,0.5); color: #bf5af2;">
+                                    <span class="material-symbols-outlined align-middle me-1" aria-hidden="true" style="font-size: 18px;">person_add</span> {% trans "参加リクエスト" %}
                                 </button>
                             </form>
                         {% endif %}
@@ -134,7 +133,7 @@
             {% endfor %}
         </div>
         {% else %}
-        <p class="text-center py-4" style="color:rgba(200,215,255,0.4);">{% trans "プライベートチャンネルはまだありません。" %}</p>
+        <p class="text-center py-5 text-muted ap-reveal">{% trans "プライベートチャンネルはまだありません。" %}</p>
         {% endif %}
     </section>
 </div>

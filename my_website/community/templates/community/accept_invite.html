@@ -4,28 +4,28 @@
 {% block title %}{% trans "招待の承諾" %} — {{ channel.name }}{% endblock %}
 
 {% block content %}
-<div class="container py-4" style="max-width:480px;">
-    <div class="hp-card text-center" style="padding:48px 36px;">
-        <div style="width:64px;height:64px;border-radius:20px;background:rgba(52,199,89,0.18);display:flex;align-items:center;justify-content:center;margin:0 auto 24px;">
-            <span class="material-symbols-outlined" aria-hidden="true" style="color:#34c759;font-size:28px;">mail</span>
+<div class="ap-section py-5" style="max-width:500px;">
+    <div class="ap-glass-panel text-center ap-reveal" style="padding:48px 36px; border: 1px solid rgba(50,215,75,0.3);">
+        <div style="width:72px;height:72px;border-radius:24px;background:rgba(50,215,75,0.15);display:flex;align-items:center;justify-content:center;margin:0 auto 32px;">
+            <span class="material-symbols-outlined" aria-hidden="true" style="color:#32d74b;font-size:36px;">mail</span>
         </div>
-        <h2 class="fw-bold mb-2" style="color:#fff;font-size:1.3rem;">{% trans "招待が届いています" %}</h2>
-        <p class="mb-4" style="color:rgba(200,215,255,0.65);">
-            <strong style="color:#fff;">{{ channel.name }}</strong>
+        <h2 class="ap-hero-title mb-3" style="font-size: 24px;">{% trans "招待が届いています" %}</h2>
+        <p class="ap-subhead mb-5" style="font-size: 15px;">
+            <strong class="text-light">{{ channel.name }}</strong>
             {% trans "へ参加するよう招待されました。" %}
             {% if membership.invited_by %}
-            <br><span style="font-size:0.85rem;">{% trans "招待者" %}: {{ membership.invited_by.username }}</span>
+            <br><span class="text-muted" style="font-size:13px; display:inline-block; margin-top:8px;">{% trans "招待者" %}: {{ membership.invited_by.username }}</span>
             {% endif %}
         </p>
-        <div class="d-flex gap-3 justify-content-center">
+        <div class="d-flex gap-3 justify-content-center flex-wrap">
             <form method="post">
                 {% csrf_token %}
-                <button type="submit" class="hp-btn-primary" style="padding:12px 28px;">
-                    <span class="material-symbols-outlined" aria-hidden="true" style="font-size:18px;">check</span>
+                <button type="submit" class="ap-btn ap-btn-primary" style="padding:14px 32px; background: #32d74b; font-size: 16px;">
+                    <span class="material-symbols-outlined align-middle me-1" aria-hidden="true" style="font-size:20px;">check</span>
                     {% trans "承諾する" %}
                 </button>
             </form>
-            <a href="{% url 'community:list' %}" class="hp-btn-ghost" style="padding:12px 24px;">{% trans "後で" %}</a>
+            <a href="{% url 'community:list' %}" class="ap-btn ap-btn-outline" style="padding:14px 32px; border:none; background:rgba(255,255,255,0.05); font-size: 16px;">{% trans "後で" %}</a>
         </div>
     </div>
 </div>

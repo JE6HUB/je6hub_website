@@ -3,378 +3,144 @@
 
 {% block title %}Contact — Y.K. Nexus{% endblock %}
 
-{% block extra_head %}
-<style>
-/* =========================================
-   Contact Page — Warm Light Theme
-========================================= */
-.contact-page {
-    min-height: 100vh;
-    padding: calc(var(--navbar-height) + 56px) 0 100px;
-}
+{% block content %}
+<div class="ap-section py-5">
 
-/* ---- Hero ---- */
-.contact-hero { text-align: center; margin-bottom: 72px; }
+    <!-- Hero -->
+    <header class="text-center mb-5 ap-reveal">
+        <div class="d-inline-flex align-items-center gap-2 mb-3">
+            <div style="width: 32px; height: 1px; background: var(--ap-accent); opacity: 0.5;"></div>
+            <span class="text-uppercase fw-bold" style="font-size: 11px; letter-spacing: 0.15em; color: var(--ap-accent);">{% trans "Get in touch" %}</span>
+            <div style="width: 32px; height: 1px; background: var(--ap-accent); opacity: 0.5;"></div>
+        </div>
+        <h1 class="ap-hero-title mb-3" style="font-size: clamp(32px, 5vw, 56px);">
+            {% trans "Let's build" %}<br>
+            {% trans "something" %} <span class="ap-text-gradient">{% trans "together" %}</span>
+        </h1>
+        <p class="ap-subhead mx-auto" style="max-width: 440px;">
+            {% trans "プロジェクトのご相談・写真や技術に関する話・コラボレーション、なんでもお気軽に。" %}
+        </p>
+    </header>
 
-.contact-hero-eyebrow {
-    display: inline-flex; align-items: center; gap: 8px;
-    font-size: 0.72rem; font-weight: 700; letter-spacing: 0.16em;
-    text-transform: uppercase; color: var(--ios-glass-accent); margin-bottom: 24px;
-}
-.contact-hero-eyebrow::before,
-.contact-hero-eyebrow::after {
-    content: ''; display: block; width: 32px; height: 1px;
-    background: var(--ios-glass-accent); opacity: 0.45;
-}
+    <!-- Grid -->
+    <div class="row g-4 justify-content-center" style="max-width: 900px; margin: 0 auto;">
 
-.contact-hero-heading {
-    font-size: clamp(40px, 7vw, 88px); font-weight: 800;
-    letter-spacing: -0.035em; line-height: 0.95;
-    color: var(--ios-glass-text); margin-bottom: 24px;
-}
+        <!-- ── Left: Info panel ── -->
+        <div class="col-md-5">
+            <div class="d-flex flex-column gap-4 h-100 ap-reveal">
 
-.contact-heading-accent {
-    background: linear-gradient(135deg, #c0583e, #e8936e, #b87c50);
-    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
-}
-
-.contact-hero-sub {
-    font-size: clamp(14px, 1.6vw, 17px); color: var(--ios-glass-text-muted);
-    max-width: 440px; margin: 0 auto; line-height: 1.75;
-}
-
-/* ---- Grid ---- */
-.contact-grid {
-    display: grid; grid-template-columns: 1fr 1.5fr;
-    gap: 32px; align-items: start; max-width: 1000px; margin: 0 auto;
-}
-
-/* ---- Info panel ---- */
-.contact-info-panel { display: flex; flex-direction: column; gap: 20px; }
-
-.contact-availability {
-    display: inline-flex; align-items: center; gap: 10px;
-    padding: 10px 18px;
-    background: rgba(52, 199, 89, 0.10);
-    border: 1px solid rgba(52, 199, 89, 0.24);
-    border-radius: 999px; font-size: 0.8rem; font-weight: 600;
-    color: rgba(25, 90, 40, 0.88); width: fit-content;
-}
-.contact-avail-dot {
-    width: 8px; height: 8px; border-radius: 50%; background: #34c759;
-    box-shadow: 0 0 0 0 rgba(52, 199, 89, 0.5);
-    animation: contactPulse 2.2s ease-in-out infinite; flex-shrink: 0;
-}
-@keyframes contactPulse {
-    0%   { box-shadow: 0 0 0 0 rgba(52,199,89,0.50); }
-    60%  { box-shadow: 0 0 0 8px rgba(52,199,89,0); }
-    100% { box-shadow: 0 0 0 0 rgba(52,199,89,0); }
-}
-
-.contact-info-card {
-    background: rgba(255, 255, 255, 0.70);
-    border: 1px solid rgba(0, 0, 0, 0.08);
-    border-radius: 24px; padding: 28px;
-    backdrop-filter: blur(24px) saturate(150%);
-    -webkit-backdrop-filter: blur(24px) saturate(150%);
-    box-shadow: 0 4px 20px rgba(60,40,20,0.07), inset 0 1px 0 rgba(255,255,255,0.90);
-}
-
-.contact-info-card-title {
-    font-size: 0.72rem; font-weight: 700; letter-spacing: 0.12em;
-    text-transform: uppercase; color: var(--ios-glass-text-muted); margin-bottom: 20px;
-}
-
-.contact-methods { display: flex; flex-direction: column; gap: 10px; }
-
-.contact-method-card {
-    display: flex; align-items: center; gap: 14px; padding: 13px 14px;
-    background: rgba(255, 255, 255, 0.55);
-    border: 1px solid rgba(0, 0, 0, 0.07);
-    border-radius: 14px; text-decoration: none; color: var(--ios-glass-text);
-    transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
-}
-.contact-method-card:hover {
-    background: rgba(255, 255, 255, 0.95);
-    border-color: rgba(0, 0, 0, 0.12);
-    transform: translateX(4px);
-    box-shadow: 0 4px 16px rgba(60,40,20,0.08);
-    color: var(--ios-glass-text);
-}
-
-.contact-method-icon {
-    width: 40px; height: 40px; border-radius: 12px;
-    display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0;
-}
-.contact-method-icon .material-symbols-outlined,
-.contact-method-icon i { font-size: 18px; }
-
-.contact-method-body { flex: 1; min-width: 0; }
-
-.contact-method-label {
-    font-size: 0.68rem; font-weight: 700; letter-spacing: 0.07em;
-    text-transform: uppercase; color: var(--ios-glass-text-muted); margin-bottom: 2px;
-}
-.contact-method-value {
-    font-size: 0.84rem; font-weight: 500; color: var(--ios-glass-text);
-    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-}
-
-.contact-method-arrow {
-    font-size: 16px; color: rgba(28,25,23,0.22);
-    transition: color 0.2s ease, transform 0.2s ease; flex-shrink: 0;
-}
-.contact-method-card:hover .contact-method-arrow {
-    color: var(--ios-glass-accent); transform: translateX(3px);
-}
-
-.contact-response-note {
-    display: flex; align-items: center; gap: 8px;
-    font-size: 0.78rem; color: var(--ios-glass-text-muted); padding: 0 4px;
-}
-
-/* ---- Form panel ---- */
-.contact-form-panel {
-    background: rgba(255, 255, 255, 0.78);
-    border: 1px solid rgba(0, 0, 0, 0.08);
-    border-radius: 28px; padding: 40px 36px;
-    backdrop-filter: blur(32px) saturate(160%);
-    -webkit-backdrop-filter: blur(32px) saturate(160%);
-    box-shadow:
-        inset 0 1px 0 rgba(255, 255, 255, 0.95),
-        0 12px 40px rgba(60, 40, 20, 0.09);
-}
-
-.contact-form-title {
-    font-size: 1.25rem; font-weight: 700; color: var(--ios-glass-text);
-    margin-bottom: 32px; display: flex; align-items: center; gap: 10px;
-}
-.contact-form-title .material-symbols-outlined { font-size: 22px; color: var(--ios-glass-accent); }
-
-.contact-field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-.contact-field { margin-bottom: 20px; }
-
-.contact-label {
-    display: flex; align-items: center; gap: 6px;
-    font-size: 0.75rem; font-weight: 700; letter-spacing: 0.06em;
-    color: var(--ios-glass-text-muted); margin-bottom: 8px; text-transform: uppercase;
-}
-.contact-label .material-symbols-outlined { font-size: 14px; opacity: 0.65; }
-
-/* Input overrides */
-.contact-form-panel input[type="text"],
-.contact-form-panel input[type="email"],
-.contact-form-panel textarea {
-    background: rgba(255, 255, 255, 0.85) !important;
-    border: 1px solid rgba(0, 0, 0, 0.09) !important;
-    border-top: 1px solid rgba(0, 0, 0, 0.06) !important;
-    border-radius: 14px !important;
-    color: var(--ios-glass-text) !important;
-    padding: 13px 16px !important;
-    font-size: 0.9rem !important;
-    width: 100% !important;
-    box-shadow: inset 0 1px 3px rgba(60,40,20,0.04) !important;
-    transition: background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease !important;
-    backdrop-filter: none !important; -webkit-backdrop-filter: none !important;
-    resize: none;
-}
-.contact-form-panel input[type="text"]::placeholder,
-.contact-form-panel input[type="email"]::placeholder,
-.contact-form-panel textarea::placeholder { color: rgba(28,25,23,0.32) !important; }
-
-.contact-form-panel input[type="text"]:focus,
-.contact-form-panel input[type="email"]:focus,
-.contact-form-panel textarea:focus {
-    background: rgba(255, 255, 255, 0.98) !important;
-    border-color: rgba(192, 88, 62, 0.48) !important;
-    box-shadow: 0 0 0 3px rgba(192,88,62,0.11) !important;
-    outline: none !important;
-}
-.contact-form-panel textarea { min-height: 140px; line-height: 1.65; }
-
-/* Character counter */
-.contact-char-counter {
-    text-align: right; font-size: 0.7rem; color: rgba(28,25,23,0.30);
-    margin-top: 4px; transition: color 0.2s ease;
-}
-.contact-char-counter.warn { color: rgba(192,88,62,0.65); }
-
-/* Submit */
-.contact-submit {
-    width: 100%; display: flex; align-items: center; justify-content: center;
-    gap: 12px; padding: 15px 32px; margin-top: 8px;
-    background: var(--ios-glass-text);
-    border: 1px solid rgba(28,25,23,0.12);
-    border-radius: 999px; color: #faf8f5;
-    font-size: 0.92rem; font-weight: 700; letter-spacing: 0.02em; cursor: pointer;
-    transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
-    box-shadow: 0 4px 18px rgba(60,40,20,0.18);
-    position: relative; overflow: hidden;
-}
-.contact-submit::before {
-    content: ''; position: absolute; inset: 0;
-    background: linear-gradient(135deg, rgba(255,255,255,0.08), rgba(255,255,255,0));
-    border-radius: inherit; opacity: 0; transition: opacity 0.25s ease;
-}
-.contact-submit:hover::before { opacity: 1; }
-.contact-submit:hover {
-    background: #2d2825; transform: translateY(-3px);
-    box-shadow: 0 14px 36px rgba(60,40,20,0.24);
-}
-.contact-submit:active { transform: translateY(1px); box-shadow: 0 4px 10px rgba(60,40,20,0.14); }
-.contact-submit .material-symbols-outlined {
-    font-size: 18px; transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
-}
-.contact-submit:hover .material-symbols-outlined { transform: translateX(4px) rotate(-10deg); }
-
-/* ---- Responsive ---- */
-@media (max-width: 860px) {
-    .contact-grid { grid-template-columns: 1fr; }
-    .contact-info-panel { flex-direction: row; flex-wrap: wrap; gap: 16px; }
-    .contact-info-card { flex: 1; min-width: 260px; }
-    .contact-availability { width: 100%; }
-    .contact-response-note { width: 100%; justify-content: center; }
-}
-@media (max-width: 640px) {
-    .contact-field-row { grid-template-columns: 1fr; }
-    .contact-form-panel { padding: 28px 20px; }
-    .contact-hero-heading { font-size: clamp(34px, 10vw, 52px); }
-    .contact-info-panel { flex-direction: column; }
-    .contact-info-card { min-width: unset; }
-}
-</style>
-{% endblock %}
-
-{% block main_content %}
-<main id="content" role="main" class="contact-page">
-    <div class="container-xl px-4">
-
-        <!-- Hero -->
-        <header class="contact-hero hp-reveal">
-            <div class="contact-hero-eyebrow">
-                <span>{% trans "Get in touch" %}</span>
-            </div>
-            <h1 class="contact-hero-heading">
-                {% trans "Let's build" %}<br>
-                {% trans "something" %} <span class="contact-heading-accent">{% trans "together" %}</span>
-            </h1>
-            <p class="contact-hero-sub">
-                {% trans "プロジェクトのご相談・写真や技術に関する話・コラボレーション、なんでもお気軽に。" %}
-            </p>
-        </header>
-
-        <!-- Two-column layout -->
-        <div class="contact-grid">
-
-            <!-- ── Left: Info panel ── -->
-            <aside class="contact-info-panel hp-reveal hp-reveal-d1">
-
-                <div class="contact-availability">
-                    <span class="contact-avail-dot" aria-hidden="true"></span>
-                    <span>{% trans "Available for new projects" %}</span>
+                <div class="d-inline-flex align-items-center gap-2 px-3 py-2 rounded-pill" style="background: rgba(50,215,75,0.1); border: 1px solid rgba(50,215,75,0.2); width: fit-content;">
+                    <span style="width: 8px; height: 8px; border-radius: 50%; background: #32d74b; box-shadow: 0 0 0 0 rgba(50,215,75,0.5); animation: pulse 2s infinite;"></span>
+                    <span class="fw-bold" style="font-size: 13px; color: #32d74b;">{% trans "Available for new projects" %}</span>
                 </div>
+                <style>
+                    @keyframes pulse {
+                        0% { box-shadow: 0 0 0 0 rgba(50,215,75,0.5); }
+                        70% { box-shadow: 0 0 0 6px rgba(50,215,75,0); }
+                        100% { box-shadow: 0 0 0 0 rgba(50,215,75,0); }
+                    }
+                </style>
 
-                <!-- Contact methods -->
-                <div class="contact-info-card">
-                    <p class="contact-info-card-title">{% trans "Reach me at" %}</p>
-                    <div class="contact-methods">
-                        <a href="mailto:kumagt2000@gmail.com" class="contact-method-card" aria-label="Email">
-                            <span class="contact-method-icon" style="background:rgba(10,132,255,0.18);color:#60a5fa;">
-                                <span class="material-symbols-outlined" aria-hidden="true">mail</span>
-                            </span>
-                            <div class="contact-method-body">
-                                <div class="contact-method-label">Email</div>
-                                <div class="contact-method-value">kumagt2000@gmail.com</div>
+                <div class="ap-glass-panel flex-grow-1 d-flex flex-column" style="padding: 24px;">
+                    <p class="text-uppercase fw-bold text-muted mb-4" style="font-size: 11px; letter-spacing: 0.1em;">{% trans "Reach me at" %}</p>
+                    
+                    <div class="d-flex flex-column gap-3">
+                        <a href="mailto:kumagt2000@gmail.com" class="d-flex align-items-center gap-3 text-decoration-none" style="padding: 12px; border-radius: 12px; background: rgba(255,255,255,0.03); transition: background 0.2s;">
+                            <div style="width: 40px; height: 40px; border-radius: 10px; background: rgba(10,132,255,0.15); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                                <span class="material-symbols-outlined" style="color: #0a84ff; font-size: 20px;">mail</span>
                             </div>
-                            <span class="material-symbols-outlined contact-method-arrow" aria-hidden="true">arrow_forward</span>
+                            <div style="flex: 1; min-width: 0;">
+                                <div class="fw-bold text-muted text-uppercase mb-1" style="font-size: 11px; letter-spacing: 0.05em;">Email</div>
+                                <div class="fw-bold text-light" style="font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">kumagt2000@gmail.com</div>
+                            </div>
+                            <span class="material-symbols-outlined text-muted" style="font-size: 18px;">arrow_forward</span>
                         </a>
 
-                        <a href="https://github.com/je6hub" target="_blank" rel="noopener noreferrer" class="contact-method-card" aria-label="GitHub">
-                            <span class="contact-method-icon" style="background:rgba(255,255,255,0.10);color:#e2e8f0;">
-                                <i class="fab fa-github" aria-hidden="true"></i>
-                            </span>
-                            <div class="contact-method-body">
-                                <div class="contact-method-label">GitHub</div>
-                                <div class="contact-method-value">github.com/je6hub</div>
+                        <a href="https://github.com/je6hub" target="_blank" rel="noopener noreferrer" class="d-flex align-items-center gap-3 text-decoration-none" style="padding: 12px; border-radius: 12px; background: rgba(255,255,255,0.03); transition: background 0.2s;">
+                            <div style="width: 40px; height: 40px; border-radius: 10px; background: rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                                <i class="fab fa-github" style="color: #fff; font-size: 20px;"></i>
                             </div>
-                            <span class="material-symbols-outlined contact-method-arrow" aria-hidden="true">arrow_forward</span>
-                        </a>
-
-                        <a href="{% url 'photraveler:map' %}" class="contact-method-card" aria-label="WanderLens">
-                            <span class="contact-method-icon" style="background:rgba(129,140,248,0.18);color:#818cf8;">
-                                <span class="material-symbols-outlined" aria-hidden="true">photo_camera</span>
-                            </span>
-                            <div class="contact-method-body">
-                                <div class="contact-method-label">WanderLens</div>
-                                <div class="contact-method-value">{% trans "Photo travel map" %}</div>
+                            <div style="flex: 1; min-width: 0;">
+                                <div class="fw-bold text-muted text-uppercase mb-1" style="font-size: 11px; letter-spacing: 0.05em;">GitHub</div>
+                                <div class="fw-bold text-light" style="font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">github.com/je6hub</div>
                             </div>
-                            <span class="material-symbols-outlined contact-method-arrow" aria-hidden="true">arrow_forward</span>
+                            <span class="material-symbols-outlined text-muted" style="font-size: 18px;">arrow_forward</span>
                         </a>
                     </div>
                 </div>
 
-                <!-- Response time -->
-                <div class="contact-response-note">
-                    <span class="material-symbols-outlined" aria-hidden="true" style="font-size:15px;opacity:0.45;">schedule</span>
+                <div class="d-flex align-items-center gap-2 text-muted px-2" style="font-size: 12px;">
+                    <span class="material-symbols-outlined" style="font-size: 16px; opacity: 0.7;">schedule</span>
                     <span>{% trans "通常 24 時間以内にご返信します" %}</span>
                 </div>
 
-            </aside>
+            </div>
+        </div>
 
-            <!-- ── Right: Form ── -->
-            <div class="contact-form-panel hp-reveal hp-reveal-d2">
-
-                <p class="contact-form-title">
-                    <span class="material-symbols-outlined" aria-hidden="true">edit_square</span>
+        <!-- ── Right: Form ── -->
+        <div class="col-md-7">
+            <div class="ap-glass-panel h-100 ap-reveal" style="padding: 32px;">
+                <h2 class="d-flex align-items-center gap-2 mb-4 text-light fw-bold" style="font-size: 20px;">
+                    <span class="material-symbols-outlined" style="color: var(--ap-accent); font-size: 24px;">edit_square</span>
                     {% trans "Send a message" %}
-                </p>
+                </h2>
 
                 <form method="post" action="{% url 'core:contact' %}" id="contactForm" novalidate>
                     {% csrf_token %}
 
-                    <div class="contact-field-row">
-                        <div class="contact-field">
-                            <label class="contact-label" for="{{ form.name.id_for_label }}">
-                                <span class="material-symbols-outlined" aria-hidden="true">person</span>
+                    <div class="row g-3 mb-3">
+                        <div class="col-sm-6">
+                            <label class="form-label d-flex align-items-center gap-1 text-uppercase fw-bold text-muted mb-2" for="{{ form.name.id_for_label }}" style="font-size: 11px; letter-spacing: 0.05em;">
+                                <span class="material-symbols-outlined" style="font-size: 14px;">person</span>
                                 {% trans "Name" %}
                             </label>
+                            <!-- The form fields render with their own classes, we should just style them generically inside ap-glass-panel if we can't add ap-input easily, or we can use django-widget-tweaks, but we can't here, so we add custom css -->
                             {{ form.name }}
                         </div>
-                        <div class="contact-field">
-                            <label class="contact-label" for="{{ form.email.id_for_label }}">
-                                <span class="material-symbols-outlined" aria-hidden="true">alternate_email</span>
+                        <div class="col-sm-6">
+                            <label class="form-label d-flex align-items-center gap-1 text-uppercase fw-bold text-muted mb-2" for="{{ form.email.id_for_label }}" style="font-size: 11px; letter-spacing: 0.05em;">
+                                <span class="material-symbols-outlined" style="font-size: 14px;">alternate_email</span>
                                 {% trans "Email" %}
                             </label>
                             {{ form.email }}
                         </div>
                     </div>
 
-                    <div class="contact-field">
-                        <label class="contact-label" for="{{ form.message.id_for_label }}">
-                            <span class="material-symbols-outlined" aria-hidden="true">edit_note</span>
+                    <div class="mb-4">
+                        <label class="form-label d-flex align-items-center gap-1 text-uppercase fw-bold text-muted mb-2" for="{{ form.message.id_for_label }}" style="font-size: 11px; letter-spacing: 0.05em;">
+                            <span class="material-symbols-outlined" style="font-size: 14px;">edit_note</span>
                             {% trans "Message" %}
                         </label>
                         {{ form.message }}
-                        <div class="contact-char-counter" id="msgCounter" aria-live="polite"></div>
+                        <div class="text-end mt-1 text-muted" id="msgCounter" style="font-size: 11px;"></div>
                     </div>
 
-                    <button type="submit" class="contact-submit">
+                    <button type="submit" class="ap-btn ap-btn-primary w-100 d-flex justify-content-center align-items-center gap-2" style="padding: 14px; font-size: 15px;">
                         <span>{% trans "Send Message" %}</span>
-                        <span class="material-symbols-outlined" aria-hidden="true">send</span>
+                        <span class="material-symbols-outlined" style="font-size: 18px;">send</span>
                     </button>
 
                 </form>
             </div>
-
         </div>
 
     </div>
-</main>
+</div>
 {% endblock %}
 
 {% block extra_js %}
 <script>
 (function () {
+    /* Style django form fields */
+    const inputs = document.querySelectorAll('#contactForm input[type="text"], #contactForm input[type="email"], #contactForm textarea');
+    inputs.forEach(input => {
+        input.classList.add('ap-input');
+    });
+    const textarea = document.querySelector('#contactForm textarea');
+    if (textarea) {
+        textarea.style.minHeight = '140px';
+    }
+
     /* Character counter for message field */
     const msgField = document.querySelector('#contactForm textarea');
     const counter  = document.getElementById('msgCounter');
@@ -384,7 +150,11 @@
         const update = () => {
             const len = msgField.value.length;
             counter.textContent = len + ' / ' + MAX;
-            counter.classList.toggle('warn', len > MAX * 0.85);
+            if(len > MAX * 0.85) {
+                counter.style.color = '#ff3b30';
+            } else {
+                counter.style.color = 'inherit';
+            }
         };
         msgField.addEventListener('input', update);
         update();
@@ -392,7 +162,7 @@
 
     /* Submit animation */
     const form = document.getElementById('contactForm');
-    const btn  = form ? form.querySelector('.contact-submit') : null;
+    const btn  = form ? form.querySelector('button[type="submit"]') : null;
     if (form && btn) {
         form.addEventListener('submit', () => {
             btn.style.opacity = '0.7';
@@ -401,14 +171,6 @@
             if (icon) icon.textContent = 'hourglass_top';
         });
     }
-
-    /* Scroll reveal (re-trigger for contact page elements) */
-    const io = new IntersectionObserver((entries) => {
-        entries.forEach(e => {
-            if (e.isIntersecting) { e.target.classList.add('visible'); io.unobserve(e.target); }
-        });
-    }, { threshold: 0.08 });
-    document.querySelectorAll('.hp-reveal').forEach(el => io.observe(el));
 })();
 </script>
 {% endblock %}

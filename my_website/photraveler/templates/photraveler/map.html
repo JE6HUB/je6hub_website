@@ -6,56 +6,71 @@
 {% block extra_head %}
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <style>
-.wanderlens-map { height: 65vh; width: 100%; border-radius: 20px; }
+.wanderlens-map { height: 65vh; width: 100%; border-radius: 20px; z-index: 1; }
+.leaflet-container { background: #1a1a1a; font-family: -apple-system, BlinkMacSystemFont, "SF Pro JP", "SF Pro Text", sans-serif; }
+.leaflet-popup-content-wrapper { background: rgba(30, 30, 30, 0.85); backdrop-filter: blur(10px); color: #f5f5f7; border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; }
+.leaflet-popup-tip { background: rgba(30, 30, 30, 0.85); }
+.ap-pin-card {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.05);
+    border-radius: 20px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: transform 0.3s cubic-bezier(0.25, 1, 0.5, 1), background 0.3s;
+}
+.ap-pin-card:hover {
+    transform: scale(1.02);
+    background: rgba(255,255,255,0.06);
+}
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="container py-4">
+<div class="ap-section py-4">
 
     <!-- Header -->
-    <div class="d-flex align-items-start justify-content-between mb-3 flex-wrap gap-2">
+    <div class="d-flex align-items-start justify-content-between mb-4 flex-wrap gap-2 ap-reveal">
         <div>
             <div class="d-flex align-items-center gap-2 mb-1">
-                <a href="{% url 'photraveler:map' %}" style="color:rgba(160,200,255,0.7);text-decoration:none;font-size:0.85rem;">
-                    <span class="material-symbols-outlined align-middle" aria-hidden="true" style="font-size:18px;">arrow_back</span>
+                <a href="{% url 'photraveler:map' %}" style="color:var(--ap-accent); text-decoration:none;">
+                    <span class="material-symbols-outlined align-middle">arrow_back</span>
                 </a>
-                <h2 class="fw-bold mb-0" style="color:#fff;font-size:1.2rem;">
-                    <span class="material-symbols-outlined align-middle me-1" aria-hidden="true" style="color:var(--ios-glass-accent);font-size:20px;">map</span>
+                <h2 class="ap-hero-title mb-0" style="font-size: 24px;">
+                    <span class="material-symbols-outlined align-middle me-1" style="color:var(--ap-accent);">map</span>
                     {{ profile_user.username }}'s WanderLens
                 </h2>
             </div>
-            <p style="color:rgba(200,215,255,0.5);font-size:0.82rem;margin-left:28px;">
+            <p class="ap-subhead mb-0" style="font-size: 14px; margin-left:36px;">
                 {{ pin_count }} {% trans "ヶ所の記憶" %}
             </p>
         </div>
         {% if can_edit %}
-        <button type="button" class="hp-btn-primary" style="padding:10px 22px;font-size:0.88rem;" id="addPinBtn">
-            <span class="material-symbols-outlined" aria-hidden="true" style="font-size:18px;">add_location</span>
+        <button type="button" class="ap-btn ap-btn-primary" id="addPinBtn">
+            <span class="material-symbols-outlined align-middle me-1" style="font-size: 18px;">add_location</span>
             {% trans "ピンを追加" %}
         </button>
         {% endif %}
     </div>
 
     {% if can_edit %}
-    <div class="hp-card mb-3 d-flex align-items-center gap-2" style="padding:12px 18px;font-size:0.83rem;color:rgba(200,215,255,0.6);border-color:rgba(10,132,255,0.25);">
-        <span class="material-symbols-outlined" aria-hidden="true" style="font-size:16px;color:var(--ios-glass-accent);">info</span>
+    <div class="ap-glass-panel mb-4 py-2 px-3 d-flex align-items-center gap-2 ap-reveal" style="font-size: 13px;">
+        <span class="material-symbols-outlined" style="color:var(--ap-accent); font-size: 18px;">info</span>
         {% trans "「ピンを追加」ボタンを押してから地図をクリックすると位置を選択できます。ピンのポップアップから編集・削除も可能です。" %}
     </div>
     {% endif %}
 
     <!-- Map -->
-    <div class="hp-card mb-4" style="padding:0;overflow:hidden;border-radius:24px;">
+    <div class="ap-glass-panel mb-5 p-0 overflow-hidden ap-reveal">
         <div id="map" class="wanderlens-map"></div>
     </div>
 
     <!-- Pin grid (thumbnails) -->
     {% if pin_count > 0 %}
-    <h3 class="fw-bold mb-3" style="color:rgba(200,215,255,0.7);font-size:0.8rem;letter-spacing:0.12em;text-transform:uppercase;">
-        <span class="material-symbols-outlined align-middle me-1" aria-hidden="true" style="font-size:14px;">photo_library</span>
+    <h3 class="ap-subhead fw-bold mb-4 ap-reveal" style="font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase;">
+        <span class="material-symbols-outlined align-middle me-1" style="font-size:16px;">photo_library</span>
         {% trans "ピン一覧" %}
     </h3>
-    <div id="pinGrid" class="row g-3"></div>
+    <div id="pinGrid" class="row g-4 ap-reveal"></div>
     {% endif %}
 
 </div>
@@ -64,49 +79,42 @@
 {% if can_edit %}
 <div class="modal fade" id="addPinModal" tabindex="-1" aria-labelledby="addPinModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content ios-glass-card liquid-glass-card border-0" style="color:var(--ios-glass-text);">
-            <div class="modal-header border-0 pb-0">
-                <h5 class="modal-title fw-bold" id="addPinModalLabel">{% trans "ピンを追加" %}</h5>
-                <button type="button" class="btn btn-sm ios-glass-btn" data-mdb-dismiss="modal" aria-label="{% trans '閉じる' %}">
-                    <span class="material-symbols-outlined" aria-hidden="true" style="font-size:16px;">close</span>
-                </button>
+        <div class="modal-content ap-glass-panel p-0" style="border: 1px solid rgba(255,255,255,0.1);">
+            <div class="modal-header border-0 pb-0 pt-4 px-4">
+                <h5 class="modal-title fw-bold text-light" id="addPinModalLabel" style="font-size: 20px;">{% trans "ピンを追加" %}</h5>
+                <button type="button" class="btn-close btn-close-white" data-mdb-dismiss="modal" aria-label="{% trans '閉じる' %}"></button>
             </div>
-            <div class="modal-body">
+            <div class="modal-body p-4">
                 <form method="post" action="{% url 'photraveler:add_pin' profile_user.username %}" enctype="multipart/form-data" id="addPinForm">
                     {% csrf_token %}
                     <input type="hidden" name="latitude"  id="addLat">
                     <input type="hidden" name="longitude" id="addLng">
 
-                    <div class="mb-3">
-                        <label for="addTitle" class="form-label fw-semibold small">{% trans "タイトル" %} <span style="color:red;">*</span></label>
-                        <input type="text" id="addTitle" name="title" class="form-control" required maxlength="200"
-                               placeholder="e.g. Eiffel Tower at Sunset">
+                    <div class="mb-4">
+                        <label for="addTitle" class="form-label fw-semibold small text-muted">{% trans "タイトル" %} <span style="color: #ff3b30;">*</span></label>
+                        <input type="text" id="addTitle" name="title" class="form-control ap-input" required maxlength="200" placeholder="e.g. Eiffel Tower at Sunset">
                     </div>
-                    <div class="mb-3">
-                        <label for="addDesc" class="form-label fw-semibold small">{% trans "説明" %}</label>
-                        <textarea id="addDesc" name="description" class="form-control" rows="3"
-                                  placeholder="{% trans 'このピンについて説明してください。' %}"></textarea>
+                    <div class="mb-4">
+                        <label for="addDesc" class="form-label fw-semibold small text-muted">{% trans "説明" %}</label>
+                        <textarea id="addDesc" name="description" class="form-control ap-input" rows="3" placeholder="{% trans 'このピンについて説明してください。' %}"></textarea>
                     </div>
-                    <div class="row mb-3 g-2">
+                    <div class="row mb-4 g-3">
                         <div class="col-6">
-                            <label class="form-label fw-semibold small">{% trans "緯度" %}</label>
-                            <input type="text" id="addLatDisplay" class="form-control" readonly
-                                   placeholder="{% trans '地図をクリック' %}" style="background:rgba(255,255,255,0.5);">
+                            <label class="form-label fw-semibold small text-muted">{% trans "緯度" %}</label>
+                            <input type="text" id="addLatDisplay" class="form-control ap-input" readonly placeholder="{% trans '地図をクリック' %}" style="opacity: 0.7;">
                         </div>
                         <div class="col-6">
-                            <label class="form-label fw-semibold small">{% trans "経度" %}</label>
-                            <input type="text" id="addLngDisplay" class="form-control" readonly
-                                   placeholder="{% trans '地図をクリック' %}" style="background:rgba(255,255,255,0.5);">
+                            <label class="form-label fw-semibold small text-muted">{% trans "経度" %}</label>
+                            <input type="text" id="addLngDisplay" class="form-control ap-input" readonly placeholder="{% trans '地図をクリック' %}" style="opacity: 0.7;">
                         </div>
                     </div>
-                    <div class="mb-3">
-                        <label for="addImage" class="form-label fw-semibold small">{% trans "写真" %} <span style="color:rgba(0,0,0,0.4);font-weight:400;">（{% trans "任意" %}）</span></label>
-                        <input type="file" id="addImage" name="image" class="form-control" accept="image/*">
+                    <div class="mb-4">
+                        <label for="addImage" class="form-label fw-semibold small text-muted">{% trans "写真" %} <span style="opacity: 0.6; font-weight:400;">（{% trans "任意" %}）</span></label>
+                        <input type="file" id="addImage" name="image" class="form-control ap-input" accept="image/*">
                     </div>
-                    <div class="d-flex gap-2 justify-content-end">
-                        <button type="button" class="btn btn-sm ios-glass-btn" data-mdb-dismiss="modal">{% trans "キャンセル" %}</button>
-                        <button type="submit" class="btn ios-glass-btn" id="addPinSubmit">
-                            <span class="material-symbols-outlined align-middle me-1" aria-hidden="true" style="font-size:16px;">add_location</span>
+                    <div class="d-flex gap-2 justify-content-end mt-4">
+                        <button type="button" class="ap-btn ap-btn-outline" data-mdb-dismiss="modal" style="border: none;">{% trans "キャンセル" %}</button>
+                        <button type="submit" class="ap-btn ap-btn-primary" id="addPinSubmit">
                             {% trans "追加する" %}
                         </button>
                     </div>
@@ -119,35 +127,32 @@
 <!-- ─── Edit Pin Modal ───────────────────────── -->
 <div class="modal fade" id="editPinModal" tabindex="-1" aria-labelledby="editPinModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content ios-glass-card liquid-glass-card border-0" style="color:var(--ios-glass-text);">
-            <div class="modal-header border-0 pb-0">
-                <h5 class="modal-title fw-bold" id="editPinModalLabel">{% trans "ピンを編集" %}</h5>
-                <button type="button" class="btn btn-sm ios-glass-btn" data-mdb-dismiss="modal" aria-label="{% trans '閉じる' %}">
-                    <span class="material-symbols-outlined" aria-hidden="true" style="font-size:16px;">close</span>
-                </button>
+        <div class="modal-content ap-glass-panel p-0" style="border: 1px solid rgba(255,255,255,0.1);">
+            <div class="modal-header border-0 pb-0 pt-4 px-4">
+                <h5 class="modal-title fw-bold text-light" id="editPinModalLabel" style="font-size: 20px;">{% trans "ピンを編集" %}</h5>
+                <button type="button" class="btn-close btn-close-white" data-mdb-dismiss="modal" aria-label="{% trans '閉じる' %}"></button>
             </div>
-            <div class="modal-body">
+            <div class="modal-body p-4">
                 <form method="post" id="editPinForm" enctype="multipart/form-data">
                     {% csrf_token %}
                     <input type="hidden" name="latitude"  id="editLat">
                     <input type="hidden" name="longitude" id="editLng">
 
-                    <div class="mb-3">
-                        <label for="editTitle" class="form-label fw-semibold small">{% trans "タイトル" %}</label>
-                        <input type="text" id="editTitle" name="title" class="form-control" required maxlength="200">
+                    <div class="mb-4">
+                        <label for="editTitle" class="form-label fw-semibold small text-muted">{% trans "タイトル" %}</label>
+                        <input type="text" id="editTitle" name="title" class="form-control ap-input" required maxlength="200">
                     </div>
-                    <div class="mb-3">
-                        <label for="editDesc" class="form-label fw-semibold small">{% trans "説明" %}</label>
-                        <textarea id="editDesc" name="description" class="form-control" rows="3"></textarea>
+                    <div class="mb-4">
+                        <label for="editDesc" class="form-label fw-semibold small text-muted">{% trans "説明" %}</label>
+                        <textarea id="editDesc" name="description" class="form-control ap-input" rows="3"></textarea>
                     </div>
-                    <div class="mb-3">
-                        <label for="editImage" class="form-label fw-semibold small">{% trans "写真を変更" %} <span style="color:rgba(0,0,0,0.4);font-weight:400;">（{% trans "任意" %}）</span></label>
-                        <input type="file" id="editImage" name="image" class="form-control" accept="image/*">
+                    <div class="mb-4">
+                        <label for="editImage" class="form-label fw-semibold small text-muted">{% trans "写真を変更" %} <span style="opacity: 0.6; font-weight:400;">（{% trans "任意" %}）</span></label>
+                        <input type="file" id="editImage" name="image" class="form-control ap-input" accept="image/*">
                     </div>
-                    <div class="d-flex gap-2 justify-content-end">
-                        <button type="button" class="btn btn-sm ios-glass-btn" data-mdb-dismiss="modal">{% trans "キャンセル" %}</button>
-                        <button type="submit" class="btn ios-glass-btn">
-                            <span class="material-symbols-outlined align-middle me-1" aria-hidden="true" style="font-size:16px;">save</span>
+                    <div class="d-flex gap-2 justify-content-end mt-4">
+                        <button type="button" class="ap-btn ap-btn-outline" data-mdb-dismiss="modal" style="border: none;">{% trans "キャンセル" %}</button>
+                        <button type="submit" class="ap-btn ap-btn-primary">
                             {% trans "保存する" %}
                         </button>
                     </div>
@@ -161,49 +166,46 @@
 <!-- ─── Pin View Modal (for non-owners / all users) ── -->
 <div class="modal fade" id="photoModal" tabindex="-1" aria-labelledby="photoModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-lg">
-        <div class="modal-content ios-glass-card liquid-glass-card border-0 shadow-5-strong">
-            <div class="modal-header border-0 pb-0 d-flex align-items-center justify-content-between">
-                <h5 class="modal-title fw-bold" id="photoModalLabel"></h5>
-                <button type="button" class="btn btn-sm ios-glass-btn" data-mdb-dismiss="modal" aria-label="Close">
-                    <span class="material-symbols-outlined" aria-hidden="true">close</span>
-                </button>
+        <div class="modal-content ap-glass-panel p-0" style="border: 1px solid rgba(255,255,255,0.1);">
+            <div class="modal-header border-0 pb-0 pt-4 px-4 d-flex align-items-center justify-content-between">
+                <h5 class="modal-title fw-bold text-light" id="photoModalLabel" style="font-size: 24px;"></h5>
+                <button type="button" class="btn-close btn-close-white" data-mdb-dismiss="modal" aria-label="Close"></button>
             </div>
-            <div class="modal-body">
-                <img src="" id="modalImage" class="w-100 mb-3 shadow-3-strong" alt="Travel Photo"
-                     style="max-height:400px;object-fit:cover;border-radius:16px;display:none;">
-                <p id="modalDesc" class="text-muted fs-6"></p>
+            <div class="modal-body p-4">
+                <img src="" id="modalImage" class="w-100 mb-4" alt="Travel Photo"
+                     style="max-height: 500px; object-fit: cover; border-radius: 20px; display:none;">
+                <p id="modalDesc" class="ap-subhead fs-6 mb-4"></p>
 
                 {% if can_edit %}
                 <div class="d-flex gap-2 mb-4">
-                    <button type="button" class="btn btn-sm ios-glass-btn" id="openEditBtn">
-                        <span class="material-symbols-outlined align-middle me-1" aria-hidden="true" style="font-size:14px;">edit</span>{% trans "編集" %}
+                    <button type="button" class="ap-btn ap-btn-outline" id="openEditBtn" style="padding: 6px 16px; font-size: 14px;">
+                        {% trans "編集" %}
                     </button>
                     <form method="post" id="deletePinForm" class="js-confirm" data-confirm="{% trans 'このピンを削除しますか？' %}">
                         {% csrf_token %}
-                        <button type="submit" class="btn btn-sm ios-glass-btn" style="border-color:rgba(255,100,100,0.3);color:rgba(220,60,60,0.9);">
-                            <span class="material-symbols-outlined align-middle me-1" aria-hidden="true" style="font-size:14px;">delete</span>{% trans "削除" %}
+                        <button type="submit" class="ap-btn ap-btn-outline" style="padding: 6px 16px; font-size: 14px; border-color: rgba(255,59,48,0.5); color: #ff3b30;">
+                            {% trans "削除" %}
                         </button>
                     </form>
                 </div>
                 {% endif %}
 
-                <hr class="my-3" style="border-color:rgba(255,255,255,0.15);">
-                <h6 class="fw-bold mb-3">
-                    <span class="material-symbols-outlined me-2" aria-hidden="true">chat_bubble</span>{% trans "Comments" %}
+                <hr class="my-4" style="border-color: rgba(255,255,255,0.1);">
+                <h6 class="fw-bold mb-3 text-light">
+                    <span class="material-symbols-outlined align-middle me-2" aria-hidden="true">chat_bubble</span>{% trans "Comments" %}
                 </h6>
-                <div id="commentSection" class="mb-3" style="max-height:200px;overflow-y:auto;"></div>
+                <div id="commentSection" class="mb-4" style="max-height:250px; overflow-y:auto; padding-right: 10px;"></div>
+                
                 <form id="commentForm" novalidate data-comments-url="{% url 'photraveler:pin_comments' pin_id=0 %}">
                     {% csrf_token %}
-                    <div class="input-group glass-panel p-2">
+                    <div class="d-flex gap-2">
                         <label for="photoCommentInput" class="visually-hidden">{% trans "コメントを書く" %}</label>
-                        <input type="text" id="photoCommentInput" class="ios-glass-input"
-                               placeholder="{% trans 'コメントを書く...' %}" maxlength="500" required>
-                        <button id="commentSubmitBtn" class="btn ios-glass-btn px-4 shadow-0" type="submit"
-                                aria-label="{% trans '送信' %}">
+                        <input type="text" id="photoCommentInput" class="ap-input flex-grow-1" placeholder="{% trans 'コメントを書く...' %}" maxlength="500" required>
+                        <button id="commentSubmitBtn" class="ap-btn ap-btn-primary px-4" type="submit" aria-label="{% trans '送信' %}">
                             <span class="material-symbols-outlined" aria-hidden="true">send</span>
                         </button>
                     </div>
-                    <p id="commentError" class="text-danger small mt-1 d-none"></p>
+                    <p id="commentError" class="text-danger small mt-2 d-none"></p>
                 </form>
             </div>
         </div>
@@ -236,8 +238,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
     /* ── Map ── */
     const map = L.map('map').setView([30, 10], 2);
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
-        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>',
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/dark_all/{z}/{x}/{y}{r}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
         maxZoom: 19
     }).addTo(map);
 
@@ -268,33 +270,42 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         loadComments(pin.id);
-        new mdb.Modal(document.getElementById('photoModal')).show();
+        const modalInstance = (window.mdb && window.mdb.Modal) ? window.mdb.Modal.getOrCreateInstance(document.getElementById('photoModal')) : window.bootstrap.Modal.getOrCreateInstance(document.getElementById('photoModal'));
+        modalInstance.show();
     }
 
     /* ── Place markers ── */
     pinsData.forEach(function (pin) {
-        const marker = L.marker([pin.lat, pin.lng]).addTo(map);
-        marker.on('click', function () { openPhotoModal(pin); });
+        const marker = L.marker([pin.lat, pin.lng], {
+            icon: L.divIcon({ className: '', html: '<span style="font-size:32px; color:var(--ap-accent); text-shadow: 0 4px 10px rgba(0,0,0,0.5);">📍</span>', iconSize:[32,32], iconAnchor:[16,32] })
+        }).addTo(map);
+        
+        marker.bindPopup(`<div style="font-weight:bold; font-size:14px; margin-bottom:4px;">${pin.title}</div><button class="ap-btn ap-btn-primary" style="padding:4px 10px; font-size:12px; width:100%;" onclick="document.dispatchEvent(new CustomEvent('openPinModal', {detail: ${pin.id}}))">詳細を見る</button>`);
 
         // Pin thumbnail card
         if (pinGrid) {
             const col = document.createElement('div');
             col.className = 'col-6 col-md-4 col-lg-3';
             col.innerHTML = `
-                <div class="hp-card" style="padding:0;overflow:hidden;cursor:pointer;" onclick="">
+                <div class="ap-pin-card h-100 d-flex flex-column" onclick="document.dispatchEvent(new CustomEvent('openPinModal', {detail: ${pin.id}}))">
                     ${pin.image_url
-                        ? `<img src="${pin.image_url}" alt="${pin.title}" style="width:100%;height:120px;object-fit:cover;">`
-                        : `<div style="width:100%;height:120px;background:rgba(10,132,255,0.12);display:flex;align-items:center;justify-content:center;">
-                               <span class="material-symbols-outlined" style="font-size:36px;color:rgba(100,170,255,0.4);">location_on</span>
+                        ? `<img src="${pin.image_url}" alt="${pin.title}" style="width:100%; height:140px; object-fit:cover;">`
+                        : `<div style="width:100%; height:140px; background:rgba(255,255,255,0.02); display:flex; align-items:center; justify-content:center;">
+                               <span class="material-symbols-outlined" style="font-size:36px; color:rgba(255,255,255,0.2);">location_on</span>
                            </div>`
                     }
-                    <div style="padding:10px 12px;">
-                        <p class="fw-bold mb-0" style="color:#fff;font-size:0.85rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${pin.title}</p>
+                    <div style="padding:14px;">
+                        <p class="fw-bold mb-0 text-light" style="font-size:14px; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;">${pin.title}</p>
                     </div>
                 </div>`;
-            col.querySelector('.hp-card').addEventListener('click', function () { openPhotoModal(pin); });
             pinGrid.appendChild(col);
         }
+    });
+
+    document.addEventListener('openPinModal', function(e) {
+        const pinId = e.detail;
+        const pin = pinsData.find(p => p.id === pinId);
+        if (pin) openPhotoModal(pin);
     });
 
     /* ── Add Pin mode ── */
@@ -302,11 +313,12 @@ document.addEventListener('DOMContentLoaded', function () {
         let addingMode = false;
         let tempMarker = null;
         const addBtn   = document.getElementById('addPinBtn');
-        const addModal = document.getElementById('addPinModal') ? new mdb.Modal(document.getElementById('addPinModal')) : null;
+        const addModalEl = document.getElementById('addPinModal');
+        const addModal = addModalEl ? ((window.mdb && window.mdb.Modal) ? window.mdb.Modal.getOrCreateInstance(addModalEl) : window.bootstrap.Modal.getOrCreateInstance(addModalEl)) : null;
 
         addBtn.addEventListener('click', function () {
             addingMode = true;
-            addBtn.textContent = '地図をクリックして位置を選択…';
+            addBtn.innerHTML = '地図をクリックして位置を選択…';
             addBtn.style.opacity = '0.7';
             map.getContainer().style.cursor = 'crosshair';
         });
@@ -314,7 +326,7 @@ document.addEventListener('DOMContentLoaded', function () {
         map.on('click', function (e) {
             if (!addingMode) return;
             addingMode = false;
-            addBtn.innerHTML = '<span class="material-symbols-outlined" style="font-size:18px;margin-right:6px;vertical-align:middle;">add_location</span>ピンを追加';
+            addBtn.innerHTML = '<span class="material-symbols-outlined align-middle me-1" style="font-size:18px;">add_location</span>ピンを追加';
             addBtn.style.opacity = '';
             map.getContainer().style.cursor = '';
 
@@ -327,23 +339,28 @@ document.addEventListener('DOMContentLoaded', function () {
 
             if (tempMarker) map.removeLayer(tempMarker);
             tempMarker = L.marker([e.latlng.lat, e.latlng.lng], {
-                icon: L.divIcon({ className: '', html: '<span style="font-size:28px;">📍</span>', iconSize:[28,28], iconAnchor:[14,28] })
+                icon: L.divIcon({ className: '', html: '<span style="font-size:32px; filter: grayscale(100%) brightness(200%);">📍</span>', iconSize:[32,32], iconAnchor:[16,32] })
             }).addTo(map);
 
             if (addModal) addModal.show();
         });
 
         // Reset temp marker on modal hide
-        document.getElementById('addPinModal').addEventListener('hidden.mdb.modal', function () {
+        addModalEl.addEventListener('hidden.mdb.modal', resetAddMode);
+        addModalEl.addEventListener('hidden.bs.modal', resetAddMode);
+        
+        function resetAddMode() {
             if (tempMarker) { map.removeLayer(tempMarker); tempMarker = null; }
             addingMode = false;
-            addBtn.innerHTML = '<span class="material-symbols-outlined" style="font-size:18px;margin-right:6px;vertical-align:middle;">add_location</span>ピンを追加';
+            addBtn.innerHTML = '<span class="material-symbols-outlined align-middle me-1" style="font-size:18px;">add_location</span>ピンを追加';
             addBtn.style.opacity = '';
             map.getContainer().style.cursor = '';
-        });
+        }
 
         /* Edit pin */
-        const editModal = new mdb.Modal(document.getElementById('editPinModal'));
+        const editModalEl = document.getElementById('editPinModal');
+        const editModal = editModalEl ? ((window.mdb && window.mdb.Modal) ? window.mdb.Modal.getOrCreateInstance(editModalEl) : window.bootstrap.Modal.getOrCreateInstance(editModalEl)) : null;
+        
         document.getElementById('openEditBtn').addEventListener('click', async function () {
             if (!currentPinId) return;
             try {
@@ -357,7 +374,10 @@ document.addEventListener('DOMContentLoaded', function () {
                 document.getElementById('editLat').value   = d.latitude;
                 document.getElementById('editLng').value   = d.longitude;
                 document.getElementById('editPinForm').action = editUrl(currentPinId);
-                mdb.Modal.getInstance(document.getElementById('photoModal')).hide();
+                
+                const photoModal = (window.mdb && window.mdb.Modal) ? window.mdb.Modal.getInstance(document.getElementById('photoModal')) : window.bootstrap.Modal.getInstance(document.getElementById('photoModal'));
+                if (photoModal) photoModal.hide();
+                
                 editModal.show();
             } catch { alert('ピン情報の取得に失敗しました。'); }
         });
@@ -368,27 +388,29 @@ document.addEventListener('DOMContentLoaded', function () {
 
     async function loadComments(pinId) {
         const section = document.getElementById('commentSection');
-        section.innerHTML = '<p class="text-muted small text-center">読み込み中…</p>';
+        section.innerHTML = '<p class="text-muted small text-center my-4">読み込み中…</p>';
         try {
             const resp = await fetch(commentsUrl(pinId), { headers: { 'Accept': 'application/json' } });
             const data = await resp.json();
             section.innerHTML = '';
             if (!data.comments.length) {
-                section.innerHTML = '<p class="text-muted small text-center">まだコメントがありません。</p>';
+                section.innerHTML = '<p class="text-muted small text-center my-4">まだコメントがありません。</p>';
             } else {
                 data.comments.forEach(c => {
                     const el = document.createElement('div');
-                    el.className = 'd-flex gap-2 mb-2';
-                    el.innerHTML = `<span class="material-symbols-outlined" style="font-size:28px;flex-shrink:0;color:rgba(0,0,0,0.3);">account_circle</span>
-                        <div class="ios-glass-card p-2 rounded w-100" style="padding:8px 12px !important;">
-                            <span class="fw-bold small">${escHtml(c.author_name)}</span>
-                            <span class="text-muted small ms-2">${escHtml(c.created_at)}</span>
-                            <p class="mb-0 small mt-1">${escHtml(c.text)}</p>
+                    el.className = 'd-flex gap-3 mb-3';
+                    el.innerHTML = `<span class="material-symbols-outlined" style="font-size:32px; color:var(--ap-accent); opacity: 0.8;">account_circle</span>
+                        <div class="ap-glass-panel flex-grow-1" style="padding: 12px 16px;">
+                            <div class="d-flex justify-content-between align-items-baseline mb-1">
+                                <span class="fw-bold text-light fs-6">${escHtml(c.author_name)}</span>
+                                <span class="text-muted" style="font-size: 11px;">${escHtml(c.created_at)}</span>
+                            </div>
+                            <p class="mb-0 text-muted" style="font-size: 14px; line-height: 1.5;">${escHtml(c.text)}</p>
                         </div>`;
                     section.appendChild(el);
                 });
             }
-        } catch { section.innerHTML = '<p class="text-danger small text-center">コメントを読み込めませんでした。</p>'; }
+        } catch { section.innerHTML = '<p class="text-danger small text-center my-4">コメントを読み込めませんでした。</p>'; }
     }
 
     document.getElementById('commentForm').addEventListener('submit', async function (e) {
