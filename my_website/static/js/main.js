@@ -408,6 +408,34 @@ document.addEventListener('DOMContentLoaded', () => {
     syncNav();
 });
 
+// Mobile Menu (734px 以下で表示される全画面メニュー)
+document.addEventListener('DOMContentLoaded', () => {
+    const button = document.getElementById('ap-menu-btn');
+    const menu = document.getElementById('ap-mobile-menu');
+    if (!button || !menu) return;
+
+    const setOpen = (open) => {
+        menu.hidden = !open;
+        button.setAttribute('aria-expanded', String(open));
+        document.body.classList.toggle('ap-menu-open', open);
+    };
+
+    button.addEventListener('click', () => setOpen(menu.hidden));
+    menu.addEventListener('click', (e) => {
+        if (e.target.closest('a')) setOpen(false);
+    });
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && !menu.hidden) {
+            setOpen(false);
+            button.focus();
+        }
+    });
+    // 画面を回転・拡大してデスクトップ幅になったら閉じる
+    window.matchMedia('(max-width: 734px)').addEventListener('change', (e) => {
+        if (!e.matches) setOpen(false);
+    });
+});
+
 // Apple-style Reveal Animations
 document.addEventListener('DOMContentLoaded', () => {
     const observer = new IntersectionObserver((entries) => {

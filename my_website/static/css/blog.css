@@ -2107,3 +2107,12 @@ button.bk-callout-icon:hover { background: rgba(255, 255, 255, 0.08); }
     .bk-demo-copy { padding: 0 10px; }
     .bk-demo-copy [data-copy-label] { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 }
+
+/* スマートフォン: 16px 未満の入力欄は iOS がフォーカス時に画面を拡大してしまう */
+@media (max-width: 734px) {
+    .blog-dialog-input--mono,
+    .bk-inserter-search,
+    .bk-menu-input,
+    .bk-demo-field textarea { font-size: 16px; }
+    .bk-popover { max-width: calc(100vw - 24px); }
+}
