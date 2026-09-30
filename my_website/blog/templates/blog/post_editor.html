@@ -1,0 +1,325 @@
+{% extends 'base.html' %}
+{% load static i18n %}
+
+{% block title %}{% if post.pk %}{% trans "記事を編集" %}{% else %}{% trans "新しい記事" %}{% endif %} — Blogs{% endblock %}
+
+{% block extra_head %}
+<link href="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.snow.css" rel="stylesheet" />
+<link href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" rel="stylesheet" />
+<link href="{% static 'css/blog.css' %}?v=21" rel="stylesheet" />
+{% endblock %}
+
+{% block content %}
+{% with current_template=form.template.value current_accent=form.accent.value current_width=form.display_width.value|default:'standard' %}
+<form id="blog-post-form" method="post" enctype="multipart/form-data"
+      action="{% if post.pk %}{% url 'blog:edit' post.pk %}{% else %}{% url 'blog:create' %}{% endif %}"
+      data-upload-url="{% url 'blog:upload_image' %}"
+      data-width="{{ current_width }}"
+      style="--blog-accent: {{ current_accent }};">
+    {% csrf_token %}
+    <input type="hidden" name="body_html" id="id_body_html" value="{{ form.body_html.value|default:'' }}">
+    <input type="hidden" name="body_delta" id="id_body_delta" value="{{ form.body_delta.value|default:'' }}">
+    <input type="hidden" name="body_blocks" id="id_body_blocks" value="{{ form.body_blocks.value|default:'' }}">
+
+    <div class="blog-editor">
+        <!-- ── Canvas ─────────────────────────── -->
+        <div class="blog-editor-canvas">
+            <a href="{% url 'blog:mine' %}" class="blog-back">
+                <span class="material-symbols-outlined" aria-hidden="true">arrow_back</span>{% trans "マイブログ" %}
+            </a>
+
+            {% if form.errors %}
+            <div class="blog-form-errors" role="alert">
+                {% for field in form %}{% for error in field.errors %}<p>{{ field.label }}: {{ error }}</p>{% endfor %}{% endfor %}
+                {% for error in form.non_field_errors %}<p>{{ error }}</p>{% endfor %}
+            </div>
+            {% endif %}
+
+            <!-- Cover image -->
+            <div class="blog-cover-drop{% if cover_url %} has-image{% endif %}" id="blog-cover-drop" tabindex="0" role="button"
+                 aria-label="{% trans 'カバー画像を選択' %}">
+                <img id="blog-cover-preview"{% if cover_url %} src="{{ cover_url }}"{% endif %} alt="">
+                <div class="blog-cover-empty">
+                    <span class="material-symbols-outlined" aria-hidden="true">add_photo_alternate</span>
+                    <span>{% trans "カバー画像を追加" %}</span>
+                    <small>{% trans "クリックまたはドラッグ＆ドロップ（JPEG / PNG / WebP / SVG、10MBまで）" %}</small>
+                </div>
+                <button type="button" class="blog-cover-remove" id="blog-cover-remove" aria-label="{% trans 'カバー画像を削除' %}">
+                    <span class="material-symbols-outlined" aria-hidden="true">close</span>
+                </button>
+                <input type="file" name="cover_image" id="id_cover_image" accept="image/jpeg,image/png,image/gif,image/webp,image/svg+xml" hidden>
+                <input type="checkbox" name="cover_image-clear" id="cover_image-clear_id" hidden{% if cover_cleared %} checked{% endif %}>
+                {# 前回の送信がエラーだったときに一時保存したカバー画像 (新しい画像の選択・削除で破棄) #}
+                <input type="hidden" name="cover_pending" id="id_cover_pending" value="{{ cover_pending.pk|default:'' }}">
+            </div>
+
+            <!-- Title & subtitle -->
+            <textarea name="title" id="id_title" class="blog-title-input" rows="1" maxlength="150" required
+                      placeholder="{% trans 'タイトル' %}">{{ form.title.value|default:'' }}</textarea>
+            <input type="text" name="subtitle" id="id_subtitle" class="blog-subtitle-input" maxlength="200"
+                   placeholder="{% trans 'サブタイトル（任意）' %}" value="{{ form.subtitle.value|default:'' }}">
+
+            <!-- Toolbar (全ブロック共通。最後にフォーカスした列に効く) -->
+            <div id="blog-toolbar" class="blog-toolbar" role="toolbar" aria-label="{% trans '書式' %}">
+                <span class="tb-group">
+                    <button type="button" data-cmd="header" data-value="" class="tb-text">{% trans "本文" %}</button>
+                    <button type="button" data-cmd="header" data-value="2" class="tb-text">{% trans "見出し" %}</button>
+                    <button type="button" data-cmd="header" data-value="3" class="tb-text">{% trans "小見出し" %}</button>
+                </span>
+                <span class="tb-group">
+                    <button type="button" data-cmd="bold" aria-label="{% trans '太字' %}" title="{% trans '太字' %}"><span class="material-symbols-outlined" aria-hidden="true">format_bold</span></button>
+                    <button type="button" data-cmd="italic" aria-label="{% trans '斜体' %}" title="{% trans '斜体' %}"><span class="material-symbols-outlined" aria-hidden="true">format_italic</span></button>
+                    <button type="button" data-cmd="underline" aria-label="{% trans '下線' %}" title="{% trans '下線' %}"><span class="material-symbols-outlined" aria-hidden="true">format_underlined</span></button>
+                    <button type="button" data-cmd="strike" aria-label="{% trans '取り消し線' %}" title="{% trans '取り消し線' %}"><span class="material-symbols-outlined" aria-hidden="true">strikethrough_s</span></button>
+                </span>
+                <span class="tb-group">
+                    <button type="button" data-cmd="align" data-value="" aria-label="{% trans '左揃え' %}" title="{% trans '左揃え' %}"><span class="material-symbols-outlined" aria-hidden="true">format_align_left</span></button>
+                    <button type="button" data-cmd="align" data-value="center" aria-label="{% trans '中央揃え' %}" title="{% trans '中央揃え' %}"><span class="material-symbols-outlined" aria-hidden="true">format_align_center</span></button>
+                    <button type="button" data-cmd="align" data-value="right" aria-label="{% trans '右揃え' %}" title="{% trans '右揃え' %}"><span class="material-symbols-outlined" aria-hidden="true">format_align_right</span></button>
+                    <button type="button" data-cmd="align" data-value="justify" aria-label="{% trans '両端揃え' %}" title="{% trans '両端揃え' %}"><span class="material-symbols-outlined" aria-hidden="true">format_align_justify</span></button>
+                </span>
+                <span class="tb-group">
+                    <button type="button" data-cmd="list" data-value="bullet" aria-label="{% trans '箇条書き' %}" title="{% trans '箇条書き' %}"><span class="material-symbols-outlined" aria-hidden="true">format_list_bulleted</span></button>
+                    <button type="button" data-cmd="list" data-value="ordered" aria-label="{% trans '番号付きリスト' %}" title="{% trans '番号付きリスト' %}"><span class="material-symbols-outlined" aria-hidden="true">format_list_numbered</span></button>
+                    <button type="button" data-cmd="indent" data-value="-1" aria-label="{% trans 'インデントを減らす' %}" title="{% trans 'インデントを減らす' %}"><span class="material-symbols-outlined" aria-hidden="true">format_indent_decrease</span></button>
+                    <button type="button" data-cmd="indent" data-value="+1" aria-label="{% trans 'インデントを増やす' %}" title="{% trans 'インデントを増やす' %}"><span class="material-symbols-outlined" aria-hidden="true">format_indent_increase</span></button>
+                </span>
+                <span class="tb-group">
+                    <button type="button" data-cmd="blockquote" aria-label="{% trans '引用' %}" title="{% trans '引用' %}"><span class="material-symbols-outlined" aria-hidden="true">format_quote</span></button>
+                    <button type="button" data-cmd="code-block" aria-label="{% trans 'コード' %}" title="{% trans 'コード' %}"><span class="material-symbols-outlined" aria-hidden="true">code_blocks</span></button>
+                    <button type="button" data-cmd="link" aria-label="{% trans 'リンク' %}" title="{% trans 'リンク' %}"><span class="material-symbols-outlined" aria-hidden="true">link</span></button>
+                    <button type="button" data-cmd="image" aria-label="{% trans '画像を挿入' %}" title="{% trans '画像を挿入' %}"><span class="material-symbols-outlined" aria-hidden="true">image</span></button>
+                    <button type="button" data-cmd="formula" aria-label="{% trans '数式 (LaTeX)' %}" title="{% trans '数式 (LaTeX)' %}"><span class="material-symbols-outlined" aria-hidden="true">function</span></button>
+                    <button type="button" data-cmd="markdown" class="tb-text tb-md" aria-label="{% trans 'Markdown を読み込む' %}" title="{% trans 'Markdown を読み込む' %}">M↓</button>
+                    <button type="button" data-cmd="clean" aria-label="{% trans '書式をクリア' %}" title="{% trans '書式をクリア' %}"><span class="material-symbols-outlined" aria-hidden="true">format_clear</span></button>
+                </span>
+            </div>
+
+            <!-- Body: ブロック -->
+            <div id="blog-blocks" class="blog-prose blog-blocks blog-blocks-editor"></div>
+            <button type="button" id="blog-add-block" class="blog-add-block">
+                <span class="material-symbols-outlined" aria-hidden="true">add</span>{% trans "ブロックを追加" %}
+            </button>
+        </div>
+
+        <!-- ── Settings ───────────────────────── -->
+        <aside class="blog-editor-settings" aria-label="{% trans '記事の設定' %}">
+            <section class="blog-settings-card">
+                <h2 class="blog-settings-title">{% trans "テンプレート" %}</h2>
+                <div class="blog-template-grid" role="radiogroup">
+                    <label class="blog-template-option">
+                        <input type="radio" name="template" value="feature" {% if current_template == 'feature' %}checked{% endif %}>
+                        <span class="blog-template-thumb blog-template-thumb--feature" aria-hidden="true"><i></i><b></b><b></b></span>
+                        <span class="blog-template-name">{% trans "フィーチャー" %}</span>
+                        <span class="blog-template-desc">{% trans "カバー画像を全面に" %}</span>
+                    </label>
+                    <label class="blog-template-option">
+                        <input type="radio" name="template" value="classic" {% if current_template == 'classic' or not current_template %}checked{% endif %}>
+                        <span class="blog-template-thumb blog-template-thumb--classic" aria-hidden="true"><b></b><b></b><i></i></span>
+                        <span class="blog-template-name">{% trans "クラシック" %}</span>
+                        <span class="blog-template-desc">{% trans "中央揃えの定番" %}</span>
+                    </label>
+                    <label class="blog-template-option">
+                        <input type="radio" name="template" value="split" {% if current_template == 'split' %}checked{% endif %}>
+                        <span class="blog-template-thumb blog-template-thumb--split" aria-hidden="true"><b></b><b></b><i></i></span>
+                        <span class="blog-template-name">{% trans "スプリット" %}</span>
+                        <span class="blog-template-desc">{% trans "タイトルと写真を左右に" %}</span>
+                    </label>
+                    <label class="blog-template-option">
+                        <input type="radio" name="template" value="minimal" {% if current_template == 'minimal' %}checked{% endif %}>
+                        <span class="blog-template-thumb blog-template-thumb--minimal" aria-hidden="true"><b></b><b></b><b></b></span>
+                        <span class="blog-template-name">{% trans "ミニマル" %}</span>
+                        <span class="blog-template-desc">{% trans "文字が主役" %}</span>
+                    </label>
+                </div>
+                <hr class="blog-settings-divider">
+                <h2 class="blog-settings-title">{% trans "表示幅" %}</h2>
+                <div class="blog-width-options" role="radiogroup" aria-label="{% trans '表示幅' %}">
+                    <label class="blog-width-option">
+                        <input type="radio" name="display_width" value="standard" {% if current_width != 'narrow' %}checked{% endif %}>
+                        <span class="blog-width-thumb blog-width-thumb--standard" aria-hidden="true"><b></b><b></b><b></b></span>
+                        <span class="blog-width-name">{% trans "標準" %}</span>
+                        <span class="blog-width-desc">{% trans "画面いっぱいに表示" %}</span>
+                    </label>
+                    <label class="blog-width-option">
+                        <input type="radio" name="display_width" value="narrow" {% if current_width == 'narrow' %}checked{% endif %}>
+                        <span class="blog-width-thumb blog-width-thumb--narrow" aria-hidden="true"><b></b><b></b><b></b></span>
+                        <span class="blog-width-name">{% trans "狭幅" %}</span>
+                        <span class="blog-width-desc">{% trans "読みやすい細い段組" %}</span>
+                    </label>
+                </div>
+            </section>
+
+            <section class="blog-settings-card">
+                <h2 class="blog-settings-title">{% trans "アクセントカラー" %}</h2>
+                <div class="blog-accent-row" role="radiogroup">
+                    {% for value, label in form.fields.accent.choices %}
+                    <label class="blog-accent-option" title="{{ label }}">
+                        <input type="radio" name="accent" value="{{ value }}" {% if current_accent == value %}checked{% endif %} aria-label="{{ label }}">
+                        <span style="background: {{ value }};"></span>
+                    </label>
+                    {% endfor %}
+                </div>
+            </section>
+
+            <section class="blog-settings-card blog-settings-tips">
+                <h2 class="blog-settings-title">{% trans "ヒント" %}</h2>
+                <ul>
+                    <li>{% trans "画像はツールバーのボタン、ドラッグ＆ドロップ、貼り付けで挿入できます。" %}</li>
+                    <li>{% trans "ブロックの左の ⋮⋮ で列数 (1〜3)・背景・幅などを設定、ドラッグで並べ替え。＋ か空の行で「/」でブロックを追加。" %}</li>
+                    <li>{% trans "画像はクリックで選択。四隅をドラッグでサイズ変更、画像をドラッグで移動、ダブルクリックで元のサイズ。" %}</li>
+                    <li>{% trans "Markdown 記法 (# 見出し、**太字**、`コード`、--- など) がそのまま使えます。" %}</li>
+                    <li>{% trans "⌘/Ctrl + S で下書き保存。" %}</li>
+                </ul>
+            </section>
+
+            {% if post.pk %}
+            <section class="blog-settings-card">
+                <h2 class="blog-settings-title">{% trans "記事" %}</h2>
+                <p class="blog-settings-meta">
+                    <span class="blog-status blog-status--{{ post.status }}">{{ post.get_status_display }}</span>
+                    {% trans "最終更新" %} {{ post.updated_at|date:"Y.m.d H:i" }}
+                </p>
+                <button type="submit" form="blog-delete-form" class="blog-link-danger">
+                    <span class="material-symbols-outlined" aria-hidden="true">delete</span>{% trans "この記事を削除" %}
+                </button>
+            </section>
+            {% endif %}
+        </aside>
+    </div>
+
+    <!-- ── Floating action bar ──────────────── -->
+    <div class="blog-actionbar" role="toolbar" aria-label="{% trans '保存' %}">
+        <span class="blog-actionbar-status" id="blog-save-status" aria-live="polite"></span>
+        {% if post.pk %}
+            <a href="{{ post.get_absolute_url }}" class="blog-actionbar-btn" target="_blank" rel="noopener">
+                {% trans "プレビュー" %}
+            </a>
+        {% endif %}
+        {% if post.is_published %}
+            <button type="submit" name="action" value="unpublish" class="blog-actionbar-btn">{% trans "非公開にする" %}</button>
+            <button type="submit" name="action" value="publish" class="blog-actionbar-btn blog-actionbar-btn--primary">{% trans "更新する" %}</button>
+        {% else %}
+            <button type="submit" name="action" value="draft" class="blog-actionbar-btn" id="blog-save-draft">{% trans "下書き保存" %}</button>
+            <button type="submit" name="action" value="publish" class="blog-actionbar-btn blog-actionbar-btn--primary">{% trans "公開する" %}</button>
+        {% endif %}
+    </div>
+</form>
+
+<!-- 数式ダイアログ -->
+<dialog id="blog-math-dialog" class="blog-dialog" data-label-insert="{% trans '挿入' %}" data-label-update="{% trans '更新' %}">
+    <form method="dialog">
+        <h2 class="blog-dialog-title">{% trans "数式 (LaTeX)" %}</h2>
+        <div class="blog-segmented" role="radiogroup" aria-label="{% trans '表示方法' %}">
+            <label><input type="radio" name="math-mode" value="inline" checked><span>{% trans "文中" %}</span></label>
+            <label><input type="radio" name="math-mode" value="display"><span>{% trans "独立した行" %}</span></label>
+        </div>
+        <textarea class="blog-dialog-input blog-dialog-input--mono" rows="3" spellcheck="false"
+                  placeholder="e.g. E = mc^2,  \int_0^\infty e^{-x^2} dx = \frac{\sqrt{\pi}}{2}"
+                  aria-label="{% trans 'LaTeX' %}"></textarea>
+        <div class="blog-math-preview" aria-live="polite"></div>
+        <p class="blog-dialog-hint">{% trans "本文中で $…$ と入力しても文中の数式、$$ + Enter で独立した数式を挿入できます。" %}</p>
+        <div class="blog-dialog-actions">
+            <button value="cancel" class="ap-btn ap-btn-outline blog-btn-sm" formnovalidate>{% trans "キャンセル" %}</button>
+            <button value="insert" data-action="insert" class="ap-btn ap-btn-primary blog-btn-sm">{% trans "挿入" %}</button>
+        </div>
+    </form>
+</dialog>
+
+<!-- リンクダイアログ -->
+<dialog id="blog-link-dialog" class="blog-dialog">
+    <form method="dialog">
+        <h2 class="blog-dialog-title">{% trans "リンク" %}</h2>
+        <input type="url" class="blog-dialog-input" placeholder="https://" aria-label="URL">
+        <div class="blog-dialog-actions">
+            <button value="remove" class="ap-btn ap-btn-outline blog-btn-sm" formnovalidate style="margin-right: auto;">{% trans "リンクを解除" %}</button>
+            <button value="cancel" class="ap-btn ap-btn-outline blog-btn-sm" formnovalidate>{% trans "キャンセル" %}</button>
+            <button value="insert" class="ap-btn ap-btn-primary blog-btn-sm">{% trans "適用" %}</button>
+        </div>
+    </form>
+</dialog>
+
+<!-- Markdown 読み込みダイアログ -->
+<dialog id="blog-md-dialog" class="blog-dialog blog-dialog--wide">
+    <form method="dialog">
+        <h2 class="blog-dialog-title">{% trans "Markdown を読み込む" %}</h2>
+        <p class="blog-dialog-hint" style="margin-top: 0;">{% trans "見出し・リスト・引用・コード・リンク・画像・数式 ($…$ / $$…$$) に対応。カーソル位置に挿入されます。" %}</p>
+        <textarea class="blog-dialog-input blog-dialog-input--mono" rows="12" spellcheck="false"
+                  placeholder="# {% trans '見出し' %}&#10;&#10;**{% trans '太字' %}** {% trans 'と' %} *{% trans '斜体' %}*、$E = mc^2$&#10;&#10;- {% trans 'リスト' %}" aria-label="Markdown"></textarea>
+        <div class="blog-dialog-actions">
+            <button value="cancel" class="ap-btn ap-btn-outline blog-btn-sm" formnovalidate>{% trans "キャンセル" %}</button>
+            <button value="insert" class="ap-btn ap-btn-primary blog-btn-sm">{% trans "挿入" %}</button>
+        </div>
+    </form>
+</dialog>
+
+{% if post.pk %}
+<form id="blog-delete-form" method="post" action="{% url 'blog:delete' post.pk %}"
+      onsubmit="return confirm('{% trans "この記事を削除しますか？この操作は取り消せません。" %}');">
+    {% csrf_token %}
+</form>
+{% endif %}
+{% endwith %}
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/marked@12.0.2/marked.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.js"></script>
+<script>
+    window.BLOG_EDITOR_I18N = {
+        placeholder: "{% trans 'テキストを入力、または「/」でブロックを追加' %}",
+        uploading: "{% trans '画像をアップロード中…' %}",
+        uploadFailed: "{% trans '画像をアップロードできませんでした。' %}",
+        unsaved: "{% trans '未保存の変更があります' %}",
+        saving: "{% trans '保存中…' %}",
+        invalidUrl: "{% trans 'http(s):// で始まる URL を入力してください。' %}",
+        blocks: {
+            addBlock: "{% trans 'ブロックを追加' %}",
+            blockMenu: "{% trans 'クリックで設定、ドラッグで移動' %}",
+            changeIcon: "{% trans 'アイコンを変更' %}",
+            searchBlocks: "{% trans 'ブロックを検索' %}",
+            noMatch: "{% trans '該当するブロックがありません' %}",
+            types: {
+                text: "{% trans 'テキスト' %}", heading: "{% trans '見出し' %}", cols2: "{% trans '2列' %}", cols3: "{% trans '3列' %}",
+                image: "{% trans '画像' %}", mediaText: "{% trans '画像とテキスト' %}", callout: "{% trans 'コールアウト' %}",
+                quote: "{% trans '引用' %}", math: "{% trans '数式' %}", code: "{% trans 'コード' %}",
+                divider: "{% trans '区切り線' %}", spacer: "{% trans '余白' %}", button: "{% trans 'ボタン' %}",
+                demo: "{% trans 'HTML / CSS' %}",
+            },
+            typeDesc: {
+                text: "{% trans '本文を書く' %}", heading: "{% trans 'セクションの見出し' %}", cols2: "{% trans '2つの列に分けて並べる' %}",
+                cols3: "{% trans '3つの列に分けて並べる' %}", image: "{% trans '画像をアップロード' %}",
+                mediaText: "{% trans '画像と文章を左右に' %}", callout: "{% trans 'アイコン付きで目立たせる' %}",
+                quote: "{% trans '大きな引用文' %}", math: "{% trans 'LaTeX の数式' %}", code: "{% trans 'コードブロック' %}",
+                divider: "{% trans 'セクションを区切る' %}", spacer: "{% trans '縦の余白' %}", button: "{% trans 'リンクボタン' %}",
+                demo: "{% trans 'UI をプレビューしてコードを共有' %}",
+            },
+            kind: "{% trans '種類' %}", columns: "{% trans '列' %}", ratio: "{% trans '比率' %}", icon: "{% trans 'アイコン' %}",
+            background: "{% trans '背景' %}", width: "{% trans '幅' %}", spacing: "{% trans '余白' %}", valign: "{% trans '縦位置' %}",
+            textSize: "{% trans '文字サイズ' %}", height: "{% trans '高さ' %}", align: "{% trans '配置' %}", none: "{% trans 'なし' %}",
+            columnRule: "{% trans '列の間に線' %}", animate: "{% trans 'スクロールでフェードイン' %}",
+            bg: { none: "{% trans 'なし' %}", gray: "{% trans 'グレー' %}", tint: "{% trans 'アクセント (淡)' %}", accent: "{% trans 'アクセント' %}", light: "{% trans 'ホワイト' %}" },
+            widths: { text: "{% trans '本文' %}", wide: "{% trans 'ワイド' %}", full: "{% trans '全幅' %}" },
+            valigns: { top: "{% trans '上' %}", center: "{% trans '中央' %}", bottom: "{% trans '下' %}" },
+            sizes: { s: "{% trans '小' %}", m: "{% trans '標準' %}", l: "{% trans '大' %}" },
+            dividers: { dots: "{% trans 'ドット' %}", line: "{% trans '線' %}" },
+            aligns: { left: "{% trans '左' %}", center: "{% trans '中央' %}", right: "{% trans '右' %}" },
+            buttonLabel: "{% trans 'ボタン名' %}", buttonUrl: "{% trans 'リンク先' %}", buttonPlaceholder: "{% trans 'ボタン' %}",
+            buttonVariants: { primary: "{% trans '塗り' %}", secondary: "{% trans '線' %}" },
+            demoPreview: "{% trans 'HTML / CSS のプレビュー' %}",
+            demoBg: { dark: "{% trans 'ダーク' %}", light: "{% trans 'ライト' %}", checker: "{% trans 'チェック' %}" },
+            demoTop: "{% trans '左上' %}",
+            demoResize: "{% trans 'ドラッグで幅を変更 (ダブルクリックで元の幅に戻す)' %}",
+            demoResizeLabel: "{% trans 'カードの幅' %}",
+            demoFullWidth: "{% trans '全幅' %}",
+            moveUp: "{% trans '上へ' %}", moveDown: "{% trans '下へ' %}", duplicate: "{% trans '複製' %}", remove: "{% trans '削除' %}",
+        },
+    };
+</script>
+<script src="{% static 'js/blog-editor-math.js' %}?v=2"></script>
+<script src="{% static 'js/blog-editor-markdown.js' %}?v=3"></script>
+<script src="{% static 'js/blog-editor-images.js' %}?v=3"></script>
+<script src="{% static 'js/blog-blocks.js' %}?v=7"></script>
+<script src="{% static 'js/blog-editor.js' %}?v=9"></script>
+{% endblock %}

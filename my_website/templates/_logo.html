@@ -1,0 +1,28 @@
+{% comment %}
+JE6HUB ロゴ (マーク + ワードマーク)。色は currentColor に追従する。
+使い方: include "_logo.html" with logo_id="nav"  (logo_id はページ内で一意に)
+{% endcomment %}
+<svg class="je6hub-logo" viewBox="0 0 146 32" fill="none" role="img" aria-labelledby="je6hub-logo-title-{{ logo_id }}">
+    <title id="je6hub-logo-title-{{ logo_id }}">JE6HUB.com</title>
+    <defs>
+        <linearGradient id="je6hub-logo-core-{{ logo_id }}" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stop-color="#2997ff"/><stop offset="1" stop-color="#bf5af2"/>
+        </linearGradient>
+    </defs>
+    <g transform="translate(16 16)" stroke="currentColor" stroke-linecap="round">
+        <circle r="12" stroke-width="1.5" opacity=".45"/>
+        <path d="M0 -5.2 V-9.4 M4.5 2.6 L8.14 4.7 M-4.5 2.6 L-8.14 4.7" stroke-width="1.8"/>
+        <g fill="currentColor" stroke="none">
+            <circle cy="-12" r="2.6"/><circle cx="10.39" cy="6" r="2.6"/><circle cx="-10.39" cy="6" r="2.6"/>
+        </g>
+        <circle r="4" fill="url(#je6hub-logo-core-{{ logo_id }})" stroke="none"/>
+    </g>
+    <g transform="translate(38 7)" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M9 0 V12.5 A4.5 4.5 0 0 1 0 12.5"/>
+        <path transform="translate(15 0)" d="M9 0 H0 V18 H9 M0 9 H7.5"/>
+        <path transform="translate(29 0)" d="M9.5 1.2 C4 -0.8 0.6 4 0.6 12 M0.6 12.5 A5 5 0 1 0 10.6 12.5 A5 5 0 1 0 0.6 12.5"/>
+        <path transform="translate(46 0)" d="M0 0 V18 M10 0 V18 M0 9 H10"/>
+        <path transform="translate(62 0)" d="M0 0 V12.5 A5 5 0 0 0 10 12.5 V0"/>
+        <path transform="translate(78 0)" d="M0 18 V0 H5 A4.5 4.5 0 0 1 5 9 H0 M5 9 H5.5 A4.5 4.5 0 0 1 5.5 18 H0"/>
+    </g>
+</svg>

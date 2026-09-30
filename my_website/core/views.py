@@ -5,24 +5,24 @@ from django.core.mail import send_mail
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.utils.translation import gettext_lazy as _
+
+from blog.models import Post
+
 from .forms import ContactForm
 
 logger = logging.getLogger(__name__)
 
+LATEST_POSTS = 6
+
 
 def home_view(request):
-    from django.db.models import Q
-    from photraveler.models import MapPin
-    from community.models import Channel
-
-    q = request.GET.get('q', '').strip()
-    context = {'q': q}
-    if q:
-        context['pin_results'] = MapPin.objects.filter(
-            Q(title__icontains=q) | Q(description__icontains=q)
-        )
-        context['channel_results'] = Channel.objects.filter(name__icontains=q)
-    return render(request, 'core/home.html', context)
+    """ホーム: Blogs の紹介と最新記事。個人のポートフォリオは resume に集約している。"""
+    published = Post.objects.published()
+    return render(request, 'core/home.html', {
+        'latest': list(published.select_related('author')[:LATEST_POSTS]),
+        'post_count': published.count(),
+        'writer_count': published.values('author').distinct().count(),
+    })
 
 
 def resume_view(request):

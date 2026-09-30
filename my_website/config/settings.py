@@ -76,6 +76,7 @@ INSTALLED_APPS = [
     'core',        # Home, Contact
     'photraveler', # 写真×地図
     'community',   # チャット
+    'blog',        # Blogs
 ]
 
 SITE_ID = 1
@@ -91,6 +92,7 @@ AUTHENTICATION_BACKENDS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'core.middleware.MediaSvgSecurityMiddleware',   # アップロードされた SVG を安全に配信
     'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.locale.LocaleMiddleware', # 多言語対応(i18n)のためSessionの次に配置

@@ -1,0 +1,143 @@
+{% extends 'base.html' %}
+{% load static i18n %}
+
+{% block title %}{{ post.title }} — Blogs{% endblock %}
+
+{% block extra_head %}
+<meta name="description" content="{{ post.excerpt }}">
+<meta property="og:title" content="{{ post.title }}">
+<meta property="og:description" content="{{ post.excerpt }}">
+{% if post.cover_image %}<meta property="og:image" content="{{ request.scheme }}://{{ request.get_host }}{{ post.cover_image.url }}">{% endif %}
+<link href="{% static 'css/blog.css' %}?v=21" rel="stylesheet" />
+{% if post.has_math %}
+<link href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" rel="stylesheet" />
+{% endif %}
+{% if post.has_demo %}
+<link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css" rel="stylesheet" />
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+{% if post.has_demo %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script>
+    window.BLOG_DEMO_I18N = { copy: "{% trans 'コピー' %}", copied: "{% trans 'コピーしました' %}" };
+</script>
+<script src="{% static 'js/blog-demo.js' %}?v=2"></script>
+{% endif %}
+{% if post.has_math %}
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script>
+    // 数式は LaTeX ソース (data-value) として保存されている。trust: false で \href 等も無効
+    document.querySelectorAll('.blog-prose .ql-formula, .blog-prose .ql-math-display').forEach((el) => {
+        katex.render(el.getAttribute('data-value') || el.textContent, el, {
+            displayMode: el.classList.contains('ql-math-display'),
+            throwOnError: false,
+            trust: false,
+        });
+    });
+</script>
+{% endif %}
+{% endblock %}
+
+{% block content %}
+<article class="blog-article blog-template-{{ post.template }} blog-width-{{ post.display_width }}" style="--blog-accent: {{ post.accent }};">
+
+    {% if is_author %}
+    <div class="blog-author-bar">
+        {% if not post.is_published %}
+            <span class="blog-status blog-status--draft">{% trans "下書き — あなただけに表示されています" %}</span>
+        {% endif %}
+        <a href="{% url 'blog:edit' post.pk %}" class="ap-btn ap-btn-primary blog-btn-sm">
+            {% trans "編集" %}
+        </a>
+    </div>
+    {% endif %}
+
+    {% if post.template == 'feature' %}
+    <!-- Feature: 全面カバー + タイトルオーバーレイ -->
+    <header class="blog-hero blog-hero--feature">
+        {% if post.cover_image %}
+            <img class="blog-hero-bg" src="{{ post.cover_image.url }}" alt="">
+        {% else %}
+            <div class="blog-hero-bg blog-cover-fallback"></div>
+        {% endif %}
+        <div class="blog-hero-scrim"></div>
+        <div class="blog-hero-inner">
+            <h1 class="blog-title">{{ post.title }}</h1>
+            {% if post.subtitle %}<p class="blog-subtitle">{{ post.subtitle }}</p>{% endif %}
+            {% include "blog/_byline.html" %}
+        </div>
+    </header>
+
+    {% elif post.template == 'split' %}
+    <!-- Split: テキストと画像を左右に -->
+    <header class="blog-hero blog-hero--split">
+        <div class="blog-hero-text">
+            <h1 class="blog-title">{{ post.title }}</h1>
+            {% if post.subtitle %}<p class="blog-subtitle">{{ post.subtitle }}</p>{% endif %}
+            {% include "blog/_byline.html" %}
+        </div>
+        <div class="blog-hero-media">
+            {% if post.cover_image %}
+                <img src="{{ post.cover_image.url }}" alt="">
+            {% else %}
+                <div class="blog-cover-fallback"><span>{{ post.title|first }}</span></div>
+            {% endif %}
+        </div>
+    </header>
+
+    {% elif post.template == 'minimal' %}
+    <!-- Minimal: タイポグラフィ中心 -->
+    <header class="blog-hero blog-hero--minimal">
+        <h1 class="blog-title">{{ post.title }}</h1>
+        {% if post.subtitle %}<p class="blog-subtitle">{{ post.subtitle }}</p>{% endif %}
+        <hr class="blog-rule">
+        {% include "blog/_byline.html" %}
+    </header>
+
+    {% else %}
+    <!-- Classic: 中央揃えタイトル + カバー画像 -->
+    <header class="blog-hero blog-hero--classic">
+        <h1 class="blog-title">{{ post.title }}</h1>
+        {% if post.subtitle %}<p class="blog-subtitle">{{ post.subtitle }}</p>{% endif %}
+        {% include "blog/_byline.html" %}
+        {% if post.cover_image %}
+        <figure class="blog-hero-figure">
+            <img src="{{ post.cover_image.url }}" alt="">
+        </figure>
+        {% endif %}
+    </header>
+    {% endif %}
+
+    {% if post.uses_blocks %}
+        {% include "blog/_blocks.html" %}
+    {% else %}
+    <div class="blog-prose{% if post.template == 'minimal' %} blog-prose--dropcap{% endif %}">
+        {{ post.body_html|safe }}
+    </div>
+    {% endif %}
+
+    <footer class="blog-article-footer">
+        <div class="blog-author-card ap-glass-panel">
+            <span class="blog-avatar blog-avatar--lg" aria-hidden="true">{{ post.author.username|first|upper }}</span>
+            <div>
+                <span class="blog-kicker">{% trans "Written by" %}</span>
+                <p class="blog-author-name">{{ post.author.username }}</p>
+                <a href="{% url 'blog:list' %}?author={{ post.author.username|urlencode }}">{% trans "この著者の記事をすべて見る" %} →</a>
+            </div>
+        </div>
+    </footer>
+</article>
+
+{% if more_posts %}
+<section class="blog-page blog-more">
+    <h2 class="blog-more-title">{% trans "この著者の他の記事" %}</h2>
+    <div class="blog-grid">
+        {% for post in more_posts %}
+            {% include "blog/_card.html" %}
+        {% endfor %}
+    </div>
+</section>
+{% endif %}
+{% endblock %}

@@ -1,8 +1,10 @@
+import shutil
+import tempfile
 from io import BytesIO
 
 from django.contrib.auth import get_user_model
 from django.core.files.uploadedfile import SimpleUploadedFile
-from django.test import TestCase
+from django.test import TestCase, override_settings
 from django.urls import reverse
 
 from .models import Channel, ChannelMembership, Message
@@ -161,7 +163,16 @@ class InviteApproveTests(TestCase):
         self.assertEqual(response.status_code, 403)
 
 
+TEMP_MEDIA = tempfile.mkdtemp()  # 添付ファイルは実際の media/ ではなく一時フォルダに保存する
+
+
+@override_settings(MEDIA_ROOT=TEMP_MEDIA)
 class MessageMediaTests(TestCase):
+    @classmethod
+    def tearDownClass(cls):
+        super().tearDownClass()
+        shutil.rmtree(TEMP_MEDIA, ignore_errors=True)
+
     def setUp(self):
         self.user = make_user('alice')
         self.ch   = make_channel(self.user, 'Media Test')

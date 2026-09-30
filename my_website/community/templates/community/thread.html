@@ -1,320 +1,193 @@
 {% extends 'base.html' %}
-{% load i18n %}
+{% load static i18n %}
 
 {% block title %}{{ channel.name }} — Community Lounge{% endblock %}
 
 {% block extra_head %}
-<style>
-/* ── メッセージバブル ── */
-.msg-bubble { padding: 12px 16px; font-size: 15px; }
-.msg-bubble-self  { border-radius: 20px 20px 4px 20px; background: var(--ap-accent); color: #fff; }
-.msg-bubble-other { border-radius: 20px 20px 20px 4px; background: rgba(255,255,255,0.1); color: #fff; border: 1px solid rgba(255,255,255,0.05); }
-.msg-bubble p { line-height: 1.4; margin: 0; }
-.msg-bubble p:empty { display: none; }
-
-/* ── メディア表示 ── */
-.msg-media {
-    max-width: 320px;
-    border-radius: 16px;
-    overflow: hidden;
-    margin-bottom: 6px;
-}
-.msg-media img { width: 100%; display: block; cursor: pointer; transition: transform 0.3s; }
-.msg-media img:hover { transform: scale(1.02); }
-.msg-media video { width: 100%; display: block; border-radius: 16px; }
-
-/* ── 添付プレビュー（入力エリア） ── */
-#mediaPreviewWrap {
-    display: none;
-    margin-bottom: 12px;
-    position: relative;
-    width: fit-content;
-}
-#mediaPreviewImg  { max-height: 180px; max-width: 100%; border-radius: 14px; object-fit: cover; }
-#mediaPreviewVid  { max-height: 180px; max-width: 100%; border-radius: 14px; }
-#mediaRemoveBtn {
-    position: absolute; top: 8px; right: 8px;
-    width: 28px; height: 28px; border-radius: 50%;
-    background: rgba(0,0,0,0.6); border: none; cursor: pointer;
-    display: flex; align-items: center; justify-content: center;
-    color: #fff; font-size: 16px; line-height: 1; backdrop-filter: blur(4px);
-}
-#mediaRemoveBtn:hover { background: rgba(0,0,0,0.8); }
-
-/* ── 入力エリア ── */
-.chat-input-bar {
-    background: rgba(255,255,255,0.05);
-    border: 1px solid rgba(255,255,255,0.1);
-    border-radius: 24px;
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    padding: 10px 16px;
-}
-.attach-btn {
-    background: none; border: none; cursor: pointer;
-    color: rgba(255,255,255,0.4); transition: color 0.2s;
-    padding: 6px; border-radius: 50%; display: flex; align-items: center;
-}
-.attach-btn:hover { color: var(--ap-accent); background: rgba(255,255,255,0.05); }
-#chatTextInput {
-    flex: 1; background: none; border: none; outline: none;
-    color: #fff; font-size: 15px; line-height: 1.5;
-    resize: none; min-height: 24px; max-height: 120px;
-    font-family: inherit; padding: 4px 8px;
-}
-#chatTextInput::placeholder { color: rgba(255,255,255,0.3); }
-#sendBtn {
-    width: 40px; height: 40px; border-radius: 50%;
-    background: var(--ap-accent); border: none; cursor: pointer;
-    display: flex; align-items: center; justify-content: center;
-    color: #fff; transition: background 0.2s, transform 0.15s;
-    flex-shrink: 0; margin-left: 8px;
-}
-#sendBtn:hover  { background: #0062d1; }
-#sendBtn:active { transform: scale(0.92); }
-#sendBtn:disabled { background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.3); cursor: default; }
-
-/* ── 画像ライトボックス ── */
-#lightbox {
-    display: none; position: fixed; inset: 0; z-index: 2000;
-    background: rgba(0,0,0,0.9); align-items: center; justify-content: center;
-    backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
-}
-#lightbox.open { display: flex; }
-#lightboxImg { max-width: 90vw; max-height: 90vh; border-radius: 16px; }
-#lightboxClose {
-    position: absolute; top: 24px; right: 32px;
-    background: rgba(255,255,255,0.1); border: none; color: #fff;
-    width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
-    font-size: 24px; cursor: pointer; line-height: 1; transition: background 0.2s;
-}
-#lightboxClose:hover { background: rgba(255,255,255,0.2); }
-</style>
+<link href="{% static 'css/lounge.css' %}?v=5" rel="stylesheet" />
 {% endblock %}
 
 {% block content %}
-<div class="ap-section py-4" style="max-width:1000px;">
+<div class="lounge-ambient" aria-hidden="true"></div>
 
-    <!-- ヘッダー -->
-    <div class="d-flex align-items-center gap-3 mb-4 flex-wrap ap-reveal">
-        <a href="{% url 'community:list' %}" style="color:var(--ap-accent);text-decoration:none;">
-            <span class="material-symbols-outlined align-middle" aria-hidden="true" style="font-size:24px;">arrow_back</span>
-        </a>
-        <div style="flex:1;min-width:0;">
-            <h2 class="ap-hero-title mb-0" style="font-size: 24px;">
-                {% if channel.channel_type == 'private' %}
-                <span class="material-symbols-outlined align-middle me-1" aria-hidden="true" style="font-size: 24px; color:#bf5af2;">lock</span>
-                {% else %}
-                <span class="material-symbols-outlined align-middle me-1" aria-hidden="true" style="font-size: 24px; color:var(--ap-accent);">tag</span>
+<div class="lounge-page" style="padding-top: 24px;">
+    <div class="lounge-chat-layout{% if is_owner and channel.channel_type == 'private' %} lounge-chat-layout--with-panel{% endif %}">
+
+        <!-- ── チャット ── -->
+        <section class="lounge-chat lounge-glass{% if channel.channel_type == 'private' %} lounge-chat--private{% endif %}">
+            <header class="lounge-chat-header">
+                <a href="{% url 'community:list' %}" class="lounge-chat-back" aria-label="{% trans 'Loungeに戻る' %}">
+                    <span class="material-symbols-outlined" aria-hidden="true">arrow_back</span>
+                </a>
+                <div class="lounge-card-icon" aria-hidden="true">
+                    <span class="material-symbols-outlined">{% if channel.channel_type == 'private' %}lock{% else %}tag{% endif %}</span>
+                </div>
+                <div class="lounge-chat-title">
+                    <h1>{{ channel.name }}</h1>
+                    <p>{% if channel.description %}{{ channel.description }}{% else %}{{ channel.active_member_count }} {% trans "メンバー" %}{% endif %}</p>
+                </div>
+                {% if membership and membership.role != 'owner' %}
+                <form method="post" action="{% url 'community:leave' channel.id %}" class="js-confirm"
+                      data-confirm="{% trans 'チャンネルを退出しますか？' %}">
+                    {% csrf_token %}
+                    <button type="submit" class="lounge-btn lounge-btn--tint lounge-btn--sm" style="--tint: var(--lounge-danger);">
+                        <span class="material-symbols-outlined" aria-hidden="true">logout</span><span class="lounge-btn-text">{% trans "退出" %}</span>
+                    </button>
+                </form>
                 {% endif %}
-                {{ channel.name }}
-            </h2>
-            {% if channel.description %}
-            <p class="mb-0 mt-1 text-muted" style="font-size:14px;">{{ channel.description }}</p>
-            {% endif %}
-        </div>
-        {% if membership and membership.role != 'owner' %}
-        <form method="post" action="{% url 'community:leave' channel.id %}" class="js-confirm"
-              data-confirm="チャンネルを退出しますか？">
-            {% csrf_token %}
-            <button type="submit" class="ap-btn ap-btn-outline" style="padding: 8px 16px; font-size:13px; color: #ff3b30; border-color: rgba(255,59,48,0.5);">
-                <span class="material-symbols-outlined align-middle me-1" aria-hidden="true" style="font-size:16px;">logout</span>{% trans "退出" %}
-            </button>
-        </form>
-        {% endif %}
-    </div>
-
-    <div class="{% if is_owner and channel.channel_type == 'private' %}row g-4{% endif %}">
-
-        <!-- ── チャットエリア ── -->
-        <div class="{% if is_owner and channel.channel_type == 'private' %}col-lg-8{% endif %}">
+            </header>
 
             <!-- メッセージ一覧 -->
-            <div class="ap-glass-panel mb-4 p-0 overflow-hidden ap-reveal">
-                <div id="msgList" style="height:65vh;overflow-y:auto;padding:24px;display:flex;flex-direction:column;gap:20px;">
-                    {% for msg in messages %}
-                    <div class="d-flex {% if msg.sender == request.user %}justify-content-end{% else %}justify-content-start{% endif %}">
-                        <div style="max-width:75%;">
-                            {% if msg.sender != request.user %}
-                            <p class="mb-2" style="font-size:12px;color:rgba(255,255,255,0.5);padding-left:12px;font-weight:500;">{{ msg.sender.username }}</p>
-                            {% endif %}
+            <div id="msgList">
+                {% for msg in chat_messages %}
+                <div class="msg-row{% if msg.sender == request.user %} msg-row--self{% endif %}">
+                    {% if msg.sender != request.user %}
+                    <span class="msg-avatar" aria-hidden="true">{{ msg.sender.username|first|upper }}</span>
+                    {% endif %}
+                    <div class="msg-body">
+                        {% if msg.sender != request.user %}
+                        <p class="msg-sender">{{ msg.sender.username }}</p>
+                        {% endif %}
 
-                            <!-- メディア（バブル外、上に表示） -->
-                            {% if msg.has_media %}
-                            <div class="msg-media {% if msg.sender == request.user %}ms-auto{% endif %}">
-                                {% if msg.media_type == 'image' %}
-                                <img src="{{ msg.media.url }}" alt="shared image"
-                                     onclick="openLightbox(this.src)">
-                                {% elif msg.media_type == 'video' %}
-                                <video src="{{ msg.media.url }}" controls preload="metadata" playsinline></video>
-                                {% endif %}
-                            </div>
+                        {% if msg.has_media %}
+                        <div class="msg-media">
+                            {% if msg.media_type == 'image' %}
+                            <img src="{{ msg.media.url }}" alt="{% trans '共有された画像' %}" onclick="openLightbox(this.src)">
+                            {% elif msg.media_type == 'video' %}
+                            <video src="{{ msg.media.url }}" controls preload="metadata" playsinline></video>
                             {% endif %}
-
-                            <!-- テキストバブル（テキストがある場合のみ） -->
-                            {% if msg.text %}
-                            <div class="msg-bubble {% if msg.sender == request.user %}msg-bubble-self{% else %}msg-bubble-other{% endif %}">
-                                <p>{{ msg.text }}</p>
-                            </div>
-                            {% endif %}
-
-                            <p class="mt-2 mb-0 {% if msg.sender == request.user %}text-end{% endif %}"
-                               style="font-size:11px;color:rgba(255,255,255,0.3);padding:0 8px;">
-                                {{ msg.created_at|date:"m/d H:i" }}
-                            </p>
                         </div>
+                        {% endif %}
+
+                        {% if msg.text %}
+                        <div class="msg-bubble {% if msg.sender == request.user %}msg-bubble-self{% else %}msg-bubble-other{% endif %}"><p>{{ msg.text }}</p></div>
+                        {% endif %}
+
+                        <time class="msg-time" datetime="{{ msg.created_at|date:'c' }}">{{ msg.created_at|date:"m/d H:i" }}</time>
                     </div>
-                    {% empty %}
-                    <div class="text-center py-5 my-auto">
-                        <span class="material-symbols-outlined" aria-hidden="true" style="font-size:64px;color:rgba(255,255,255,0.1);">chat_bubble</span>
-                        <p class="mt-3 mb-0 text-muted" style="font-size:15px;">{% trans "まだメッセージがありません。" %}</p>
-                    </div>
-                    {% endfor %}
                 </div>
+                {% empty %}
+                <div class="lounge-chat-empty">
+                    <span class="material-symbols-outlined" aria-hidden="true">chat_bubble</span>
+                    <p class="mt-2 mb-0">{% trans "まだメッセージがありません。最初のメッセージを送ってみましょう。" %}</p>
+                </div>
+                {% endfor %}
             </div>
 
-            <!-- ── 入力エリア（SNS スタイル） ── -->
-            <form method="post" enctype="multipart/form-data" id="msgForm" class="ap-reveal">
+            <!-- ── 入力エリア ── -->
+            <form method="post" enctype="multipart/form-data" id="msgForm" class="lounge-composer">
                 {% csrf_token %}
                 <input type="file" id="mediaInput" name="media" accept="image/*,video/*" style="display:none;">
 
-                <!-- 添付プレビュー -->
                 <div id="mediaPreviewWrap">
                     <img id="mediaPreviewImg" src="" alt="preview" style="display:none;">
                     <video id="mediaPreviewVid" style="display:none;" muted></video>
-                    <button type="button" id="mediaRemoveBtn" aria-label="添付を削除"><span class="material-symbols-outlined" style="font-size:18px;">close</span></button>
+                    <button type="button" id="mediaRemoveBtn" aria-label="{% trans '添付を削除' %}"><span class="material-symbols-outlined" style="font-size:18px;">close</span></button>
                 </div>
 
-                <!-- 入力バー -->
-                <div class="chat-input-bar d-flex align-items-end">
-
-                    <!-- 添付ボタン群 -->
-                    <div class="d-flex gap-2 align-items-center mb-1 me-2">
-                        <button type="button" class="attach-btn" id="attachImageBtn"
-                                title="{% trans '画像を添付' %}" aria-label="{% trans '画像を添付' %}">
-                            <span class="material-symbols-outlined" aria-hidden="true" style="font-size:22px;">image</span>
-                        </button>
-                        <button type="button" class="attach-btn" id="attachVideoBtn"
-                                title="{% trans '動画を添付' %}" aria-label="{% trans '動画を添付' %}">
-                            <span class="material-symbols-outlined" aria-hidden="true" style="font-size:22px;">videocam</span>
-                        </button>
-                    </div>
-
-                    <!-- テキスト入力 -->
+                <div class="chat-input-bar">
+                    <button type="button" class="attach-btn" id="attachImageBtn" title="{% trans '画像を添付' %}" aria-label="{% trans '画像を添付' %}">
+                        <span class="material-symbols-outlined" aria-hidden="true">image</span>
+                    </button>
+                    <button type="button" class="attach-btn" id="attachVideoBtn" title="{% trans '動画を添付' %}" aria-label="{% trans '動画を添付' %}">
+                        <span class="material-symbols-outlined" aria-hidden="true">videocam</span>
+                    </button>
                     <textarea id="chatTextInput" name="message" rows="1"
                               placeholder="{% trans 'メッセージを入力…' %}"
                               aria-label="{% trans 'メッセージを入力' %}"></textarea>
-
-                    <!-- 送信 -->
                     <button type="submit" id="sendBtn" disabled aria-label="{% trans '送信' %}">
-                        <span class="material-symbols-outlined" aria-hidden="true" style="font-size:20px; padding-left: 3px;">send</span>
+                        <span class="material-symbols-outlined" aria-hidden="true">arrow_upward</span>
                     </button>
                 </div>
-
-                <!-- ファイルサイズ等のヒント -->
-                <p class="mt-2 mb-0 text-end text-muted" style="font-size:11px;">
-                    {% trans "画像: 最大20MB  /  動画: 最大200MB（MP4・MOV・WebM）" %}
-                </p>
+                <p class="lounge-composer-hint">{% trans "Enterで送信 · Shift+Enterで改行 · 画像 最大20MB / 動画 最大200MB" %}</p>
             </form>
-        </div>
+        </section>
 
         <!-- ── オーナー管理パネル（プライベートチャンネルのみ） ── -->
         {% if is_owner and channel.channel_type == 'private' %}
-        <div class="col-lg-4">
-            <div class="ap-glass-panel ap-reveal" style="border: 1px solid rgba(191,90,242,0.3);">
-                <h4 class="fw-bold mb-4 text-light" style="font-size: 18px;">
-                    <span class="material-symbols-outlined align-middle me-2" aria-hidden="true" style="font-size:24px; color:#bf5af2;">manage_accounts</span>
-                    {% trans "メンバー管理" %}
-                </h4>
+        <aside class="lounge-panel lounge-glass">
+            <h2 class="lounge-panel-title">
+                {% trans "メンバー管理" %}
+            </h2>
 
-                <!-- 招待フォーム -->
-                <form method="post" action="{% url 'community:invite' channel.id %}" class="mb-5">
-                    {% csrf_token %}
-                    <p class="mb-2 text-muted fw-bold" style="font-size: 13px;">{% trans "ユーザーを招待" %}</p>
-                    <div class="d-flex gap-2">
-                        <input type="text" name="username" placeholder="{% trans 'ユーザー名' %}" required
-                               class="ap-input" style="flex-grow: 1;">
-                        <button type="submit" class="ap-btn ap-btn-primary" style="padding: 10px 16px;">{% trans "招待" %}</button>
-                    </div>
-                </form>
-
-                <!-- 参加リクエスト -->
-                {% if pending_requests %}
-                <div class="mb-5">
-                    <p class="mb-3 fw-bold" style="color:#ff9f0a; font-size: 13px;">
-                        <span class="material-symbols-outlined align-middle me-1" aria-hidden="true" style="font-size:18px;">hourglass_empty</span>
-                        {% trans "参加リクエスト" %} ({{ pending_requests|length }})
-                    </p>
-                    {% for m in pending_requests %}
-                    <div class="d-flex align-items-center gap-2 mb-2 p-2" style="background:rgba(255,159,10,0.1); border-radius:12px;">
-                        <span class="material-symbols-outlined" aria-hidden="true" style="font-size:24px; color:rgba(255,159,10,0.8);">account_circle</span>
-                        <span style="color:#fff; font-size:14px; flex:1;">{{ m.user.username }}</span>
-                        <form method="post" action="{% url 'community:approve' channel.id m.user.id %}">{% csrf_token %}
-                            <button type="submit" class="ap-btn" style="padding:6px; background:#32d74b; color:#fff;" title="{% trans '承認' %}">
-                                <span class="material-symbols-outlined d-block" aria-hidden="true" style="font-size:16px;">check</span>
-                            </button>
-                        </form>
-                        <form method="post" action="{% url 'community:decline' channel.id m.user.id %}">{% csrf_token %}
-                            <button type="submit" class="ap-btn ap-btn-outline" style="padding:6px; border-color: rgba(255,59,48,0.5); color:#ff3b30;" title="{% trans '拒否' %}">
-                                <span class="material-symbols-outlined d-block" aria-hidden="true" style="font-size:16px;">close</span>
-                            </button>
-                        </form>
-                    </div>
-                    {% endfor %}
+            <form method="post" action="{% url 'community:invite' channel.id %}">
+                {% csrf_token %}
+                <p class="lounge-panel-label">{% trans "ユーザーを招待" %}</p>
+                <div class="lounge-invite-form">
+                    <input type="text" name="username" placeholder="{% trans 'ユーザー名' %}" required class="lounge-input">
+                    <button type="submit" class="lounge-btn lounge-btn--primary lounge-btn--sm">{% trans "招待" %}</button>
                 </div>
-                {% endif %}
+            </form>
 
-                <!-- 招待済み -->
-                {% if invited %}
-                <div class="mb-5">
-                    <p class="mb-3 text-muted fw-bold" style="font-size: 13px;">
-                        <span class="material-symbols-outlined align-middle me-1" aria-hidden="true" style="font-size:18px;">mail</span>
-                        {% trans "招待済み" %}
-                    </p>
-                    {% for m in invited %}
-                    <div class="d-flex align-items-center gap-2 mb-2 px-2">
-                        <span class="material-symbols-outlined" aria-hidden="true" style="font-size:20px; color:rgba(255,255,255,0.4);">account_circle</span>
-                        <span class="text-light" style="font-size:14px; flex:1;">{{ m.user.username }}</span>
-                        <form method="post" action="{% url 'community:decline' channel.id m.user.id %}">{% csrf_token %}
-                            <button type="submit" class="ap-btn ap-btn-outline" style="padding:4px 8px; border:none; color:rgba(255,59,48,0.8);">
-                                <span class="material-symbols-outlined d-block" aria-hidden="true" style="font-size:16px;">close</span>
-                            </button>
-                        </form>
-                    </div>
-                    {% endfor %}
+            {% if pending_requests %}
+            <div class="lounge-panel-section">
+                <p class="lounge-panel-label" style="--label-color: var(--lounge-warning);">
+                    {% trans "参加リクエスト" %} ({{ pending_requests|length }})
+                </p>
+                {% for m in pending_requests %}
+                <div class="lounge-member lounge-member--pending">
+                    <span class="msg-avatar" aria-hidden="true">{{ m.user.username|first|upper }}</span>
+                    <span class="lounge-member-name">{{ m.user.username }}</span>
+                    <form method="post" action="{% url 'community:approve' channel.id m.user.id %}">{% csrf_token %}
+                        <button type="submit" class="lounge-icon-btn lounge-icon-btn--ok" title="{% trans '承認' %}" aria-label="{% trans '承認' %}">
+                            <span class="material-symbols-outlined" aria-hidden="true">check</span>
+                        </button>
+                    </form>
+                    <form method="post" action="{% url 'community:decline' channel.id m.user.id %}">{% csrf_token %}
+                        <button type="submit" class="lounge-icon-btn lounge-icon-btn--danger" title="{% trans '拒否' %}" aria-label="{% trans '拒否' %}">
+                            <span class="material-symbols-outlined" aria-hidden="true">close</span>
+                        </button>
+                    </form>
                 </div>
-                {% endif %}
-
-                <!-- アクティブメンバー -->
-                {% if members %}
-                <div>
-                    <p class="mb-3 fw-bold" style="color:#32d74b; font-size: 13px;">
-                        <span class="material-symbols-outlined align-middle me-1" aria-hidden="true" style="font-size:18px;">people</span>
-                        {% trans "メンバー" %} ({{ members|length }})
-                    </p>
-                    {% for m in members %}
-                    <div class="d-flex align-items-center gap-2 mb-2 px-2">
-                        <span class="material-symbols-outlined" aria-hidden="true" style="font-size:20px; color:rgba(255,255,255,0.4);">account_circle</span>
-                        <span class="text-light" style="font-size:14px; flex:1;">{{ m.user.username }}</span>
-                        {% if m.role == 'owner' %}
-                        <span style="font-size:11px; padding:2px 8px; background:rgba(255,159,10,0.2); border-radius:10px; color:#ff9f0a; font-weight: 600;">Owner</span>
-                        {% else %}
-                        <form method="post" action="{% url 'community:decline' channel.id m.user.id %}"
-                              class="js-confirm" data-confirm="{{ m.user.username }}を削除しますか？">
-                            {% csrf_token %}
-                            <button type="submit" class="ap-btn ap-btn-outline" style="padding:4px 8px; border:none; color:rgba(255,59,48,0.8);">
-                                <span class="material-symbols-outlined d-block" aria-hidden="true" style="font-size:16px;">person_remove</span>
-                            </button>
-                        </form>
-                        {% endif %}
-                    </div>
-                    {% endfor %}
-                </div>
-                {% endif %}
+                {% endfor %}
             </div>
-        </div>
-        {% endif %}
+            {% endif %}
 
+            {% if invited %}
+            <div class="lounge-panel-section">
+                <p class="lounge-panel-label">
+                    {% trans "招待済み" %}
+                </p>
+                {% for m in invited %}
+                <div class="lounge-member">
+                    <span class="msg-avatar" aria-hidden="true">{{ m.user.username|first|upper }}</span>
+                    <span class="lounge-member-name">{{ m.user.username }}</span>
+                    <form method="post" action="{% url 'community:decline' channel.id m.user.id %}">{% csrf_token %}
+                        <button type="submit" class="lounge-icon-btn lounge-icon-btn--danger" title="{% trans '招待を取り消す' %}" aria-label="{% trans '招待を取り消す' %}">
+                            <span class="material-symbols-outlined" aria-hidden="true">close</span>
+                        </button>
+                    </form>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            {% if members %}
+            <div class="lounge-panel-section">
+                <p class="lounge-panel-label" style="--label-color: var(--lounge-success);">
+                    {% trans "メンバー" %} ({{ members|length }})
+                </p>
+                {% for m in members %}
+                <div class="lounge-member">
+                    <span class="msg-avatar" aria-hidden="true">{{ m.user.username|first|upper }}</span>
+                    <span class="lounge-member-name">{{ m.user.username }}</span>
+                    {% if m.role == 'owner' %}
+                    <span class="lounge-role">Owner</span>
+                    {% else %}
+                    <form method="post" action="{% url 'community:decline' channel.id m.user.id %}"
+                          class="js-confirm" data-confirm="{% blocktrans with name=m.user.username %}{{ name }}を削除しますか？{% endblocktrans %}">
+                        {% csrf_token %}
+                        <button type="submit" class="lounge-icon-btn lounge-icon-btn--danger" title="{% trans 'メンバーを削除' %}" aria-label="{% trans 'メンバーを削除' %}">
+                            <span class="material-symbols-outlined" aria-hidden="true">person_remove</span>
+                        </button>
+                    </form>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+        </aside>
+        {% endif %}
     </div>
 </div>
 

@@ -13,10 +13,9 @@ class MapPin(models.Model):
     )
     title = models.CharField(max_length=200, verbose_name=_("タイトル"))
     description = models.TextField(blank=True, default='', verbose_name=_("説明"))
-    image = models.ImageField(
-        upload_to='photraveler/%Y/%m/', blank=True,
-        verbose_name=_("写真"),
-    )
+    place_name = models.CharField(max_length=120, blank=True, default='', verbose_name=_("場所の名前"))
+    country = models.CharField(max_length=60, blank=True, default='', verbose_name=_("国"))
+    visited_on = models.DateField(null=True, blank=True, verbose_name=_("訪れた日"))
     latitude = models.DecimalField(max_digits=9, decimal_places=6, verbose_name=_("緯度"))
     longitude = models.DecimalField(max_digits=9, decimal_places=6, verbose_name=_("経度"))
     created_at = models.DateTimeField(auto_now_add=True)
@@ -26,6 +25,31 @@ class MapPin(models.Model):
 
     def __str__(self):
         return self.title
+
+    @property
+    def cover(self):
+        """一覧やマーカーに使う代表写真 (最初の写真)。"""
+        photos = list(self.photos.all())
+        return photos[0] if photos else None
+
+
+class PinPhoto(models.Model):
+    """ピンの写真。1 つのピンに複数枚 (並び順は position)。"""
+    pin = models.ForeignKey(MapPin, on_delete=models.CASCADE, related_name='photos')
+    image = models.ImageField(upload_to='photraveler/%Y/%m/', verbose_name=_("写真"))
+    thumbnail = models.ImageField(upload_to='photraveler/thumbs/%Y/%m/', blank=True, verbose_name=_("サムネイル"))
+    position = models.PositiveSmallIntegerField(default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['position', 'id']
+
+    def __str__(self):
+        return f'{self.pin.title} #{self.position}'
+
+    @property
+    def thumb_url(self):
+        return (self.thumbnail or self.image).url
 
 
 class PhotoComment(models.Model):

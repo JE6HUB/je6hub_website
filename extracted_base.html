@@ -1,0 +1,117 @@
+{% load static i18n %}
+<!DOCTYPE html>
+<html lang="{{ LANGUAGE_CODE }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Portfolio & Apps{% endblock %}</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,400,0,0" rel="stylesheet" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/6.4.0/mdb.min.css" rel="stylesheet" />
+
+    <link href="{% static 'css/style.css' %}?v={% now 'U' %}" rel="stylesheet" />
+
+    {% block extra_head %}{% endblock %}
+</head>
+<body>
+
+    <a class="visually-hidden-focusable" href="#content">Skip to content</a>
+
+    <!-- Apple-style Global Nav -->
+    <nav class="ap-globalnav" aria-label="Global">
+        <ul class="ap-globalnav-list">
+            <li class="ap-globalnav-item">
+                <a class="ap-globalnav-link" href="/" aria-label="Home">
+                    <span class="material-symbols-outlined" style="font-size: 20px;">apple</span>
+                </a>
+            </li>
+            <li class="ap-globalnav-item"><a class="ap-globalnav-link" href="/">{% trans "Home" %}</a></li>
+            <li class="ap-globalnav-item"><a class="ap-globalnav-link" href="{% url 'photraveler:map' %}">{% trans "WanderLens" %}</a></li>
+            <li class="ap-globalnav-item"><a class="ap-globalnav-link" href="{% if user.is_authenticated %}{% url 'community:list' %}{% else %}{% url 'login' %}?next={% url 'community:list' %}{% endif %}">{% trans "Lounge" %}</a></li>
+            <li class="ap-globalnav-item"><a class="ap-globalnav-link" href="{% url 'core:resume' %}">{% trans "Resume" %}</a></li>
+            <li class="ap-globalnav-item"><a class="ap-globalnav-link" href="{% url 'core:contact' %}">{% trans "Contact" %}</a></li>
+            
+            <!-- Auth & Language -->
+            <li class="ap-globalnav-item ms-auto d-flex align-items-center gap-3">
+                <form action="{% url 'set_language' %}" method="post" class="m-0">
+                    {% csrf_token %}
+                    <input name="next" type="hidden" value="{{ redirect_to }}">
+                    <select name="language" class="form-select form-select-sm"
+                            onchange="this.form.submit()"
+                            style="background: transparent; color: #f5f5f7; border: none; font-size: 12px; cursor: pointer; width: auto;">
+                        {% get_current_language as LANGUAGE_CODE %}
+                        {% get_available_languages as LANGUAGES %}
+                        {% for lang in LANGUAGES %}
+                            <option value="{{ lang.0 }}" style="color: #000;" {% if lang.0 == LANGUAGE_CODE %}selected{% endif %}>{{ lang.1 }}</option>
+                        {% endfor %}
+                    </select>
+                </form>
+
+                {% if user.is_authenticated %}
+                    <a href="{% url 'profile' %}" class="ap-globalnav-link" aria-label="{{ user.username }}" title="{{ user.username }}">
+                        <i class="fas fa-user"></i>
+                    </a>
+                    {% if user.is_staff %}
+                        <a href="{% url 'admin:index' %}" class="ap-globalnav-link" aria-label="{% trans 'Admin' %}">
+                            <i class="fas fa-cog"></i>
+                        </a>
+                    {% endif %}
+                    <form action="{% url 'logout' %}" method="post" class="m-0 p-0">
+                        {% csrf_token %}
+                        <button type="submit" class="ap-globalnav-link bg-transparent border-0 p-0 m-0"><i class="fas fa-sign-out-alt"></i></button>
+                    </form>
+                {% else %}
+                    <a href="{% url 'login' %}" class="ap-globalnav-link"><i class="fas fa-user-circle"></i></a>
+                {% endif %}
+            </li>
+        </ul>
+    </nav>
+
+    <!-- Main content -->
+    {% block main_content %}
+    <main id="content" role="main" style="padding-top: 48px;">
+        {% block content %}{% endblock %}
+    </main>
+    {% endblock %}
+
+    <!-- Footer -->
+    <footer class="ap-section" style="padding: 40px 20px; border-top: 1px solid rgba(255,255,255,0.1); font-size: 12px; color: var(--ap-text-muted);">
+        <div style="max-width: 980px; margin: 0 auto;">
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-center gap-3">
+                <div>
+                    <span class="fw-bold text-light">Y.K. Nexus</span>
+                    <span class="ms-3">© 2026 Yuta Kumadaki. All rights reserved.</span>
+                </div>
+                <div class="d-flex gap-4">
+                    <a href="{% url 'core:resume' %}" class="text-decoration-none" style="color: var(--ap-text-muted);">Resume</a>
+                    <a href="{% url 'photraveler:map' %}" class="text-decoration-none" style="color: var(--ap-text-muted);">WanderLens</a>
+                    <a href="{% url 'community:list' %}" class="text-decoration-none" style="color: var(--ap-text-muted);">Lounge</a>
+                    <a href="{% url 'core:contact' %}" class="text-decoration-none" style="color: var(--ap-text-muted);">Contact</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Toast notifications -->
+    <div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 10000;">
+        {% if messages %}
+            {% for message in messages %}
+            <div class="toast align-items-center text-bg-dark border-0 mb-2" role="alert" aria-live="assertive" aria-atomic="true" style="background: rgba(28,28,30,0.8)!important; backdrop-filter: blur(20px); border-radius: 12px;">
+                <div class="d-flex">
+                    <div class="toast-body fw-bold text-light">{{ message }}</div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-mdb-dismiss="toast" aria-label="Close"></button>
+                </div>
+            </div>
+            {% endfor %}
+        {% endif %}
+    </div>
+
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/6.4.0/mdb.min.js"></script>
+    <script src="https://js-cdn.music.apple.com/musickit/v1/musickit.js"></script>
+    <script type="text/javascript" src="{% static 'js/main.js' %}"></script>
+
+    {% block extra_js %}{% endblock %}
+
+</body>
+</html>

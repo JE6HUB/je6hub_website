@@ -1,204 +1,150 @@
 {% extends 'base.html' %}
-{% load i18n %}
-{% load static %}
+{% load static i18n %}
 
-{% block title %}Yuta Kumadaki — AI Architect & Photographer{% endblock %}
+{% block title %}JE6HUB.com — Blogs{% endblock %}{% block title_suffix %}{% endblock %}
+
+{% block glass_preload %}{% include "_liquid_glass_preload.html" with hero="img/hero/blogs-glass" %}{% endblock %}
+
+{% block extra_head %}
+<link href="{% static 'css/blog.css' %}?v=18" rel="stylesheet" />
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/blog-carousel.js' %}?v=3"></script>
+{% endblock %}
 
 {% block main_content %}
 <main id="content" role="main">
 
-    {% if q %}
-    <!-- Search Results View -->
-    <div class="ap-section" style="padding-top: 100px;">
-        <h2 class="ap-section-title">{% blocktrans with q=q %}"{{ q }}" の検索結果{% endblocktrans %}</h2>
-        <a href="{% url 'core:home' %}" class="ap-btn ap-btn-outline mt-3">{% trans "クリア" %}</a>
+    <!-- Hero — LiquidGlass root (背景と glass ボタンはすべて root の直接の子) -->
+    <section id="hero-glass-root" class="ap-section liquid-glass-root landing-hero">
+        {% include "_hero_image.html" with hero="img/hero/blogs-glass" class="landing-hero-bg" %}
+        <div class="landing-hero-scrim"></div>
 
-        <!-- Render search results dynamically based on layout -->
-        <div class="ap-bento-container mt-5">
-            {% for pin in pin_results %}
-            <div class="ap-bento-card">
-                <div>
-                    <h3 class="ap-subhead text-light mb-2">{{ pin.title }}</h3>
-                    <p class="text-muted">{{ pin.description|truncatechars:72 }}</p>
-                </div>
-                <a href="{% url 'photraveler:map' %}" class="ap-btn ap-btn-primary mt-4">View Map</a>
-            </div>
-            {% endfor %}
-            {% for channel in channel_results %}
-            <div class="ap-bento-card">
-                <div>
-                    <span class="ap-eyebrow">{{ channel.channel_type }}</span>
-                    <h3 class="ap-subhead text-light mb-2">{{ channel.name }}</h3>
-                </div>
-                <a href="{% if user.is_authenticated %}{% url 'community:thread' channel.id %}{% else %}{% url 'login' %}{% endif %}"
-                    class="ap-btn ap-btn-primary mt-4">Join Lounge</a>
-            </div>
-            {% endfor %}
-        </div>
-    </div>
-    {% else %}
-
-    <!-- Apple-style Hero Section — LiquidGlass root -->
-    <section id="hero-glass-root" class="ap-section ap-reveal liquid-glass-root"
-        style="position: relative; overflow: hidden; padding-top: 100px; padding-bottom: 60px; text-align: center;">
-
-        <!-- Background image for glass refraction (must be a direct child, not on the root itself) -->
-        <img src="{% static 'img/hero_lens_bg.jpg' %}" alt=""
-            style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; pointer-events: none; z-index: 0;">
-
-        <!-- Dark gradient for text legibility over the bright photo (still a
-             root sibling, so the glass buttons pick up its darkening too) -->
-        <div
-            style="position: absolute; inset: 0; background: linear-gradient(180deg, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.25) 45%, rgba(0,0,0,0.55) 100%); pointer-events: none; z-index: 1;">
-        </div>
-
-        <!-- Text content (non-glass, z-index above background) -->
-        <div style="position: relative; z-index: 2; pointer-events: none;">
-            <span class="ap-eyebrow" style="color: var(--ap-accent);">Tokyo · AI Architect &amp; Photographer</span>
-            <h1 class="ap-hero-title">Yuta Kumadaki</h1>
-            <p class="ap-hero-subtitle mx-auto" style="max-width: 600px;">
-                ようこそ。
+        <div class="landing-hero-text">
+            <span class="ap-eyebrow" style="color: var(--ap-accent);">JE6HUB</span>
+            <h1 class="ap-hero-title">{% trans "Draw your story." %}</h1>
+            <p class="ap-hero-subtitle mx-auto" style="max-width: 640px;">
+                {% trans "テンプレートを選んで書くだけ。登録メンバーなら誰でも、洗練されたブログをすぐに公開できます。" %}
             </p>
         </div>
 
-        <!-- Glass buttons — MUST be direct children of the root -->
-        <a href="#work" id="glass-btn-1" class="liquid-glass-btn"
-            data-config='{"button":true, "cornerRadius":28, "blurAmount":0.25, "brightness":-0.15}'
-            style="display: inline-flex; align-items: center; padding: 14px 28px; color: #fff; text-decoration: none; font-weight: 600; font-size: 16px; margin: 16px 8px 0; z-index: 2;">
-            <span class="label">View My Work</span>
+        <a href="{% if user.is_authenticated %}{% url 'blog:create' %}{% else %}{% url 'login' %}?next={% url 'blog:create' %}{% endif %}"
+           id="glass-btn-1" class="liquid-glass-btn landing-hero-btn"
+           data-config='{"button":true, "cornerRadius":28, "blurAmount":0.25, "brightness":-0.15}'>
+            <span class="label">
+                {% trans "ブログを書く" %}
+            </span>
         </a>
-        <a href="{% url 'core:contact' %}" id="glass-btn-2" class="liquid-glass-btn"
-            data-config='{"button":true, "cornerRadius":28, "blurAmount":0.25, "brightness":-0.15}'
-            style="display: inline-flex; align-items: center; padding: 14px 28px; color: #fff; text-decoration: none; font-weight: 600; font-size: 16px; margin: 16px 8px 0; z-index: 2;">
-            <span class="label" style="display: flex; align-items: center; gap: 8px;">Get In Touch <span
-                    class="material-symbols-outlined" style="font-size:18px;">arrow_forward</span></span>
+        <a href="{% url 'blog:list' %}" id="glass-btn-2" class="liquid-glass-btn landing-hero-btn"
+           data-config='{"button":true, "cornerRadius":28, "blurAmount":0.25, "brightness":-0.15}'>
+            <span class="label">
+                {% trans "記事を読む" %}
+            </span>
         </a>
 
-    </section>
-
-    <!-- Expertise Section -->
-    <section class="ap-section ap-reveal" style="background: #000;">
-        <h2 class="ap-section-title">What I bring to the table.</h2>
-        <p class="ap-subhead mx-auto mb-5" style="max-width: 700px;">
-            AI アーキテクチャ、写真、コミュニティ構築の3つの軸で活動。技術と創造性の交差点に立つ。
+        {% if post_count %}
+        <p class="landing-hero-stats">
+            {% blocktrans count counter=post_count %}{{ counter }} 本の記事{% plural %}{{ counter }} 本の記事{% endblocktrans %}
+            &nbsp;·&nbsp;
+            {% blocktrans count counter=writer_count %}{{ counter }} 人の書き手{% plural %}{{ counter }} 人の書き手{% endblocktrans %}
         </p>
+        {% endif %}
+    </section>
 
-        <div class="ap-bento-container">
-            <div class="ap-bento-card ap-reveal text-start">
-                <div>
-                    <span class="material-symbols-outlined mb-3"
-                        style="font-size: 48px; color: var(--ap-accent);">psychology</span>
-                    <h3 class="text-light fs-4 fw-bold mb-3">AI Architecture</h3>
-                    <p class="text-muted">大規模言語モデルの社会実装とシステム設計。Mechanistic Interpretability の研究を通じて LLM の内部構造を解明する。</p>
-                </div>
+    <!-- Latest posts -->
+    <div class="blog-page landing-latest">
+        {% if latest %}
+            {% include "blog/_latest_carousel.html" %}
+            <div class="landing-more">
+                <a href="{% url 'blog:list' %}" class="ap-link">{% trans "すべての記事を見る" %}</a>
             </div>
-            <div class="ap-bento-card ap-reveal text-start">
-                <div>
-                    <span class="material-symbols-outlined mb-3"
-                        style="font-size: 48px; color: #ff9f0a;">photo_camera</span>
-                    <h3 class="text-light fs-4 fw-bold mb-3">Photography</h3>
-                    <p class="text-muted">Leica Q3 による都市・旅・自然のスナップショット。世界中の記憶を地図にピン留めして共有する WanderLens を開発。</p>
-                </div>
+        {% else %}
+            <h2 class="blog-section-title mb-4">{% trans "最新の投稿" %}</h2>
+            <div class="blog-empty ap-glass-panel">
+                <span class="material-symbols-outlined" aria-hidden="true">auto_stories</span>
+                <p>{% trans "まだ記事がありません。最初のストーリーを書いてみませんか？" %}</p>
+                <a href="{% url 'blog:create' %}" class="ap-btn ap-btn-primary blog-btn-sm">{% trans "ブログを書く" %}</a>
             </div>
-            <div class="ap-bento-card ap-reveal text-start">
+        {% endif %}
+    </div>
+
+    <!-- Features -->
+    <section class="blog-page landing-section ap-reveal">
+        <h2 class="blog-section-title">{% trans "Blogs でできること" %}</h2>
+
+        <div class="landing-features">
+            <article class="landing-feature landing-feature--wide">
                 <div>
-                    <span class="material-symbols-outlined mb-3" style="font-size: 48px; color: #32d74b;">groups</span>
-                    <h3 class="text-light fs-4 fw-bold mb-3">Community</h3>
-                    <p class="text-muted">AI・クラフトビール・写真をテーマにしたプライベートコミュニティ Lounge を運営。知識と情熱を共有する場を作る。</p>
+                    <span class="material-symbols-outlined landing-feature-icon" aria-hidden="true" style="color:#bf5af2;">dashboard_customize</span>
+                    <h3>{% trans "選ぶだけの4つのテンプレート" %}</h3>
+                    <p>{% trans "全面カバーのフィーチャー、定番のクラシック、写真と並べるスプリット、文字が主役のミニマル。サイトのデザインに溶け込むレイアウトを、クリックひとつで切り替えられます。" %}</p>
                 </div>
-            </div>
+                <div class="landing-template-row" aria-hidden="true">
+                    <span class="blog-template-thumb blog-template-thumb--feature" style="--blog-accent:#ff9f0a;"><i></i><b></b><b></b></span>
+                    <span class="blog-template-thumb blog-template-thumb--classic" style="--blog-accent:#2997ff;"><b></b><b></b><i></i></span>
+                    <span class="blog-template-thumb blog-template-thumb--split" style="--blog-accent:#bf5af2;"><b></b><b></b><i></i></span>
+                    <span class="blog-template-thumb blog-template-thumb--minimal" style="--blog-accent:#30d158;"><b></b><b></b><b></b></span>
+                </div>
+            </article>
+            <article class="landing-feature">
+                <span class="material-symbols-outlined landing-feature-icon" aria-hidden="true" style="color:var(--ap-accent);">format_align_center</span>
+                <h3>{% trans "配置も書式も自由自在" %}</h3>
+                <p>{% trans "見出し、左・中央・右・両端揃え、リスト、引用、コード、区切り線。見たままの画面で、思いどおりに整えられます。" %}</p>
+            </article>
+            <article class="landing-feature">
+                <span class="material-symbols-outlined landing-feature-icon" aria-hidden="true" style="color:#ff9f0a;">add_photo_alternate</span>
+                <h3>{% trans "画像はドラッグ＆ドロップ" %}</h3>
+                <p>{% trans "本文への画像はボタン、ドラッグ＆ドロップ、貼り付けで挿入。カバー画像もその場で設定できます。" %}</p>
+            </article>
+            <article class="landing-feature">
+                <span class="material-symbols-outlined landing-feature-icon" aria-hidden="true" style="color:#30d158;">group</span>
+                <h3>{% trans "メンバーなら誰でも" %}</h3>
+                <p>{% trans "アカウントを作れば、すぐに書き始められます。下書き保存、公開・非公開の切り替えも自由です。" %}</p>
+            </article>
+            <article class="landing-feature">
+                <span class="material-symbols-outlined landing-feature-icon" aria-hidden="true" style="color:#ff375f;">palette</span>
+                <h3>{% trans "記事ごとのアクセントカラー" %}</h3>
+                <p>{% trans "6色から選んだアクセントが、見出しの装飾やリンク、カードに統一感を与えます。" %}</p>
+            </article>
         </div>
     </section>
 
-    <!-- Work Section -->
-    <section class="ap-section" id="work" style="background: #111;">
-        <div class="ap-reveal">
-            <h2 class="ap-section-title">Projects I'm proud of.</h2>
-            <p class="ap-subhead mb-5">Built with modern design and precision.</p>
-        </div>
-
-        <div class="ap-bento-container">
-            <!-- WanderLens -->
-            <a href="{% url 'photraveler:map' %}" class="text-decoration-none">
-                <div class="ap-bento-card ap-reveal"
-                    style="min-height: 400px; border: 1px solid rgba(255,255,255,0.05);">
-                    <div class="text-start">
-                        <span class="ap-eyebrow" style="color: #64d2ff;">Photography · Maps</span>
-                        <h3 class="text-light fs-3 fw-bold mb-2">WanderLens</h3>
-                        <p class="text-muted mb-0">旅の記憶を世界地図にピン留めするフォトトラベルジャーナル。</p>
-                    </div>
-                    <img src="{% static 'img/apple/image_playground__do3eby1zbe82_large.jpg' %}" alt="WanderLens"
-                        class="ap-bento-card-image">
-                </div>
-            </a>
-
-            <!-- Community Lounge -->
-            <a href="{% if user.is_authenticated %}{% url 'community:list' %}{% else %}{% url 'login' %}{% endif %}"
-                class="text-decoration-none">
-                <div class="ap-bento-card ap-reveal"
-                    style="min-height: 400px; border: 1px solid rgba(255,255,255,0.05);">
-                    <div class="text-start">
-                        <span class="ap-eyebrow" style="color: #ff375f;">Community</span>
-                        <h3 class="text-light fs-3 fw-bold mb-2">Community Lounge</h3>
-                        <p class="text-muted mb-0">AI・写真・クラフトビールをテーマにしたディスカッション。</p>
-                    </div>
-                    <img src="{% static 'img/apple/messages__e05v4dplbdea_large.jpg' %}" alt="Lounge"
-                        class="ap-bento-card-image">
-                </div>
-            </a>
-
-            <!-- Resume/Profile -->
-            <a href="{% url 'core:resume' %}" class="text-decoration-none" style="grid-column: 1 / -1;">
-                <div class="ap-bento-card ap-reveal d-flex flex-md-row align-items-center"
-                    style="min-height: 300px; border: 1px solid rgba(255,255,255,0.05);">
-                    <div class="text-start flex-grow-1 pe-4">
-                        <span class="ap-eyebrow" style="color: #bf5af2;">Profile</span>
-                        <h3 class="text-light fs-2 fw-bold mb-3">Y.K. Nexus Resume</h3>
-                        <p class="text-muted mb-0" style="max-width: 400px;">このポートフォリオサイト本体。Apple デザインシステムを Django で実装。
-                        </p>
-                    </div>
-                    <img src="{% static 'img/apple/hero__elo7tt0mnqy6_large(3).jpg' %}" alt="Resume"
-                        style="width: 50%; max-width: 400px; border-radius: 24px; object-fit: cover;">
-                </div>
-            </a>
-        </div>
+    <!-- How it works -->
+    <section class="blog-page landing-section ap-reveal">
+        <h2 class="blog-section-title">{% trans "3ステップで公開" %}</h2>
+        <ol class="landing-steps">
+            <li>
+                <span class="landing-step-num">1</span>
+                <h3>{% trans "テンプレートを選ぶ" %}</h3>
+                <p>{% trans "記事の雰囲気に合うレイアウトとアクセントカラーを選択。" %}</p>
+            </li>
+            <li>
+                <span class="landing-step-num">2</span>
+                <h3>{% trans "書く" %}</h3>
+                <p>{% trans "タイトル、カバー画像、本文を入力。⌘/Ctrl + S でいつでも下書き保存。" %}</p>
+            </li>
+            <li>
+                <span class="landing-step-num">3</span>
+                <h3>{% trans "公開する" %}</h3>
+                <p>{% trans "ボタンひとつで公開。一覧とホームの最新記事に表示されます。" %}</p>
+            </li>
+        </ol>
     </section>
-
-    <!-- Now Playing -->
-    {% if user.is_authenticated and user.favorite_track_title %}
-    <section class="ap-section ap-reveal">
-        <h2 class="ap-section-title">Now Listening</h2>
-        <div class="ap-glass-panel mx-auto mt-5 text-start d-flex align-items-center gap-4" style="max-width: 600px;">
-            {% if user.favorite_track_image_url %}
-            <img src="{{ user.favorite_track_image_url }}" alt="{{ user.favorite_track_title }}"
-                style="width: 96px; height: 96px; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
-            {% endif %}
-            <div>
-                <h3 class="text-light fw-bold mb-1 fs-4">{{ user.favorite_track_title }}</h3>
-                <p class="text-muted mb-3">{{ user.favorite_track_artist }}</p>
-                <div class="d-flex gap-2">
-                    <button class="ap-btn ap-btn-primary" style="padding: 8px 16px; font-size: 14px;"
-                        data-playbar-open="1" data-playbar-autoplay="1">Play</button>
-                    {% if user.favorite_track_apple_music_url %}
-                    <a href="{{ user.favorite_track_apple_music_url }}" class="ap-btn ap-btn-outline"
-                        style="padding: 8px 16px; font-size: 14px;" target="_blank">Apple Music</a>
-                    {% endif %}
-                </div>
-            </div>
-        </div>
-    </section>
-    {% endif %}
 
     <!-- CTA -->
     <section class="ap-section ap-reveal" style="padding-bottom: 150px;">
-        <h2 class="ap-hero-title">Let's build<br>something together.</h2>
-        <p class="ap-subhead mt-3 mb-5">プロジェクト相談、コラボレーション、または単純に話したいことがあれば。</p>
-        <div class="d-flex gap-3 justify-content-center">
-            <a href="{% url 'core:contact' %}" class="ap-btn ap-btn-primary">Start a Conversation</a>
+        <h2 class="ap-hero-title" style="font-size: clamp(40px, 6vw, 72px);">{% trans "あなたのストーリーを、" %}<br>{% trans "ここから。" %}</h2>
+        <p class="ap-subhead mt-3 mb-5 text-muted">{% trans "旅の記録、技術のメモ、日々の気づき。どんな話でも歓迎です。" %}</p>
+        <div class="d-flex gap-3 justify-content-center flex-wrap">
+            {% if user.is_authenticated %}
+                <a href="{% url 'blog:create' %}" class="ap-btn ap-btn-primary">{% trans "ブログを書く" %}</a>
+            {% else %}
+                <a href="{% url 'signup' %}" class="ap-btn ap-btn-primary">{% trans "無料で登録して書く" %}</a>
+                <a href="{% url 'login' %}?next={% url 'blog:create' %}" class="ap-btn ap-btn-outline">{% trans "ログイン" %}</a>
+            {% endif %}
         </div>
     </section>
-
-    {% endif %}
 
 </main>
 {% endblock %}

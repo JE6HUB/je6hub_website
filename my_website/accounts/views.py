@@ -130,6 +130,7 @@ def signup_view(request):
             # ユーザーをデータベースに保存
             user = form.save()
             # 登録後、そのまま自動的にログイン状態にする
+            # allauth と併用して認証バックエンドが複数あるため、明示的に指定する
             login(request, user, backend='django.contrib.auth.backends.ModelBackend')
             # 成功メッセージをSnackbar（Toast）にセット
             messages.success(request, _('会員登録が完了しました。Loungeへようこそ！'))

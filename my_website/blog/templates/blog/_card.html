@@ -1,0 +1,16 @@
+{% load i18n %}
+<article class="blog-card" style="--blog-accent: {{ post.accent }};">
+    <a href="{{ post.get_absolute_url }}" class="blog-card-link" aria-label="{{ post.title }}"></a>
+    <div class="blog-card-media">
+        {% if post.cover_image %}
+            <img src="{{ post.cover_image.url }}" alt="" loading="lazy">
+        {% else %}
+            <div class="blog-cover-fallback"><span>{{ post.title|first }}</span></div>
+        {% endif %}
+    </div>
+    <div class="blog-card-body">
+        <h3 class="blog-card-title">{{ post.title }}</h3>
+        {% if post.excerpt %}<p class="blog-card-excerpt">{{ post.excerpt }}</p>{% endif %}
+        {% include "blog/_byline.html" %}
+    </div>
+</article>

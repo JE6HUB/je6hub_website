@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import MapPin, PhotoComment
+from .models import MapPin, PhotoComment, PinPhoto
 
 
 class PhotoCommentInline(admin.TabularInline):
@@ -8,12 +8,17 @@ class PhotoCommentInline(admin.TabularInline):
     extra = 0
 
 
+class PinPhotoInline(admin.TabularInline):
+    model = PinPhoto
+    extra = 0
+
+
 @admin.register(MapPin)
 class MapPinAdmin(admin.ModelAdmin):
-    list_display = ('title', 'user', 'latitude', 'longitude', 'created_at')
-    list_filter  = ('user',)
-    search_fields = ('title', 'user__username')
-    inlines = [PhotoCommentInline]
+    list_display = ('title', 'user', 'place_name', 'country', 'visited_on', 'created_at')
+    list_filter  = ('user', 'country')
+    search_fields = ('title', 'place_name', 'user__username')
+    inlines = [PinPhotoInline, PhotoCommentInline]
 
 
 @admin.register(PhotoComment)

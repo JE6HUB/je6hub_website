@@ -1,208 +1,230 @@
-import json
-
 from django.contrib import messages
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
-from django.core.exceptions import PermissionDenied
+from django.core.exceptions import PermissionDenied, ValidationError
+from django.db import transaction
+from django.db.models import Count, Q
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
+from django.utils.translation import gettext as _
 from django.views.decorators.http import require_http_methods
 
-from .models import MapPin, PhotoComment
+import json
+
+from .forms import PinForm
+from .models import MapPin, PhotoComment, PinPhoto
+from .photos import MAX_PHOTOS_PER_PIN, process_photo
 
 User = get_user_model()
 
 
-def _pin_to_dict(request, pin):
+def _pin_to_dict(pin):
+    photos = list(pin.photos.all())
     return {
-        "id":         pin.id,
-        "title":      pin.title,
-        "lat":        float(pin.latitude),
-        "lng":        float(pin.longitude),
-        "image_url":  request.build_absolute_uri(pin.image.url) if pin.image else "",
-        "desc":       pin.description,
-        "owner":      pin.user.username if pin.user else "",
+        'id':       pin.id,
+        'title':    pin.title,
+        'lat':      float(pin.latitude),
+        'lng':      float(pin.longitude),
+        'place':    pin.place_name,
+        'country':  pin.country,
+        'visited':  pin.visited_on.isoformat() if pin.visited_on else '',
+        'created':  pin.created_at.date().isoformat(),
+        'desc':     pin.description,
+        'owner':    pin.user.username if pin.user else '',
+        'photos':   [{'id': ph.id, 'url': ph.image.url, 'thumb': ph.thumb_url} for ph in photos],
+        'comments': getattr(pin, 'comment_count', None) or 0,
+    }
+
+
+def _pins_payload(queryset):
+    pins = queryset.select_related('user').prefetch_related('photos').annotate(comment_count=Count('comments'))
+    return [_pin_to_dict(p) for p in pins]
+
+
+def _stats(pins):
+    return {
+        'places':    len(pins),
+        'countries': len({p['country'] for p in pins if p['country']}),
+        'photos':    sum(len(p['photos']) for p in pins),
     }
 
 
 # ─── グローバル探索ページ ────────────────────────────────────
 
 def map_view(request):
-    """全ユーザーのピンを一覧表示するディスカバリーページ。"""
-    all_pins = MapPin.objects.select_related('user').all()
-    pins_json = json.dumps([_pin_to_dict(request, p) for p in all_pins])
-
-    # ピンを持つユーザーの一覧（ピン数付き）
-    from django.db.models import Count
-    users_with_pins = (
-        User.objects.filter(map_pins__isnull=False)
-        .annotate(pin_count=Count('map_pins'))
-        .order_by('-pin_count')
-    )
+    """全ユーザーのピンと旅人の一覧。"""
+    pins = _pins_payload(MapPin.objects.filter(user__isnull=False))
+    travelers = []
+    by_owner = {}
+    for p in pins:
+        by_owner.setdefault(p['owner'], []).append(p)
+    for owner, owner_pins in by_owner.items():
+        cover = next((p['photos'][0]['thumb'] for p in owner_pins if p['photos']), '')
+        travelers.append({'username': owner, 'cover': cover, **_stats(owner_pins)})
+    travelers.sort(key=lambda t: (-t['places'], t['username']))
 
     return render(request, 'photraveler/discovery.html', {
-        'pins_json':      pins_json,
-        'users_with_pins': users_with_pins,
+        'pins':      pins,
+        'recent':    pins[:8],
+        'travelers': travelers,
+        'stats':     _stats(pins),
     })
 
 
 # ─── ユーザー個別マップ ──────────────────────────────────────
 
 def user_map_view(request, username):
-    """特定ユーザーのWanderLens。ログイン不要で誰でも閲覧可能。"""
+    """特定ユーザーの WanderLens。ログイン不要で誰でも閲覧可能。"""
     profile_user = get_object_or_404(User, username=username)
-    user_pins    = MapPin.objects.filter(user=profile_user)
-    pins_json    = json.dumps([_pin_to_dict(request, p) for p in user_pins])
-    can_edit     = request.user.is_authenticated and request.user == profile_user
-
+    pins = _pins_payload(MapPin.objects.filter(user=profile_user))
     return render(request, 'photraveler/map.html', {
-        'pins_json':    pins_json,
+        'pins':         pins,
         'profile_user': profile_user,
-        'can_edit':     can_edit,
-        'pin_count':    user_pins.count(),
+        'can_edit':     request.user.is_authenticated and request.user == profile_user,
+        'stats':        _stats(pins),
+        'max_photos':   MAX_PHOTOS_PER_PIN,
     })
 
 
-# ─── ピン追加 ────────────────────────────────────────────────
+# ─── ピン追加・編集 ──────────────────────────────────────────
+
+def _save_pin(request, pin):
+    """追加・編集共通。写真の検証 → ピン保存 → 写真保存を 1 トランザクションで行う。"""
+    form = PinForm(request.POST, instance=pin)
+    uploads = request.FILES.getlist('photos')
+    remove_ids = {int(i) for i in request.POST.getlist('remove_photos') if i.isdigit()}
+
+    existing = list(pin.photos.all()) if pin.pk else []
+    keep = [ph for ph in existing if ph.id not in remove_ids]
+    if len(keep) + len(uploads) > MAX_PHOTOS_PER_PIN:
+        messages.error(request, _('写真は 1 か所につき %(n)d 枚までです。') % {'n': MAX_PHOTOS_PER_PIN})
+        return False
+
+    processed = []
+    for f in uploads:
+        try:
+            processed.append(process_photo(f))
+        except ValidationError as exc:
+            messages.error(request, f'{f.name}: {exc.messages[0]}')
+            return False
+
+    if not form.is_valid():
+        for errors in form.errors.values():
+            for e in errors:
+                messages.error(request, e)
+        return False
+
+    pin = form.save(commit=False)
+    lat, lng = form.cleaned_data.get('latitude'), form.cleaned_data.get('longitude')
+    if lat is None or lng is None:
+        # 位置の指定がなければ、写真の撮影位置 (EXIF GPS) を使う
+        gps = next((p for p in processed if p.latitude is not None), None)
+        if not gps:
+            messages.error(request, _('地図で場所を選ぶか、位置情報付きの写真を追加してください。'))
+            return False
+        lat, lng = gps.latitude, gps.longitude
+    pin.latitude, pin.longitude = round(lat, 6), round(lng, 6)
+    if not pin.visited_on:
+        pin.visited_on = next((p.taken_on for p in processed if p.taken_on), None)
+
+    with transaction.atomic():
+        pin.save()
+        for ph in existing:
+            if ph.id in remove_ids:
+                ph.image.delete(save=False)
+                if ph.thumbnail:
+                    ph.thumbnail.delete(save=False)
+                ph.delete()
+        order = [int(i) for i in request.POST.get('photo_order', '').split(',') if i.isdigit()]
+        for ph in keep:
+            if ph.id in order:
+                ph.position = order.index(ph.id)
+                ph.save(update_fields=['position'])
+        start = max([ph.position for ph in keep], default=-1) + 1
+        for i, p in enumerate(processed):
+            PinPhoto.objects.create(pin=pin, image=p.full, thumbnail=p.thumb, position=start + i)
+    return pin
+
 
 @login_required
+@require_http_methods(['POST'])
 def add_pin(request, username):
     if request.user.username != username:
         raise PermissionDenied
-
-    if request.method != 'POST':
-        return redirect('photraveler:user_map', username=username)
-
-    title = request.POST.get('title', '').strip()
-    desc  = request.POST.get('description', '').strip()
-    lat   = request.POST.get('latitude', '').strip()
-    lng   = request.POST.get('longitude', '').strip()
-    image = request.FILES.get('image')
-
-    errors = []
-    if not title:
-        errors.append('タイトルを入力してください。')
-    if not lat or not lng:
-        errors.append('地図上の場所を選択してください（緯度・経度が必要です）。')
-    else:
-        try:
-            lat_f = float(lat)
-            lng_f = float(lng)
-            if not (-90 <= lat_f <= 90) or not (-180 <= lng_f <= 180):
-                errors.append('緯度・経度の値が範囲外です。')
-        except ValueError:
-            errors.append('緯度・経度は数値で入力してください。')
-
-    if errors:
-        for e in errors:
-            messages.error(request, e)
-        return redirect('photraveler:user_map', username=username)
-
-    pin = MapPin(
-        user=request.user,
-        title=title,
-        description=desc,
-        latitude=lat_f,
-        longitude=lng_f,
-    )
-    if image:
-        pin.image = image
-    pin.save()
-    messages.success(request, f'ピン「{pin.title}」を追加しました。')
+    pin = _save_pin(request, MapPin(user=request.user))
+    if pin:
+        messages.success(request, _('「%(title)s」を追加しました。') % {'title': pin.title})
+        return redirect(f"{redirect('photraveler:user_map', username=username).url}?pin={pin.id}")
     return redirect('photraveler:user_map', username=username)
 
-
-# ─── ピン編集 ────────────────────────────────────────────────
 
 @login_required
 def edit_pin(request, pin_id):
     pin = get_object_or_404(MapPin, id=pin_id, user=request.user)
 
     if request.method == 'POST':
-        title = request.POST.get('title', '').strip()
-        desc  = request.POST.get('description', '').strip()
-        lat   = request.POST.get('latitude', '').strip()
-        lng   = request.POST.get('longitude', '').strip()
-        image = request.FILES.get('image')
-
-        if not title:
-            messages.error(request, 'タイトルを入力してください。')
-            return redirect('photraveler:user_map', username=request.user.username)
-
-        try:
-            pin.latitude  = float(lat)
-            pin.longitude = float(lng)
-        except (ValueError, TypeError):
-            messages.error(request, '緯度・経度は数値で入力してください。')
-            return redirect('photraveler:user_map', username=request.user.username)
-
-        pin.title       = title
-        pin.description = desc
-        if image:
-            pin.image = image
-        pin.save()
-        messages.success(request, f'ピン「{pin.title}」を更新しました。')
+        saved = _save_pin(request, pin)
+        if saved:
+            messages.success(request, _('「%(title)s」を更新しました。') % {'title': saved.title})
+            return redirect(f"{redirect('photraveler:user_map', username=request.user.username).url}?pin={saved.id}")
         return redirect('photraveler:user_map', username=request.user.username)
 
-    # GET: return pin data as JSON for the edit modal
-    return JsonResponse({
-        'id':          pin.id,
-        'title':       pin.title,
-        'description': pin.description,
-        'latitude':    str(pin.latitude),
-        'longitude':   str(pin.longitude),
-        'image_url':   request.build_absolute_uri(pin.image.url) if pin.image else '',
-    })
+    # GET: 編集ダイアログ用の JSON
+    data = _pin_to_dict(pin)
+    data.update(description=pin.description, latitude=str(pin.latitude), longitude=str(pin.longitude))
+    return JsonResponse(data)
 
-
-# ─── ピン削除 ────────────────────────────────────────────────
 
 @login_required
 @require_http_methods(['POST'])
 def delete_pin(request, pin_id):
     pin = get_object_or_404(MapPin, id=pin_id, user=request.user)
     username = request.user.username
+    for ph in pin.photos.all():
+        ph.image.delete(save=False)
+        if ph.thumbnail:
+            ph.thumbnail.delete(save=False)
     pin.delete()
-    messages.success(request, 'ピンを削除しました。')
+    messages.success(request, _('ピンを削除しました。'))
     return redirect('photraveler:user_map', username=username)
 
 
-# ─── コメント API（既存、全ユーザー共通） ───────────────────
+# ─── コメント API ────────────────────────────────────────────
 
-@require_http_methods(["GET", "POST"])
+@require_http_methods(['GET', 'POST'])
 def pin_comments(request, pin_id):
     pin = get_object_or_404(MapPin, pk=pin_id)
 
-    if request.method == "GET":
+    if request.method == 'GET':
         comments = [
             {
-                "author_name": c.author_name,
-                "text":        c.text,
-                "created_at":  c.created_at.strftime("%Y-%m-%d %H:%M"),
+                'author_name': c.author_name,
+                'text':        c.text,
+                'created_at':  c.created_at.strftime('%Y-%m-%d %H:%M'),
             }
-            for c in pin.comments.order_by("created_at")
+            for c in pin.comments.order_by('created_at')
         ]
-        return JsonResponse({"comments": comments})
+        return JsonResponse({'comments': comments})
 
     try:
         body = json.loads(request.body)
     except (json.JSONDecodeError, ValueError):
-        return JsonResponse({"error": "Invalid JSON"}, status=400)
+        return JsonResponse({'error': 'Invalid JSON'}, status=400)
 
-    text = (body.get("text") or "").strip()
+    text = (body.get('text') or '').strip()
     if not text:
-        return JsonResponse({"error": "text is required"}, status=400)
+        return JsonResponse({'error': 'text is required'}, status=400)
     if len(text) > 500:
-        return JsonResponse({"error": "text too long"}, status=400)
+        return JsonResponse({'error': 'text too long'}, status=400)
 
     author_name = (
         request.user.username if request.user.is_authenticated
-        else (body.get("author_name") or "Guest").strip()[:50]
+        else (body.get('author_name') or 'Guest').strip()[:50]
     )
 
     comment = PhotoComment.objects.create(pin=pin, author_name=author_name, text=text)
     return JsonResponse({
-        "author_name": comment.author_name,
-        "text":        comment.text,
-        "created_at":  comment.created_at.strftime("%Y-%m-%d %H:%M"),
+        'author_name': comment.author_name,
+        'text':        comment.text,
+        'created_at':  comment.created_at.strftime('%Y-%m-%d %H:%M'),
     }, status=201)

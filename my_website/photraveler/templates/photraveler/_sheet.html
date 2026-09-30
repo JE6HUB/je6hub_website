@@ -1,0 +1,50 @@
+{% load i18n %}
+<!-- スポットの詳細 -->
+<dialog id="wl-sheet" class="wl-sheet" aria-labelledby="wl-sheet-title">
+    <div class="wl-sheet-inner">
+        <div class="wl-gallery" id="wl-gallery">
+            <div class="wl-gallery-track" id="wl-gallery-track"></div>
+            <button type="button" class="wl-gallery-nav wl-gallery-nav--prev" data-dir="-1" aria-label="{% trans '前の写真' %}"><span class="material-symbols-outlined" aria-hidden="true">chevron_left</span></button>
+            <button type="button" class="wl-gallery-nav wl-gallery-nav--next" data-dir="1" aria-label="{% trans '次の写真' %}"><span class="material-symbols-outlined" aria-hidden="true">chevron_right</span></button>
+            <div class="wl-gallery-dots" id="wl-gallery-dots"></div>
+        </div>
+        <div class="wl-sheet-body">
+            <div class="wl-sheet-head">
+                <div>
+                    <p class="wl-sheet-meta" id="wl-sheet-meta"></p>
+                    <h2 class="wl-sheet-title" id="wl-sheet-title"></h2>
+                </div>
+                <form method="dialog"><button class="wl-icon-btn" aria-label="{% trans '閉じる' %}"><span class="material-symbols-outlined" aria-hidden="true">close</span></button></form>
+            </div>
+            <p class="wl-sheet-desc" id="wl-sheet-desc"></p>
+            <div class="wl-sheet-actions" id="wl-sheet-actions">
+                <a class="ap-link" id="wl-sheet-owner" href="#"></a>
+                <button type="button" class="wl-text-btn" id="wl-sheet-locate">{% trans "地図で見る" %}</button>
+                <button type="button" class="wl-text-btn" id="wl-sheet-copy">{% trans "リンクをコピー" %}</button>
+                {% if can_edit %}
+                <button type="button" class="wl-text-btn" id="wl-sheet-edit">{% trans "編集" %}</button>
+                <form method="post" id="wl-delete-form" class="wl-inline-form">
+                    {% csrf_token %}
+                    <button type="submit" class="wl-text-btn wl-text-btn--danger">{% trans "削除" %}</button>
+                </form>
+                {% endif %}
+            </div>
+
+            <section class="wl-comments" aria-labelledby="wl-comments-title">
+                <h3 id="wl-comments-title">{% trans "コメント" %}</h3>
+                <div id="wl-comment-list" class="wl-comment-list"></div>
+                <form id="wl-comment-form" class="wl-comment-form" novalidate>
+                    {% csrf_token %}
+                    <input type="text" id="wl-comment-input" class="ap-input" maxlength="500" placeholder="{% trans 'コメントを書く…' %}" aria-label="{% trans 'コメントを書く' %}" required>
+                    <button type="submit" class="ap-btn ap-btn-primary wl-btn">{% trans "送信" %}</button>
+                </form>
+                <p class="wl-error" id="wl-comment-error" hidden></p>
+            </section>
+
+            <nav class="wl-sheet-pager" aria-label="{% trans 'スポットを移動' %}">
+                <button type="button" class="wl-text-btn" data-step="-1"><span class="material-symbols-outlined" aria-hidden="true">arrow_back</span>{% trans "前のスポット" %}</button>
+                <button type="button" class="wl-text-btn" data-step="1">{% trans "次のスポット" %}<span class="material-symbols-outlined" aria-hidden="true">arrow_forward</span></button>
+            </nav>
+        </div>
+    </div>
+</dialog>

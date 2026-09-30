@@ -5,13 +5,34 @@
    ========================================= */
 
 :root {
+    /* Typography — apple.com (日本) と同じフォントスタック。
+       SF Pro はライセンス上ウェブフォントとして配布できないため埋め込まず、
+       Apple 端末では OS 標準の SF Pro / ヒラギノ (= SF Pro JP の和文) がそのまま使われる。
+       見出し (20px 以上) は Display、本文は Text の光学サイズを使うのも apple.com と同じ。 */
+    --ap-font-text: "SF Pro JP", "SF Pro Text", "SF Pro Icons", -apple-system, BlinkMacSystemFont,
+        "Hiragino Kaku Gothic Pro", "ヒラギノ角ゴ Pro W3", "Hiragino Sans", "Helvetica Neue", Helvetica, Arial,
+        "メイリオ", Meiryo, sans-serif;
+    --ap-font-display: "SF Pro JP", "SF Pro Display", "SF Pro Icons", -apple-system, BlinkMacSystemFont,
+        "Hiragino Kaku Gothic Pro", "ヒラギノ角ゴ Pro W3", "Hiragino Sans", "Helvetica Neue", Helvetica, Arial,
+        "メイリオ", Meiryo, sans-serif;
+    --ap-font-serif: "New York", ui-serif, "Hiragino Mincho ProN", "Yu Mincho", Georgia, serif;
+    --ap-font-mono: "SF Mono", ui-monospace, Menlo, Consolas, monospace;
+
+    /* MDB (Bootstrap) の Roboto 指定を上書き */
+    --mdb-body-font-family: var(--ap-font-text);
+    --mdb-btn-font-family: var(--ap-font-text);
+    --mdb-font-roboto: var(--ap-font-text);
+    --mdb-font-monospace: var(--ap-font-mono);
+
     /* Colors - Pure Dark Mode */
     --ap-bg: #000000;
     --ap-text: #f5f5f7;
     --ap-text-muted: #86868b;
-    --ap-card-bg: #111111;
+    --ap-card-bg: #1c1c1e; /* 枠線なしカード用: 黒背景から面の明度差で浮かせる */
     --ap-card-border: rgba(255, 255, 255, 0.1);
-    --ap-accent: #2997ff; /* Apple Blue */
+    --ap-accent: #2997ff; /* Apple Blue (リンク / ダーク背景) */
+    --ap-button: #0071e3; /* Apple のボタン青 */
+    --ap-button-hover: #0077ed;
     --ap-nav-bg: rgba(0, 0, 0, 0.72);
     --ap-glass: rgba(28, 28, 30, 0.6);
     --ap-glass-border: rgba(255, 255, 255, 0.15);
@@ -20,10 +41,10 @@
 body {
     background-color: var(--ap-bg);
     color: var(--ap-text);
-    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-family: var(--ap-font-text);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    letter-spacing: -0.01em;
+    letter-spacing: -0.022em;
     line-height: 1.47059;
     font-weight: 400;
     margin: 0;
@@ -35,10 +56,19 @@ body {
    Typography
    ========================================= */
 
+/* apple.com と同様、大きな文字 (見出し類) は SF Pro Display、それ以外は SF Pro Text */
+h1, h2, h3,
+.ap-hero-title,
+.ap-hero-subtitle,
+.ap-section-title {
+    font-family: var(--ap-font-display);
+}
+code, kbd, pre, samp { font-family: var(--ap-font-mono); }
+
 .ap-hero-title {
     font-size: clamp(48px, 8vw, 96px);
     font-weight: 600;
-    letter-spacing: -0.04em;
+    letter-spacing: -0.015em;
     line-height: 1.05;
     margin-bottom: 0.2em;
 }
@@ -54,20 +84,50 @@ body {
 .ap-section-title {
     font-size: clamp(32px, 5vw, 56px);
     font-weight: 600;
-    letter-spacing: -0.02em;
+    letter-spacing: -0.005em;
     line-height: 1.1;
     margin-bottom: 0.5em;
 }
 
 .ap-eyebrow {
-    font-size: 14px;
+    font-size: 19px;
     font-weight: 600;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
+    letter-spacing: 0.012em;
     color: var(--ap-text-muted);
-    margin-bottom: 0.8em;
+    margin-bottom: 0.4em;
     display: block;
 }
+
+/* 本文サイズのリード文 */
+.ap-subhead {
+    font-size: 19px;
+    line-height: 1.42;
+    letter-spacing: 0.012em;
+    color: var(--ap-text-muted);
+}
+
+/* 以前のグラデーション文字は使わない (Apple は単色) */
+.ap-text-gradient { color: inherit; }
+
+/* 技術名などの補足: タグではなく本文中の短い語として並べる */
+.ap-chip {
+    display: inline;
+    font-size: 14px;
+    color: var(--ap-text-muted);
+}
+.ap-chip + .ap-chip::before { content: " · "; }
+
+/* 「詳しく見る ›」形式のテキストリンク */
+.ap-link {
+    color: var(--ap-accent);
+    text-decoration: none;
+    font-size: 17px;
+}
+.ap-link:hover { text-decoration: underline; color: var(--ap-accent); }
+.ap-link::after { content: " ›"; }
+
+/* 和文は字間を詰めない (apple.com/jp と同じ) */
+html[lang="ja"] body { letter-spacing: 0; }
 
 /* =========================================
    Global Header (ap-globalnav)
@@ -180,6 +240,11 @@ body {
     opacity: 1;
 }
 
+/* ── Logo ── */
+.ap-logo-link { display: inline-flex; align-items: center; }
+.je6hub-logo { display: block; width: auto; height: 20px; color: inherit; }
+.ap-glass-navbar .je6hub-logo { height: 16px; }
+
 /* =========================================
    Buttons
    ========================================= */
@@ -199,12 +264,12 @@ body {
 }
 
 .ap-btn-primary {
-    background-color: var(--ap-text);
-    color: var(--ap-bg);
+    background-color: var(--ap-button);
+    color: #fff;
 }
 .ap-btn-primary:hover {
-    background-color: #e8e8ed;
-    transform: scale(1.02);
+    background-color: var(--ap-button-hover);
+    color: #fff;
 }
 
 .ap-btn-accent {
@@ -217,12 +282,12 @@ body {
 
 .ap-btn-outline {
     background-color: transparent;
-    color: var(--ap-text);
-    border: 1px solid var(--ap-text);
+    color: var(--ap-accent);
+    border: 1px solid var(--ap-accent);
 }
 .ap-btn-outline:hover {
-    background-color: var(--ap-text);
-    color: var(--ap-bg);
+    background-color: var(--ap-accent);
+    color: #fff;
 }
 
 /* =========================================
@@ -246,7 +311,6 @@ body {
     justify-content: space-between;
     position: relative;
     overflow: hidden;
-    border: 1px solid var(--ap-card-border);
     transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
@@ -266,11 +330,9 @@ body {
    Glass Card (For Forms / Content)
    ========================================= */
 .ap-glass-panel {
-    background: var(--ap-glass);
-    backdrop-filter: saturate(180%) blur(30px);
-    -webkit-backdrop-filter: saturate(180%) blur(30px);
-    border: 1px solid var(--ap-glass-border);
-    border-radius: 24px;
+    background: var(--ap-card-bg);
+    border: none;
+    border-radius: 28px;
     padding: 40px;
 }
 
@@ -279,8 +341,8 @@ body {
    ========================================= */
 .ap-reveal {
     opacity: 0;
-    transform: translateY(40px);
-    transition: opacity 1s cubic-bezier(0.2, 0.8, 0.2, 1), transform 1s cubic-bezier(0.2, 0.8, 0.2, 1);
+    transform: translateY(24px);
+    transition: opacity 0.8s cubic-bezier(0.2, 0.8, 0.2, 1), transform 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
 .ap-reveal.visible {
@@ -297,8 +359,8 @@ body {
 /* Form Elements */
 .ap-input {
     width: 100%;
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: #000;
+    border: 1px solid #424245;
     color: var(--ap-text);
     padding: 16px;
     border-radius: 12px;
@@ -308,7 +370,14 @@ body {
 .ap-input:focus {
     outline: none;
     border-color: var(--ap-accent);
-    background: rgba(255, 255, 255, 0.08);
+    box-shadow: 0 0 0 3px rgba(41, 151, 255, 0.35);
+}
+.ap-label {
+    display: block;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--ap-text);
+    margin-bottom: 8px;
 }
 
 /* LiquidGlass Button — matches official site pattern */
@@ -326,3 +395,57 @@ body {
     filter: drop-shadow(0px 0px 6px #000000);
     color: #fff;
 }
+
+/* ── Small screens: ナビ項目が画面幅を超えるため、左寄せ + 横スクロールにして
+   先頭のロゴが常に見えるようにする ── */
+@media (max-width: 734px) {
+    .ap-globalnav-list {
+        justify-content: flex-start;
+        overflow-x: auto;
+        scrollbar-width: none;
+        padding: 0 16px;
+    }
+    .ap-globalnav-list::-webkit-scrollbar { display: none; }
+    .ap-globalnav-item { margin: 0 0.7rem; flex-shrink: 0; }
+    .ap-globalnav-item:first-child { margin-left: 0; }
+    .ap-glass-navbar {
+        max-width: calc(100vw - 24px);
+        overflow-x: auto;
+        scrollbar-width: none;
+        justify-content: flex-start;
+    }
+    .ap-glass-navbar::-webkit-scrollbar { display: none; }
+    .ap-glass-navbar-link { flex-shrink: 0; }
+}
+
+/* 見出し・リード文の改行を整える (行長をそろえ、和文は文節で折り返す) */
+.ap-hero-title, .ap-hero-subtitle, .ap-section-title, .ap-subhead {
+    text-wrap: balance;
+    word-break: auto-phrase;
+}
+
+
+/* =========================================
+   共通コンポーネント
+   ========================================= */
+/* セグメントコントロール (Apple の UISegmentedControl 風) */
+.blog-segmented {
+    display: inline-flex;
+    align-self: flex-start;
+    padding: 2px;
+    border-radius: 9px;
+    background: #2c2c2e;
+}
+.blog-segmented label { position: relative; cursor: pointer; }
+.blog-segmented input { position: absolute; opacity: 0; pointer-events: none; }
+.blog-segmented span {
+    display: block;
+    padding: 6px 16px;
+    border-radius: 7px;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--ap-text-muted);
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+.blog-segmented input:checked + span { background: #636366; color: #fff; }
+.blog-segmented input:focus-visible + span { outline: 2px solid var(--ap-accent); }

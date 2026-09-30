@@ -43,6 +43,7 @@ def channel_list(request):
     return render(request, 'community/channel_list.html', {
         'public_channels':  annotate(public_channels),
         'private_channels': annotate(private_channels),
+        'joined_count':     request.user.channel_memberships.filter(status=ChannelMembership.STATUS_ACTIVE).count(),
     })
 
 
@@ -138,7 +139,7 @@ def thread_view(request, channel_id):
 
     return render(request, 'community/thread.html', {
         'channel':          channel,
-        'messages':         channel.messages.select_related('sender').order_by('created_at'),
+        'chat_messages':    channel.messages.select_related('sender').order_by('created_at'),
         'membership':       membership,
         'is_owner':         is_owner,
         'members':          members,

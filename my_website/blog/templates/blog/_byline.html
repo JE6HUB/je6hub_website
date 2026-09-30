@@ -1,0 +1,11 @@
+{% load i18n %}
+<div class="blog-byline">
+    <span class="blog-avatar" aria-hidden="true">{{ post.author.username|first|upper }}</span>
+    <span class="blog-byline-text">
+        <a href="{% url 'blog:list' %}?author={{ post.author.username|urlencode }}" class="blog-byline-name">{{ post.author.username }}</a>
+        <span class="blog-byline-meta">
+            {% if post.published_at %}<time datetime="{{ post.published_at|date:'c' }}">{{ post.published_at|date:"Y.m.d" }}</time>{% else %}{% trans "未公開" %}{% endif %}
+            &nbsp;·&nbsp; {% blocktrans count minutes=post.reading_minutes %}{{ minutes }}分で読めます{% plural %}{{ minutes }}分で読めます{% endblocktrans %}
+        </span>
+    </span>
+</div>

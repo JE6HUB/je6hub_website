@@ -1,139 +1,159 @@
 {% extends 'base.html' %}
-{% load i18n %}
+{% load static i18n %}
 
 {% block title %}Community Lounge{% endblock %}
 
-{% block content %}
-<div class="ap-section py-5">
+{% block glass_preload %}{% include "_liquid_glass_preload.html" with hero="img/hero/lounge-fluid" %}{% endblock %}
 
-    <!-- Header -->
-    <div class="d-flex align-items-center justify-content-between mb-5 flex-wrap gap-3 ap-reveal">
-        <div>
-            <h2 class="ap-hero-title mb-0" style="font-size: 32px;">
-                <span class="material-symbols-outlined align-middle me-2" aria-hidden="true" style="font-size: 36px; color:var(--ap-accent);">forum</span>
-                {% trans "Community Lounge" %}
-            </h2>
-            <p class="ap-subhead mt-2 mb-0" style="font-size: 17px;">{% trans "興味のあるトピックに参加して、自由に語り合いましょう。" %}</p>
-        </div>
-        <a href="{% url 'community:create' %}" class="ap-btn ap-btn-primary" style="padding: 12px 24px;">
-            <span class="material-symbols-outlined align-middle me-1" aria-hidden="true" style="font-size: 20px;">add</span>
-            {% trans "チャンネルを作成" %}
-        </a>
+{% block extra_head %}
+<link href="{% static 'css/lounge.css' %}?v=5" rel="stylesheet" />
+{% endblock %}
+
+{% block content %}
+<div class="lounge-ambient" aria-hidden="true"></div>
+
+<!-- Liquid Glass hero: 背景画像と glass 要素はすべて root の直接の子 -->
+<section class="lounge-hero liquid-glass-root" id="lounge-glass-root">
+    {% include "_hero_image.html" with hero="img/hero/lounge-fluid" class="lounge-hero-bg" %}
+    <div class="lounge-hero-tint"></div>
+
+    <div class="liquid-glass-panel lounge-hero-panel"
+         data-config='{"cornerRadius":40, "blurAmount":0.35, "brightness":-0.12, "refraction":0.8}'>
+        <span class="label">
+            <h1 class="lounge-hero-title">Lounge</h1>
+            <p class="lounge-hero-lead">{% trans "興味のあるトピックに参加して、自由に語り合いましょう。" %}</p>
+        </span>
     </div>
 
+    <div class="lounge-hero-break"></div>
+
+    <a href="{% url 'community:create' %}" class="liquid-glass-btn"
+       data-config='{"button":true, "cornerRadius":28, "blurAmount":0.25, "brightness":-0.15}'>
+        <span class="label">
+            {% trans "チャンネルを作成" %}
+        </span>
+    </a>
+    <a href="#lounge-channels" class="liquid-glass-btn"
+       data-config='{"button":true, "cornerRadius":28, "blurAmount":0.25, "brightness":-0.15}'>
+        <span class="label">
+            {% trans "チャンネルを探す" %}
+        </span>
+    </a>
+
+    <div class="lounge-hero-break"></div>
+
+    <div class="lounge-hero-stats">
+        <span><strong>{{ public_channels|length }}</strong>{% trans "パブリック" %}</span>
+        <span><strong>{{ private_channels|length }}</strong>{% trans "プライベート" %}</span>
+        <span><strong>{{ joined_count }}</strong>{% trans "参加中" %}</span>
+    </div>
+</section>
+
+<div class="lounge-page" id="lounge-channels">
+
     <!-- Public Channels -->
-    <section class="mb-5">
-        <h3 class="ap-subhead fw-bold mb-4 ap-reveal" style="font-size: 13px; letter-spacing: 0.1em; text-transform: uppercase;">
-            <span class="material-symbols-outlined align-middle me-1" aria-hidden="true" style="font-size: 18px;">tag</span>
-            {% trans "パブリックチャンネル" %}
-        </h3>
+    <section class="lounge-section ap-reveal" style="--tint: var(--lounge-public);">
+        <div class="lounge-section-head">
+            <h2>{% trans "パブリックチャンネル" %}</h2>
+            <span class="lounge-count">{{ public_channels|length }}</span>
+        </div>
 
         {% if public_channels %}
-        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4 ap-reveal">
+        <div class="lounge-grid">
             {% for item in public_channels %}
             {% with ch=item.channel m=item.membership %}
-            <div class="col">
-                <div class="ap-glass-panel h-100 d-flex flex-column" style="padding: 24px;">
-                    <div class="d-flex align-items-start gap-3 mb-3">
-                        <div style="width: 48px; height: 48px; border-radius: 14px; background: rgba(0,113,227,0.1); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
-                            <span class="material-symbols-outlined" aria-hidden="true" style="color:var(--ap-accent); font-size: 24px;">tag</span>
-                        </div>
-                        <div style="flex:1; min-width:0;">
-                            <p class="fw-bold mb-0 text-light" style="font-size: 18px; line-height: 1.2;">{{ ch.name }}</p>
-                            <p class="mb-0 mt-1 text-muted" style="font-size: 13px;">
-                                {{ ch.active_member_count }} {% trans "メンバー" %} &nbsp;·&nbsp; {{ ch.created_by.username }}
-                            </p>
-                        </div>
-                    </div>
-                    {% if ch.description %}
-                    <p class="mb-4 text-muted" style="font-size: 14px; flex:1;">{{ ch.description }}</p>
-                    {% else %}
-                    <div style="flex:1;"></div>
-                    {% endif %}
-                    <div class="mt-auto">
-                        {% if m and m.status == 'active' %}
-                            <a href="{% url 'community:thread' ch.id %}" class="ap-btn ap-btn-primary w-100 d-flex justify-content-center">
-                                <span class="material-symbols-outlined align-middle me-1" aria-hidden="true" style="font-size:18px;">chat</span> {% trans "開く" %}
-                            </a>
-                        {% else %}
-                            <form method="post" action="{% url 'community:join' ch.id %}">
-                                {% csrf_token %}
-                                <button type="submit" class="ap-btn ap-btn-outline w-100 d-flex justify-content-center">
-                                    <span class="material-symbols-outlined align-middle me-1" aria-hidden="true" style="font-size:18px;">login</span> {% trans "参加する" %}
-                                </button>
-                            </form>
-                        {% endif %}
+            <article class="lounge-card lounge-glass">
+                <div class="lounge-card-head">
+                    <div class="lounge-card-icon"><span class="material-symbols-outlined" aria-hidden="true">tag</span></div>
+                    <div style="min-width:0;">
+                        <h3 class="lounge-card-title">{{ ch.name }}</h3>
+                        <p class="lounge-card-meta">{{ ch.active_member_count }} {% trans "メンバー" %} · {{ ch.created_by.username }}</p>
                     </div>
                 </div>
-            </div>
+                {% if ch.description %}
+                    <p class="lounge-card-desc">{{ ch.description }}</p>
+                {% else %}
+                    <div class="lounge-card-spacer"></div>
+                {% endif %}
+                {% if m and m.status == 'active' %}
+                    <a href="{% url 'community:thread' ch.id %}" class="lounge-btn lounge-btn--primary lounge-btn--block">
+                        {% trans "開く" %}
+                    </a>
+                {% else %}
+                    <form method="post" action="{% url 'community:join' ch.id %}">
+                        {% csrf_token %}
+                        <button type="submit" class="lounge-btn lounge-btn--glass lounge-btn--block">
+                            {% trans "参加する" %}
+                        </button>
+                    </form>
+                {% endif %}
+            </article>
             {% endwith %}
             {% endfor %}
         </div>
         {% else %}
-        <p class="text-center py-5 text-muted ap-reveal">{% trans "パブリックチャンネルはまだありません。" %}</p>
+        <div class="lounge-empty lounge-glass">
+            <span class="material-symbols-outlined" aria-hidden="true">forum</span>
+            {% trans "パブリックチャンネルはまだありません。" %}
+        </div>
         {% endif %}
     </section>
 
     <!-- Private Channels -->
-    <section>
-        <h3 class="ap-subhead fw-bold mb-4 ap-reveal" style="font-size: 13px; letter-spacing: 0.1em; text-transform: uppercase;">
-            <span class="material-symbols-outlined align-middle me-1" aria-hidden="true" style="font-size: 18px; color: #bf5af2;">lock</span>
-            {% trans "プライベートチャンネル" %}
-        </h3>
+    <section class="lounge-section ap-reveal" style="--tint: var(--lounge-private);">
+        <div class="lounge-section-head">
+            <h2>{% trans "プライベートチャンネル" %}</h2>
+            <span class="lounge-count">{{ private_channels|length }}</span>
+        </div>
 
         {% if private_channels %}
-        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4 ap-reveal">
+        <div class="lounge-grid">
             {% for item in private_channels %}
             {% with ch=item.channel m=item.membership %}
-            <div class="col">
-                <div class="ap-glass-panel h-100 d-flex flex-column" style="padding: 24px; border: 1px solid rgba(191,90,242,0.3);">
-                    <div class="d-flex align-items-start gap-3 mb-3">
-                        <div style="width: 48px; height: 48px; border-radius: 14px; background: rgba(191,90,242,0.1); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
-                            <span class="material-symbols-outlined" aria-hidden="true" style="color: #bf5af2; font-size: 24px;">lock</span>
-                        </div>
-                        <div style="flex:1; min-width:0;">
-                            <p class="fw-bold mb-0 text-light" style="font-size: 18px; line-height: 1.2;">{{ ch.name }}</p>
-                            <p class="mb-0 mt-1 text-muted" style="font-size: 13px;">
-                                {% if m and m.status == 'active' %}{{ ch.active_member_count }} {% trans "メンバー" %} &nbsp;·&nbsp; {% endif %}
-                                {{ ch.created_by.username }}
-                            </p>
-                        </div>
-                    </div>
-                    {% if ch.description and m and m.status == 'active' %}
-                    <p class="mb-4 text-muted" style="font-size: 14px; flex:1;">{{ ch.description }}</p>
-                    {% else %}
-                    <div style="flex:1;"></div>
-                    {% endif %}
-                    <div class="mt-auto">
-                        {% if m and m.status == 'active' %}
-                            <a href="{% url 'community:thread' ch.id %}" class="ap-btn ap-btn-primary w-100 d-flex justify-content-center" style="background: #bf5af2;">
-                                <span class="material-symbols-outlined align-middle me-1" aria-hidden="true" style="font-size: 18px;">chat</span> {% trans "開く" %}
-                            </a>
-                        {% elif m and m.status == 'invited' %}
-                            <a href="{% url 'community:accept_invite' ch.id %}" class="ap-btn ap-btn-primary w-100 d-flex justify-content-center" style="background: #32d74b;">
-                                <span class="material-symbols-outlined align-middle me-1" aria-hidden="true" style="font-size: 18px;">mail</span> {% trans "招待を承諾" %}
-                            </a>
-                        {% elif m and m.status == 'pending' %}
-                            <div class="text-center text-muted" style="font-size: 14px; padding: 12px; background: rgba(255,255,255,0.05); border-radius: 12px;">
-                                <span class="material-symbols-outlined align-middle me-1" aria-hidden="true" style="font-size: 16px;">hourglass_empty</span>
-                                {% trans "承認待ち…" %}
-                            </div>
-                        {% else %}
-                            <form method="post" action="{% url 'community:join' ch.id %}">
-                                {% csrf_token %}
-                                <button type="submit" class="ap-btn ap-btn-outline w-100 d-flex justify-content-center" style="border-color: rgba(191,90,242,0.5); color: #bf5af2;">
-                                    <span class="material-symbols-outlined align-middle me-1" aria-hidden="true" style="font-size: 18px;">person_add</span> {% trans "参加リクエスト" %}
-                                </button>
-                            </form>
-                        {% endif %}
+            <article class="lounge-card lounge-card--private lounge-glass">
+                <div class="lounge-card-head">
+                    <div class="lounge-card-icon"><span class="material-symbols-outlined" aria-hidden="true">lock</span></div>
+                    <div style="min-width:0;">
+                        <h3 class="lounge-card-title">{{ ch.name }}</h3>
+                        <p class="lounge-card-meta">
+                            {% if m and m.status == 'active' %}{{ ch.active_member_count }} {% trans "メンバー" %} · {% endif %}{{ ch.created_by.username }}
+                        </p>
                     </div>
                 </div>
-            </div>
+                {% if ch.description and m and m.status == 'active' %}
+                    <p class="lounge-card-desc">{{ ch.description }}</p>
+                {% else %}
+                    <div class="lounge-card-spacer"></div>
+                {% endif %}
+                {% if m and m.status == 'active' %}
+                    <a href="{% url 'community:thread' ch.id %}" class="lounge-btn lounge-btn--primary lounge-btn--block">
+                        {% trans "開く" %}
+                    </a>
+                {% elif m and m.status == 'invited' %}
+                    <a href="{% url 'community:accept_invite' ch.id %}" class="lounge-btn lounge-btn--tint lounge-btn--block" style="--tint: var(--lounge-success);">
+                        {% trans "招待を承諾" %}
+                    </a>
+                {% elif m and m.status == 'pending' %}
+                    <div class="lounge-pending">
+                        <span class="material-symbols-outlined" aria-hidden="true">hourglass_empty</span>{% trans "承認待ち…" %}
+                    </div>
+                {% else %}
+                    <form method="post" action="{% url 'community:join' ch.id %}">
+                        {% csrf_token %}
+                        <button type="submit" class="lounge-btn lounge-btn--tint lounge-btn--block">
+                            {% trans "参加リクエスト" %}
+                        </button>
+                    </form>
+                {% endif %}
+            </article>
             {% endwith %}
             {% endfor %}
         </div>
         {% else %}
-        <p class="text-center py-5 text-muted ap-reveal">{% trans "プライベートチャンネルはまだありません。" %}</p>
+        <div class="lounge-empty lounge-glass">
+            <span class="material-symbols-outlined" aria-hidden="true">lock</span>
+            {% trans "プライベートチャンネルはまだありません。" %}
+        </div>
         {% endif %}
     </section>
 </div>

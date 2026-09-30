@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% load i18n %}
 
-{% block title %}Profile - {{ user_obj.username }}{% endblock %}
+{% block title %}Profile — {{ user_obj.username }}{% endblock %}
 
 {% block content %}
 <div class="ap-section py-5">
@@ -10,8 +10,8 @@
             <!-- Profile Info -->
             <div class="ap-glass-panel text-center mb-4 ap-reveal">
                 <div class="mb-3">
-                    <span class="material-symbols-outlined" aria-hidden="true" style="font-size:72px;color:var(--ap-accent);">account_circle</span>
-                    <h2 class="ap-hero-title mt-2" style="font-size: 32px;">{{ user_obj.username }}</h2>
+                    <span class="profile-monogram" aria-hidden="true">{{ user_obj.username|first|upper }}</span>
+                    <h2 class="ap-hero-title mt-3" style="font-size: 40px;">{{ user_obj.username }}</h2>
                     <p class="ap-subhead mb-2" style="font-size: 17px;">{% if user_obj.email %}{{ user_obj.email }}{% else %}{% trans "No email provided" %}{% endif %}</p>
                 </div>
 
@@ -23,39 +23,39 @@
 
             <!-- Profile Edit Form -->
             <div class="ap-glass-panel ap-reveal">
-                <h3 class="ap-subhead mb-4 text-light fw-bold"><span class="material-symbols-outlined align-middle me-2" aria-hidden="true">edit</span> {% trans "プロフィール編集" %}</h3>
+                <h3 class="mb-4 text-light fw-semibold" style="font-size: 28px;">{% trans "プロフィール編集" %}</h3>
                 <form method="post" class="needs-validation">
                     {% csrf_token %}
 
                     {% if form.errors %}
-                    <div class="alert alert-danger" style="background: rgba(255,59,48,0.1); border: 1px solid rgba(255,59,48,0.2); color: #ff453a; border-radius: 12px;">
+                    <div class="alert alert-danger" style="background: rgba(255,59,48,0.12); border: none; color: #ff453a; border-radius: 12px;">
                         {% trans "入力内容にエラーがあります。" %}
                         {{ form.errors }}
                     </div>
                     {% endif %}
 
                     <div class="mb-4">
-                        <label class="form-label fw-bold text-muted small" for="profileEmail">{% trans "メールアドレス" %}</label>
+                        <label class="ap-label" for="profileEmail">{% trans "メールアドレス" %}</label>
                         <input type="email" class="form-control ap-input" id="profileEmail" name="email" value="{{ form.email.value|default:'' }}">
                     </div>
 
                     <div class="row mb-4">
                         <div class="col-md-6">
-                            <label class="form-label fw-bold text-muted small" for="profileFirstName">{% trans "名" %}</label>
+                            <label class="ap-label" for="profileFirstName">{% trans "名" %}</label>
                             <input type="text" class="form-control ap-input" id="profileFirstName" name="first_name" value="{{ form.first_name.value|default:'' }}">
                         </div>
                         <div class="col-md-6 mt-4 mt-md-0">
-                            <label class="form-label fw-bold text-muted small" for="profileLastName">{% trans "姓" %}</label>
+                            <label class="ap-label" for="profileLastName">{% trans "姓" %}</label>
                             <input type="text" class="form-control ap-input" id="profileLastName" name="last_name" value="{{ form.last_name.value|default:'' }}">
                         </div>
                     </div>
 
-                    <hr class="my-5" style="border-color: rgba(255, 255, 255, 0.1);">
+                    <hr class="my-5" style="border-color: #424245; opacity: 1;">
 
-                    <h4 class="fw-bold mb-4 text-light fs-5"><span class="material-symbols-outlined align-middle me-2" style="color: var(--ap-accent);">music_note</span>{% trans "お気に入りの曲" %}</h4>
+                    <h4 class="mb-4 text-light fw-semibold" style="font-size: 21px;">{% trans "お気に入りの曲" %}</h4>
 
                     <div class="mb-4">
-                        <label class="form-label fw-bold text-muted small" for="appleMusicSearchTerm">{% trans "Apple Music で検索" %}</label>
+                        <label class="ap-label" for="appleMusicSearchTerm">{% trans "Apple Music で検索" %}</label>
                         <div class="d-flex gap-2">
                             <input type="search" class="form-control ap-input" id="appleMusicSearchTerm" placeholder="曲名 / アーティスト名">
                             <button type="button" class="ap-btn ap-btn-primary" id="appleMusicSearchBtn">{% trans "検索" %}</button>
@@ -64,22 +64,22 @@
                     </div>
 
                     <div class="mb-4">
-                        <label class="form-label fw-bold text-muted small" for="favoriteTrackTitle">{% trans "曲名" %}</label>
+                        <label class="ap-label" for="favoriteTrackTitle">{% trans "曲名" %}</label>
                         <input type="text" class="form-control ap-input" id="favoriteTrackTitle" name="favorite_track_title" value="{{ form.favorite_track_title.value|default:'' }}" placeholder="e.g., All Of Me">
                     </div>
 
                     <div class="mb-4">
-                        <label class="form-label fw-bold text-muted small" for="favoriteTrackArtist">{% trans "アーティスト名" %}</label>
+                        <label class="ap-label" for="favoriteTrackArtist">{% trans "アーティスト名" %}</label>
                         <input type="text" class="form-control ap-input" id="favoriteTrackArtist" name="favorite_track_artist" value="{{ form.favorite_track_artist.value|default:'' }}" placeholder="e.g., Nao">
                     </div>
 
                     <div class="mb-4">
-                        <label class="form-label fw-bold text-muted small" for="favoriteTrackImageUrl">{% trans "ジャケット画像URL" %}</label>
+                        <label class="ap-label" for="favoriteTrackImageUrl">{% trans "ジャケット画像URL" %}</label>
                         <input type="url" class="form-control ap-input" id="favoriteTrackImageUrl" name="favorite_track_image_url" value="{{ form.favorite_track_image_url.value|default:'' }}" placeholder="https://...">
                     </div>
 
                     <div class="mb-4">
-                        <label class="form-label fw-bold text-muted small" for="favoriteTrackAppleMusicUrl">{% trans "Apple Music リンク" %}</label>
+                        <label class="ap-label" for="favoriteTrackAppleMusicUrl">{% trans "Apple Music リンク" %}</label>
                         <input type="url" class="form-control ap-input" id="favoriteTrackAppleMusicUrl" name="favorite_track_apple_music_url" value="{{ form.favorite_track_apple_music_url.value|default:'' }}" placeholder="https://music.apple.com/...">
                     </div>
 
@@ -88,7 +88,7 @@
 
                     {% if form.favorite_track_image_url.value %}
                     <div class="mb-4">
-                        <label class="form-label fw-bold text-muted small">{% trans "プレビュー" %}</label>
+                        <label class="ap-label">{% trans "プレビュー" %}</label>
                         <div style="display: flex; gap: 15px; align-items: center; background: rgba(255,255,255,0.02); padding: 16px; border-radius: 20px;">
                             <img src="{{ form.favorite_track_image_url.value }}" style="width: 80px; height: 80px; border-radius: 12px; object-fit: cover;" alt="preview">
                             <div>
@@ -131,10 +131,14 @@
 </div>
 
 <style>
+.profile-monogram {
+    width: 88px; height: 88px; border-radius: 50%;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 40px; font-weight: 600; color: #fff; background: #3a3a3c;
+}
 /* 検索結果のアイテムにAppleスタイルを適用 */
 .am-result-item {
-    background: rgba(255,255,255,0.03);
-    border: 1px solid rgba(255,255,255,0.05);
+    background: rgba(255,255,255,0.06);
     border-radius: 16px;
     padding: 12px;
     margin-bottom: 8px;
