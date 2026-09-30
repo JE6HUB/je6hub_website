@@ -23,7 +23,10 @@ je6hub サイトを 1 台の VPS 上で `docker-compose.prod.yml` を使って�
    | A | `www` | VPS の IPv4 |
    | AAAA | `@` / `www` | VPS の IPv6（ある場合のみ） |
 
-3. Cloudflare の DNS を使う場合は、最初は **プロキシをオフ（DNS only / グレーの雲）** にする。Caddy が Let's Encrypt の証明書を取得できたあとでオンにしてよい（その場合 SSL/TLS モードは「Full (strict)」）
+3. Cloudflare の DNS を使う場合は、最初は **プロキシをオフ（DNS only / グレーの雲）** にする。Caddy が Let's Encrypt の証明書を取得できたあとでオンにしてよい。オンにする前に Cloudflare 側で次を設定する
+   - SSL/TLS → 暗号化モードを **Full (strict)** にする（Flexible だと Caddy の HTTPS リダイレクトと衝突して無限リダイレクトになる）
+   - SSL/TLS → Edge 証明書の **Always Use HTTPS はオフ** のままにする（HTTPS へのリダイレクトは Caddy が行う。証明書更新の確認リクエストを Caddy に届けるため）
+   - 訪問者の本当の IP は `Caddyfile` の `trusted_proxies`（Cloudflare の IP 一覧）と `CF-Connecting-IP` で Django に渡している。Cloudflare が IP 一覧を更新したら `Caddyfile` も更新する
 4. `dig +short je6hub.com` で VPS の IP が返ることを確認してから次へ進む
 
 ## 3. サーバーの初期設定
