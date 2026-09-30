@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-30 15:21+0900\n"
+"POT-Creation-Date: 2026-09-30 15:42+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -38,6 +38,21 @@ msgstr ""
 msgid "Sign in with Apple の sub 識別子"
 msgstr "Sign in with Apple sub identifier"
 
+msgid "表示名"
+msgstr "Display name"
+
+msgid "未入力の場合はユーザー名が表示されます。"
+msgstr "If left blank, your username is shown."
+
+msgid "自己紹介"
+msgstr "Bio"
+
+msgid "拠点"
+msgstr "Location"
+
+msgid "ウェブサイト"
+msgstr "Website"
+
 msgid "お気に入りの曲名"
 msgstr "Favorite song title"
 
@@ -55,6 +70,38 @@ msgstr "Apple Music track ID"
 
 msgid "プレビュー音源URL"
 msgstr "Preview audio URL"
+
+#, python-format
+msgid "%(date)s から参加"
+msgstr "Joined %(date)s"
+
+msgid "記事"
+msgstr "Post"
+
+msgid "スポット"
+msgstr "spots"
+
+msgid "国と地域"
+msgstr "countries & regions"
+
+msgid "詳細を見る"
+msgstr "View Profile"
+
+msgid "プロフィールを編集"
+msgstr "Edit Profile"
+
+msgid "お気に入りの曲"
+msgstr "Favorite Song"
+
+msgid "Apple Music で聴く"
+msgstr "Listen on Apple Music"
+
+#, python-format
+msgid "%(title)s のプレビューを再生"
+msgstr "Play a preview of %(title)s"
+
+msgid "プレビューを一時停止"
+msgstr "Pause preview"
 
 #, python-format
 msgid ""
@@ -81,11 +128,11 @@ msgstr "[JE6HUB.com] Confirm your email address"
 msgid "No email provided"
 msgstr ""
 
-msgid "Home"
-msgstr ""
+msgid "プロフィールを表示"
+msgstr "View Profile"
 
-msgid "Logout"
-msgstr ""
+msgid "サインアウト"
+msgstr "Sign Out"
 
 msgid "プロフィール編集"
 msgstr "Edit Profile"
@@ -93,14 +140,29 @@ msgstr "Edit Profile"
 msgid "入力内容にエラーがあります。"
 msgstr "There are errors in your input."
 
+msgid "公開プロフィール"
+msgstr "Public Profile"
+
+msgid "ここに入力した内容は、ほかのユーザーにも表示されます。"
+msgstr "Everything here is visible to other users."
+
+msgid "好きなこと、書いていること、旅したい場所など"
+msgstr "What you love, what you write about, where you want to travel…"
+
+msgid "例: 東京"
+msgstr "e.g. Tokyo"
+
+msgid "アカウント"
+msgstr "Account"
+
+msgid "メールアドレスと氏名は公開されません。"
+msgstr "Your email address and name are never shown publicly."
+
 msgid "名"
 msgstr "First name"
 
 msgid "姓"
 msgstr "Last name"
-
-msgid "お気に入りの曲"
-msgstr "Favorite Song"
 
 msgid "Apple Music で検索"
 msgstr "Search Apple Music"
@@ -117,8 +179,8 @@ msgstr "Pick a result to fill in the fields automatically."
 msgid "曲名"
 msgstr "Song title"
 
-msgid "プレビュー"
-msgstr "Preview"
+msgid "現在の設定"
+msgstr "Current selection"
 
 msgid "保存"
 msgstr "Save"
@@ -141,6 +203,9 @@ msgstr "Close"
 msgid "設定"
 msgstr "Select"
 
+msgid "プレビューを再生"
+msgstr "Play preview"
+
 msgid "検索中..."
 msgstr "Searching..."
 
@@ -161,6 +226,27 @@ msgstr "Resend"
 
 msgid "サインインに戻る"
 msgstr "Back to sign in"
+
+msgid "写真"
+msgstr "Photo"
+
+msgid "お気に入りの曲を設定すると、ここでプレビュー再生できます。"
+msgstr "Set a favorite song to play a preview of it here."
+
+msgid "曲を設定する"
+msgstr "Choose a song"
+
+msgid "すべて見る"
+msgstr "See all"
+
+msgid "まだ公開された記事はありません。"
+msgstr "No published posts yet."
+
+msgid "旅の地図を見る"
+msgstr "View travel map"
+
+msgid "まだスポットがありません。"
+msgstr "No spots yet."
 
 msgid "リンクが無効です"
 msgstr "Invalid Link"
@@ -189,6 +275,10 @@ msgstr ""
 
 msgid "メールが届かない場合は再送"
 msgstr "Didn't get the email? Resend it"
+
+#, python-format
+msgid "%(name)s のプロフィール"
+msgstr "%(name)s's profile"
 
 msgid "プロフィールが更新されました。"
 msgstr "Your profile has been updated."
@@ -322,6 +412,9 @@ msgstr "View & Copy"
 
 msgid "表示"
 msgstr "View"
+
+msgid "プレビュー"
+msgstr "Preview"
 
 msgid "プレビューの幅"
 msgstr "Preview width"
@@ -539,9 +632,6 @@ msgstr ""
 
 msgid "⌘/Ctrl + S で下書き保存。"
 msgstr "Press ⌘/Ctrl + S to save a draft."
-
-msgid "記事"
-msgstr "Post"
 
 msgid "最終更新"
 msgstr "Last updated"
@@ -1421,9 +1511,6 @@ msgstr "Latitude"
 msgid "経度"
 msgstr "Longitude"
 
-msgid "写真"
-msgstr "Photo"
-
 msgid "サムネイル"
 msgstr "Thumbnail"
 
@@ -1487,9 +1574,6 @@ msgstr "Add a spot here"
 
 msgid "見つかりませんでした"
 msgstr "No results"
-
-msgid "スポット"
-msgstr "spots"
 
 msgid "スポットを追加"
 msgstr "Add Spot"
@@ -1573,9 +1657,6 @@ msgstr "Travel map"
 msgid "みんなの旅の記憶を、地図で。"
 msgstr "Everyone's travel memories, on a map."
 
-msgid "国と地域"
-msgstr "countries & regions"
-
 msgid "マイ WanderLens"
 msgstr "My WanderLens"
 
@@ -1617,9 +1698,6 @@ msgstr ""
 "Add your first spot. Photos with location data fill in the place and date "
 "automatically."
 
-msgid "まだスポットがありません。"
-msgstr "No spots yet."
-
 #, python-format
 msgid "写真は 1 か所につき %(n)d 枚までです。"
 msgstr "Up to %(n)d photos per spot."
@@ -1647,6 +1725,9 @@ msgstr "Something went wrong on the server. Please try again later."
 msgid "Global (condensed)"
 msgstr ""
 
+msgid "Home"
+msgstr ""
+
 msgid "WanderLens"
 msgstr ""
 
@@ -1668,14 +1749,14 @@ msgstr ""
 msgid "メニュー"
 msgstr "Menu"
 
-msgid "サインアウト"
-msgstr "Sign Out"
-
 msgid "アカウントを作成"
 msgstr "Create Account"
 
 msgid "Language"
 msgstr ""
+
+msgid "プロフィールを読み込めませんでした。"
+msgstr "Couldn't load this profile."
 
 msgid "Login"
 msgstr ""

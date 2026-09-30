@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% load static i18n %}
+{% load profiles static i18n %}
 
 {% block title %}{{ post.title }} — Blogs{% endblock %}
 
@@ -120,10 +120,10 @@
 
     <footer class="blog-article-footer">
         <div class="blog-author-card ap-glass-panel">
-            <span class="blog-avatar blog-avatar--lg" aria-hidden="true">{{ post.author.username|first|upper }}</span>
+            <span class="blog-avatar blog-avatar--lg" data-profile="{{ post.author.username }}" aria-hidden="true">{{ post.author.public_name|first|upper }}</span>
             <div>
                 <span class="blog-kicker">{% trans "Written by" %}</span>
-                <p class="blog-author-name">{{ post.author.username }}</p>
+                <p class="blog-author-name"><a href="{{ post.author.get_absolute_url }}" {% profile_trigger post.author link=True %}>{{ post.author.public_name }}</a></p>
                 <a href="{% url 'blog:list' %}?author={{ post.author.username|urlencode }}">{% trans "この著者の記事をすべて見る" %} →</a>
             </div>
         </div>

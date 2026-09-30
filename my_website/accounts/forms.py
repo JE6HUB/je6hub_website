@@ -52,6 +52,10 @@ class UserProfileForm(forms.ModelForm):
     class Meta:
         model = CustomUser
         fields = (
+            "display_name",
+            "bio",
+            "location",
+            "website",
             "email",
             "first_name",
             "last_name",

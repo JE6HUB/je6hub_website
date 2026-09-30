@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% load static i18n %}
+{% load profiles static i18n %}
 
 {% block title %}{% trans "招待の承諾" %} — {{ channel.name }}{% endblock %}
 
@@ -24,7 +24,7 @@
                 {% blocktrans with name=channel.name %}<strong>{{ name }}</strong> へ参加するよう招待されました。{% endblocktrans %}
             </p>
             {% if membership.invited_by %}
-            <span class="lounge-invite-by">{% trans "招待者" %}: {{ membership.invited_by.username }}</span>
+            <span class="lounge-invite-by">{% trans "招待者" %}: <span {% profile_trigger membership.invited_by %}>{{ membership.invited_by.public_name }}</span></span>
             {% endif %}
         </span>
     </div>

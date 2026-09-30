@@ -112,3 +112,67 @@ class AppleMusicEndpointTests(TestCase):
 
         response = self.client.get(reverse('apple_music_token'))
         self.assertEqual(response.status_code, 429)
+
+
+class PublicProfileTests(TestCase):
+    def setUp(self):
+        from blog.models import Post
+        from photraveler.models import MapPin
+        self.user = User.objects.create_user(
+            username='traveler', password='pass12345', email='secret@example.com',
+            first_name='Hidden', last_name='Name',
+            display_name='Tabi', bio='旅が好き', location='Tokyo', website='https://example.com',
+            favorite_track_title='Aruarian Dance', favorite_track_artist='Nujabes',
+            favorite_track_preview_url='https://audio-ssl.itunes.apple.com/preview.m4a',
+        )
+        Post.objects.create(author=self.user, title='First trip', body_html='<p>x</p>', status=Post.STATUS_PUBLISHED)
+        Post.objects.create(author=self.user, title='Secret draft', body_html='<p>x</p>', status=Post.STATUS_DRAFT)
+        MapPin.objects.create(user=self.user, title='Kyoto', latitude=35, longitude=135, country='Japan')
+        MapPin.objects.create(user=self.user, title='Osaka', latitude=34.7, longitude=135.5, country='Japan')
+
+    def test_profile_page_shows_public_fields_only(self):
+        response = self.client.get(reverse('user_profile', args=['traveler']))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'Tabi')
+        self.assertContains(response, '@traveler')
+        self.assertContains(response, '旅が好き')
+        self.assertContains(response, 'First trip')
+        self.assertContains(response, 'data-track-src="https://audio-ssl.itunes.apple.com/preview.m4a"')
+        self.assertNotContains(response, 'Secret draft')
+        self.assertNotContains(response, 'secret@example.com')
+        self.assertNotContains(response, 'Hidden')
+        self.assertEqual(response.context['stats'], {'posts': 1, 'places': 2, 'countries': 1, 'photos': 0})
+
+    def test_card_fragment_links_to_profile(self):
+        response = self.client.get(reverse('user_card', args=['traveler']))
+        self.assertEqual(response.status_code, 200)
+        self.assertNotContains(response, '<html')
+        self.assertContains(response, f'href="{reverse("user_profile", args=["traveler"])}"')
+        self.assertNotContains(response, reverse('profile'))
+
+    def test_own_card_offers_edit_link(self):
+        self.client.force_login(self.user)
+        response = self.client.get(reverse('user_card', args=['traveler']))
+        self.assertContains(response, reverse('profile'))
+
+    def test_unverified_or_missing_user_is_404(self):
+        User.objects.create_user(username='pending', password='x', is_active=False)
+        for name in ('pending', 'nobody'):
+            self.assertEqual(self.client.get(reverse('user_profile', args=[name])).status_code, 404)
+            self.assertEqual(self.client.get(reverse('user_card', args=[name])).status_code, 404)
+
+    def test_blog_byline_opens_profile(self):
+        from blog.models import Post
+        post = Post.objects.get(title='First trip')
+        response = self.client.get(post.get_absolute_url())
+        self.assertContains(response, 'data-profile="traveler"')
+
+    def test_profile_edit_saves_public_fields(self):
+        self.client.force_login(self.user)
+        response = self.client.post(reverse('profile'), {
+            'display_name': 'New Name', 'bio': 'Hello', 'location': 'Osaka', 'website': 'https://example.org',
+            'email': 'secret@example.com',
+        })
+        self.assertRedirects(response, reverse('profile'), fetch_redirect_response=False)
+        self.user.refresh_from_db()
+        self.assertEqual((self.user.display_name, self.user.location), ('New Name', 'Osaka'))

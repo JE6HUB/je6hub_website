@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% load static i18n %}
+{% load profiles static i18n %}
 
 {% block title %}{{ channel.name }} — Community Lounge{% endblock %}
 
@@ -42,11 +42,11 @@
                 {% for msg in chat_messages %}
                 <div class="msg-row{% if msg.sender == request.user %} msg-row--self{% endif %}">
                     {% if msg.sender != request.user %}
-                    <span class="msg-avatar" aria-hidden="true">{{ msg.sender.username|first|upper }}</span>
+                    <span class="msg-avatar" data-profile="{{ msg.sender.username }}" aria-hidden="true">{{ msg.sender.public_name|first|upper }}</span>
                     {% endif %}
                     <div class="msg-body">
                         {% if msg.sender != request.user %}
-                        <p class="msg-sender">{{ msg.sender.username }}</p>
+                        <p class="msg-sender"><span {% profile_trigger msg.sender %}>{{ msg.sender.public_name }}</span></p>
                         {% endif %}
 
                         {% if msg.has_media %}
@@ -126,8 +126,8 @@
                 </p>
                 {% for m in pending_requests %}
                 <div class="lounge-member lounge-member--pending">
-                    <span class="msg-avatar" aria-hidden="true">{{ m.user.username|first|upper }}</span>
-                    <span class="lounge-member-name">{{ m.user.username }}</span>
+                    <span class="msg-avatar" data-profile="{{ m.user.username }}" aria-hidden="true">{{ m.user.public_name|first|upper }}</span>
+                    <span class="lounge-member-name" {% profile_trigger m.user %}>{{ m.user.public_name }}</span>
                     <form method="post" action="{% url 'community:approve' channel.id m.user.id %}">{% csrf_token %}
                         <button type="submit" class="lounge-icon-btn lounge-icon-btn--ok" title="{% trans '承認' %}" aria-label="{% trans '承認' %}">
                             <span class="material-symbols-outlined" aria-hidden="true">check</span>
@@ -150,8 +150,8 @@
                 </p>
                 {% for m in invited %}
                 <div class="lounge-member">
-                    <span class="msg-avatar" aria-hidden="true">{{ m.user.username|first|upper }}</span>
-                    <span class="lounge-member-name">{{ m.user.username }}</span>
+                    <span class="msg-avatar" data-profile="{{ m.user.username }}" aria-hidden="true">{{ m.user.public_name|first|upper }}</span>
+                    <span class="lounge-member-name" {% profile_trigger m.user %}>{{ m.user.public_name }}</span>
                     <form method="post" action="{% url 'community:decline' channel.id m.user.id %}">{% csrf_token %}
                         <button type="submit" class="lounge-icon-btn lounge-icon-btn--danger" title="{% trans '招待を取り消す' %}" aria-label="{% trans '招待を取り消す' %}">
                             <span class="material-symbols-outlined" aria-hidden="true">close</span>
@@ -169,8 +169,8 @@
                 </p>
                 {% for m in members %}
                 <div class="lounge-member">
-                    <span class="msg-avatar" aria-hidden="true">{{ m.user.username|first|upper }}</span>
-                    <span class="lounge-member-name">{{ m.user.username }}</span>
+                    <span class="msg-avatar" data-profile="{{ m.user.username }}" aria-hidden="true">{{ m.user.public_name|first|upper }}</span>
+                    <span class="lounge-member-name" {% profile_trigger m.user %}>{{ m.user.public_name }}</span>
                     {% if m.role == 'owner' %}
                     <span class="lounge-role">Owner</span>
                     {% else %}

@@ -1,0 +1,103 @@
+{% extends 'base.html' %}
+{% load static i18n %}
+
+{% block title %}{{ profile_user.public_name }} (@{{ profile_user.username }}){% endblock %}
+
+{% block extra_head %}
+<link href="{% static 'css/blog.css' %}?v=18" rel="stylesheet" />
+{% endblock %}
+
+{% block content %}
+{% with u=profile_user %}
+<div class="pf-page">
+
+    <!-- プロフィール -->
+    <header class="pf-hero ap-reveal">
+        <span class="pf-avatar pf-avatar--xl" aria-hidden="true">{{ u.public_name|first|upper }}</span>
+        <h1 class="pf-hero-name">{{ u.public_name }}</h1>
+        <p class="pf-hero-handle">@{{ u.username }}</p>
+        {% if u.bio %}<p class="pf-bio pf-hero-bio">{{ u.bio|linebreaksbr }}</p>{% endif %}
+        <ul class="pf-meta pf-meta--center">
+            {% if u.location %}<li><span class="material-symbols-outlined" aria-hidden="true">location_on</span>{{ u.location }}</li>{% endif %}
+            {% if u.website %}
+                <li><span class="material-symbols-outlined" aria-hidden="true">link</span><a href="{{ u.website }}" target="_blank" rel="noopener noreferrer nofollow ugc">{{ u.website|cut:"https://"|cut:"http://" }}</a></li>
+            {% endif %}
+            <li><span class="material-symbols-outlined" aria-hidden="true">calendar_month</span>{% blocktrans with date=u.date_joined|date:"Y.m" %}{{ date }} から参加{% endblocktrans %}</li>
+        </ul>
+        {% if is_self %}
+            <div class="pf-hero-actions">
+                <a href="{% url 'profile' %}" class="ap-btn ap-btn-primary">{% trans "プロフィールを編集" %}</a>
+            </div>
+        {% endif %}
+    </header>
+
+    <!-- 数字 -->
+    <dl class="pf-stats pf-stats--lg ap-reveal">
+        <div><dt>{% trans "記事" %}</dt><dd>{{ stats.posts }}</dd></div>
+        <div><dt>{% trans "スポット" %}</dt><dd>{{ stats.places }}</dd></div>
+        <div><dt>{% trans "国と地域" %}</dt><dd>{{ stats.countries }}</dd></div>
+        <div><dt>{% trans "写真" %}</dt><dd>{{ stats.photos }}</dd></div>
+    </dl>
+
+    <!-- お気に入りの曲 -->
+    {% if u.has_favorite_track %}
+    <section class="pf-section ap-reveal">
+        {% include "accounts/_track_player.html" with large=True %}
+    </section>
+    {% elif is_self %}
+    <section class="pf-section ap-reveal">
+        <div class="pf-empty">
+            <span class="material-symbols-outlined" aria-hidden="true">music_note</span>
+            <p>{% trans "お気に入りの曲を設定すると、ここでプレビュー再生できます。" %}</p>
+            <a href="{% url 'profile' %}" class="ap-link">{% trans "曲を設定する" %}</a>
+        </div>
+    </section>
+    {% endif %}
+
+    <!-- 記事 -->
+    <section class="pf-section ap-reveal">
+        <div class="pf-section-head">
+            <h2>{% trans "記事" %}</h2>
+            {% if stats.posts %}
+                <a href="{% url 'blog:list' %}?author={{ u.username|urlencode }}" class="ap-link">{% trans "すべて見る" %}</a>
+            {% endif %}
+        </div>
+        {% if recent_posts %}
+            <div class="blog-grid">
+                {% for post in recent_posts %}{% include "blog/_card.html" %}{% endfor %}
+            </div>
+        {% else %}
+            <p class="pf-muted">{% trans "まだ公開された記事はありません。" %}</p>
+        {% endif %}
+    </section>
+
+    <!-- WanderLens -->
+    <section class="pf-section ap-reveal">
+        <div class="pf-section-head">
+            <h2>WanderLens</h2>
+            <a href="{% url 'photraveler:user_map' u.username %}" class="ap-link">{% trans "旅の地図を見る" %}</a>
+        </div>
+        {% if recent_pins %}
+            <ul class="pf-spots">
+                {% for pin in recent_pins %}
+                <li>
+                    <a href="{% url 'photraveler:user_map' u.username %}?pin={{ pin.id }}" class="pf-spot">
+                        {% with photo=pin.photos.all|first %}
+                            {% if photo %}<img src="{{ photo.thumb_url }}" alt="" loading="lazy">
+                            {% else %}<span class="pf-spot-fallback material-symbols-outlined" aria-hidden="true">location_on</span>{% endif %}
+                        {% endwith %}
+                        <span class="pf-spot-text">
+                            <strong>{{ pin.title }}</strong>
+                            {% if pin.place_name or pin.country %}<small>{{ pin.place_name|default:pin.country }}</small>{% endif %}
+                        </span>
+                    </a>
+                </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p class="pf-muted">{% trans "まだスポットがありません。" %}</p>
+        {% endif %}
+    </section>
+</div>
+{% endwith %}
+{% endblock %}

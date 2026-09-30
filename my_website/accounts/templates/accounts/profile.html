@@ -10,14 +10,18 @@
             <!-- Profile Info -->
             <div class="ap-glass-panel text-center mb-4 ap-reveal">
                 <div class="mb-3">
-                    <span class="profile-monogram" aria-hidden="true">{{ user_obj.username|first|upper }}</span>
-                    <h2 class="ap-hero-title mt-3" style="font-size: 40px;">{{ user_obj.username }}</h2>
+                    <span class="profile-monogram" aria-hidden="true">{{ user_obj.public_name|first|upper }}</span>
+                    <h2 class="ap-hero-title mt-3" style="font-size: 40px;">{{ user_obj.public_name }}</h2>
+                    <p class="ap-subhead mb-1" style="font-size: 17px;">@{{ user_obj.username }}</p>
                     <p class="ap-subhead mb-2" style="font-size: 17px;">{% if user_obj.email %}{{ user_obj.email }}{% else %}{% trans "No email provided" %}{% endif %}</p>
                 </div>
 
-                <div class="d-flex justify-content-center gap-3">
-                    <a href="{% url 'core:home' %}" class="ap-btn ap-btn-outline">{% trans "Home" %}</a>
-                    <a href="{% url 'logout' %}" class="ap-btn ap-btn-outline" style="border-color: rgba(255,59,48,0.5); color: #ff453a;">{% trans "Logout" %}</a>
+                <div class="d-flex justify-content-center flex-wrap gap-3">
+                    <a href="{{ user_obj.get_absolute_url }}" class="ap-btn ap-btn-primary">{% trans "プロフィールを表示" %}</a>
+                    <form action="{% url 'logout' %}" method="post" class="m-0">
+                        {% csrf_token %}
+                        <button type="submit" class="ap-btn ap-btn-outline" style="border-color: rgba(255,59,48,0.5); color: #ff453a;">{% trans "サインアウト" %}</button>
+                    </form>
                 </div>
             </div>
 
@@ -33,6 +37,40 @@
                         {{ form.errors }}
                     </div>
                     {% endif %}
+
+                    <h4 class="mb-2 text-light fw-semibold" style="font-size: 21px;">{% trans "公開プロフィール" %}</h4>
+                    <p class="small text-muted mb-4">{% trans "ここに入力した内容は、ほかのユーザーにも表示されます。" %}</p>
+
+                    <div class="mb-4">
+                        <label class="ap-label" for="profileDisplayName">{% trans "表示名" %}</label>
+                        <input type="text" class="form-control ap-input" id="profileDisplayName" name="display_name" maxlength="50"
+                               value="{{ form.display_name.value|default:'' }}" placeholder="{{ user_obj.username }}">
+                        <div class="small text-muted mt-2">{% trans "未入力の場合はユーザー名が表示されます。" %}</div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="ap-label" for="profileBio">{% trans "自己紹介" %}</label>
+                        <textarea class="form-control ap-input" id="profileBio" name="bio" rows="4" maxlength="300"
+                                  placeholder="{% trans '好きなこと、書いていること、旅したい場所など' %}">{{ form.bio.value|default:'' }}</textarea>
+                    </div>
+
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <label class="ap-label" for="profileLocation">{% trans "拠点" %}</label>
+                            <input type="text" class="form-control ap-input" id="profileLocation" name="location" maxlength="60"
+                                   value="{{ form.location.value|default:'' }}" placeholder="{% trans '例: 東京' %}">
+                        </div>
+                        <div class="col-md-6 mt-4 mt-md-0">
+                            <label class="ap-label" for="profileWebsite">{% trans "ウェブサイト" %}</label>
+                            <input type="url" class="form-control ap-input" id="profileWebsite" name="website"
+                                   value="{{ form.website.value|default:'' }}" placeholder="https://">
+                        </div>
+                    </div>
+
+                    <hr class="my-5" style="border-color: #424245; opacity: 1;">
+
+                    <h4 class="mb-2 text-light fw-semibold" style="font-size: 21px;">{% trans "アカウント" %}</h4>
+                    <p class="small text-muted mb-4">{% trans "メールアドレスと氏名は公開されません。" %}</p>
 
                     <div class="mb-4">
                         <label class="ap-label" for="profileEmail">{% trans "メールアドレス" %}</label>
@@ -86,16 +124,10 @@
                     <input type="hidden" id="favoriteTrackAppleMusicId" name="favorite_track_apple_music_id" value="{{ form.favorite_track_apple_music_id.value|default:'' }}">
                     <input type="hidden" id="favoriteTrackPreviewUrl" name="favorite_track_preview_url" value="{{ form.favorite_track_preview_url.value|default:'' }}">
 
-                    {% if form.favorite_track_image_url.value %}
+                    {% if user_obj.has_favorite_track %}
                     <div class="mb-4">
-                        <label class="ap-label">{% trans "プレビュー" %}</label>
-                        <div style="display: flex; gap: 15px; align-items: center; background: rgba(255,255,255,0.02); padding: 16px; border-radius: 20px;">
-                            <img src="{{ form.favorite_track_image_url.value }}" style="width: 80px; height: 80px; border-radius: 12px; object-fit: cover;" alt="preview">
-                            <div>
-                                <p class="mb-1 fw-bold text-light">{{ form.favorite_track_title.value|default:'' }}</p>
-                                <p class="text-muted small mb-0">{{ form.favorite_track_artist.value|default:'' }}</p>
-                            </div>
-                        </div>
+                        <label class="ap-label">{% trans "現在の設定" %}</label>
+                        {% include "accounts/_track_player.html" with profile_user=user_obj %}
                     </div>
                     {% endif %}
 
@@ -239,6 +271,17 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         row.appendChild(info);
+        if (result.preview_url) {
+            const play = document.createElement('button');
+            play.type = 'button';
+            play.className = 'pf-play pf-play--sm';
+            play.dataset.trackSrc = result.preview_url;
+            play.dataset.labelPlay = '{% trans "プレビューを再生" as t %}{{ t|escapejs }}';
+            play.dataset.labelPause = '{% trans "プレビューを一時停止" as t %}{{ t|escapejs }}';
+            play.setAttribute('aria-label', play.dataset.labelPlay);
+            play.innerHTML = '<span class="material-symbols-outlined pf-play-icon" aria-hidden="true">play_arrow</span>';
+            row.appendChild(play);
+        }
         row.appendChild(btn);
         wrapper.appendChild(row);
 
