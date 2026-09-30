@@ -1,0 +1,118 @@
+{% extends 'dashboard/_layout.html' %}
+{% load i18n %}
+
+{% block db_title %}{% trans "通報の詳細" %}{% endblock %}
+
+{% block db_content %}
+<header class="db-head">
+    <div>
+        <a href="{% url 'dashboard:reports' %}" class="ap-link" style="font-size: 14px;">{% trans "通報の一覧" %}</a>
+        <h1 class="db-title">{{ kind.label }} #{{ object_id }}</h1>
+        {% if not obj %}<p class="db-lead">{% trans "この投稿はすでに削除されています。通報時点の内容を表示しています。" %}</p>{% endif %}
+    </div>
+</header>
+
+<div class="db-cols">
+    <section class="db-card">
+        <h2>{% trans "内容" %}</h2>
+        <dl class="db-dl mb-3">
+            <dt>{% trans "投稿者" %}</dt>
+            <dd>{% if author %}<a class="db-link" href="{% url 'dashboard:user_detail' author.pk %}">{{ author.username }}</a>{% if author.suspension %} <span class="db-badge db-badge--red">{% trans "凍結中" %}</span>{% endif %}{% elif obj and kind.key == 'comment' %}{{ obj.author_name }} <span class="db-muted">({% trans "ゲスト" %})</span>{% else %}—{% endif %}</dd>
+            {% if obj %}
+            <dt>{% trans "投稿日時" %}</dt><dd>{{ obj.created_at|date:"Y/m/d H:i" }}</dd>
+            {% if kind.key == 'message' %}<dt>{% trans "チャンネル" %}</dt><dd>{{ obj.channel.name }} <span class="db-muted">({{ obj.channel.get_channel_type_display }})</span></dd>{% endif %}
+            {% if kind.key == 'post' %}<dt>{% trans "状態" %}</dt><dd>{{ obj.get_status_display }}</dd>{% endif %}
+            {% if site_url %}<dt>{% trans "サイトで見る" %}</dt><dd><a class="db-link" href="{{ site_url }}" target="_blank" rel="noopener">{{ site_url }}</a></dd>{% endif %}
+            {% endif %}
+        </dl>
+        <pre class="db-snapshot">{% if obj %}{{ current_text }}{% else %}{{ snapshot }}{% endif %}</pre>
+        {% if obj and kind.key == 'message' and obj.media %}
+            {% if obj.media_type == 'image' %}
+            <img class="db-media" src="{% url 'dashboard:message_media' obj.pk %}" alt="{% trans '添付画像' %}">
+            {% elif obj.media_type == 'video' %}
+            <video class="db-media" src="{% url 'dashboard:message_media' obj.pk %}" controls preload="metadata"></video>
+            {% endif %}
+        {% endif %}
+        {% if obj and kind.key == 'post' and obj.cover_image %}
+            <img class="db-media" src="{{ obj.cover_image.url }}" alt="{% trans 'カバー画像' %}">
+        {% endif %}
+        {% if obj and kind.key == 'pin' %}
+            <div class="d-flex flex-wrap gap-2 mt-2">{% for ph in obj.photos.all %}<img src="{{ ph.thumb_url }}" alt="" style="width: 96px; height: 96px; object-fit: cover; border-radius: 10px;">{% endfor %}</div>
+        {% endif %}
+    </section>
+
+    <section class="db-card">
+        <h2>{% blocktrans count counter=reports|length %}通報 ({{ counter }} 件){% plural %}通報 ({{ counter }} 件){% endblocktrans %}</h2>
+        <div class="db-table-wrap">
+        <table class="db-table">
+            <tbody>
+            {% for r in reports %}
+                <tr>
+                    <td>
+                        <strong>{{ r.get_reason_display }}</strong> {% include 'dashboard/_report_status.html' %}
+                        {% if r.detail %}<div style="white-space: pre-wrap; margin-top: 4px;">{{ r.detail }}</div>{% endif %}
+                        <div class="db-muted" style="font-size: 12px; margin-top: 4px;">
+                            {% if r.reporter %}<a href="{% url 'dashboard:user_detail' r.reporter.pk %}">{{ r.reporter.username }}</a>{% else %}{% trans "削除されたユーザー" %}{% endif %}
+                            · {{ r.created_at|date:"Y/m/d H:i" }}
+                            {% if r.handled_by %} · {% blocktrans with name=r.handled_by.username %}{{ name }} が対応{% endblocktrans %}{% endif %}
+                        </div>
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        </div>
+    </section>
+</div>
+
+{% if obj %}
+<section class="db-card" style="margin-top: 16px;">
+    <h2>{% trans "内容を編集" %}</h2>
+    <form method="post">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="edit">
+        {% for field in form %}
+        <div class="db-form-row">
+            <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+            {{ field }}
+            {{ field.errors }}
+        </div>
+        {% endfor %}
+        <div class="db-form-row">
+            <label for="note-edit">{% trans "メモ (操作履歴に残ります)" %}</label>
+            <input type="text" id="note-edit" name="note" class="db-note" maxlength="500">
+        </div>
+        <button type="submit" class="db-btn db-btn--primary"><span class="material-symbols-outlined" aria-hidden="true">save</span>{% trans "保存して対応済みにする" %}</button>
+    </form>
+</section>
+{% endif %}
+
+<section class="db-card db-danger-zone" style="margin-top: 16px;">
+    <h2>{% trans "対応" %}</h2>
+    <form method="post">
+        {% csrf_token %}
+        <div class="db-form-row">
+            <label for="note-action">{% trans "メモ (操作履歴に残ります)" %}</label>
+            <input type="text" id="note-action" name="note" class="db-note" maxlength="500">
+        </div>
+        <div class="db-actions">
+            {% if obj %}
+            <button type="submit" name="action" value="delete" class="db-btn db-btn--danger" onclick="return confirm('{% trans "この投稿を削除しますか？添付ファイルも削除され、元に戻せません。" %}');"><span class="material-symbols-outlined" aria-hidden="true">delete</span>{% trans "投稿を削除" %}</button>
+            {% if kind.key == 'message' and obj.media %}
+            <button type="submit" name="action" value="remove_media" class="db-btn db-btn--danger" onclick="return confirm('{% trans "添付ファイルだけを削除しますか？" %}');"><span class="material-symbols-outlined" aria-hidden="true">hide_image</span>{% trans "添付だけ削除" %}</button>
+            {% endif %}
+            {% if kind.key == 'post' and obj.is_published %}
+            <button type="submit" name="action" value="unpublish" class="db-btn"><span class="material-symbols-outlined" aria-hidden="true">visibility_off</span>{% trans "非公開 (下書き) にする" %}</button>
+            {% endif %}
+            {% endif %}
+            {% if has_open %}
+            <button type="submit" name="action" value="resolve" class="db-btn"><span class="material-symbols-outlined" aria-hidden="true">task_alt</span>{% trans "対応済みにする" %}</button>
+            <button type="submit" name="action" value="dismiss" class="db-btn"><span class="material-symbols-outlined" aria-hidden="true">block</span>{% trans "問題なしとして閉じる" %}</button>
+            {% endif %}
+            {% if author and not author.suspension and not author.is_staff and not author.is_superuser %}
+            <a href="{% url 'dashboard:user_detail' author.pk %}#suspend" class="db-btn db-btn--danger"><span class="material-symbols-outlined" aria-hidden="true">person_off</span>{% trans "投稿者を凍結…" %}</a>
+            {% endif %}
+        </div>
+    </form>
+</section>
+{% endblock %}

@@ -1,0 +1,43 @@
+{% extends 'dashboard/_layout.html' %}
+{% load i18n %}
+
+{% block db_title %}{% trans "通報" %}{% endblock %}
+
+{% block db_content %}
+<header class="db-head">
+    <div>
+        <h1 class="db-title">{% trans "通報" %}</h1>
+        <p class="db-lead">{% trans "利用者から通報された投稿。同じ投稿への通報はまとめて表示します。" %}</p>
+    </div>
+    <div class="db-actions">
+        <a href="?status=open" class="db-btn{% if status == 'open' %} db-btn--primary{% endif %}">{% trans "未対応" %}</a>
+        <a href="?status=closed" class="db-btn{% if status != 'open' %} db-btn--primary{% endif %}">{% trans "対応済み" %}</a>
+    </div>
+</header>
+
+<section class="db-card">
+{% if groups %}
+<div class="db-table-wrap">
+<table class="db-table">
+    <thead><tr><th>{% trans "種類" %}</th><th>{% trans "内容" %}</th><th>{% trans "投稿者" %}</th><th>{% trans "最新の理由" %}</th><th class="num">{% trans "件数" %}</th><th>{% trans "最終通報" %}</th></tr></thead>
+    <tbody>
+    {% for g in groups %}
+        {% with r=g.report %}
+        <tr>
+            <td><span class="db-badge db-badge--blue">{{ g.kind_label }}</span></td>
+            <td style="max-width: 360px;"><a href="{% url 'dashboard:report_detail' g.kind g.object_id %}">{{ r.snapshot|truncatechars:80|default:"—" }}</a></td>
+            <td>{% if r.content_author %}<a href="{% url 'dashboard:user_detail' r.content_author.pk %}">{{ r.content_author.username }}</a>{% else %}<span class="db-muted">—</span>{% endif %}</td>
+            <td>{{ r.get_reason_display }}{% if status != 'open' %} {% include 'dashboard/_report_status.html' %}{% endif %}</td>
+            <td class="num">{{ g.count }}</td>
+            <td class="db-muted" style="white-space: nowrap;">{{ g.latest|date:"Y/m/d H:i" }}</td>
+        </tr>
+        {% endwith %}
+    {% endfor %}
+    </tbody>
+</table>
+</div>
+{% else %}
+<p class="db-empty">{% if status == 'open' %}{% trans "未対応の通報はありません。" %}{% else %}{% trans "対応済みの通報はまだありません。" %}{% endif %}</p>
+{% endif %}
+</section>
+{% endblock %}

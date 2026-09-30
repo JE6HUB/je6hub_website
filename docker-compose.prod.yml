@@ -38,6 +38,8 @@ services:
       - "8000"
     volumes:
       - media_data:/app/my_website/media
+      # アクセス元の位置情報データベース (docs/deploy.md の「アクセス解析」を参照)
+      - ./geoip:/app/geoip:ro
 
   caddy:
     image: caddy:2

@@ -1,0 +1,34 @@
+{% extends 'dashboard/_layout.html' %}
+{% load i18n %}
+
+{% block db_title %}{% trans "お問い合わせ" %}{% endblock %}
+
+{% block db_content %}
+<header class="db-head">
+    <div>
+        <h1 class="db-title">{% trans "お問い合わせ" %}</h1>
+        <p class="db-lead">{% trans "Contact フォームから届いたメッセージ" %}</p>
+    </div>
+</header>
+
+{% for m in page.object_list %}
+<article class="db-card">
+    <div class="d-flex justify-content-between flex-wrap gap-2 mb-2">
+        <div><strong>{{ m.name }}</strong> <a class="db-link" href="mailto:{{ m.email }}">{{ m.email }}</a></div>
+        <div class="db-actions">
+            <span class="db-muted" style="font-size:13px">{{ m.created_at|date:"Y/m/d H:i" }}</span>
+            <form method="post" onsubmit="return confirm('{% trans "このお問い合わせを削除しますか？" %}');">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="delete">
+                <input type="hidden" name="id" value="{{ m.pk }}">
+                <button type="submit" class="db-btn db-btn--danger" aria-label="{% trans '削除' %}"><span class="material-symbols-outlined" aria-hidden="true">delete</span></button>
+            </form>
+        </div>
+    </div>
+    <p class="mb-0" style="white-space: pre-wrap;">{{ m.message }}</p>
+</article>
+{% empty %}
+<section class="db-card"><p class="db-empty">{% trans "お問い合わせはまだありません。" %}</p></section>
+{% endfor %}
+{% include 'dashboard/_pager.html' %}
+{% endblock %}

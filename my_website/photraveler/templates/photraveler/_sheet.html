@@ -21,6 +21,9 @@
                 <a class="ap-link" id="wl-sheet-owner" href="#"></a>
                 <button type="button" class="wl-text-btn" id="wl-sheet-locate">{% trans "地図で見る" %}</button>
                 <button type="button" class="wl-text-btn" id="wl-sheet-copy">{% trans "リンクをコピー" %}</button>
+                {% if not can_edit %}
+                <a class="wl-text-btn" id="wl-sheet-report" href="#">{% trans "通報" %}</a>
+                {% endif %}
                 {% if can_edit %}
                 <button type="button" class="wl-text-btn" id="wl-sheet-edit">{% trans "編集" %}</button>
                 <form method="post" id="wl-delete-form" class="wl-inline-form">

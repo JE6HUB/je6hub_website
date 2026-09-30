@@ -1,0 +1,37 @@
+{% extends 'dashboard/_layout.html' %}
+{% load i18n %}
+
+{% block db_title %}{% trans "操作履歴" %}{% endblock %}
+
+{% block db_content %}
+<header class="db-head">
+    <div>
+        <h1 class="db-title">{% trans "操作履歴" %}</h1>
+        <p class="db-lead">{% trans "ダッシュボードで行った管理操作の記録" %}</p>
+    </div>
+</header>
+
+<section class="db-card">
+{% if page.object_list %}
+<div class="db-table-wrap">
+<table class="db-table">
+    <thead><tr><th>{% trans "日時" %}</th><th>{% trans "管理者" %}</th><th>{% trans "操作" %}</th><th>{% trans "対象" %}</th><th>{% trans "メモ" %}</th></tr></thead>
+    <tbody>
+    {% for entry in page.object_list %}
+        <tr>
+            <td class="db-muted" style="white-space:nowrap">{{ entry.created_at|date:"Y/m/d H:i" }}</td>
+            <td>{{ entry.actor.username|default:"—" }}</td>
+            <td>{{ entry.action_label }}</td>
+            <td>{{ entry.target }}</td>
+            <td class="db-muted">{{ entry.note }}</td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+</div>
+{% include 'dashboard/_pager.html' %}
+{% else %}
+<p class="db-empty">{% trans "まだ操作はありません。" %}</p>
+{% endif %}
+</section>
+{% endblock %}

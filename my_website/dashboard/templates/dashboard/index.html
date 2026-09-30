@@ -1,0 +1,71 @@
+{% extends 'dashboard/_layout.html' %}
+{% load i18n %}
+
+{% block db_content %}
+<header class="db-head">
+    <div>
+        <h1 class="db-title">{% trans "管理者ダッシュボード" %}</h1>
+        <p class="db-lead">{% trans "サイトの状況と、対応が必要な項目" %}</p>
+    </div>
+</header>
+
+<div class="db-grid">
+    <a class="db-card db-stat-link" href="{% url 'dashboard:reports' %}">
+        <div class="db-stat-label">{% trans "未対応の通報" %}</div>
+        <div class="db-stat-value{% if open_reports %} db-alert{% endif %}">{{ open_reports }}</div>
+        <div class="db-stat-sub">{% trans "通報の一覧を開く" %} →</div>
+    </a>
+    <a class="db-card db-stat-link" href="{% url 'dashboard:traffic' %}">
+        <div class="db-stat-label">{% trans "今日のページビュー" %}</div>
+        <div class="db-stat-value">{{ today_views }}</div>
+        <div class="db-stat-sub">{% blocktrans %}訪問者 {{ today_visitors }} 人{% endblocktrans %}</div>
+    </a>
+    <a class="db-card db-stat-link" href="{% url 'dashboard:traffic' %}">
+        <div class="db-stat-label">{% trans "30日間のページビュー" %}</div>
+        <div class="db-stat-value">{{ month_views }}</div>
+        <div class="db-stat-sub">{% blocktrans %}のべ訪問者 {{ month_visitors }} 人{% endblocktrans %}</div>
+    </a>
+    <a class="db-card db-stat-link" href="{% url 'dashboard:users' %}">
+        <div class="db-stat-label">{% trans "ユーザー" %}</div>
+        <div class="db-stat-value">{{ user_count }}</div>
+        <div class="db-stat-sub">{% blocktrans %}7日間で +{{ new_users }} ・ 凍結中 {{ suspended_count }}{% endblocktrans %}</div>
+    </a>
+</div>
+
+<section class="db-card">
+    <h2>{% trans "30日間のアクセス" %}</h2>
+    {% include 'dashboard/_chart.html' %}
+</section>
+
+<div class="db-cols" style="margin-top: 16px;">
+    <section class="db-card">
+        <h2>{% trans "アクセス元 (30日間)" %}</h2>
+        {% include 'dashboard/_countries.html' %}
+        <p class="mt-2 mb-0"><a class="db-link" href="{% url 'dashboard:traffic' %}">{% trans "都市別・ページ別を見る" %}</a></p>
+    </section>
+    <section class="db-card">
+        <h2>{% trans "投稿" %}</h2>
+        <table class="db-table">
+            <thead><tr><th></th><th class="num">{% trans "合計" %}</th><th class="num">{% trans "7日間" %}</th></tr></thead>
+            <tbody>
+            {% for label, total, recent in content_counts %}
+                <tr><td>{{ label }}</td><td class="num">{{ total }}</td><td class="num">+{{ recent }}</td></tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        <h2 class="mt-4">{% trans "新しいユーザー" %}</h2>
+        <table class="db-table">
+            <tbody>
+            {% for u in recent_users %}
+                <tr><td><a href="{% url 'dashboard:user_detail' u.pk %}">{{ u.username }}</a>{% if u.display_name %} <span class="db-muted">{{ u.display_name }}</span>{% endif %}</td><td class="num db-muted">{{ u.date_joined|date:"Y/m/d H:i" }}</td></tr>
+            {% empty %}
+                <tr><td class="db-muted">{% trans "まだいません。" %}</td></tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        {% if unread_contacts %}
+        <p class="mt-3 mb-0"><a class="db-link" href="{% url 'dashboard:contacts' %}">{% blocktrans %}7日間のお問い合わせ {{ unread_contacts }} 件{% endblocktrans %}</a></p>
+        {% endif %}
+    </section>
+</div>
+{% endblock %}

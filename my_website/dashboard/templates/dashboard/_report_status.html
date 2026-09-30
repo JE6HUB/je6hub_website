@@ -1,0 +1,1 @@
+{% if r.status == 'open' %}<span class="db-badge db-badge--red">{{ r.get_status_display }}</span>{% elif r.status == 'resolved' %}<span class="db-badge db-badge--green">{{ r.get_status_display }}</span>{% else %}<span class="db-badge">{{ r.get_status_display }}</span>{% endif %}

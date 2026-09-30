@@ -494,6 +494,9 @@
     background: #3a3a3c;
 }
 .msg-time { font-size: 11px; color: rgba(255, 255, 255, 0.35); margin: 4px 8px 0; }
+.msg-report { font-size: 11px; color: rgba(255, 255, 255, 0.35); margin: 0 8px; text-decoration: none; opacity: 0; transition: opacity 0.2s ease; }
+.msg-row:hover .msg-report, .msg-report:focus { opacity: 1; color: rgba(255, 255, 255, 0.6); }
+@media (hover: none) { .msg-report { opacity: 1; } }
 
 .msg-media { max-width: 320px; border-radius: 18px; overflow: hidden; margin-bottom: 6px; }
 .msg-media img { width: 100%; display: block; cursor: zoom-in; transition: transform 0.3s ease; }

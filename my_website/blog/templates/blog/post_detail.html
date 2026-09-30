@@ -148,6 +148,9 @@
                 <a href="{% url 'blog:list' %}?author={{ post.author.username|urlencode }}">{% trans "この著者の記事をすべて見る" %} →</a>
             </div>
         </div>
+        {% if not is_author %}
+        <p class="blog-report" style="text-align: right; font-size: 13px; margin: 16px 0 0;"><a href="{% url 'dashboard:report' 'post' post.pk %}" style="color: var(--ap-text-muted);">{% trans "この記事を通報" %}</a></p>
+        {% endif %}
     </footer>
 </article>
 

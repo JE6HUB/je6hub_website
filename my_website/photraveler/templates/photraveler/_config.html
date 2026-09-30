@@ -7,7 +7,9 @@
         "comments": "{% url 'photraveler:pin_comments' pin_id=0 %}",
         "edit": "{% url 'photraveler:edit_pin' pin_id=0 %}",
         "delete": "{% url 'photraveler:delete_pin' pin_id=0 %}",
-        "userMap": "{% url 'photraveler:user_map' '__user__' %}"
+        "userMap": "{% url 'photraveler:user_map' '__user__' %}",
+        "reportPin": "{% url 'dashboard:report' 'pin' 0 %}",
+        "reportComment": "{% url 'dashboard:report' 'comment' 0 %}"
     },
     "t": {
         "by": "{% trans 'by' %}",
@@ -26,7 +28,8 @@
         "cover": "{% trans 'カバー' %}",
         "addHere": "{% trans 'ここにスポットを追加' %}",
         "noResults": "{% trans '見つかりませんでした' %}",
-        "places": "{% trans 'スポット' %}"
+        "places": "{% trans 'スポット' %}",
+        "report": "{% trans '通報' %}"
     },
     "maxPhotos": {{ max_photos|default:10 }}
 }</script>
