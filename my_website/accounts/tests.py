@@ -176,3 +176,75 @@ class PublicProfileTests(TestCase):
         self.assertRedirects(response, reverse('profile'), fetch_redirect_response=False)
         self.user.refresh_from_db()
         self.assertEqual((self.user.display_name, self.user.location), ('New Name', 'Osaka'))
+
+
+class SecurityHardeningTests(TestCase):
+    def setUp(self):
+        cache.clear()
+
+    def tearDown(self):
+        cache.clear()
+
+    def test_allauth_password_signup_is_disabled(self):
+        """allauth 側の登録画面からメール認証なしでアカウントを作れないこと。"""
+        response = self.client.post('/ja/accounts/signup/', {
+            'username': 'sneaky', 'password1': 'Str0ng-pass-123', 'password2': 'Str0ng-pass-123',
+        })
+        self.assertEqual(response.status_code, 404)
+        self.assertFalse(User.objects.filter(username='sneaky').exists())
+
+    def test_allauth_password_reset_is_disabled(self):
+        self.assertEqual(self.client.get('/ja/accounts/password/reset/').status_code, 404)
+
+    def test_login_is_rate_limited(self):
+        User.objects.create_user(username='victim', password='correct-horse-9')
+        for _ in range(10):
+            self.client.post(reverse('login'), {'username': 'victim', 'password': 'wrong'})
+        response = self.client.post(reverse('login'), {'username': 'victim', 'password': 'correct-horse-9'})
+        self.assertEqual(response.status_code, 429)
+
+    def test_admin_login_is_rate_limited(self):
+        for _ in range(10):
+            self.client.post('/ja/admin/login/', {'username': 'admin', 'password': 'wrong'})
+        self.assertEqual(self.client.post('/ja/admin/login/', {'username': 'admin', 'password': 'x'}).status_code, 429)
+
+    def _profile_data(self, **overrides):
+        data = {'display_name': '', 'bio': '', 'location': '', 'website': '', 'email': '',
+                'first_name': '', 'last_name': '', 'favorite_track_title': '', 'favorite_track_artist': '',
+                'favorite_track_image_url': '', 'favorite_track_apple_music_url': '',
+                'favorite_track_apple_music_id': '', 'favorite_track_preview_url': ''}
+        data.update(overrides)
+        return data
+
+    def test_profile_rejects_non_apple_media_urls(self):
+        """プロフィールを見た人の IP を集める外部サーバーの URL を登録できないこと。"""
+        user = User.objects.create_user(username='u1', password='pass12345')
+        self.client.force_login(user)
+        self.client.post(reverse('profile'), self._profile_data(
+            favorite_track_title='x', favorite_track_image_url='https://tracker.example.com/pixel.png'))
+        user.refresh_from_db()
+        self.assertEqual(user.favorite_track_image_url, '')
+
+    def test_profile_accepts_apple_media_urls(self):
+        user = User.objects.create_user(username='u2', password='pass12345')
+        self.client.force_login(user)
+        self.client.post(reverse('profile'), self._profile_data(
+            favorite_track_title='x',
+            favorite_track_image_url='https://is1-ssl.mzstatic.com/image/thumb/a/100x100bb.jpg',
+            favorite_track_preview_url='https://audio-ssl.itunes.apple.com/itunes-assets/a.m4a',
+            favorite_track_apple_music_url='https://music.apple.com/jp/album/x/1?i=2'))
+        user.refresh_from_db()
+        self.assertTrue(user.favorite_track_image_url.startswith('https://is1-ssl.mzstatic.com/'))
+
+    def test_profile_cannot_take_another_users_email(self):
+        User.objects.create_user(username='owner', email='owner@example.com', password='pass12345')
+        user = User.objects.create_user(username='u3', password='pass12345')
+        self.client.force_login(user)
+        self.client.post(reverse('profile'), self._profile_data(email='OWNER@example.com'))
+        user.refresh_from_db()
+        self.assertEqual(user.email, '')
+
+    def test_apple_login_requires_post(self):
+        response = self.client.get(reverse('apple_login'))
+        # GET では Apple へ転送せず、確認画面を表示するだけ
+        self.assertNotEqual(response.status_code, 302)

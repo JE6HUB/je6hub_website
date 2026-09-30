@@ -6,6 +6,11 @@ from django.conf.urls.static import static
 from django.contrib.auth.views import LogoutView, LoginView
 from accounts import views as accounts_views
 from accounts.forms import LoginForm
+from accounts.ratelimit import ratelimit
+
+# パスワードの総当たり対策: 同じ IP からのログイン送信は 5 分間に 10 回まで (管理画面も同じ)
+_login_ratelimit = ratelimit('login', limit=10, period=300, methods=('POST',))
+admin.site.login = _login_ratelimit(admin.site.login)
 
 # 言語切り替え用のエンドポイント（言語選択フォームからPOSTされる先）
 urlpatterns = [
@@ -16,7 +21,7 @@ urlpatterns = [
 urlpatterns += i18n_patterns(
     path('admin/', admin.site.urls),
     # --- ここにログアウトのルーティングを追加 ---
-    path('login/', LoginView.as_view(template_name='login.html', authentication_form=LoginForm), name='login'),
+    path('login/', _login_ratelimit(LoginView.as_view(template_name='login.html', authentication_form=LoginForm)), name='login'),
     path('logout/', LogoutView.as_view(), name='logout'),
     path('signup/', accounts_views.signup_view, name='signup'),
     path('signup/verify/<str:uidb64>/<str:token>/', accounts_views.verify_email_view, name='verify_email'),

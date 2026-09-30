@@ -183,6 +183,7 @@ def send_verification_email(request, user):
     return True
 
 
+@ratelimit('signup', limit=10, period=3600, methods=('POST',))
 def signup_view(request):
     # すでにログインしているユーザーがアクセスした場合はトップへ戻す
     if request.user.is_authenticated:

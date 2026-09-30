@@ -1,3 +1,7 @@
+import os
+import shutil
+import tempfile
+from io import BytesIO, StringIO
 from unittest import mock
 
 from django.core import mail
@@ -91,3 +95,139 @@ class CoreViewsTests(TestCase):
         self.assertEqual(response.status_code, 302)
         self.assertEqual(ContactMessage.objects.count(), 1)
         self.assertIn('smtp down', '\n'.join(logs.output))
+
+
+def _box(box_type, payload):
+    import struct
+    return struct.pack('>I4s', 8 + len(payload), box_type) + payload
+
+
+def make_mp4():
+    """位置情報 (©xyz と Apple の ISO 6709 キー) を含む最小限の MP4 のバイト列。"""
+    location = b'+35.6812+139.7671+040.000/'
+    xyz = _box(b'\xa9xyz', b'\x00\x1a\x15\xc7' + location)
+    keys = _box(b'keys', b'\x00\x00\x00\x00\x00\x00\x00\x01' + _box(b'mdta', b'com.apple.quicktime.location.ISO6709'))
+    ilst = _box(b'ilst', _box(b'\x00\x00\x00\x01', _box(b'data', b'\x00\x00\x00\x01\x00\x00\x00\x00' + location)))
+    meta = _box(b'meta', _box(b'hdlr', b'\x00' * 8 + b'mdta' + b'\x00' * 12) + keys + ilst)
+    moov = _box(b'moov', _box(b'mvhd', b'\x00' * 100) + _box(b'udta', xyz) + meta)
+    return _box(b'ftyp', b'isom\x00\x00\x02\x00isomiso2mp41') + moov + _box(b'mdat', b'\x00' * 64)
+
+
+def jpeg_with_gps():
+    """撮影位置 (GPS)・カメラ情報・コメントを含む JPEG のバイト列。"""
+    from PIL import Image
+    exif = Image.Exif()
+    exif[0x8825] = {1: 'N', 2: (35.0, 40.0, 52.0), 3: 'E', 4: (139.0, 46.0, 1.0)}
+    exif[0x010F] = 'Apple'
+    buf = BytesIO()
+    Image.new('RGB', (40, 30), 'blue').save(buf, 'JPEG', exif=exif, comment=b'secret note')
+    return buf.getvalue()
+
+
+class UploadSanitizerTests(TestCase):
+
+    def test_image_metadata_is_removed(self):
+        from django.core.files.uploadedfile import SimpleUploadedFile
+        from PIL import Image
+        from .uploads import sanitize_image
+        clean = sanitize_image(SimpleUploadedFile('me.jpg', jpeg_with_gps(), content_type='image/jpeg'))
+        data = clean.read()
+        self.assertNotIn(b'secret note', data)
+        with Image.open(BytesIO(data)) as img:
+            self.assertEqual(img.format, 'JPEG')
+            self.assertEqual(len(img.getexif()), 0)
+        self.assertRegex(clean.name, r'^[0-9a-f]{32}\.jpg$')
+
+    def test_png_transparency_kept(self):
+        from django.core.files.uploadedfile import SimpleUploadedFile
+        from PIL import Image
+        from .uploads import sanitize_image
+        buf = BytesIO()
+        Image.new('RGBA', (4, 4), (255, 0, 0, 0)).save(buf, 'PNG')
+        clean = sanitize_image(SimpleUploadedFile('a.png', buf.getvalue()))
+        with Image.open(BytesIO(clean.read())) as img:
+            self.assertEqual((img.format, img.mode), ('PNG', 'RGBA'))
+
+    def test_decompression_bomb_rejected(self):
+        from django.core.exceptions import ValidationError
+        from django.core.files.uploadedfile import SimpleUploadedFile
+        from PIL import Image
+        from .uploads import sanitize_image
+        buf = BytesIO()
+        Image.new('1', (12000, 12000)).save(buf, 'PNG')  # 1 億 4400 万画素だがファイルは小さい
+        with self.assertRaises(ValidationError):
+            sanitize_image(SimpleUploadedFile('bomb.png', buf.getvalue()))
+
+    def test_video_location_is_removed_in_place(self):
+        from django.core.files.uploadedfile import SimpleUploadedFile
+        from .uploads import sanitize_video
+        original = make_mp4()
+        clean = sanitize_video(SimpleUploadedFile('clip.mp4', original))
+        data = clean.read()
+        self.assertEqual(len(data), len(original))  # 動画の中身の位置 (オフセット) は変えない
+        self.assertNotIn(b'+35.6812', data)
+        self.assertNotIn(b'\xa9xyz', data)
+        self.assertIn(b'mdat', data)
+
+    def test_non_video_rejected(self):
+        from django.core.exceptions import ValidationError
+        from django.core.files.uploadedfile import SimpleUploadedFile
+        from .uploads import sanitize_video
+        with self.assertRaises(ValidationError):
+            sanitize_video(SimpleUploadedFile('x.mp4', b'<html><script>alert(1)</script></html>'))
+
+    def test_media_responses_are_sandboxed(self):
+        from django.http import HttpResponse
+        from django.test import RequestFactory
+        from .middleware import MediaSvgSecurityMiddleware
+        mw = MediaSvgSecurityMiddleware(lambda r: HttpResponse('<script>alert(1)</script>'))
+        response = mw(RequestFactory().get('/media/community/media/2026/09/evil.html'))
+        self.assertIn('sandbox', response['Content-Security-Policy'])
+        self.assertEqual(response['X-Content-Type-Options'], 'nosniff')
+
+
+class ContactRateLimitTests(TestCase):
+    def test_contact_form_rate_limited(self):
+        from django.core.cache import cache
+        cache.clear()
+        data = {'name': 'a', 'email': 'a@example.com', 'message': 'hi'}
+        for _ in range(5):
+            self.client.post(reverse('core:contact'), data)
+        self.assertEqual(self.client.post(reverse('core:contact'), data).status_code, 429)
+        cache.clear()
+
+
+_SCRUB_MEDIA = tempfile.mkdtemp()
+
+
+@override_settings(MEDIA_ROOT=_SCRUB_MEDIA)
+class ScrubMediaCommandTests(TestCase):
+    @classmethod
+    def tearDownClass(cls):
+        super().tearDownClass()
+        shutil.rmtree(_SCRUB_MEDIA, ignore_errors=True)
+
+    def test_existing_lounge_media_is_scrubbed_and_invalid_removed(self):
+        from django.contrib.auth import get_user_model
+        from django.core.files.base import ContentFile
+        from django.core.management import call_command
+        from PIL import Image
+        from community.models import Channel, Message
+
+        user = get_user_model().objects.create_user(username='old', password='pass12345')
+        ch = Channel.objects.create(name='c', created_by=user)
+        photo = Message(channel=ch, sender=user, media_type='image')
+        photo.media.save('IMG_0001.jpg', ContentFile(jpeg_with_gps()), save=True)
+        evil = Message(channel=ch, sender=user, media_type='image')
+        evil.media.save('evil.html', ContentFile(b'<script>alert(1)</script>'), save=True)
+        old_photo_path = photo.media.path
+
+        call_command('scrub_media', '--delete-invalid', stdout=StringIO())
+
+        photo.refresh_from_db()
+        evil.refresh_from_db()
+        self.assertRegex(photo.media.name, r'/[0-9a-f]{32}\.jpg$')
+        self.assertFalse(os.path.exists(old_photo_path))
+        with Image.open(photo.media.path) as img:
+            self.assertEqual(len(img.getexif()), 0)
+        self.assertFalse(evil.media)

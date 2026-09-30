@@ -1,5 +1,8 @@
 from django import forms
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.utils.translation import gettext_lazy as _
+
+from core.uploads import sanitize_image
 
 from .blocks import blocks_to_html, normalize_blocks
 from .models import Post
@@ -17,9 +20,17 @@ class ImageOrSvgField(forms.ImageField):
     default_validators = []
 
     def to_python(self, data):
-        if data and hasattr(data, 'read') and is_svg_upload(data):
+        if not (data and hasattr(data, 'read')):
+            return super().to_python(data)
+        if data.size > MAX_IMAGE_BYTES:
+            raise forms.ValidationError(_('画像サイズの上限は10MBです。'))
+        if is_svg_upload(data):
             return sanitized_svg_upload(data)
-        return super().to_python(data)
+        super().to_python(data)
+        # 撮影位置 (EXIF GPS) などのメタデータを取り除き、ファイル名もランダムにしてから保存する
+        clean = sanitize_image(data)
+        content_type = {'jpg': 'image/jpeg', 'png': 'image/png', 'webp': 'image/webp', 'gif': 'image/gif'}
+        return SimpleUploadedFile(clean.name, clean.read(), content_type=content_type[clean.name.rsplit('.', 1)[-1]])
 
 
 def validate_image_upload(image):

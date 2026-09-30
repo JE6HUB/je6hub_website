@@ -1,3 +1,5 @@
+from urllib.parse import urlparse
+
 from django import forms
 from django.contrib.auth.forms import AuthenticationForm, UserCreationForm, UserChangeForm
 from django.utils.translation import gettext_lazy as _
@@ -66,3 +68,33 @@ class UserProfileForm(forms.ModelForm):
             "favorite_track_apple_music_id",
             "favorite_track_preview_url",
         )
+
+    # お気に入りの曲の画像・音源は Apple のサーバーのものだけを受け付ける。
+    # 任意の URL を許すと、プロフィールを見た人の IP アドレスなどが第三者のサーバーに送られてしまう。
+    _APPLE_HOSTS = ("mzstatic.com", "apple.com")
+
+    def _clean_apple_url(self, name):
+        url = self.cleaned_data.get(name, "")
+        if not url:
+            return url
+        parsed = urlparse(url)
+        host = (parsed.hostname or "").lower()
+        if parsed.scheme != "https" or not any(host == h or host.endswith("." + h) for h in self._APPLE_HOSTS):
+            raise forms.ValidationError(_("Apple Music の URL を指定してください。"))
+        return url
+
+    def clean_favorite_track_image_url(self):
+        return self._clean_apple_url("favorite_track_image_url")
+
+    def clean_favorite_track_apple_music_url(self):
+        return self._clean_apple_url("favorite_track_apple_music_url")
+
+    def clean_favorite_track_preview_url(self):
+        return self._clean_apple_url("favorite_track_preview_url")
+
+    def clean_email(self):
+        email = (self.cleaned_data.get("email") or "").strip()
+        # 他の人のメールアドレスを登録して、本人の会員登録を妨げることができないようにする
+        if email and CustomUser.objects.filter(email__iexact=email).exclude(pk=self.instance.pk).exists():
+            raise forms.ValidationError(_("このメールアドレスは既に登録されています。"))
+        return email
