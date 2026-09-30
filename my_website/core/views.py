@@ -11,18 +11,14 @@ logger = logging.getLogger(__name__)
 
 
 def home_view(request):
-    from django.db.models import Q
     from photraveler.models import MapPin
-    from community.models import Channel
 
-    q = request.GET.get('q', '').strip()
-    context = {'q': q}
-    if q:
-        context['pin_results'] = MapPin.objects.filter(
-            Q(title__icontains=q) | Q(description__icontains=q)
-        )
-        context['channel_results'] = Channel.objects.filter(name__icontains=q)
-    return render(request, 'core/home.html', context)
+    recent_pins = (
+        MapPin.objects.select_related('user')
+        .exclude(image='')
+        .order_by('-created_at')[:6]
+    )
+    return render(request, 'core/home.html', {'recent_pins': recent_pins})
 
 
 def resume_view(request):

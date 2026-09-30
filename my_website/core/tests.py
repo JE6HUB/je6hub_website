@@ -14,7 +14,7 @@ class CoreViewsTests(TestCase):
         response = self.client.get(reverse('core:resume'))
         self.assertEqual(response.status_code, 200)
 
-    def test_search_returns_pin_results(self):
+    def test_home_shows_latest_photos(self):
         from photraveler.models import MapPin
         from django.core.files.uploadedfile import SimpleUploadedFile
         TINY_GIF = (
@@ -28,13 +28,15 @@ class CoreViewsTests(TestCase):
             image=SimpleUploadedFile('eiffel.gif', TINY_GIF, content_type='image/gif'),
             latitude=48.8584, longitude=2.2945,
         )
-        response = self.client.get(reverse('core:home'), {'q': 'Eiffel'})
+        MapPin.objects.create(title='No Photo Pin', latitude=0, longitude=0)
+        response = self.client.get(reverse('core:home'))
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'Eiffel Tower')
+        self.assertNotContains(response, 'No Photo Pin')
 
-    def test_search_no_results(self):
-        response = self.client.get(reverse('core:home'), {'q': 'xyznotfound'})
-        self.assertEqual(response.status_code, 200)
+    def test_home_hides_latest_photos_when_empty(self):
+        response = self.client.get(reverse('core:home'))
+        self.assertNotContains(response, 'id="latest-photos"')
 
     def test_contact_page_loads(self):
         response = self.client.get(reverse('core:contact'))
