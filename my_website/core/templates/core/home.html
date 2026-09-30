@@ -6,11 +6,12 @@
 {% block glass_preload %}{% include "_liquid_glass_preload.html" with hero="img/hero/blogs-glass" %}{% endblock %}
 
 {% block extra_head %}
-<link href="{% static 'css/blog.css' %}?v=18" rel="stylesheet" />
+<link href="{% static 'css/blog.css' %}?v=22" rel="stylesheet" />
 {% endblock %}
 
 {% block extra_js %}
 <script src="{% static 'js/blog-carousel.js' %}?v=3"></script>
+<script src="{% static 'js/landing-tour.js' %}?v=2"></script>
 {% endblock %}
 
 {% block main_content %}
@@ -72,6 +73,30 @@
     <!-- Features -->
     <section class="blog-page landing-section ap-reveal">
         <h2 class="blog-section-title">{% trans "Blogs でできること" %}</h2>
+
+        <!-- UI ツアー: 枠を付けず画面幅いっぱいに敷き、上下の帯を動画の端と同じ色にして
+             ページの黒へ溶かす (色は landing-tour.js が再生中に更新)。動画の先頭と末尾は
+             黒からフェードするので、ループの継ぎ目も背景に消える。
+             JS が有効で「視差効果を減らす」がオフのときだけ動画に切り替える (それ以外は静止画)。 -->
+        <figure class="landing-tour" data-landing-tour>
+            <div class="landing-tour-wash landing-tour-wash--top" aria-hidden="true"></div>
+            <div class="landing-tour-media">
+                <img class="landing-tour-still" src="{% static 'video/ui-tour-still.jpg' %}" loading="lazy" decoding="async"
+                     width="1600" height="900" alt="{% trans 'JE6HUB のさまざまな画面' %}">
+                <video class="landing-tour-video" muted loop playsinline disablepictureinpicture preload="none"
+                       aria-label="{% trans 'JE6HUB の画面を紹介する動画' %}">
+                    <source src="{% static 'video/ui-tour-960.mp4' %}" type="video/mp4" media="(max-width: 734px)">
+                    <source src="{% static 'video/ui-tour-1600.mp4' %}" type="video/mp4">
+                </video>
+            </div>
+            <div class="landing-tour-wash landing-tour-wash--bottom" aria-hidden="true"></div>
+            <button type="button" class="blog-carousel-play landing-tour-toggle" hidden
+                    data-label-pause="{% trans '動画を一時停止' %}" data-label-play="{% trans '動画を再生' %}"
+                    aria-label="{% trans '動画を一時停止' %}">
+                <svg class="icon-pause" viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="5" width="4" height="14" rx="1.2"/><rect x="14" y="5" width="4" height="14" rx="1.2"/></svg>
+                <svg class="icon-play" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.6v12.8a1 1 0 0 0 1.52.85l10.2-6.4a1 1 0 0 0 0-1.7L9.52 4.75A1 1 0 0 0 8 5.6Z"/></svg>
+            </button>
+        </figure>
 
         <div class="landing-features">
             <article class="landing-feature landing-feature--wide">

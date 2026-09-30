@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-30 15:42+0900\n"
+"POT-Creation-Date: 2026-09-30 16:09+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -1303,6 +1303,18 @@ msgstr "See all posts"
 
 msgid "Blogs でできること"
 msgstr "What You Can Do with Blogs"
+
+msgid "JE6HUB のさまざまな画面"
+msgstr "Screens from across JE6HUB"
+
+msgid "JE6HUB の画面を紹介する動画"
+msgstr "A video tour of JE6HUB"
+
+msgid "動画を一時停止"
+msgstr "Pause video"
+
+msgid "動画を再生"
+msgstr "Play video"
 
 msgid "選ぶだけの4つのテンプレート"
 msgstr "Four templates, ready to go"
