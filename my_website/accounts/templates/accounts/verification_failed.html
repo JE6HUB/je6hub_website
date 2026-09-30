@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block title %}{% trans "リンクが無効です" %}{% endblock %}
+
+{% block content %}
+<div class="ap-section d-flex align-items-center justify-content-center" style="min-height: 80vh;">
+    <div class="ap-glass-panel ap-reveal" style="width: 100%; max-width: 440px;">
+        <div class="text-center">
+            <h1 class="ap-hero-title" style="font-size: 40px;">{% trans "リンクが無効です" %}</h1>
+            <p class="ap-subhead mt-3 mb-0" style="font-size: 17px;">{% trans "確認リンクの有効期限が切れているか、すでに使用済みです。登録済みの場合はそのままサインインできます。" %}</p>
+        </div>
+
+        <a href="{% url 'login' %}" class="ap-btn ap-btn-primary w-100 mt-5" style="font-size: 17px;">
+            {% trans "サインイン" %}
+        </a>
+
+        <div class="text-center mt-4">
+            <a href="{% url 'resend_verification' %}" class="ap-link" style="font-size: 17px;">
+                {% trans "確認メールを再送" %}
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

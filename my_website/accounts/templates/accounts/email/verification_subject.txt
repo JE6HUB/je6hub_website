@@ -1,0 +1,1 @@
+{% load i18n %}{% trans "[JE6HUB.com] メールアドレスの確認" %}

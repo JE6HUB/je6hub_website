@@ -1,18 +1,28 @@
 # accounts/views.py
 
 import json
+import logging
 import urllib.parse
 import urllib.request
 
 from django.contrib import messages
 from django.contrib.auth import login
+from django.core.mail import send_mail
 from django.http import JsonResponse
 from django.shortcuts import redirect, render
 from django.conf import settings
+from django.template.loader import render_to_string
+from django.urls import reverse
+from django.utils.encoding import force_bytes
+from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
 from django.utils.translation import gettext_lazy as _
 
-from .forms import CustomUserCreationForm, UserProfileForm
+from .forms import CustomUserCreationForm, ResendVerificationForm, UserProfileForm
+from .models import CustomUser
 from .ratelimit import ratelimit
+from .tokens import email_verification_token
+
+logger = logging.getLogger(__name__)
 
 
 @ratelimit('apple_music_search', limit=30, period=60)
@@ -119,6 +129,25 @@ def profile_view(request):
     }
     return render(request, 'accounts/profile.html', context)
 
+def send_verification_email(request, user):
+    """メール認証リンクを送る。送信に失敗しても登録処理は止めず、False を返す。"""
+    uid = urlsafe_base64_encode(force_bytes(user.pk))
+    token = email_verification_token.make_token(user)
+    verify_url = request.build_absolute_uri(reverse('verify_email', args=[uid, token]))
+    context = {'user': user, 'verify_url': verify_url}
+    try:
+        send_mail(
+            subject=render_to_string('accounts/email/verification_subject.txt', context).strip(),
+            message=render_to_string('accounts/email/verification_body.txt', context),
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            recipient_list=[user.email],
+        )
+    except Exception:
+        logger.exception('Failed to send verification email to user %s', user.pk)
+        return False
+    return True
+
+
 def signup_view(request):
     # すでにログインしているユーザーがアクセスした場合はトップへ戻す
     if request.user.is_authenticated:
@@ -127,16 +156,50 @@ def signup_view(request):
     if request.method == 'POST':
         form = CustomUserCreationForm(request.POST)
         if form.is_valid():
-            # ユーザーをデータベースに保存
-            user = form.save()
-            # 登録後、そのまま自動的にログイン状態にする
-            # allauth と併用して認証バックエンドが複数あるため、明示的に指定する
-            login(request, user, backend='django.contrib.auth.backends.ModelBackend')
-            # 成功メッセージをSnackbar（Toast）にセット
-            messages.success(request, _('会員登録が完了しました。Loungeへようこそ！'))
-            # 登録後はLounge（チャット一覧）へリダイレクト
-            return redirect('community:list')
+            # メール認証が済むまではログインできないよう、無効な状態で保存する
+            user = form.save(commit=False)
+            user.is_active = False
+            user.save()
+            sent = send_verification_email(request, user)
+            return render(request, 'accounts/verification_sent.html', {
+                'email': user.email,
+                'send_failed': not sent,
+            })
     else:
         form = CustomUserCreationForm()
 
     return render(request, 'signup.html', {'form': form})
+
+
+def verify_email_view(request, uidb64, token):
+    try:
+        user = CustomUser.objects.get(pk=urlsafe_base64_decode(uidb64).decode())
+    except (TypeError, ValueError, OverflowError, CustomUser.DoesNotExist):
+        user = None
+
+    if user is None or not email_verification_token.check_token(user, token):
+        return render(request, 'accounts/verification_failed.html', status=400)
+
+    user.is_active = True
+    user.save(update_fields=['is_active'])
+    # allauth と併用して認証バックエンドが複数あるため、明示的に指定する
+    login(request, user, backend='django.contrib.auth.backends.ModelBackend')
+    messages.success(request, _('メールアドレスの確認が完了しました。Loungeへようこそ！'))
+    return redirect('community:list')
+
+
+@ratelimit('resend_verification', limit=5, period=600)
+def resend_verification_view(request):
+    if request.method == 'POST':
+        form = ResendVerificationForm(request.POST)
+        if form.is_valid():
+            email = form.cleaned_data['email']
+            # 登録の有無が分からないよう、未認証ユーザーがいるかに関わらず同じ画面を返す
+            user = CustomUser.objects.filter(email__iexact=email, is_active=False, last_login__isnull=True).first()
+            if user:
+                send_verification_email(request, user)
+            return render(request, 'accounts/verification_sent.html', {'email': email})
+    else:
+        form = ResendVerificationForm()
+
+    return render(request, 'accounts/resend_verification.html', {'form': form})
