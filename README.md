@@ -133,6 +133,8 @@ docker compose up -d
 
 ### 本番サーバー（VPS等）での起動
 
+VPS の用意からドメイン・バックアップまでの詳しい手順は [docs/deploy.md](docs/deploy.md) を参照。
+
 `docker-compose.yml` は開発用（DEBUG=True、`--reload`、ソースマウント）。本番は `docker-compose.prod.yml` を使う。Caddy が 80/443 で待ち受けて Let's Encrypt の証明書を自動取得し、`/media/` の写真を直接配信、それ以外を Gunicorn へ転送する。
 
 ```bash
