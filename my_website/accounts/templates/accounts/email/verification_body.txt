@@ -1,0 +1,12 @@
+{% load i18n %}{% autoescape off %}{% blocktrans with username=user.username %}{{ username }} さん
+
+JE6HUB.com へのご登録ありがとうございます。
+以下のリンクを開いて、メールアドレスの確認を完了してください。{% endblocktrans %}
+
+{{ verify_url }}
+
+{% blocktrans %}このリンクの有効期限は 3 日間です。
+お心当たりのない場合は、このメールを破棄してください。{% endblocktrans %}
+
+JE6HUB.com
+{% endautoescape %}

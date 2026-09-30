@@ -13,7 +13,12 @@
 
         {% if form.errors %}
             <div class="alert alert-danger" style="background: rgba(255,59,48,0.12); border: none; color: #ff453a; border-radius: 12px; font-size: 14px;">
-                {% trans "ユーザー名またはパスワードが正しくありません。" %}
+                {% if form.unverified %}
+                    {% trans "メールアドレスの確認が済んでいません。確認メールのリンクを開いてください。" %}
+                    <a href="{% url 'resend_verification' %}" class="ap-link">{% trans "確認メールを再送" %}</a>
+                {% else %}
+                    {% trans "ユーザー名またはパスワードが正しくありません。" %}
+                {% endif %}
             </div>
         {% endif %}
 
@@ -54,6 +59,11 @@
         <div class="text-center mt-4">
             <a href="{% url 'signup' %}" class="ap-link" style="font-size: 17px;">
                 {% trans "アカウントを作成" %}
+            </a>
+        </div>
+        <div class="text-center mt-2">
+            <a href="{% url 'resend_verification' %}" class="ap-link" style="font-size: 14px;">
+                {% trans "確認メールが届かない場合" %}
             </a>
         </div>
     </div>

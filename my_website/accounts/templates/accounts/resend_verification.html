@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block title %}{% trans "確認メールを再送" %}{% endblock %}
+
+{% block content %}
+<div class="ap-section d-flex align-items-center justify-content-center" style="min-height: 80vh;">
+    <div class="ap-glass-panel ap-reveal" style="width: 100%; max-width: 440px;">
+        <div class="text-center mb-5">
+            <h1 class="ap-hero-title" style="font-size: 40px;">{% trans "確認メールを再送" %}</h1>
+            <p class="ap-subhead mt-2 mb-0" style="font-size: 17px;">{% trans "登録したメールアドレスを入力してください。" %}</p>
+        </div>
+
+        <form method="post" action="{% url 'resend_verification' %}">
+            {% csrf_token %}
+            <div class="mb-4 text-start">
+                {% if form.email.errors %}
+                    <div class="text-danger small mb-1" style="color: #ff453a!important;">{{ form.email.errors|striptags }}</div>
+                {% endif %}
+                <input type="email" name="email" id="id_email"
+                       class="ap-input {% if form.email.errors %}border-danger{% endif %}"
+                       placeholder="{{ form.email.label }}" required autofocus />
+            </div>
+
+            <button class="ap-btn ap-btn-primary w-100 mt-2" type="submit" style="font-size: 17px;">
+                {% trans "再送する" %}
+            </button>
+        </form>
+
+        <div class="text-center mt-4">
+            <a href="{% url 'login' %}" class="ap-link" style="font-size: 17px;">
+                {% trans "サインインに戻る" %}
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
