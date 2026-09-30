@@ -75,7 +75,7 @@ def create_channel(request):
             channel=channel, user=request.user,
             role=ChannelMembership.ROLE_OWNER, status=ChannelMembership.STATUS_ACTIVE,
         )
-        messages.success(request, _(f'チャンネル「{channel.name}」を作成しました。'))
+        messages.success(request, _('チャンネル「%(name)s」を作成しました。') % {'name': channel.name})
         return redirect('community:thread', channel_id=channel.id)
 
     return render(request, 'community/create_channel.html')
@@ -116,7 +116,7 @@ def thread_view(request, channel_id):
             limit = _MAX_VIDEO_BYTES if media_type == Message.MEDIA_VIDEO else _MAX_IMAGE_BYTES
             if media_file.size > limit:
                 limit_mb = limit // (1024 * 1024)
-                messages.error(request, _(f'ファイルサイズが上限（{limit_mb}MB）を超えています。'))
+                messages.error(request, _('ファイルサイズが上限（%(limit)sMB）を超えています。') % {'limit': limit_mb})
                 return redirect('community:thread', channel_id=channel.id)
 
         if not text and not media_file:
@@ -167,7 +167,7 @@ def join_channel(request, channel_id):
         if membership.status == ChannelMembership.STATUS_INVITED:
             membership.status = ChannelMembership.STATUS_ACTIVE
             membership.save()
-            messages.success(request, _(f'「{channel.name}」への招待を承認しました。'))
+            messages.success(request, _('「%(name)s」への招待を承認しました。') % {'name': channel.name})
             return redirect('community:thread', channel_id=channel.id)
 
     if channel.channel_type == 'public':
@@ -175,7 +175,7 @@ def join_channel(request, channel_id):
             channel=channel, user=request.user,
             role=ChannelMembership.ROLE_MEMBER, status=ChannelMembership.STATUS_ACTIVE,
         )
-        messages.success(request, _(f'「{channel.name}」に参加しました。'))
+        messages.success(request, _('「%(name)s」に参加しました。') % {'name': channel.name})
         return redirect('community:thread', channel_id=channel.id)
 
     # Private — 参加リクエスト
@@ -183,7 +183,7 @@ def join_channel(request, channel_id):
         channel=channel, user=request.user,
         role=ChannelMembership.ROLE_MEMBER, status=ChannelMembership.STATUS_PENDING,
     )
-    messages.success(request, _(f'「{channel.name}」への参加リクエストを送信しました。オーナーの承認をお待ちください。'))
+    messages.success(request, _('「%(name)s」への参加リクエストを送信しました。オーナーの承認をお待ちください。') % {'name': channel.name})
     return redirect('community:list')
 
 
@@ -201,7 +201,7 @@ def leave_channel(request, channel_id):
         return redirect('community:thread', channel_id=channel.id)
 
     membership.delete()
-    messages.success(request, _(f'「{channel.name}」から退出しました。'))
+    messages.success(request, _('「%(name)s」から退出しました。') % {'name': channel.name})
     return redirect('community:list')
 
 
@@ -215,7 +215,7 @@ def accept_invite(request, channel_id):
     if request.method == 'POST':
         membership.status = ChannelMembership.STATUS_ACTIVE
         membership.save()
-        messages.success(request, _(f'「{channel.name}」への招待を承認しました。'))
+        messages.success(request, _('「%(name)s」への招待を承認しました。') % {'name': channel.name})
         return redirect('community:thread', channel_id=channel.id)
 
     return render(request, 'community/accept_invite.html', {'channel': channel, 'membership': membership})
@@ -239,26 +239,26 @@ def invite_member(request, channel_id):
     try:
         target = User.objects.get(username=username)
     except User.DoesNotExist:
-        messages.error(request, _(f'ユーザー「{username}」が見つかりません。'))
+        messages.error(request, _('ユーザー「%(username)s」が見つかりません。') % {'username': username})
         return redirect('community:thread', channel_id=channel.id)
 
     existing = channel.get_membership(target)
     if existing:
         if existing.status == ChannelMembership.STATUS_ACTIVE:
-            messages.info(request, _(f'「{username}」はすでにメンバーです。'))
+            messages.info(request, _('「%(username)s」はすでにメンバーです。') % {'username': username})
         elif existing.status == ChannelMembership.STATUS_PENDING:
             existing.status = ChannelMembership.STATUS_ACTIVE
             existing.save()
-            messages.success(request, _(f'「{username}」の参加リクエストを承認しました。'))
+            messages.success(request, _('「%(username)s」の参加リクエストを承認しました。') % {'username': username})
         elif existing.status == ChannelMembership.STATUS_INVITED:
-            messages.info(request, _(f'「{username}」はすでに招待済みです。'))
+            messages.info(request, _('「%(username)s」はすでに招待済みです。') % {'username': username})
     else:
         ChannelMembership.objects.create(
             channel=channel, user=target,
             role=ChannelMembership.ROLE_MEMBER, status=ChannelMembership.STATUS_INVITED,
             invited_by=request.user,
         )
-        messages.success(request, _(f'「{username}」を招待しました。'))
+        messages.success(request, _('「%(username)s」を招待しました。') % {'username': username})
     return redirect('community:thread', channel_id=channel.id)
 
 
@@ -272,7 +272,7 @@ def approve_member(request, channel_id, user_id):
     m = get_object_or_404(ChannelMembership, channel=channel, user_id=user_id)
     m.status = ChannelMembership.STATUS_ACTIVE
     m.save()
-    messages.success(request, _(f'「{m.user.username}」の参加を承認しました。'))
+    messages.success(request, _('「%(username)s」の参加を承認しました。') % {'username': m.user.username})
     return redirect('community:thread', channel_id=channel.id)
 
 
@@ -286,5 +286,5 @@ def decline_member(request, channel_id, user_id):
     m = get_object_or_404(ChannelMembership, channel=channel, user_id=user_id)
     name = m.user.username
     m.delete()
-    messages.success(request, _(f'「{name}」を拒否/削除しました。'))
+    messages.success(request, _('「%(name)s」を拒否/削除しました。') % {'name': name})
     return redirect('community:thread', channel_id=channel.id)

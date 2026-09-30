@@ -1,6 +1,6 @@
-{% load static %}
+{% load static i18n %}{% get_current_language as LANGUAGE_CODE %}
 <!DOCTYPE html>
-<html lang="ja">
+<html lang="{{ LANGUAGE_CODE }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -21,9 +21,9 @@
                 <span class="material-symbols-outlined" style="font-size: 40px; color: #ff9f0a;">error</span>
             </div>
             <h1 class="ap-hero-title mb-3" style="font-size: 48px;">404</h1>
-            <p class="ap-subhead mb-5" style="font-size: 15px;">お探しのページは見つかりませんでした。</p>
+            <p class="ap-subhead mb-5" style="font-size: 15px;">{% trans "お探しのページは見つかりませんでした。" %}</p>
             <a href="/" class="ap-btn ap-btn-primary d-inline-flex align-items-center justify-content-center" style="padding: 14px 32px; font-size: 16px;">
-                トップへ戻る
+                {% trans "トップへ戻る" %}
             </a>
         </div>
     </main>

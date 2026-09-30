@@ -1,0 +1,1724 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-09-30 15:21+0900\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: en\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+msgid "コミュニティ権限"
+msgstr "Community permissions"
+
+msgid "このメールアドレスは既に登録されています。"
+msgstr "This email address is already registered."
+
+msgid "メールアドレス"
+msgstr "Email address"
+
+msgid "Privateチャンネル参加承認"
+msgstr "Approved for private channels"
+
+msgid "Privateチャンネルへの参加を許可する場合はチェックを入れます。"
+msgstr "Check to allow this user to join private channels."
+
+msgid "Apple User ID"
+msgstr ""
+
+msgid "Sign in with Apple の sub 識別子"
+msgstr "Sign in with Apple sub identifier"
+
+msgid "お気に入りの曲名"
+msgstr "Favorite song title"
+
+msgid "アーティスト名"
+msgstr "Artist"
+
+msgid "ジャケット画像URL"
+msgstr "Artwork image URL"
+
+msgid "Apple Music リンク"
+msgstr "Apple Music link"
+
+msgid "Apple Music 曲ID"
+msgstr "Apple Music track ID"
+
+msgid "プレビュー音源URL"
+msgstr "Preview audio URL"
+
+#, python-format
+msgid ""
+"%(username)s さん\n"
+"\n"
+"JE6HUB.com へのご登録ありがとうございます。\n"
+"以下のリンクを開いて、メールアドレスの確認を完了してください。"
+msgstr ""
+"Hi %(username)s,\n"
+"\n"
+"Thank you for signing up for JE6HUB.com.\n"
+"Please open the link below to confirm your email address."
+
+msgid ""
+"このリンクの有効期限は 3 日間です。\n"
+"お心当たりのない場合は、このメールを破棄してください。"
+msgstr ""
+"This link expires in 3 days.\n"
+"If you did not sign up, you can safely ignore this email."
+
+msgid "[JE6HUB.com] メールアドレスの確認"
+msgstr "[JE6HUB.com] Confirm your email address"
+
+msgid "No email provided"
+msgstr ""
+
+msgid "Home"
+msgstr ""
+
+msgid "Logout"
+msgstr ""
+
+msgid "プロフィール編集"
+msgstr "Edit Profile"
+
+msgid "入力内容にエラーがあります。"
+msgstr "There are errors in your input."
+
+msgid "名"
+msgstr "First name"
+
+msgid "姓"
+msgstr "Last name"
+
+msgid "お気に入りの曲"
+msgstr "Favorite Song"
+
+msgid "Apple Music で検索"
+msgstr "Search Apple Music"
+
+msgid "曲名 / アーティスト名"
+msgstr "Song / Artist"
+
+msgid "検索"
+msgstr "Search"
+
+msgid "検索結果から選ぶと自動入力されます。"
+msgstr "Pick a result to fill in the fields automatically."
+
+msgid "曲名"
+msgstr "Song title"
+
+msgid "プレビュー"
+msgstr "Preview"
+
+msgid "保存"
+msgstr "Save"
+
+msgid "キャンセル"
+msgstr "Cancel"
+
+msgid "Apple Music 検索"
+msgstr "Apple Music Search"
+
+msgid "検索ワード"
+msgstr "Search term"
+
+msgid "さらに見る"
+msgstr "Show more"
+
+msgid "閉じる"
+msgstr "Close"
+
+msgid "設定"
+msgstr "Select"
+
+msgid "検索中..."
+msgstr "Searching..."
+
+msgid "検索結果が見つかりませんでした。"
+msgstr "No results found."
+
+msgid "検索に失敗しました。時間をおいて再試行してください。"
+msgstr "Search failed. Please try again later."
+
+msgid "確認メールを再送"
+msgstr "Resend Confirmation Email"
+
+msgid "登録したメールアドレスを入力してください。"
+msgstr "Enter the email address you signed up with."
+
+msgid "再送する"
+msgstr "Resend"
+
+msgid "サインインに戻る"
+msgstr "Back to sign in"
+
+msgid "リンクが無効です"
+msgstr "Invalid Link"
+
+msgid "確認リンクの有効期限が切れているか、すでに使用済みです。登録済みの場合はそのままサインインできます。"
+msgstr ""
+"This confirmation link has expired or has already been used. If your account"
+" is already confirmed, you can sign in."
+
+msgid "サインイン"
+msgstr "Sign In"
+
+msgid "メールを確認してください"
+msgstr "Check Your Email"
+
+msgid "アカウントは作成されましたが、確認メールを送信できませんでした。時間をおいて、下のリンクから再送してください。"
+msgstr ""
+"Your account was created, but we couldn't send the confirmation email. "
+"Please try again later using the link below."
+
+#, python-format
+msgid "%(email)s に確認メールを送りました。メール内のリンクを開くと登録が完了します。"
+msgstr ""
+"We sent a confirmation email to %(email)s. Open the link in the email to "
+"finish signing up."
+
+msgid "メールが届かない場合は再送"
+msgstr "Didn't get the email? Resend it"
+
+msgid "プロフィールが更新されました。"
+msgstr "Your profile has been updated."
+
+msgid "入力内容を確認してください。"
+msgstr "Please check your input."
+
+msgid "メールアドレスの確認が完了しました。Loungeへようこそ！"
+msgstr "Your email address has been confirmed. Welcome to the Lounge!"
+
+msgid "HTML / CSS はそれぞれ 50,000 文字までです。"
+msgstr "HTML and CSS are limited to 50,000 characters each."
+
+msgid "本文が大きすぎます。"
+msgstr "The post body is too large."
+
+msgid "本文のデータが壊れています。"
+msgstr "The post body data is corrupted."
+
+msgid "画像サイズの上限は10MBです。"
+msgstr "Images must be 10 MB or smaller."
+
+msgid "JPEG / PNG / GIF / WebP / SVG 形式の画像を選択してください。"
+msgstr "Please choose a JPEG, PNG, GIF, WebP, or SVG image."
+
+msgid "公開するには本文を入力してください。"
+msgstr "Please add some content before publishing."
+
+msgid "下書き"
+msgstr "Draft"
+
+msgid "公開"
+msgstr "Published"
+
+msgid "フィーチャー"
+msgstr "Feature"
+
+msgid "クラシック"
+msgstr "Classic"
+
+msgid "スプリット"
+msgstr "Split"
+
+msgid "ミニマル"
+msgstr "Minimal"
+
+msgid "標準"
+msgstr "Standard"
+
+msgid "狭幅"
+msgstr "Narrow"
+
+msgid "ブルー"
+msgstr "Blue"
+
+msgid "パープル"
+msgstr "Purple"
+
+msgid "グリーン"
+msgstr "Green"
+
+msgid "オレンジ"
+msgstr "Orange"
+
+msgid "ピンク"
+msgstr "Pink"
+
+msgid "ティール"
+msgstr "Teal"
+
+msgid "著者"
+msgstr "Author"
+
+msgid "タイトル"
+msgstr "Title"
+
+msgid "サブタイトル"
+msgstr "Subtitle"
+
+msgid "カバー画像"
+msgstr "Cover image"
+
+msgid "本文"
+msgstr "Body"
+
+msgid "本文 (エディタデータ)"
+msgstr "Body (editor data)"
+
+msgid "本文 (ブロック)"
+msgstr "Body (blocks)"
+
+msgid "テンプレート"
+msgstr "Template"
+
+msgid "表示幅"
+msgstr "Width"
+
+msgid "アクセントカラー"
+msgstr "Accent color"
+
+msgid "ステータス"
+msgstr "Status"
+
+msgid "公開日時"
+msgstr "Published at"
+
+msgid "ブログ記事"
+msgstr "Blog post"
+
+msgid "画像"
+msgstr "Image"
+
+msgid "ブログ画像"
+msgstr "Blog image"
+
+msgid "SVG は 2MB までです。"
+msgstr "SVG files must be 2 MB or smaller."
+
+msgid "DOCTYPE やエンティティ定義を含む SVG は使えません。"
+msgstr ""
+"SVG files containing a DOCTYPE or entity declarations are not allowed."
+
+msgid "SVG として読み込めないファイルです。"
+msgstr "This file could not be read as an SVG."
+
+msgid "表示とコピーのメニュー"
+msgstr "View and copy menu"
+
+msgid "表示とコピー"
+msgstr "View & Copy"
+
+msgid "表示"
+msgstr "View"
+
+msgid "プレビューの幅"
+msgstr "Preview width"
+
+msgid "全幅"
+msgstr "Full width"
+
+msgid "タブレット (768px)"
+msgstr "Tablet (768px)"
+
+msgid "スマホ (375px)"
+msgstr "Phone (375px)"
+
+msgid "コピー"
+msgstr "Copy"
+
+msgid "HTML / CSS のプレビュー"
+msgstr "HTML / CSS preview"
+
+msgid "未公開"
+msgstr "Unpublished"
+
+#, python-format
+msgid "%(minutes)s分で読めます"
+msgid_plural "%(minutes)s分で読めます"
+msgstr[0] "%(minutes)s min read"
+msgstr[1] "%(minutes)s min read"
+
+msgid "最新の投稿"
+msgstr "Latest Posts"
+
+#, python-format
+msgid "スライド %(n)s を表示"
+msgstr "Show slide %(n)s"
+
+msgid "自動再生を一時停止"
+msgstr "Pause autoplay"
+
+msgid "自動再生を開始"
+msgstr "Start autoplay"
+
+msgid "マイブログ"
+msgstr "My Blog"
+
+msgid "Blogsに戻る"
+msgstr "Back to Blogs"
+
+msgid "あなたの記事と下書き"
+msgstr "Your posts and drafts"
+
+msgid "新しい記事"
+msgstr "New Post"
+
+msgid "更新"
+msgstr "Updated"
+
+msgid "編集"
+msgstr "Edit"
+
+msgid "この記事を削除しますか？この操作は取り消せません。"
+msgstr "Delete this post? This cannot be undone."
+
+msgid "削除"
+msgstr "Delete"
+
+msgid "まだ記事がありません。テンプレートを選んで、すぐに書き始められます。"
+msgstr "No posts yet. Pick a template and start writing right away."
+
+msgid "最初の記事を書く"
+msgstr "Write your first post"
+
+msgid "コピーしました"
+msgstr "Copied"
+
+msgid "下書き — あなただけに表示されています"
+msgstr "Draft — only visible to you"
+
+msgid "Written by"
+msgstr ""
+
+msgid "この著者の記事をすべて見る"
+msgstr "See all posts by this author"
+
+msgid "この著者の他の記事"
+msgstr "More from this author"
+
+msgid "記事を編集"
+msgstr "Edit Post"
+
+msgid "カバー画像を選択"
+msgstr "Choose a cover image"
+
+msgid "カバー画像を追加"
+msgstr "Add a cover image"
+
+msgid "クリックまたはドラッグ＆ドロップ（JPEG / PNG / WebP / SVG、10MBまで）"
+msgstr "Click or drag & drop (JPEG / PNG / WebP / SVG, up to 10 MB)"
+
+msgid "カバー画像を削除"
+msgstr "Remove cover image"
+
+msgid "サブタイトル（任意）"
+msgstr "Subtitle (optional)"
+
+msgid "書式"
+msgstr "Format"
+
+msgid "見出し"
+msgstr "Heading"
+
+msgid "小見出し"
+msgstr "Subheading"
+
+msgid "太字"
+msgstr "Bold"
+
+msgid "斜体"
+msgstr "Italic"
+
+msgid "下線"
+msgstr "Underline"
+
+msgid "取り消し線"
+msgstr "Strikethrough"
+
+msgid "左揃え"
+msgstr "Align left"
+
+msgid "中央揃え"
+msgstr "Align center"
+
+msgid "右揃え"
+msgstr "Align right"
+
+msgid "両端揃え"
+msgstr "Justify"
+
+msgid "箇条書き"
+msgstr "Bulleted list"
+
+msgid "番号付きリスト"
+msgstr "Numbered list"
+
+msgid "インデントを減らす"
+msgstr "Decrease indent"
+
+msgid "インデントを増やす"
+msgstr "Increase indent"
+
+msgid "引用"
+msgstr "Quote"
+
+msgid "コード"
+msgstr "Code"
+
+msgid "リンク"
+msgstr "Link"
+
+msgid "画像を挿入"
+msgstr "Insert image"
+
+msgid "数式 (LaTeX)"
+msgstr "Math (LaTeX)"
+
+msgid "Markdown を読み込む"
+msgstr "Import Markdown"
+
+msgid "書式をクリア"
+msgstr "Clear formatting"
+
+msgid "ブロックを追加"
+msgstr "Add block"
+
+msgid "記事の設定"
+msgstr "Post settings"
+
+msgid "カバー画像を全面に"
+msgstr "Full-bleed cover image"
+
+msgid "中央揃えの定番"
+msgstr "The centered classic"
+
+msgid "タイトルと写真を左右に"
+msgstr "Title and photo side by side"
+
+msgid "文字が主役"
+msgstr "Text takes center stage"
+
+msgid "画面いっぱいに表示"
+msgstr "Fill the screen"
+
+msgid "読みやすい細い段組"
+msgstr "A narrow, readable column"
+
+msgid "ヒント"
+msgstr "Tips"
+
+msgid "画像はツールバーのボタン、ドラッグ＆ドロップ、貼り付けで挿入できます。"
+msgstr "Insert images with the toolbar button, drag & drop, or paste."
+
+msgid "ブロックの左の ⋮⋮ で列数 (1〜3)・背景・幅などを設定、ドラッグで並べ替え。＋ か空の行で「/」でブロックを追加。"
+msgstr ""
+"Use ⋮⋮ on the left of a block to set columns (1–3), background, width and "
+"more, and drag to reorder. Add a block with + or by typing “/” on an empty "
+"line."
+
+msgid "画像はクリックで選択。四隅をドラッグでサイズ変更、画像をドラッグで移動、ダブルクリックで元のサイズ。"
+msgstr ""
+"Click an image to select it. Drag a corner to resize, drag the image to move"
+" it, and double-click to restore its original size."
+
+msgid "Markdown 記法 (# 見出し、**太字**、`コード`、--- など) がそのまま使えます。"
+msgstr ""
+"Markdown syntax (# headings, **bold**, `code`, ---, etc.) works as you type."
+
+msgid "⌘/Ctrl + S で下書き保存。"
+msgstr "Press ⌘/Ctrl + S to save a draft."
+
+msgid "記事"
+msgstr "Post"
+
+msgid "最終更新"
+msgstr "Last updated"
+
+msgid "この記事を削除"
+msgstr "Delete this post"
+
+msgid "非公開にする"
+msgstr "Unpublish"
+
+msgid "更新する"
+msgstr "Update"
+
+msgid "下書き保存"
+msgstr "Save draft"
+
+msgid "公開する"
+msgstr "Publish"
+
+msgid "挿入"
+msgstr "Insert"
+
+msgid "表示方法"
+msgstr "Display"
+
+msgid "文中"
+msgstr "Inline"
+
+msgid "独立した行"
+msgstr "On its own line"
+
+msgid "LaTeX"
+msgstr ""
+
+msgid "本文中で $…$ と入力しても文中の数式、$$ + Enter で独立した数式を挿入できます。"
+msgstr ""
+"You can also type $…$ in the text for inline math, or $$ + Enter for a "
+"display equation."
+
+msgid "リンクを解除"
+msgstr "Remove link"
+
+msgid "適用"
+msgstr "Apply"
+
+msgid "見出し・リスト・引用・コード・リンク・画像・数式 ($…$ / $$…$$) に対応。カーソル位置に挿入されます。"
+msgstr ""
+"Supports headings, lists, quotes, code, links, images, and math ($…$ / "
+"$$…$$). Inserted at the cursor position."
+
+msgid "と"
+msgstr "and"
+
+msgid "リスト"
+msgstr "List"
+
+msgid "テキストを入力、または「/」でブロックを追加"
+msgstr "Type text, or “/” to add a block"
+
+msgid "画像をアップロード中…"
+msgstr "Uploading image…"
+
+msgid "画像をアップロードできませんでした。"
+msgstr "The image could not be uploaded."
+
+msgid "未保存の変更があります"
+msgstr "You have unsaved changes"
+
+msgid "保存中…"
+msgstr "Saving…"
+
+msgid "http(s):// で始まる URL を入力してください。"
+msgstr "Please enter a URL starting with http(s)://."
+
+msgid "クリックで設定、ドラッグで移動"
+msgstr "Click to configure, drag to move"
+
+msgid "アイコンを変更"
+msgstr "Change icon"
+
+msgid "ブロックを検索"
+msgstr "Search blocks"
+
+msgid "該当するブロックがありません"
+msgstr "No matching blocks"
+
+msgid "テキスト"
+msgstr "Text"
+
+msgid "2列"
+msgstr "2 columns"
+
+msgid "3列"
+msgstr "3 columns"
+
+msgid "画像とテキスト"
+msgstr "Image & text"
+
+msgid "コールアウト"
+msgstr "Callout"
+
+msgid "数式"
+msgstr "Math"
+
+msgid "区切り線"
+msgstr "Divider"
+
+msgid "余白"
+msgstr "Spacer"
+
+msgid "ボタン"
+msgstr "Button"
+
+msgid "HTML / CSS"
+msgstr ""
+
+msgid "本文を書く"
+msgstr "Write body text"
+
+msgid "セクションの見出し"
+msgstr "Section heading"
+
+msgid "2つの列に分けて並べる"
+msgstr "Split content into two columns"
+
+msgid "3つの列に分けて並べる"
+msgstr "Split content into three columns"
+
+msgid "画像をアップロード"
+msgstr "Upload an image"
+
+msgid "画像と文章を左右に"
+msgstr "Image and text side by side"
+
+msgid "アイコン付きで目立たせる"
+msgstr "Highlight with an icon"
+
+msgid "大きな引用文"
+msgstr "A large pull quote"
+
+msgid "LaTeX の数式"
+msgstr "A LaTeX equation"
+
+msgid "コードブロック"
+msgstr "Code block"
+
+msgid "セクションを区切る"
+msgstr "Separate sections"
+
+msgid "縦の余白"
+msgstr "Vertical space"
+
+msgid "リンクボタン"
+msgstr "Link button"
+
+msgid "UI をプレビューしてコードを共有"
+msgstr "Preview UI and share the code"
+
+msgid "種類"
+msgstr "Type"
+
+msgid "列"
+msgstr "Columns"
+
+msgid "比率"
+msgstr "Ratio"
+
+msgid "アイコン"
+msgstr "Icon"
+
+msgid "背景"
+msgstr "Background"
+
+msgid "幅"
+msgstr "Width"
+
+msgid "縦位置"
+msgstr "Vertical alignment"
+
+msgid "文字サイズ"
+msgstr "Text size"
+
+msgid "高さ"
+msgstr "Height"
+
+msgid "配置"
+msgstr "Alignment"
+
+msgid "なし"
+msgstr "None"
+
+msgid "列の間に線"
+msgstr "Lines between columns"
+
+msgid "スクロールでフェードイン"
+msgstr "Fade in on scroll"
+
+msgid "グレー"
+msgstr "Gray"
+
+msgid "アクセント (淡)"
+msgstr "Accent (light)"
+
+msgid "アクセント"
+msgstr "Accent"
+
+msgid "ホワイト"
+msgstr "White"
+
+msgid "ワイド"
+msgstr "Wide"
+
+msgid "上"
+msgstr "Top"
+
+msgid "中央"
+msgstr "Center"
+
+msgid "下"
+msgstr "Bottom"
+
+msgid "小"
+msgstr "Small"
+
+msgid "大"
+msgstr "Large"
+
+msgid "ドット"
+msgstr "Dots"
+
+msgid "線"
+msgstr "Line"
+
+msgid "左"
+msgstr "Left"
+
+msgid "右"
+msgstr "Right"
+
+msgid "ボタン名"
+msgstr "Button label"
+
+msgid "リンク先"
+msgstr "Link URL"
+
+msgid "塗り"
+msgstr "Filled"
+
+msgid "ダーク"
+msgstr "Dark"
+
+msgid "ライト"
+msgstr "Light"
+
+msgid "チェック"
+msgstr "Checkered"
+
+msgid "左上"
+msgstr "Top left"
+
+msgid "ドラッグで幅を変更 (ダブルクリックで元の幅に戻す)"
+msgstr "Drag to change the width (double-click to reset)"
+
+msgid "カードの幅"
+msgstr "Card width"
+
+msgid "上へ"
+msgstr "Move up"
+
+msgid "下へ"
+msgstr "Move down"
+
+msgid "複製"
+msgstr "Duplicate"
+
+msgid "メンバーが綴る、旅と技術と日々のこと。"
+msgstr "Travel, tech, and everyday life, written by our members."
+
+msgid "ブログを書く"
+msgstr "Write a Post"
+
+msgid "ログインして書く"
+msgstr "Sign in to write"
+
+msgid "記事を検索"
+msgstr "Search posts"
+
+#, python-format
+msgid "%(author)s の記事"
+msgstr "Posts by %(author)s"
+
+#, python-format
+msgid "「%(query)s」の検索結果"
+msgstr "Results for “%(query)s”"
+
+msgid "すべての記事を表示"
+msgstr "Show all posts"
+
+msgid "すべての記事"
+msgstr "All Posts"
+
+msgid "該当する記事が見つかりませんでした。"
+msgstr "No matching posts found."
+
+msgid "まだ記事がありません。最初のストーリーを書いてみませんか？"
+msgstr "No posts yet. Why not write the first story?"
+
+msgid "ページ送り"
+msgstr "Pagination"
+
+msgid "前へ"
+msgstr "Previous"
+
+msgid "次へ"
+msgstr "Next"
+
+msgid "記事を公開しました。"
+msgstr "Your post has been published."
+
+msgid "記事を更新しました。"
+msgstr "Your post has been updated."
+
+msgid "下書きを保存しました。"
+msgstr "Draft saved."
+
+#, python-format
+msgid "「%(title)s」を削除しました。"
+msgstr "Deleted “%(title)s”."
+
+msgid "Public"
+msgstr ""
+
+msgid "Private"
+msgstr ""
+
+msgid "チャンネル名"
+msgstr "Channel name"
+
+msgid "説明"
+msgstr "Description"
+
+msgid "メンバー"
+msgstr "Member"
+
+msgid "承認待ち"
+msgstr "Pending approval"
+
+msgid "招待済み"
+msgstr "Invited"
+
+msgid "オーナー"
+msgstr "Owner"
+
+msgid "チャンネルメンバーシップ"
+msgstr "Channel membership"
+
+msgid "動画"
+msgstr "Video"
+
+msgid "メディア"
+msgstr "Media"
+
+msgid "メディアタイプ"
+msgstr "Media type"
+
+msgid "送信元IP"
+msgstr "Sender IP"
+
+msgid "招待の承諾"
+msgstr "Accept Invitation"
+
+msgid "招待が届いています"
+msgstr "You've Been Invited"
+
+#, python-format
+msgid "<strong>%(name)s</strong> へ参加するよう招待されました。"
+msgstr "You've been invited to join <strong>%(name)s</strong>."
+
+msgid "招待者"
+msgstr "Invited by"
+
+msgid "承諾する"
+msgstr "Accept"
+
+msgid "後で"
+msgstr "Later"
+
+msgid "興味のあるトピックに参加して、自由に語り合いましょう。"
+msgstr "Join the topics you care about and talk freely."
+
+msgid "チャンネルを作成"
+msgstr "Create Channel"
+
+msgid "チャンネルを探す"
+msgstr "Browse Channels"
+
+msgid "パブリック"
+msgstr "Public"
+
+msgid "プライベート"
+msgstr "Private"
+
+msgid "参加中"
+msgstr "Joined"
+
+msgid "パブリックチャンネル"
+msgstr "Public Channels"
+
+msgid "開く"
+msgstr "Open"
+
+msgid "参加する"
+msgstr "Join"
+
+msgid "パブリックチャンネルはまだありません。"
+msgstr "No public channels yet."
+
+msgid "プライベートチャンネル"
+msgstr "Private Channels"
+
+msgid "招待を承諾"
+msgstr "Accept Invitation"
+
+msgid "承認待ち…"
+msgstr "Pending approval…"
+
+msgid "参加リクエスト"
+msgstr "Request to Join"
+
+msgid "プライベートチャンネルはまだありません。"
+msgstr "No private channels yet."
+
+msgid "Loungeに戻る"
+msgstr "Back to Lounge"
+
+msgid "新しいチャンネルを作成"
+msgstr "Create a New Channel"
+
+msgid "ログインしている全ユーザーがチャンネルを作成できます。"
+msgstr "Any signed-in user can create a channel."
+
+msgid "任意"
+msgstr "optional"
+
+msgid "このチャンネルの内容を簡単に説明してください。"
+msgstr "Briefly describe what this channel is about."
+
+msgid "チャンネルタイプ"
+msgstr "Channel type"
+
+msgid "すべてのメンバーが閲覧・参加できます。"
+msgstr "All members can view and join."
+
+msgid "招待・承認されたメンバーのみアクセスできます。"
+msgstr "Only invited and approved members can access it."
+
+msgid "作成する"
+msgstr "Create"
+
+msgid "チャンネルを退出しますか？"
+msgstr "Leave this channel?"
+
+msgid "退出"
+msgstr "Leave"
+
+msgid "共有された画像"
+msgstr "Shared image"
+
+msgid "まだメッセージがありません。最初のメッセージを送ってみましょう。"
+msgstr "No messages yet. Be the first to say something."
+
+msgid "添付を削除"
+msgstr "Remove attachment"
+
+msgid "画像を添付"
+msgstr "Attach image"
+
+msgid "動画を添付"
+msgstr "Attach video"
+
+msgid "メッセージを入力…"
+msgstr "Type a message…"
+
+msgid "メッセージを入力"
+msgstr "Type a message"
+
+msgid "送信"
+msgstr "Send"
+
+msgid "Enterで送信 · Shift+Enterで改行 · 画像 最大20MB / 動画 最大200MB"
+msgstr ""
+"Enter to send · Shift+Enter for a new line · Images up to 20 MB / videos up "
+"to 200 MB"
+
+msgid "メンバー管理"
+msgstr "Manage Members"
+
+msgid "ユーザーを招待"
+msgstr "Invite a user"
+
+msgid "ユーザー名"
+msgstr "Username"
+
+msgid "招待"
+msgstr "Invite"
+
+msgid "承認"
+msgstr "Approve"
+
+msgid "拒否"
+msgstr "Decline"
+
+msgid "招待を取り消す"
+msgstr "Cancel invitation"
+
+#, python-format
+msgid "%(name)sを削除しますか？"
+msgstr "Remove %(name)s?"
+
+msgid "メンバーを削除"
+msgstr "Remove member"
+
+msgid "拡大画像"
+msgstr "Enlarged image"
+
+msgid "拡大表示"
+msgstr "Enlarged view"
+
+msgid "実行しますか？"
+msgstr "Are you sure?"
+
+msgid "チャンネル名を入力してください。"
+msgstr "Please enter a channel name."
+
+msgid "チャンネル名は100文字以内で入力してください。"
+msgstr "Channel names must be 100 characters or fewer."
+
+#, python-format
+msgid "チャンネル「%(name)s」を作成しました。"
+msgstr "Created the channel “%(name)s”."
+
+msgid "参加リクエストはオーナーの承認待ちです。"
+msgstr "Your request to join is awaiting the owner's approval."
+
+msgid "このチャンネルへのアクセス権がありません。"
+msgstr "You don't have access to this channel."
+
+msgid "対応していないファイル形式です。画像（JPEG/PNG/GIF/WebP）または動画（MP4/MOV/WebM）を選択してください。"
+msgstr ""
+"Unsupported file type. Please choose an image (JPEG/PNG/GIF/WebP) or a video"
+" (MP4/MOV/WebM)."
+
+#, python-format
+msgid "ファイルサイズが上限（%(limit)sMB）を超えています。"
+msgstr "The file exceeds the size limit (%(limit)s MB)."
+
+msgid "すでにこのチャンネルのメンバーです。"
+msgstr "You're already a member of this channel."
+
+msgid "参加リクエストは承認待ちです。"
+msgstr "Your request to join is pending approval."
+
+#, python-format
+msgid "「%(name)s」への招待を承認しました。"
+msgstr "Accepted the invitation to “%(name)s”."
+
+#, python-format
+msgid "「%(name)s」に参加しました。"
+msgstr "Joined “%(name)s”."
+
+#, python-format
+msgid "「%(name)s」への参加リクエストを送信しました。オーナーの承認をお待ちください。"
+msgstr ""
+"Sent a request to join “%(name)s”. Please wait for the owner's approval."
+
+msgid "オーナーはチャンネルを退出できません。"
+msgstr "The owner can't leave the channel."
+
+#, python-format
+msgid "「%(name)s」から退出しました。"
+msgstr "Left “%(name)s”."
+
+#, python-format
+msgid "ユーザー「%(username)s」が見つかりません。"
+msgstr "User “%(username)s” not found."
+
+#, python-format
+msgid "「%(username)s」はすでにメンバーです。"
+msgstr "“%(username)s” is already a member."
+
+#, python-format
+msgid "「%(username)s」の参加リクエストを承認しました。"
+msgstr "Approved “%(username)s”'s request to join."
+
+#, python-format
+msgid "「%(username)s」はすでに招待済みです。"
+msgstr "“%(username)s” has already been invited."
+
+#, python-format
+msgid "「%(username)s」を招待しました。"
+msgstr "Invited “%(username)s”."
+
+#, python-format
+msgid "「%(username)s」の参加を承認しました。"
+msgstr "Approved “%(username)s” to join."
+
+#, python-format
+msgid "「%(name)s」を拒否/削除しました。"
+msgstr "Declined/removed “%(name)s”."
+
+msgid "Japanese"
+msgstr ""
+
+msgid "English"
+msgstr ""
+
+msgid "名前"
+msgstr "Name"
+
+msgid "メッセージ"
+msgstr "Message"
+
+msgid "お問い合わせ"
+msgstr "Contact"
+
+msgid "プロジェクトのご相談・写真や技術に関する話・コラボレーション等なんでもお気軽にご連絡ください。通常 24 時間以内にご返信します。"
+msgstr ""
+"Project inquiries, conversations about photography or technology, "
+"collaborations — feel free to get in touch about anything. I usually reply "
+"within 24 hours."
+
+msgid "連絡先"
+msgstr "Get in Touch"
+
+msgid "メール"
+msgstr "Email"
+
+msgid "メッセージを送る"
+msgstr "Send a Message"
+
+msgid "お名前"
+msgstr "Your name"
+
+msgid "Draw your story."
+msgstr ""
+
+msgid "テンプレートを選んで書くだけ。登録メンバーなら誰でも、洗練されたブログをすぐに公開できます。"
+msgstr ""
+"Just pick a template and write. Any registered member can publish a polished"
+" blog right away."
+
+msgid "記事を読む"
+msgstr "Read Posts"
+
+#, python-format
+msgid "%(counter)s 本の記事"
+msgid_plural "%(counter)s 本の記事"
+msgstr[0] "%(counter)s post"
+msgstr[1] "%(counter)s posts"
+
+#, python-format
+msgid "%(counter)s 人の書き手"
+msgid_plural "%(counter)s 人の書き手"
+msgstr[0] "%(counter)s writer"
+msgstr[1] "%(counter)s writers"
+
+msgid "すべての記事を見る"
+msgstr "See all posts"
+
+msgid "Blogs でできること"
+msgstr "What You Can Do with Blogs"
+
+msgid "選ぶだけの4つのテンプレート"
+msgstr "Four templates, ready to go"
+
+msgid ""
+"全面カバーのフィーチャー、定番のクラシック、写真と並べるスプリット、文字が主役のミニマル。サイトのデザインに溶け込むレイアウトを、クリックひとつで切り替えられます。"
+msgstr ""
+"Full-cover Feature, the timeless Classic, Split with a photo alongside, and "
+"text-first Minimal. Switch between layouts that blend into the site's design"
+" with a single click."
+
+msgid "配置も書式も自由自在"
+msgstr "Layout and formatting, your way"
+
+msgid "見出し、左・中央・右・両端揃え、リスト、引用、コード、区切り線。見たままの画面で、思いどおりに整えられます。"
+msgstr ""
+"Headings, left/center/right/justified alignment, lists, quotes, code, and "
+"dividers. Shape your post exactly how you want, right on screen."
+
+msgid "画像はドラッグ＆ドロップ"
+msgstr "Drag & drop images"
+
+msgid "本文への画像はボタン、ドラッグ＆ドロップ、貼り付けで挿入。カバー画像もその場で設定できます。"
+msgstr ""
+"Insert images into your post with a button, drag & drop, or paste. Set the "
+"cover image right where you are."
+
+msgid "メンバーなら誰でも"
+msgstr "Open to every member"
+
+msgid "アカウントを作れば、すぐに書き始められます。下書き保存、公開・非公開の切り替えも自由です。"
+msgstr ""
+"Create an account and start writing right away. Save drafts and publish or "
+"unpublish whenever you like."
+
+msgid "記事ごとのアクセントカラー"
+msgstr "An accent color for every post"
+
+msgid "6色から選んだアクセントが、見出しの装飾やリンク、カードに統一感を与えます。"
+msgstr "Choose from six accents to tie together headings, links, and cards."
+
+msgid "3ステップで公開"
+msgstr "Publish in 3 Steps"
+
+msgid "テンプレートを選ぶ"
+msgstr "Choose a template"
+
+msgid "記事の雰囲気に合うレイアウトとアクセントカラーを選択。"
+msgstr "Pick a layout and accent color that fit the mood of your post."
+
+msgid "書く"
+msgstr "Write"
+
+msgid "タイトル、カバー画像、本文を入力。⌘/Ctrl + S でいつでも下書き保存。"
+msgstr ""
+"Add a title, cover image, and body. Press ⌘/Ctrl + S to save a draft at any "
+"time."
+
+msgid "ボタンひとつで公開。一覧とホームの最新記事に表示されます。"
+msgstr ""
+"Publish with one click. Your post appears in the list and among the latest "
+"posts on the home page."
+
+msgid "あなたのストーリーを、"
+msgstr "Your story"
+
+msgid "ここから。"
+msgstr "starts here."
+
+msgid "旅の記録、技術のメモ、日々の気づき。どんな話でも歓迎です。"
+msgstr ""
+"Travel logs, tech notes, everyday discoveries. Every story is welcome."
+
+msgid "無料で登録して書く"
+msgstr "Sign up free and start writing"
+
+msgid "ログイン"
+msgstr "Sign In"
+
+msgid "プロジェクトを見る"
+msgstr "View Projects"
+
+msgid "概要"
+msgstr "About"
+
+msgid ""
+"大規模言語モデル（LLM）のシステム設計・社会実装を専門とするAIアーキテクト。Transformer内部メカニズムの研究（Mechanistic "
+"Interpretability）に取り組みながら、Leica Q3によるフォトグラフィーも並行して続けている。"
+msgstr ""
+"An AI architect specializing in the system design and real-world deployment "
+"of large language models (LLMs). Researching the internal mechanisms of "
+"Transformers (Mechanistic Interpretability) while also pursuing photography "
+"with a Leica Q3."
+
+msgid "年の経験"
+msgstr "years of experience"
+
+msgid "件のプロジェクト"
+msgstr "projects"
+
+msgid "つの専門領域"
+msgstr "areas of expertise"
+
+msgid "専門領域"
+msgstr "Expertise"
+
+msgid ""
+"大規模言語モデルの社会実装とシステム設計。Mechanistic Interpretability の研究を通じて LLM の内部構造を解明する。"
+msgstr ""
+"System design and real-world deployment of large language models, uncovering"
+" how LLMs work inside through Mechanistic Interpretability research."
+
+msgid "Leica Q3 による都市・旅・自然のスナップショット。世界中の記憶を地図にピン留めして共有する WanderLens を開発。"
+msgstr ""
+"Snapshots of cities, travel, and nature with a Leica Q3. Built WanderLens to"
+" pin memories from around the world on a map and share them."
+
+msgid "AI・クラフトビール・写真をテーマにしたコミュニティ Lounge と、誰でも書ける Blogs を運営。"
+msgstr ""
+"Runs Lounge, a community around AI, craft beer, and photography, and Blogs, "
+"where anyone can write."
+
+msgid "経歴"
+msgstr "Experience"
+
+msgid "現在"
+msgstr "Present"
+
+msgid "LLMを活用したシステム設計・プロダクト開発の技術支援"
+msgstr ""
+"Technical support for designing systems and building products with LLMs"
+
+msgid "Transformer アーキテクチャの内部解析 (Mechanistic Interpretability)"
+msgstr ""
+"Internal analysis of the Transformer architecture (Mechanistic "
+"Interpretability)"
+
+msgid "RAG / Agent ワークフロー設計および評価フレームワーク構築"
+msgstr "Designing RAG / agent workflows and building evaluation frameworks"
+
+msgid "Webアプリケーション開発（Django / Python）"
+msgstr "Web application development (Django / Python)"
+
+msgid "データパイプライン設計・運用"
+msgstr "Designing and operating data pipelines"
+
+msgid "Computer Science"
+msgstr ""
+
+msgid "スキル"
+msgstr "Skills"
+
+msgid "Engineering"
+msgstr ""
+
+msgid "Creative"
+msgstr ""
+
+msgid "プロジェクト"
+msgstr "Projects"
+
+msgid "テンプレートを選ぶだけで、洗練されたブログを。"
+msgstr "Just pick a template for a polished blog."
+
+msgid "詳しく見る"
+msgstr "Learn more"
+
+msgid "AI・写真・クラフトビールを語り合う場所。"
+msgstr "A place to talk about AI, photography, and craft beer."
+
+msgid "旅の記憶を世界地図にピン留めするフォトトラベルジャーナル。"
+msgstr "A photo travel journal that pins your travel memories on a world map."
+
+msgid "このサイト。Django と PostgreSQL で構築。"
+msgstr "This site. Built with Django and PostgreSQL."
+
+msgid "一緒に、つくりましょう。"
+msgstr "Let's build something together."
+
+msgid "プロジェクト相談、コラボレーション、または単純に話したいことがあれば。"
+msgstr ""
+"Project inquiries, collaborations, or just something you'd like to talk "
+"about."
+
+msgid "メッセージが正常に送信されました。お問い合わせありがとうございます。"
+msgstr "Your message has been sent. Thank you for getting in touch."
+
+msgid "説明は 2000 文字以内で入力してください。"
+msgstr "Descriptions must be 2,000 characters or fewer."
+
+msgid "ユーザー"
+msgstr "User"
+
+msgid "場所の名前"
+msgstr "Place name"
+
+msgid "国"
+msgstr "Country"
+
+msgid "訪れた日"
+msgstr "Date visited"
+
+msgid "緯度"
+msgstr "Latitude"
+
+msgid "経度"
+msgstr "Longitude"
+
+msgid "写真"
+msgstr "Photo"
+
+msgid "サムネイル"
+msgstr "Thumbnail"
+
+msgid "Anonymous"
+msgstr ""
+
+msgid "コメント"
+msgstr "Comment"
+
+msgid "写真は 1 枚 25MB までです。"
+msgstr "Each photo must be 25 MB or smaller."
+
+msgid "画像として読み込めないファイルです (JPEG / PNG / WebP に対応)。"
+msgstr ""
+"This file could not be read as an image (JPEG / PNG / WebP supported)."
+
+msgid "JPEG / PNG / WebP の写真を選択してください。"
+msgstr "Please choose a JPEG, PNG, or WebP photo."
+
+msgid "by"
+msgstr ""
+
+msgid "まだコメントはありません。"
+msgstr "No comments yet."
+
+msgid "読み込み中…"
+msgstr "Loading…"
+
+msgid "読み込めませんでした。"
+msgstr "Couldn't load."
+
+msgid "送信できませんでした。"
+msgstr "Couldn't send."
+
+msgid "リンクをコピーしました"
+msgstr "Link copied"
+
+msgid "このスポットを削除しますか？写真も削除されます。"
+msgstr "Delete this spot? Its photos will be deleted too."
+
+msgid "写真なし"
+msgstr "No photo"
+
+msgid "場所未設定"
+msgstr "No location set"
+
+msgid "地図で場所を選ぶか、位置情報付きの写真を追加してください。"
+msgstr "Choose a location on the map, or add a photo with location data."
+
+msgid "写真の枚数が上限を超えています。"
+msgstr "Too many photos."
+
+msgid "元に戻す"
+msgstr "Undo"
+
+msgid "カバー"
+msgstr "Cover"
+
+msgid "ここにスポットを追加"
+msgstr "Add a spot here"
+
+msgid "見つかりませんでした"
+msgstr "No results"
+
+msgid "スポット"
+msgstr "spots"
+
+msgid "スポットを追加"
+msgstr "Add Spot"
+
+msgid "スポットを編集"
+msgstr "Edit Spot"
+
+#, python-format
+msgid "%(max_photos)s 枚まで"
+msgstr "Up to %(max_photos)s photos"
+
+msgid "写真を選ぶ"
+msgstr "Choose photos"
+
+msgid "クリックまたはドラッグ＆ドロップ"
+msgstr "Click or drag & drop"
+
+msgid "位置情報付きの写真なら、場所と日付が自動で入ります"
+msgstr "Photos with location data fill in the place and date automatically"
+
+msgid "写真の位置情報を使用しました"
+msgstr "Used the photo's location data"
+
+msgid "例: 夕暮れの清水寺"
+msgstr "e.g. Kiyomizu-dera at dusk"
+
+msgid "メモ"
+msgstr "Notes"
+
+msgid "この場所の思い出を…"
+msgstr "Memories of this place…"
+
+msgid "場所"
+msgstr "Location"
+
+msgid "場所を検索、または地図をクリック"
+msgstr "Search for a place, or click the map"
+
+msgid "場所を検索"
+msgstr "Search places"
+
+msgid "すべてのスポットを表示"
+msgstr "Show all spots"
+
+msgid "旅のルートを表示"
+msgstr "Show travel route"
+
+msgid "航空写真"
+msgstr "Satellite"
+
+msgid "前の写真"
+msgstr "Previous photo"
+
+msgid "次の写真"
+msgstr "Next photo"
+
+msgid "地図で見る"
+msgstr "View on map"
+
+msgid "リンクをコピー"
+msgstr "Copy link"
+
+msgid "コメントを書く…"
+msgstr "Write a comment…"
+
+msgid "コメントを書く"
+msgstr "Write a comment"
+
+msgid "スポットを移動"
+msgstr "Move spot"
+
+msgid "前のスポット"
+msgstr "Previous spot"
+
+msgid "次のスポット"
+msgstr "Next spot"
+
+msgid "旅の地図"
+msgstr "Travel map"
+
+msgid "みんなの旅の記憶を、地図で。"
+msgstr "Everyone's travel memories, on a map."
+
+msgid "国と地域"
+msgstr "countries & regions"
+
+msgid "マイ WanderLens"
+msgstr "My WanderLens"
+
+msgid "サインインしてはじめる"
+msgstr "Sign in to get started"
+
+msgid "最近の旅"
+msgstr "Recent Trips"
+
+msgid "まだスポットがありません。最初の旅人になりましょう。"
+msgstr "No spots yet. Be the first traveler."
+
+msgid "マイ WanderLens を開く"
+msgstr "Open My WanderLens"
+
+msgid "旅人たち"
+msgstr "Travelers"
+
+#, python-format
+msgid "%(p)s スポット · %(c)s か国"
+msgstr "%(p)s spots · %(c)s countries"
+
+#, python-format
+msgid "%(name)s の旅"
+msgstr "%(name)s's Travels"
+
+msgid "マップ"
+msgstr "Map"
+
+msgid "タイムライン"
+msgstr "Timeline"
+
+msgid "地図を右クリック (スマホは長押し) すると、その場所にスポットを追加できます。"
+msgstr ""
+"Right-click the map (long-press on phones) to add a spot at that location."
+
+msgid "最初のスポットを追加しましょう。位置情報付きの写真なら、場所と日付が自動で入ります。"
+msgstr ""
+"Add your first spot. Photos with location data fill in the place and date "
+"automatically."
+
+msgid "まだスポットがありません。"
+msgstr "No spots yet."
+
+#, python-format
+msgid "写真は 1 か所につき %(n)d 枚までです。"
+msgstr "Up to %(n)d photos per spot."
+
+#, python-format
+msgid "「%(title)s」を追加しました。"
+msgstr "Added “%(title)s”."
+
+#, python-format
+msgid "「%(title)s」を更新しました。"
+msgstr "Updated “%(title)s”."
+
+msgid "ピンを削除しました。"
+msgstr "Pin deleted."
+
+msgid "お探しのページは見つかりませんでした。"
+msgstr "The page you're looking for couldn't be found."
+
+msgid "トップへ戻る"
+msgstr "Back to Home"
+
+msgid "サーバーで問題が発生しました。しばらくしてから再度お試しください。"
+msgstr "Something went wrong on the server. Please try again later."
+
+msgid "Global (condensed)"
+msgstr ""
+
+msgid "WanderLens"
+msgstr ""
+
+msgid "Lounge"
+msgstr ""
+
+msgid "Blogs"
+msgstr ""
+
+msgid "Resume"
+msgstr ""
+
+msgid "Contact"
+msgstr ""
+
+msgid "Admin"
+msgstr ""
+
+msgid "メニュー"
+msgstr "Menu"
+
+msgid "サインアウト"
+msgstr "Sign Out"
+
+msgid "アカウントを作成"
+msgstr "Create Account"
+
+msgid "Language"
+msgstr ""
+
+msgid "Login"
+msgstr ""
+
+msgid "JE6HUB.com のアカウントでサインイン"
+msgstr "Sign in with your JE6HUB.com account"
+
+msgid "メールアドレスの確認が済んでいません。確認メールのリンクを開いてください。"
+msgstr ""
+"Your email address hasn't been confirmed yet. Please open the link in the "
+"confirmation email."
+
+msgid "ユーザー名またはパスワードが正しくありません。"
+msgstr "Incorrect username or password."
+
+msgid "Username"
+msgstr ""
+
+msgid "Password"
+msgstr ""
+
+msgid "or"
+msgstr ""
+
+msgid "Sign in with Apple"
+msgstr ""
+
+msgid "確認メールが届かない場合"
+msgstr "Didn't get the confirmation email?"
+
+msgid "Sign Up"
+msgstr ""
+
+msgid "アカウントを作成して、Blogs や Lounge に参加しましょう。"
+msgstr "Create an account to join Blogs and the Lounge."
+
+msgid "登録後、入力したメールアドレスに確認メールが届きます。"
+msgstr ""
+"After signing up, you'll receive a confirmation email at the address you "
+"entered."
+
+msgid "Sign up with Apple"
+msgstr ""
+
+msgid "アカウントをお持ちの場合はサインイン"
+msgstr "Already have an account? Sign in"

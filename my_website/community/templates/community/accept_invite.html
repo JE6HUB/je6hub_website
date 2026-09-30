@@ -21,7 +21,7 @@
             <span class="lounge-invite-icon"><span class="material-symbols-outlined" aria-hidden="true">mail</span></span>
             <h1 class="lounge-invite-title">{% trans "招待が届いています" %}</h1>
             <p class="lounge-invite-text">
-                <strong>{{ channel.name }}</strong> {% trans "へ参加するよう招待されました。" %}
+                {% blocktrans with name=channel.name %}<strong>{{ name }}</strong> へ参加するよう招待されました。{% endblocktrans %}
             </p>
             {% if membership.invited_by %}
             <span class="lounge-invite-by">{% trans "招待者" %}: {{ membership.invited_by.username }}</span>

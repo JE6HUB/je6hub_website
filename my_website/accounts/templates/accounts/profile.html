@@ -57,7 +57,7 @@
                     <div class="mb-4">
                         <label class="ap-label" for="appleMusicSearchTerm">{% trans "Apple Music で検索" %}</label>
                         <div class="d-flex gap-2">
-                            <input type="search" class="form-control ap-input" id="appleMusicSearchTerm" placeholder="曲名 / アーティスト名">
+                            <input type="search" class="form-control ap-input" id="appleMusicSearchTerm" placeholder="{% trans '曲名 / アーティスト名' %}">
                             <button type="button" class="ap-btn ap-btn-primary flex-shrink-0 text-nowrap" id="appleMusicSearchBtn">{% trans "検索" %}</button>
                         </div>
                         <div class="small text-muted mt-2">{% trans "検索結果から選ぶと自動入力されます。" %}</div>
@@ -227,7 +227,7 @@ document.addEventListener('DOMContentLoaded', () => {
         btn.className = 'ap-btn ap-btn-outline';
         btn.style.padding = '4px 12px';
         btn.style.fontSize = '13px';
-        btn.textContent = '設定';
+        btn.textContent = '{% trans "設定" as t %}{{ t|escapejs }}';
         btn.addEventListener('click', () => {
             if (titleEl) titleEl.value = result.title || '';
             if (artistEl) artistEl.value = result.artist || '';
@@ -267,7 +267,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!term) return;
 
         state.loading = true;
-        setStatus('検索中...');
+        setStatus('{% trans "検索中..." as t %}{{ t|escapejs }}');
         loadMoreBtn.disabled = true;
 
         try {
@@ -285,7 +285,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (results.length === 0) {
                 modalResultsEl.innerHTML = '';
-                setStatus('検索結果が見つかりませんでした。');
+                setStatus('{% trans "検索結果が見つかりませんでした。" as t %}{{ t|escapejs }}');
                 loadMoreBtn.style.display = 'none';
             } else {
                 setStatus('');
@@ -300,7 +300,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
         } catch (e) {
-            setStatus('検索に失敗しました。時間をおいて再試行してください。', true);
+            setStatus('{% trans "検索に失敗しました。時間をおいて再試行してください。" as t %}{{ t|escapejs }}', true);
         } finally {
             state.loading = false;
             loadMoreBtn.disabled = false;
