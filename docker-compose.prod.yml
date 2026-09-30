@@ -27,7 +27,9 @@ services:
       DB_PORT: 5432
       DJANGO_DEBUG: "False"
       DJANGO_BEHIND_PROXY: "True"
-    command: gunicorn config.wsgi:application --bind 0.0.0.0:8000 --workers 3 --access-logfile -
+      # Gunicorn のワーカー数。メモリ1GBのサーバーなら2、2GB以上なら3〜4
+      WEB_CONCURRENCY: ${WEB_CONCURRENCY:-2}
+    command: gunicorn config.wsgi:application --bind 0.0.0.0:8000 --access-logfile -
     depends_on:
       db:
         condition: service_healthy

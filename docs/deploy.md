@@ -5,9 +5,12 @@ je6hub サイトを 1 台の VPS 上で `docker-compose.prod.yml` を使って�
 
 ## 1. VPS を用意する
 
-- 推奨スペック: **メモリ 2GB / Ubuntu 24.04 LTS**（1GB だと Docker ビルドと PostgreSQL で不足しやすい）
-- 候補: ConoHa VPS、さくらのVPS、Xserver VPS、AWS Lightsail（東京リージョン）。いずれも月 1,000〜1,500 円前後
-- 作成時に SSH 公開鍵を登録し、固定の IPv4 アドレスを控えておく
+- 推奨スペック: **メモリ 1GB / Ubuntu 24.04 LTS**。個人サイトの規模なら 1GB で足りる。ただし Docker ビルド時にメモリが一時的に不足しやすいので、3 章で **スワップ 2GB** を必ず作る
+- 候補（2026年9月時点、税込の目安）:
+  - AWS Lightsail Micro-1GB: 月 $7（東京リージョン、IPv4 付き）
+  - ConoHa VPS 1GB: 月 1,065 円上限の時間課金。長期割引あり
+  - アクセスが増えてメモリが足りなくなったら、2GB プランに上げて `.env` の `WEB_CONCURRENCY` を 3 にする
+- 作成時に SSH 公開鍵を登録し、固定の IPv4 アドレスを控えておく（Lightsail は「ネットワーキング」で静的 IP を作ってインスタンスにアタッチする。アタッチ中は無料）
 
 ## 2. ドメインと DNS
 
@@ -41,12 +44,16 @@ ufw allow OpenSSH && ufw allow 80 && ufw allow 443 && ufw enable
 # セキュリティ更新の自動適用
 apt update && apt install -y unattended-upgrades && dpkg-reconfigure -plow unattended-upgrades
 
+# スワップ 2GB（メモリ1GBのサーバーでビルドや migrate が落ちないように）
+fallocate -l 2G /swapfile && chmod 600 /swapfile && mkswap /swapfile && swapon /swapfile
+echo '/swapfile none swap sw 0 0' >> /etc/fstab
+
 # Docker (公式手順)
 curl -fsSL https://get.docker.com | sh
 usermod -aG docker deploy
 ```
 
-VPS 事業者のパケットフィルター（ConoHa の「セキュリティグループ」など）がある場合は、そちらでも 22/80/443 を開ける。
+VPS 事業者のパケットフィルター（Lightsail の「ネットワーキング → IPv4 ファイアウォール」、ConoHa の「セキュリティグループ」など）がある場合は、そちらでも 22/80/443 を開ける。
 
 ## 4. アプリを配置して起動する
 
