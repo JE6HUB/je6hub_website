@@ -192,9 +192,9 @@
 </div>
 
 <!-- ── 画像ライトボックス ── -->
-<div id="lightbox" role="dialog" aria-label="拡大画像" tabindex="-1">
-    <button id="lightboxClose" aria-label="閉じる"><span class="material-symbols-outlined">close</span></button>
-    <img id="lightboxImg" src="" alt="拡大表示">
+<div id="lightbox" role="dialog" aria-label="{% trans '拡大画像' %}" tabindex="-1">
+    <button id="lightboxClose" aria-label="{% trans '閉じる' %}"><span class="material-symbols-outlined">close</span></button>
+    <img id="lightboxImg" src="" alt="{% trans '拡大表示' %}">
 </div>
 
 <script>
@@ -203,7 +203,7 @@
 
 /* ── data-confirm フォーム ── */
 document.querySelectorAll('form.js-confirm').forEach(function(f){
-    f.addEventListener('submit', function(e){ if(!confirm(f.dataset.confirm||'実行しますか？')) e.preventDefault(); });
+    f.addEventListener('submit', function(e){ if(!confirm(f.dataset.confirm||'{% trans "実行しますか？" as t %}{{ t|escapejs }}')) e.preventDefault(); });
 });
 
 /* ── メディア添付 ── */
