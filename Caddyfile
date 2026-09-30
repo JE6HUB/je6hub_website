@@ -24,6 +24,12 @@ www.{$SITE_DOMAIN} {
 	}
 
 	# ユーザーアップロード(写真)は DEBUG=False では Django が配信しないため Caddy が直接返す
+	# Lounge の添付は URL を知っていても直接は開けない。
+	# Django (community.views.message_media) が閲覧権限を確認してから、下の handle_response で配信する
+	handle /media/community/* {
+		respond 404
+	}
+
 	handle_path /media/* {
 		# core.middleware.MediaSvgSecurityMiddleware と同じヘッダー。
 		# Caddy が直接配信すると Django を通らないため、ここでも付ける。
@@ -42,6 +48,19 @@ www.{$SITE_DOMAIN} {
 		# 訪問者 IP 1つだけに置き換えて偽装を防ぐ
 		reverse_proxy web:8000 {
 			header_up X-Forwarded-For {client_ip}
+
+			# Django が権限を確認して X-Accel-Redirect を返したときだけ、そのファイルを送る
+			# (Range 要求にも対応するので、動画のシークができる)
+			@accel header X-Accel-Redirect *
+			handle_response @accel {
+				root * /srv/media
+				rewrite * {rp.header.X-Accel-Redirect}
+				method * GET
+				header X-Content-Type-Options nosniff
+				header Cache-Control "private, max-age=3600"
+				header Content-Security-Policy "default-src 'none'; img-src 'self' data:; media-src 'self'; style-src 'unsafe-inline'; sandbox"
+				file_server
+			}
 		}
 	}
 }

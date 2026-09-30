@@ -52,9 +52,9 @@
                         {% if msg.has_media %}
                         <div class="msg-media">
                             {% if msg.media_type == 'image' %}
-                            <img src="{{ msg.media.url }}" alt="{% trans '共有された画像' %}" onclick="openLightbox(this.src)">
+                            <img src="{{ msg.media_url }}" alt="{% trans '共有された画像' %}" onclick="openLightbox(this.src)">
                             {% elif msg.media_type == 'video' %}
-                            <video src="{{ msg.media.url }}" controls preload="metadata" playsinline></video>
+                            <video src="{{ msg.media_url }}" controls preload="metadata" playsinline></video>
                             {% endif %}
                         </div>
                         {% endif %}

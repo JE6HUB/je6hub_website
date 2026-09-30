@@ -216,6 +216,10 @@ STORAGES = {
 # Media files (ユーザーアップロードの画像など)
 MEDIA_URL = 'media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+# Lounge の添付は権限を確認するビュー (community.views.message_media) から配信する。
+# True のとき、ファイルの送信は X-Accel-Redirect でリバースプロキシ (Caddy) に任せる
+# (docker-compose.prod.yml で True。Caddyfile の handle_response と対になる設定)。
+MEDIA_ACCEL_REDIRECT = os.environ.get('DJANGO_MEDIA_ACCEL_REDIRECT', 'False') == 'True'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
