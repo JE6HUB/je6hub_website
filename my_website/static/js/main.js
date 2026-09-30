@@ -436,6 +436,138 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 
+// お気に入りの曲のプレビュー再生 (.pf-play[data-track-src])
+// ページ内のどの再生ボタンでも 1 つの <audio> を共有し、同時に 2 曲鳴らないようにする。
+const TrackPreview = (() => {
+    const audio = new Audio();
+    audio.preload = 'none';
+    let activeButton = null;
+
+    const setState = (button, playing) => {
+        if (!button) return;
+        button.classList.toggle('is-playing', playing);
+        const icon = button.querySelector('.pf-play-icon');
+        if (icon) icon.textContent = playing ? 'pause' : 'play_arrow';
+        const label = playing ? button.dataset.labelPause : button.dataset.labelPlay;
+        if (label) button.setAttribute('aria-label', label);
+        if (!playing) button.style.removeProperty('--pf-progress');
+    };
+
+    const stop = () => {
+        audio.pause();
+        setState(activeButton, false);
+        activeButton = null;
+    };
+
+    const toggle = (button) => {
+        if (button === activeButton && !audio.paused) {
+            stop();
+            return;
+        }
+        stop();
+        activeButton = button;
+        audio.src = button.dataset.trackSrc;
+        setState(button, true);
+        audio.play().catch(() => stop());
+    };
+
+    audio.addEventListener('timeupdate', () => {
+        if (activeButton && audio.duration) {
+            activeButton.style.setProperty('--pf-progress', `${(audio.currentTime / audio.duration) * 360}deg`);
+        }
+    });
+    audio.addEventListener('ended', stop);
+
+    document.addEventListener('click', (e) => {
+        const button = e.target.closest('.pf-play[data-track-src]');
+        if (!button) return;
+        e.preventDefault();
+        toggle(button);
+    });
+
+    return { stop };
+})();
+
+// プロフィールのモーダル: [data-profile="username"] をクリックすると開く
+document.addEventListener('DOMContentLoaded', () => {
+    const modal = document.getElementById('pf-modal');
+    const body = document.getElementById('pf-modal-body');
+    if (!modal || !body || typeof modal.showModal !== 'function') return;
+
+    const cache = new Map();
+    let opener = null;
+    let closeTimer = null;
+
+    const cardUrl = (username) => modal.dataset.cardUrl.replace('__username__', encodeURIComponent(username));
+
+    const loadCard = async (username) => {
+        if (!cache.has(username)) {
+            cache.set(username, fetch(cardUrl(username), { headers: { 'X-Requested-With': 'fetch' } })
+                .then((r) => { if (!r.ok) throw new Error(r.status); return r.text(); })
+                .catch((err) => { cache.delete(username); throw err; }));
+        }
+        return cache.get(username);
+    };
+
+    const open = async (username, trigger) => {
+        clearTimeout(closeTimer);
+        opener = trigger;
+        body.innerHTML = '<div class="pf-card pf-card--loading" aria-busy="true"><span class="pf-spinner"></span></div>';
+        if (!modal.open) modal.showModal();
+        // 次のフレームでクラスを付けて、表示アニメーションを走らせる
+        requestAnimationFrame(() => modal.classList.add('is-open'));
+        try {
+            const html = await loadCard(username);
+            if (!modal.open) return;
+            body.innerHTML = html;
+            body.firstElementChild?.classList.add('pf-card--enter');
+        } catch {
+            body.innerHTML = `<div class="pf-card pf-card--error"><p>${modal.dataset.error}</p></div>`;
+        }
+    };
+
+    const close = () => {
+        if (!modal.open) return;
+        TrackPreview.stop();
+        modal.classList.remove('is-open');
+        // CSS のトランジションが終わってから閉じる
+        closeTimer = setTimeout(() => {
+            modal.close();
+            if (opener && document.contains(opener)) opener.focus({ preventScroll: true });
+        }, 250);
+    };
+
+    const triggerOf = (e) => e.target.closest('[data-profile]');
+
+    // リンクやカードの中にあるトリガーも拾えるよう、キャプチャ段階で処理する
+    document.addEventListener('click', (e) => {
+        const trigger = triggerOf(e);
+        if (!trigger || modal.contains(trigger)) return;
+        if (e.metaKey || e.ctrlKey || e.shiftKey || e.button === 1) return; // 新しいタブで開く操作はそのまま
+        e.preventDefault();
+        e.stopPropagation();
+        open(trigger.dataset.profile, trigger);
+    }, true);
+
+    document.addEventListener('keydown', (e) => {
+        if (e.key !== 'Enter' && e.key !== ' ') return;
+        const trigger = triggerOf(e);
+        if (!trigger || trigger.tagName === 'A' || modal.contains(trigger)) return;
+        e.preventDefault();
+        e.stopPropagation();
+        open(trigger.dataset.profile, trigger);
+    }, true);
+
+    modal.addEventListener('click', (e) => {
+        // 背景 (dialog 自身) か閉じるボタンのクリックで閉じる
+        if (e.target === modal || e.target.closest('[data-pf-close]')) close();
+    });
+    modal.addEventListener('cancel', (e) => {
+        e.preventDefault();
+        close();
+    });
+});
+
 // Apple-style Reveal Animations
 document.addEventListener('DOMContentLoaded', () => {
     const observer = new IntersectionObserver((entries) => {

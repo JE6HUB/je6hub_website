@@ -9,13 +9,16 @@ from django.contrib import messages
 from django.contrib.auth import login
 from django.core.mail import send_mail
 from django.http import JsonResponse
-from django.shortcuts import redirect, render
+from django.shortcuts import get_object_or_404, redirect, render
 from django.conf import settings
 from django.template.loader import render_to_string
 from django.urls import reverse
 from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
 from django.utils.translation import gettext_lazy as _
+
+from blog.models import Post
+from photraveler.models import MapPin, PinPhoto
 
 from .forms import CustomUserCreationForm, ResendVerificationForm, UserProfileForm
 from .models import CustomUser
@@ -128,6 +131,38 @@ def profile_view(request):
         'form': form,
     }
     return render(request, 'accounts/profile.html', context)
+
+def _public_profile_context(request, username):
+    """公開プロフィール (モーダル・詳細ページ共通) の表示データ。メールアドレスや氏名は含めない。"""
+    # 未認証 (is_active=False) のアカウントは存在しないものとして扱う
+    profile_user = get_object_or_404(CustomUser, username=username, is_active=True)
+    posts = Post.objects.published().filter(author=profile_user)
+    pins = MapPin.objects.filter(user=profile_user)
+    return {
+        'profile_user': profile_user,
+        'is_self': request.user.is_authenticated and request.user.pk == profile_user.pk,
+        'stats': {
+            'posts': posts.count(),
+            'places': pins.count(),
+            'countries': pins.exclude(country='').values('country').distinct().count(),
+            'photos': PinPhoto.objects.filter(pin__user=profile_user).count(),
+        },
+        'posts': posts,
+        'pins': pins,
+    }
+
+
+def user_profile_view(request, username):
+    context = _public_profile_context(request, username)
+    context['recent_posts'] = context.pop('posts').select_related('author')[:4]
+    context['recent_pins'] = context.pop('pins').prefetch_related('photos')[:6]
+    return render(request, 'accounts/user_profile.html', context)
+
+
+def user_card_view(request, username):
+    """プロフィールモーダルの中身 (HTML 断片)。main.js が取得して表示する。"""
+    return render(request, 'accounts/_profile_card.html', _public_profile_context(request, username))
+
 
 def send_verification_email(request, user):
     """メール認証リンクを送る。送信に失敗しても登録処理は止めず、False を返す。"""

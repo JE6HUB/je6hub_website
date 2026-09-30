@@ -1,0 +1,37 @@
+{% load i18n %}
+{# お気に入りの曲。preview_url があれば 30 秒のプレビューを再生できる (再生制御は main.js) #}
+{% with u=profile_user %}
+<div class="pf-track{% if large %} pf-track--lg{% endif %}">
+    {% if large and u.favorite_track_image_url %}<img class="pf-track-bg" src="{{ u.favorite_track_image_url }}" alt="" aria-hidden="true">{% endif %}
+    <div class="pf-track-art">
+        {% if u.favorite_track_image_url %}
+            <img src="{{ u.favorite_track_image_url }}" alt="" loading="lazy">
+        {% else %}
+            <span class="material-symbols-outlined" aria-hidden="true">music_note</span>
+        {% endif %}
+    </div>
+    <div class="pf-track-text">
+        <span class="pf-track-kicker">{% trans "お気に入りの曲" %}</span>
+        <strong class="pf-track-title">{{ u.favorite_track_title }}</strong>
+        {% if u.favorite_track_artist %}<span class="pf-track-artist">{{ u.favorite_track_artist }}</span>{% endif %}
+        {% if large and u.favorite_track_apple_music_url %}
+            <a class="pf-track-link" href="{{ u.favorite_track_apple_music_url }}" target="_blank" rel="noopener noreferrer">
+                {% trans "Apple Music で聴く" %}
+            </a>
+        {% endif %}
+    </div>
+    {% if u.favorite_track_preview_url %}
+        <button type="button" class="pf-play" data-track-src="{{ u.favorite_track_preview_url }}"
+                aria-label="{% blocktrans with title=u.favorite_track_title %}{{ title }} のプレビューを再生{% endblocktrans %}"
+                data-label-play="{% blocktrans with title=u.favorite_track_title %}{{ title }} のプレビューを再生{% endblocktrans %}"
+                data-label-pause="{% trans 'プレビューを一時停止' %}">
+            <span class="material-symbols-outlined pf-play-icon" aria-hidden="true">play_arrow</span>
+        </button>
+    {% elif u.favorite_track_apple_music_url and not large %}
+        <a class="pf-play pf-play--link" href="{{ u.favorite_track_apple_music_url }}" target="_blank" rel="noopener noreferrer"
+           aria-label="{% trans 'Apple Music で聴く' %}">
+            <span class="material-symbols-outlined" aria-hidden="true">open_in_new</span>
+        </a>
+    {% endif %}
+</div>
+{% endwith %}

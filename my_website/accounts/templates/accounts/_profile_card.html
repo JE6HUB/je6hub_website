@@ -1,0 +1,35 @@
+{% load i18n %}
+{# プロフィールモーダルの中身。/users/<username>/card/ で返し、main.js が #pf-modal に差し込む #}
+{% with u=profile_user %}
+<div class="pf-card">
+    <div class="pf-card-head">
+        <span class="pf-avatar" aria-hidden="true">{{ u.public_name|first|upper }}</span>
+        <div class="pf-card-names">
+            <h2 class="pf-card-name" id="pf-modal-title">{{ u.public_name }}</h2>
+            <p class="pf-card-handle">@{{ u.username }}</p>
+        </div>
+    </div>
+
+    {% if u.bio %}<p class="pf-bio pf-bio--clamp">{{ u.bio|linebreaksbr }}</p>{% endif %}
+
+    <ul class="pf-meta">
+        {% if u.location %}<li><span class="material-symbols-outlined" aria-hidden="true">location_on</span>{{ u.location }}</li>{% endif %}
+        <li><span class="material-symbols-outlined" aria-hidden="true">calendar_month</span>{% blocktrans with date=u.date_joined|date:"Y.m" %}{{ date }} から参加{% endblocktrans %}</li>
+    </ul>
+
+    <dl class="pf-stats">
+        <div><dt>{% trans "記事" %}</dt><dd>{{ stats.posts }}</dd></div>
+        <div><dt>{% trans "スポット" %}</dt><dd>{{ stats.places }}</dd></div>
+        <div><dt>{% trans "国と地域" %}</dt><dd>{{ stats.countries }}</dd></div>
+    </dl>
+
+    {% if u.has_favorite_track %}{% include "accounts/_track_player.html" %}{% endif %}
+
+    <div class="pf-card-actions">
+        <a href="{{ u.get_absolute_url }}" class="ap-btn ap-btn-primary">{% trans "詳細を見る" %}</a>
+        {% if is_self %}
+            <a href="{% url 'profile' %}" class="ap-btn ap-btn-outline">{% trans "プロフィールを編集" %}</a>
+        {% endif %}
+    </div>
+</div>
+{% endwith %}

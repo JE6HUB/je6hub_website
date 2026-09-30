@@ -322,7 +322,7 @@
             h('span', { class: 'wl-card-body' },
                 h('strong', { text: p.title }),
                 h('small', { text: [placeLine(p), fmtDate(dateOf(p))].filter(Boolean).join(' · ') }),
-                cfg.mode === 'discovery' ? h('small', { class: 'wl-card-owner', text: `${t.by} ${p.owner}` }) : null));
+                cfg.mode === 'discovery' ? h('small', { class: 'wl-card-owner', 'data-profile': p.owner, text: `${t.by} ${p.owner}` }) : null));
     }
     const recent = $('#wl-recent');
     if (recent) {

@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% load static i18n %}
+{% load profiles static i18n %}
 
 {% block title %}Community Lounge{% endblock %}
 
@@ -67,7 +67,7 @@
                     <div class="lounge-card-icon"><span class="material-symbols-outlined" aria-hidden="true">tag</span></div>
                     <div style="min-width:0;">
                         <h3 class="lounge-card-title">{{ ch.name }}</h3>
-                        <p class="lounge-card-meta">{{ ch.active_member_count }} {% trans "メンバー" %} · {{ ch.created_by.username }}</p>
+                        <p class="lounge-card-meta">{{ ch.active_member_count }} {% trans "メンバー" %} · <span {% profile_trigger ch.created_by %}>{{ ch.created_by.public_name }}</span></p>
                     </div>
                 </div>
                 {% if ch.description %}
@@ -116,7 +116,7 @@
                     <div style="min-width:0;">
                         <h3 class="lounge-card-title">{{ ch.name }}</h3>
                         <p class="lounge-card-meta">
-                            {% if m and m.status == 'active' %}{{ ch.active_member_count }} {% trans "メンバー" %} · {% endif %}{{ ch.created_by.username }}
+                            {% if m and m.status == 'active' %}{{ ch.active_member_count }} {% trans "メンバー" %} · {% endif %}<span {% profile_trigger ch.created_by %}>{{ ch.created_by.public_name }}</span>
                         </p>
                     </div>
                 </div>

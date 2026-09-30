@@ -23,6 +23,32 @@ class CustomUser(AbstractUser):
         help_text=_("Sign in with Apple の sub 識別子")
     )
     
+    # 公開プロフィール (他のユーザーにも表示される)。氏名 (first/last_name) は非公開のまま。
+    display_name = models.CharField(
+        max_length=50,
+        blank=True,
+        default="",
+        verbose_name=_("表示名"),
+        help_text=_("未入力の場合はユーザー名が表示されます。")
+    )
+    bio = models.TextField(
+        max_length=300,
+        blank=True,
+        default="",
+        verbose_name=_("自己紹介")
+    )
+    location = models.CharField(
+        max_length=60,
+        blank=True,
+        default="",
+        verbose_name=_("拠点")
+    )
+    website = models.URLField(
+        blank=True,
+        default="",
+        verbose_name=_("ウェブサイト")
+    )
+
     # Favorite Track Fields
     favorite_track_title = models.CharField(
         max_length=255, 
@@ -62,3 +88,16 @@ class CustomUser(AbstractUser):
 
     def __str__(self):
         return self.username
+
+    @property
+    def public_name(self):
+        """他のユーザーに見せる名前。"""
+        return self.display_name or self.username
+
+    @property
+    def has_favorite_track(self):
+        return bool(self.favorite_track_title)
+
+    def get_absolute_url(self):
+        from django.urls import reverse
+        return reverse('user_profile', args=[self.username])

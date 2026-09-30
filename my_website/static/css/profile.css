@@ -1,0 +1,334 @@
+@charset "UTF-8";
+
+/* =========================================
+   プロフィール (モーダル・詳細ページ・曲のプレビュー)
+   ========================================= */
+
+/* ── 開くためのトリガー ── */
+[data-profile] { cursor: pointer; }
+span[data-profile][role="button"],
+strong[data-profile][role="button"] {
+    border-radius: 4px;
+    transition: color 0.2s ease;
+}
+span[data-profile][role="button"]:hover,
+strong[data-profile][role="button"]:hover { color: var(--ap-accent); }
+[data-profile]:focus-visible { outline: 2px solid var(--ap-accent); outline-offset: 2px; }
+/* カード全体を覆うリンク (.blog-card-link) より手前に出して、名前とアイコンをクリックできるようにする */
+.blog-card [data-profile],
+.blog-slide [data-profile] { position: relative; z-index: 2; }
+
+/* ── アバター ── */
+.pf-avatar {
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: linear-gradient(145deg, #48484a, #2c2c2e);
+    color: #fff;
+    font-size: 28px;
+    font-weight: 600;
+}
+.pf-avatar--xl { width: 112px; height: 112px; font-size: 48px; }
+
+/* ── モーダル ── */
+.pf-modal {
+    width: min(420px, calc(100vw - 32px));
+    max-width: none;
+    max-height: calc(100dvh - 48px);
+    padding: 0;
+    border: none;
+    background: transparent;
+    color: var(--ap-text);
+    overflow: visible;
+    opacity: 0;
+    transform: translateY(16px) scale(0.96);
+    transition: opacity 0.25s ease, transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.pf-modal.is-open { opacity: 1; transform: none; }
+.pf-modal::backdrop {
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    opacity: 0;
+    transition: opacity 0.25s ease;
+}
+.pf-modal.is-open::backdrop { opacity: 1; }
+
+.pf-modal-body {
+    max-height: calc(100dvh - 48px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    border-radius: 28px;
+    background: rgba(28, 28, 30, 0.92);
+    backdrop-filter: saturate(180%) blur(30px);
+    -webkit-backdrop-filter: saturate(180%) blur(30px);
+    box-shadow: 0 30px 80px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.08);
+}
+.pf-modal-close {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    z-index: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border: none;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--ap-text);
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+.pf-modal-close:hover { background: rgba(255, 255, 255, 0.18); }
+.pf-modal-close .material-symbols-outlined { font-size: 20px; }
+
+/* スマートフォンでは下から出るシートにする */
+@media (max-width: 734px) {
+    .pf-modal {
+        width: 100vw;
+        margin: auto 0 0;
+        transform: translateY(100%);
+        transition: opacity 0.2s ease, transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+    }
+    .pf-modal-body {
+        border-radius: 28px 28px 0 0;
+        padding-bottom: env(safe-area-inset-bottom);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .pf-modal, .pf-modal::backdrop { transition-duration: 0.01s; transform: none; }
+}
+
+/* ── カード (モーダルの中身) ── */
+.pf-card { display: flex; flex-direction: column; gap: 20px; padding: 32px 28px 28px; }
+.pf-card--enter { animation: pf-fade-in 0.3s ease both; }
+.pf-card--loading { align-items: center; justify-content: center; min-height: 280px; }
+.pf-card--error { min-height: 160px; justify-content: center; text-align: center; color: var(--ap-text-muted); }
+@keyframes pf-fade-in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+.pf-spinner {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: 3px solid rgba(255, 255, 255, 0.15);
+    border-top-color: var(--ap-text);
+    animation: pf-spin 0.8s linear infinite;
+}
+@keyframes pf-spin { to { transform: rotate(360deg); } }
+
+.pf-card-head { display: flex; align-items: center; gap: 16px; padding-right: 36px; }
+.pf-card-names { min-width: 0; }
+.pf-card-name {
+    margin: 0;
+    font-size: 24px;
+    font-weight: 600;
+    line-height: 1.2;
+    overflow-wrap: anywhere;
+}
+.pf-card-handle { margin: 2px 0 0; color: var(--ap-text-muted); font-size: 15px; }
+.pf-card-actions { display: flex; flex-wrap: wrap; gap: 10px; }
+.pf-card-actions .ap-btn { flex: 1 1 0; justify-content: center; padding: 12px 16px; font-size: 16px; white-space: nowrap; }
+
+.pf-bio { margin: 0; font-size: 16px; line-height: 1.55; overflow-wrap: anywhere; }
+.pf-bio--clamp { display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; }
+
+.pf-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 16px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    color: var(--ap-text-muted);
+    font-size: 14px;
+}
+.pf-meta li { display: inline-flex; align-items: center; gap: 4px; min-width: 0; }
+.pf-meta .material-symbols-outlined { font-size: 18px; }
+.pf-meta a { color: var(--ap-accent); text-decoration: none; overflow-wrap: anywhere; }
+.pf-meta a:hover { text-decoration: underline; }
+.pf-meta--center { justify-content: center; }
+
+.pf-stats {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+    margin: 0;
+}
+.pf-stats > div { padding: 12px; border-radius: 16px; background: rgba(255, 255, 255, 0.06); text-align: center; }
+.pf-stats dt { color: var(--ap-text-muted); font-size: 12px; font-weight: 400; }
+.pf-stats dd { margin: 0; font-size: 22px; font-weight: 600; line-height: 1.2; }
+.pf-stats > div { display: flex; flex-direction: column-reverse; }
+
+/* ── お気に入りの曲 ── */
+.pf-track {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 12px;
+    border-radius: 18px;
+    background: rgba(255, 255, 255, 0.06);
+    overflow: hidden;
+}
+.pf-track-bg {
+    position: absolute;
+    inset: -40px;
+    width: calc(100% + 80px);
+    height: calc(100% + 80px);
+    object-fit: cover;
+    filter: blur(40px) saturate(1.4) brightness(0.55);
+    pointer-events: none;
+}
+.pf-track > :not(.pf-track-bg) { position: relative; }
+.pf-track-art {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 56px;
+    height: 56px;
+    border-radius: 10px;
+    overflow: hidden;
+    background: #3a3a3c;
+    color: var(--ap-text-muted);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.35);
+}
+.pf-track-art img { width: 100%; height: 100%; object-fit: cover; }
+.pf-track-text { display: flex; flex-direction: column; flex: 1; min-width: 0; }
+.pf-track-kicker { color: var(--ap-text-muted); font-size: 11px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; }
+.pf-track-title, .pf-track-artist { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pf-track-title { font-size: 16px; font-weight: 600; }
+.pf-track-artist { color: var(--ap-text-muted); font-size: 14px; }
+.pf-track-link { margin-top: 10px; color: #fff; font-size: 14px; font-weight: 500; text-decoration: none; }
+.pf-track-link::after { content: " ↗"; }
+.pf-track-link:hover { color: #fff; text-decoration: underline; }
+
+.pf-track--lg { gap: 28px; padding: 32px; border-radius: 28px; background: #1c1c1e; }
+.pf-track--lg .pf-track-art { width: 140px; height: 140px; border-radius: 16px; }
+.pf-track--lg .pf-track-title { font-size: 28px; white-space: normal; }
+.pf-track--lg .pf-track-artist { font-size: 19px; color: rgba(255, 255, 255, 0.75); white-space: normal; }
+.pf-track--lg .pf-track-kicker { color: rgba(255, 255, 255, 0.7); margin-bottom: 4px; }
+
+/* 再生ボタン: 周りのリングで再生位置を表す (--pf-progress は main.js が更新) */
+.pf-play {
+    --pf-progress: 0deg;
+    flex-shrink: 0;
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    padding: 0;
+    border: none;
+    border-radius: 50%;
+    background: #fff;
+    color: #000;
+    cursor: pointer;
+    text-decoration: none;
+    transition: transform 0.2s ease;
+}
+.pf-play:hover { transform: scale(1.06); color: #000; }
+.pf-play:active { transform: scale(0.96); }
+.pf-play .material-symbols-outlined { font-size: 28px; }
+.pf-play::before {
+    content: "";
+    position: absolute;
+    inset: -4px;
+    border-radius: 50%;
+    background: conic-gradient(var(--ap-accent) var(--pf-progress), transparent 0);
+    -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 3px));
+    mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 3px));
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+.pf-play.is-playing::before { opacity: 1; }
+.pf-play--link { background: rgba(255, 255, 255, 0.12); color: var(--ap-text); }
+.pf-play--link:hover { color: var(--ap-text); }
+.pf-play--link .material-symbols-outlined { font-size: 22px; }
+.pf-play--sm { width: 36px; height: 36px; }
+.pf-play--sm .material-symbols-outlined { font-size: 22px; }
+.pf-track--lg .pf-play { width: 64px; height: 64px; }
+.pf-track--lg .pf-play .material-symbols-outlined { font-size: 36px; }
+
+/* ── 詳細ページ ── */
+.pf-page { max-width: 980px; margin: 0 auto; padding: 72px 20px 96px; }
+.pf-hero { display: flex; flex-direction: column; align-items: center; gap: 12px; text-align: center; }
+.pf-hero-name { margin: 12px 0 0; font-size: clamp(36px, 6vw, 56px); font-weight: 600; line-height: 1.1; overflow-wrap: anywhere; }
+.pf-hero-handle { margin: 0; color: var(--ap-text-muted); font-size: 19px; }
+.pf-hero-bio { max-width: 560px; font-size: 19px; }
+.pf-hero-actions { margin-top: 12px; }
+
+.pf-stats--lg { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; margin-top: 56px; }
+.pf-stats--lg > div { padding: 24px 16px; border-radius: 24px; background: var(--ap-card-bg); }
+.pf-stats--lg dt { font-size: 15px; }
+.pf-stats--lg dd { font-size: clamp(32px, 5vw, 44px); }
+
+.pf-section { margin-top: 72px; }
+.pf-section-head { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; margin-bottom: 24px; }
+.pf-section-head h2 { margin: 0; font-size: clamp(28px, 4vw, 40px); font-weight: 600; }
+.pf-muted { color: var(--ap-text-muted); font-size: 17px; }
+.pf-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding: 40px 24px;
+    border-radius: 28px;
+    background: var(--ap-card-bg);
+    color: var(--ap-text-muted);
+    text-align: center;
+}
+.pf-empty .material-symbols-outlined { font-size: 36px; }
+.pf-empty p { margin: 0; }
+
+.pf-spots {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+.pf-spot {
+    position: relative;
+    display: block;
+    aspect-ratio: 4 / 3;
+    border-radius: 20px;
+    overflow: hidden;
+    background: var(--ap-card-bg);
+    color: #fff;
+    text-decoration: none;
+}
+.pf-spot:hover { color: #fff; }
+.pf-spot img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1); }
+.pf-spot:hover img { transform: scale(1.04); }
+.pf-spot-fallback { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 40px; color: var(--ap-text-muted); }
+.pf-spot-text {
+    position: absolute;
+    inset: auto 0 0;
+    display: flex;
+    flex-direction: column;
+    padding: 28px 16px 14px;
+    background: linear-gradient(180deg, transparent, rgba(0, 0, 0, 0.75));
+}
+.pf-spot-text strong, .pf-spot-text small { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pf-spot-text small { color: rgba(255, 255, 255, 0.75); }
+
+@media (max-width: 734px) {
+    .pf-page { padding-top: 48px; }
+    .pf-stats--lg { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-top: 40px; }
+    .pf-section { margin-top: 56px; }
+    .pf-spots { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+    .pf-track--lg { flex-wrap: wrap; gap: 20px; padding: 24px; }
+    .pf-track--lg .pf-track-art { width: 96px; height: 96px; }
+    .pf-track--lg .pf-track-text { flex-basis: calc(100% - 116px); }
+    .pf-track--lg .pf-track-title { font-size: 22px; }
+    .pf-track--lg .pf-track-artist { font-size: 16px; }
+}

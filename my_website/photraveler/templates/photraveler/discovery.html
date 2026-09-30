@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% load static i18n %}
+{% load profiles static i18n %}
 
 {% block title %}WanderLens{% endblock %}
 
@@ -57,8 +57,8 @@
                 <a class="wl-traveler" href="{% url 'photraveler:user_map' t.username %}">
                     <span class="wl-traveler-cover"{% if t.cover %} style="background-image: url('{{ t.cover }}');"{% endif %}></span>
                     <span class="wl-traveler-body">
-                        <span class="wl-avatar" aria-hidden="true">{{ t.username|first|upper }}</span>
-                        <strong>{{ t.username }}</strong>
+                        <span class="wl-avatar" data-profile="{{ t.username }}" aria-hidden="true">{{ t.username|first|upper }}</span>
+                        <strong data-profile="{{ t.username }}" role="button" tabindex="0" aria-haspopup="dialog">{{ t.username }}</strong>
                         <small>{% blocktrans with p=t.places c=t.countries %}{{ p }} スポット · {{ c }} か国{% endblocktrans %}</small>
                     </span>
                 </a>

@@ -22,6 +22,8 @@ urlpatterns += i18n_patterns(
     path('signup/verify/<str:uidb64>/<str:token>/', accounts_views.verify_email_view, name='verify_email'),
     path('signup/resend/', accounts_views.resend_verification_view, name='resend_verification'),
     path('profile/', accounts_views.profile_view, name='profile'),
+    path('users/<str:username>/', accounts_views.user_profile_view, name='user_profile'),
+    path('users/<str:username>/card/', accounts_views.user_card_view, name='user_card'),
     path('api/apple-music/search/', accounts_views.apple_music_search, name='apple_music_search'),
     path('api/apple-music/token/', accounts_views.apple_music_token, name='apple_music_token'),
 
