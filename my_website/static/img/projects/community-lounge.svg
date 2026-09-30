@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 696 452" width="696" height="452" role="img" aria-label="Community Lounge">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#2a0a16"/>
+      <stop offset="1" stop-color="#07060a"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="0.3" cy="0.3" r="0.6">
+      <stop offset="0" stop-color="#ff375f" stop-opacity="0.35"/>
+      <stop offset="1" stop-color="#ff375f" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="696" height="452" fill="url(#bg)"/>
+  <rect width="696" height="452" fill="url(#glow)"/>
+  <!-- incoming -->
+  <g>
+    <circle cx="80" cy="95" r="26" fill="#bf5af2"/>
+    <text x="80" y="104" font-family="Helvetica, Arial, sans-serif" font-size="24" font-weight="700" fill="#fff" text-anchor="middle">AI</text>
+    <rect x="122" y="62" width="300" height="66" rx="22" fill="#2c2c2e"/>
+    <rect x="146" y="82" width="220" height="10" rx="5" fill="#8e8e93"/>
+    <rect x="146" y="100" width="150" height="10" rx="5" fill="#8e8e93"/>
+  </g>
+  <!-- outgoing -->
+  <g>
+    <rect x="300" y="160" width="330" height="66" rx="22" fill="#ff375f"/>
+    <rect x="324" y="180" width="240" height="10" rx="5" fill="#fff" fill-opacity="0.85"/>
+    <rect x="324" y="198" width="170" height="10" rx="5" fill="#fff" fill-opacity="0.85"/>
+    <circle cx="656" cy="193" r="22" fill="#64d2ff"/>
+  </g>
+  <!-- photo message -->
+  <g>
+    <circle cx="80" cy="300" r="26" fill="#30d158"/>
+    <rect x="122" y="252" width="210" height="140" rx="22" fill="#2c2c2e"/>
+    <rect x="134" y="264" width="186" height="116" rx="14" fill="#0a84ff"/>
+    <path d="M134 360 L180 310 L215 340 L250 300 L320 370 L320 366 Q320 380 306 380 L148 380 Q134 380 134 366 Z" fill="#003a78"/>
+    <circle cx="290" cy="290" r="12" fill="#ffd60a"/>
+  </g>
+  <!-- beer reply -->
+  <g>
+    <rect x="380" y="290" width="250" height="100" rx="22" fill="#ff375f"/>
+    <g transform="translate(410 306)">
+      <rect x="0" y="12" width="44" height="58" rx="6" fill="#ffd60a"/>
+      <rect x="0" y="4" width="44" height="16" rx="8" fill="#fff"/>
+      <path d="M44 24 h10 a10 10 0 0 1 10 10 v12 a10 10 0 0 1 -10 10 h-10" fill="none" stroke="#ffd60a" stroke-width="6"/>
+    </g>
+    <rect x="490" y="320" width="110" height="10" rx="5" fill="#fff" fill-opacity="0.85"/>
+    <rect x="490" y="340" width="80" height="10" rx="5" fill="#fff" fill-opacity="0.85"/>
+  </g>
+  <g fill="#8e8e93">
+    <circle cx="150" cy="425" r="5"/><circle cx="168" cy="425" r="5" fill-opacity="0.7"/><circle cx="186" cy="425" r="5" fill-opacity="0.4"/>
+  </g>
+</svg>
