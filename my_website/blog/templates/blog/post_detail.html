@@ -8,7 +8,7 @@
 <meta property="og:title" content="{{ post.title }}">
 <meta property="og:description" content="{{ post.excerpt }}">
 {% if post.cover_image %}<meta property="og:image" content="{{ request.scheme }}://{{ request.get_host }}{{ post.cover_image.url }}">{% endif %}
-<link href="{% static 'css/blog.css' %}?v=21" rel="stylesheet" />
+<link href="{% static 'css/blog.css' %}?v=24" rel="stylesheet" />
 {% if post.has_math %}
 <link href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" rel="stylesheet" />
 {% endif %}
@@ -18,6 +18,26 @@
 {% endblock %}
 
 {% block extra_js %}
+<script>
+// 読了プログレス: 本文を読み進めた割合を、画面上端のアクセント色のラインで示す
+(() => {
+    const bar = document.querySelector('.blog-progress');
+    const article = document.querySelector('.blog-article');
+    if (!bar || !article) return;
+    let ticking = false;
+    const update = () => {
+        const rect = article.getBoundingClientRect();
+        const total = rect.height - window.innerHeight;
+        const read = total > 0 ? Math.min(1, Math.max(0, -rect.top / total)) : 1;
+        bar.style.setProperty('--blog-read', read.toFixed(4));
+        ticking = false;
+    };
+    const onScroll = () => { if (!ticking) { ticking = true; requestAnimationFrame(update); } };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onScroll);
+    update();
+})();
+</script>
 {% if post.has_demo %}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
 <script>
@@ -41,7 +61,8 @@
 {% endblock %}
 
 {% block content %}
-<article class="blog-article blog-template-{{ post.template }} blog-width-{{ post.display_width }}" style="--blog-accent: {{ post.accent }};">
+<div class="blog-progress{% if not post.has_accent %} blog-accent-none{% endif %}" style="--blog-accent: {{ post.accent_color }};" aria-hidden="true"><span></span></div>
+<article class="blog-article blog-template-{{ post.template }} blog-width-{{ post.display_width }}{% if not post.has_accent %} blog-accent-none{% endif %}" style="--blog-accent: {{ post.accent_color }};">
 
     {% if is_author %}
     <div class="blog-author-bar">

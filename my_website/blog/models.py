@@ -15,6 +15,15 @@ from .sanitize import sanitize_html
 _CJK_RE = re.compile(r'[぀-ヿ㐀-鿿가-힯]')
 
 
+def accent_color(value):
+    """アクセントの選択値を CSS の色にする。選択肢にない値 (不正な入力など) は中立の白。
+
+    style 属性に直接書き出すため、選択肢の色以外は決して返さない。
+    """
+    colors = {v for v, _label in Post.ACCENT_CHOICES if v != Post.ACCENT_NONE}
+    return value if value in colors else Post.ACCENT_NEUTRAL
+
+
 class PostQuerySet(models.QuerySet):
     def published(self):
         return self.filter(status=Post.STATUS_PUBLISHED, published_at__lte=timezone.now())
@@ -48,7 +57,11 @@ class Post(models.Model):
         (WIDTH_NARROW, _('狭幅')),
     ]
 
+    # 'none' はアクセントなし (白とグレーだけの落ち着いた見た目)。新しい記事の既定値
+    ACCENT_NONE = 'none'
+    ACCENT_NEUTRAL = '#f5f5f7'  # アクセントなしのときに --blog-accent として使う色
     ACCENT_CHOICES = [
+        (ACCENT_NONE, _('なし')),
         ('#2997ff', _('ブルー')),
         ('#bf5af2', _('パープル')),
         ('#30d158', _('グリーン')),
@@ -85,7 +98,7 @@ class Post(models.Model):
         verbose_name=_("表示幅"),
     )
     accent = models.CharField(
-        max_length=7, choices=ACCENT_CHOICES, default='#2997ff',
+        max_length=7, choices=ACCENT_CHOICES, default=ACCENT_NONE,
         verbose_name=_("アクセントカラー"),
     )
     status = models.CharField(
@@ -118,6 +131,15 @@ class Post(models.Model):
 
     def get_absolute_url(self):
         return reverse('blog:detail', args=[self.pk])
+
+    @property
+    def has_accent(self):
+        return self.accent != self.ACCENT_NONE
+
+    @property
+    def accent_color(self):
+        """--blog-accent に渡す色。アクセントなしのときは中立の白。"""
+        return accent_color(self.accent)
 
     @property
     def uses_blocks(self):

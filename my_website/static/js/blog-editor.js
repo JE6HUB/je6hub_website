@@ -271,7 +271,10 @@
     // ── テンプレート・アクセントの即時反映 ──────────────
     form.addEventListener('change', (e) => {
         if (e.target.name === 'accent') {
-            form.style.setProperty('--blog-accent', e.target.value);
+            // 'none' はアクセントなし: 中立の白にして、派生色をモノトーンに切り替える
+            const none = e.target.value === 'none';
+            form.style.setProperty('--blog-accent', none ? '#f5f5f7' : e.target.value);
+            form.classList.toggle('blog-accent-none', none);
         }
         if (e.target.name === 'display_width') {
             // 幅は CSS の @property 変数で滑らかに変わる (blog.css「表示幅」)

@@ -8,7 +8,7 @@
 
     <div class="blog-carousel-track" tabindex="-1">
         {% for post in latest %}
-        <article class="blog-slide" style="--blog-accent: {{ post.accent }};"
+        <article class="blog-slide{% if not post.has_accent %} blog-accent-none{% endif %}" style="--blog-accent: {{ post.accent_color }};"
                  role="group" aria-roledescription="slide"
                  aria-label="{{ forloop.counter }} / {{ latest|length }}: {{ post.title }}">
             <a href="{{ post.get_absolute_url }}" class="blog-card-link" aria-label="{{ post.title }}"></a>

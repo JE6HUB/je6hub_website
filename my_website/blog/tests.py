@@ -532,3 +532,43 @@ class EditorTests(TestCase):
         response = self.client.post(reverse('blog:upload_image'), {'image': make_png()})
         self.assertEqual(response.status_code, 302)
         self.assertFalse(BlogImage.objects.exists())
+
+
+class AccentColorTests(TestCase):
+    def setUp(self):
+        self.author = User.objects.create_user(username='writer', password='pass12345')
+
+    def test_new_posts_default_to_no_accent(self):
+        post = make_post(self.author)
+        self.assertEqual(post.accent, Post.ACCENT_NONE)
+        self.assertFalse(post.has_accent)
+        self.assertEqual(post.accent_color, Post.ACCENT_NEUTRAL)
+
+    def test_detail_page_marks_no_accent(self):
+        post = make_post(self.author)
+        response = self.client.get(post.get_absolute_url())
+        self.assertContains(response, 'blog-accent-none')
+        self.assertContains(response, f'--blog-accent: {Post.ACCENT_NEUTRAL};')
+
+    def test_detail_page_uses_chosen_accent(self):
+        post = make_post(self.author, accent='#bf5af2')
+        response = self.client.get(post.get_absolute_url())
+        self.assertContains(response, '--blog-accent: #bf5af2;')
+        self.assertNotContains(response, 'blog-accent-none')
+
+    def test_invalid_accent_never_reaches_style_attribute(self):
+        from .templatetags.blog_accent import accent_color, accent_is_none
+        payload = 'red; background: url(//evil.example)'
+        self.assertEqual(accent_color(payload), Post.ACCENT_NEUTRAL)
+        self.assertTrue(accent_is_none(payload))
+        self.assertEqual(accent_color('#30d158'), '#30d158')
+
+    def test_editor_rerender_with_invalid_accent_is_safe(self):
+        self.client.force_login(self.author)
+        response = self.client.post(reverse('blog:create'), {
+            'title': 'x', 'template': 'classic', 'display_width': 'standard',
+            'accent': 'red; background: url(//evil.example)', 'action': 'draft',
+        })
+        self.assertEqual(response.status_code, 200)
+        self.assertNotContains(response, 'evil.example);')
+        self.assertContains(response, f'--blog-accent: {Post.ACCENT_NEUTRAL};')
