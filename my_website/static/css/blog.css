@@ -1167,6 +1167,100 @@
 .landing-section { padding-top: 64px; padding-bottom: 32px; }
 .landing-section .blog-section-title { margin-bottom: 32px; }
 
+/* UI ツアー動画: 埋め込みに見えないよう、枠・角丸・影なしで画面幅いっぱいに敷く。
+   動画の上下には、動画の端と同じ色 (landing-tour.js が再生中に取得) の帯を置き、
+   その帯をページの黒へグラデーションで溶かす。動画の境目は同じ色の帯に消え、
+   場面が変わるとページの背景ごと色が移り変わって見える。 */
+@property --tour-top { syntax: "<color>"; inherits: true; initial-value: #000; }
+@property --tour-bottom { syntax: "<color>"; inherits: true; initial-value: #000; }
+.landing-tour {
+    --tour-top: #000;
+    --tour-bottom: #000;
+    --tour-wash: clamp(96px, 14vw, 220px);
+    position: relative;
+    width: 100vw;
+    margin: -32px 0 8px calc(50% - 50vw);
+    transition: --tour-top 0.45s ease, --tour-bottom 0.45s ease;
+}
+.landing-tour-wash {
+    height: var(--tour-wash);
+    pointer-events: none;
+}
+/* 色の変化を滑らかにするため、直線ではなくイーズのかかった多段グラデーションにする */
+.landing-tour-wash--top {
+    background: linear-gradient(to bottom,
+        transparent 0%,
+        color-mix(in srgb, var(--tour-top) 12%, transparent) 30%,
+        color-mix(in srgb, var(--tour-top) 45%, transparent) 60%,
+        color-mix(in srgb, var(--tour-top) 85%, transparent) 88%,
+        var(--tour-top) 100%);
+}
+.landing-tour-wash--bottom {
+    background: linear-gradient(to top,
+        transparent 0%,
+        color-mix(in srgb, var(--tour-bottom) 12%, transparent) 30%,
+        color-mix(in srgb, var(--tour-bottom) 45%, transparent) 60%,
+        color-mix(in srgb, var(--tour-bottom) 85%, transparent) 88%,
+        var(--tour-bottom) 100%);
+}
+.landing-tour-media {
+    position: relative;
+    /* 幅は常に画面いっぱい。高さは 16:9 だが画面の 88% までに抑える (はみ出た分は上下を切る) */
+    width: 100%;
+    height: min(56.25vw, 88vh);
+    overflow: hidden;
+    /* 1px の隙間や丸め誤差で黒い線が出ないよう、帯と同じ色を下地にする */
+    background: linear-gradient(to bottom, var(--tour-top) 50%, var(--tour-bottom) 50%);
+}
+.landing-tour-still,
+.landing-tour-video {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+.landing-tour-video { opacity: 0; transition: opacity 1s ease; }
+/* 帯と動画の境目に、帯の色から透明へのごく短いグラデーションを重ねる。
+   読み取った色とブラウザが描く動画の色のわずかな差や、場面の切り替わりの遅れを線にしない。 */
+.landing-tour-media::before,
+.landing-tour-media::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    z-index: 1;
+    height: 48px;
+    pointer-events: none;
+}
+.landing-tour-media::before { top: 0; background: linear-gradient(to bottom, var(--tour-top), transparent); }
+.landing-tour-media::after { bottom: 0; background: linear-gradient(to top, var(--tour-bottom), transparent); }
+.landing-tour.is-video .landing-tour-still { visibility: hidden; }
+.landing-tour.is-video.is-playing .landing-tour-video { opacity: 1; }
+
+.landing-tour-toggle {
+    position: absolute;
+    right: max(20px, calc(50vw - 580px));
+    bottom: calc(var(--tour-wash) + 20px);
+    z-index: 1;
+    width: 44px;
+    height: 44px;
+    background: rgba(28, 28, 30, 0.72);
+    backdrop-filter: saturate(180%) blur(20px);
+    -webkit-backdrop-filter: saturate(180%) blur(20px);
+}
+.landing-tour-toggle svg { width: 20px; height: 20px; }
+
+@media (max-width: 734px) {
+    .landing-tour { --tour-wash: 72px; margin: -24px 0 0 calc(50% - 50vw); }
+    .landing-tour-toggle { right: 12px; bottom: calc(var(--tour-wash) + 10px); width: 36px; height: 36px; }
+    .landing-tour-toggle svg { width: 16px; height: 16px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .landing-tour, .landing-tour-video { transition: none; }
+}
+
 .landing-features {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
