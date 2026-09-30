@@ -4,7 +4,7 @@
 {% block title %}{% trans "マイブログ" %} — Blogs{% endblock %}
 
 {% block extra_head %}
-<link href="{% static 'css/blog.css' %}?v=21" rel="stylesheet" />
+<link href="{% static 'css/blog.css' %}?v=24" rel="stylesheet" />
 {% endblock %}
 
 {% block content %}
@@ -26,7 +26,7 @@
     {% if posts %}
     <ul class="blog-mine-list">
         {% for post in posts %}
-        <li class="blog-mine-item" style="--blog-accent: {{ post.accent }};">
+        <li class="blog-mine-item{% if not post.has_accent %} blog-accent-none{% endif %}" style="--blog-accent: {{ post.accent_color }};">
             <div class="blog-mine-thumb">
                 {% if post.cover_image %}
                     <img src="{{ post.cover_image.url }}" alt="">

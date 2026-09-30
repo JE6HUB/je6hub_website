@@ -1,5 +1,5 @@
 {% load i18n %}
-<article class="blog-card" style="--blog-accent: {{ post.accent }};">
+<article class="blog-card{% if not post.has_accent %} blog-accent-none{% endif %}" style="--blog-accent: {{ post.accent_color }};">
     <a href="{{ post.get_absolute_url }}" class="blog-card-link" aria-label="{{ post.title }}"></a>
     <div class="blog-card-media">
         {% if post.cover_image %}
