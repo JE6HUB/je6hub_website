@@ -11,6 +11,8 @@ from django.views.decorators.http import require_http_methods
 
 import json
 
+from accounts.ratelimit import is_rate_limited
+
 from .forms import PinForm
 from .models import MapPin, PhotoComment, PinPhoto
 from .photos import MAX_PHOTOS_PER_PIN, process_photo
@@ -75,7 +77,8 @@ def map_view(request):
 
 def user_map_view(request, username):
     """特定ユーザーの WanderLens。ログイン不要で誰でも閲覧可能。"""
-    profile_user = get_object_or_404(User, username=username)
+    # 未認証 (is_active=False) のアカウントは存在しないものとして扱う
+    profile_user = get_object_or_404(User, username=username, is_active=True)
     pins = _pins_payload(MapPin.objects.filter(user=profile_user))
     return render(request, 'photraveler/map.html', {
         'pins':         pins,
@@ -205,6 +208,10 @@ def pin_comments(request, pin_id):
             for c in pin.comments.order_by('created_at')
         ]
         return JsonResponse({'comments': comments})
+
+    # ログインなしでも書けるため、スパム対策として同じ IP からの投稿数を制限する
+    if is_rate_limited(request, 'pin_comment', limit=10, period=600):
+        return JsonResponse({'error': 'Too many requests'}, status=429)
 
     try:
         body = json.loads(request.body)

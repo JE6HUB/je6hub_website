@@ -15,7 +15,9 @@ from datetime import date, datetime
 from django.core.exceptions import ValidationError
 from django.core.files.base import ContentFile
 from django.utils.translation import gettext as _
-from PIL import Image, ImageOps, UnidentifiedImageError
+from PIL import Image, ImageOps
+
+from core.uploads import open_image
 
 MAX_UPLOAD_BYTES = 25 * 1024 * 1024
 MAX_PHOTOS_PER_PIN = 10
@@ -69,6 +71,7 @@ def _read_exif(image):
 def _encode(image, size, quality):
     img = image.copy()
     img.thumbnail((size, size), Image.LANCZOS)
+    img.info = {}  # JPEG のコメントなどを引き継がない
     buf = io.BytesIO()
     # exif を渡さないので、メタデータは書き込まれない
     img.save(buf, 'JPEG', quality=quality, optimize=True, progressive=True)
@@ -79,14 +82,8 @@ def process_photo(uploaded):
     """アップロードされたファイルを検証・変換する。問題があれば ValidationError。"""
     if uploaded.size > MAX_UPLOAD_BYTES:
         raise ValidationError(_('写真は 1 枚 25MB までです。'))
-    try:
-        probe = Image.open(uploaded)
-        probe.verify()
-        uploaded.seek(0)
-        image = Image.open(uploaded)
-        image.load()
-    except (UnidentifiedImageError, OSError, SyntaxError, ValueError) as exc:
-        raise ValidationError(_('画像として読み込めないファイルです (JPEG / PNG / WebP に対応)。')) from exc
+    # 実際に画像として読めるか・巨大すぎないか (展開するとメモリを使い切る画像) を確認する
+    image = open_image(uploaded)
     if image.format not in ALLOWED_FORMATS:
         raise ValidationError(_('JPEG / PNG / WebP の写真を選択してください。'))
 

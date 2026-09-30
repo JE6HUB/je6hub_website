@@ -232,6 +232,8 @@ class PinCRUDTests(WanderLensTestCase):
 
 class PinCommentsTests(WanderLensTestCase):
     def setUp(self):
+        from django.core.cache import cache
+        cache.clear()
         self.pin = make_pin()
         self.url = reverse('photraveler:pin_comments', kwargs={'pin_id': self.pin.pk})
 
@@ -256,3 +258,10 @@ class PinCommentsTests(WanderLensTestCase):
     def test_get_unknown_pin_404(self):
         response = self.client.get(reverse('photraveler:pin_comments', kwargs={'pin_id': 9999}))
         self.assertEqual(response.status_code, 404)
+
+    def test_anonymous_comments_rate_limited(self):
+        for i in range(10):
+            self.client.post(self.url, data=json.dumps({'text': f'spam {i}'}), content_type='application/json')
+        response = self.client.post(self.url, data=json.dumps({'text': 'more'}), content_type='application/json')
+        self.assertEqual(response.status_code, 429)
+        self.assertEqual(PhotoComment.objects.count(), 10)

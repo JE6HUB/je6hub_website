@@ -6,6 +6,7 @@ from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.utils.translation import gettext_lazy as _
 
+from accounts.ratelimit import ratelimit
 from blog.models import Post
 
 from .forms import ContactForm
@@ -28,6 +29,7 @@ def home_view(request):
 def resume_view(request):
     return render(request, 'core/resume.html')
 
+@ratelimit('contact', limit=5, period=3600, methods=('POST',))
 def contact_view(request):
     if request.method == 'POST':
         form = ContactForm(request.POST)

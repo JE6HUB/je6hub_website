@@ -164,7 +164,10 @@ class SvgSanitizeTests(TestCase):
         svg = mw(RequestFactory().get('/media/blog/images/2026/09/a.svg'))
         self.assertIn('sandbox', svg['Content-Security-Policy'])
         self.assertEqual(svg['X-Content-Type-Options'], 'nosniff')
-        self.assertNotIn('Content-Security-Policy', mw(RequestFactory().get('/media/blog/images/a.png')))
+        # SVG 以外のメディアにも sandbox を付ける (画像の表示には影響しない)
+        png = mw(RequestFactory().get('/media/blog/images/a.png'))
+        self.assertIn('sandbox', png['Content-Security-Policy'])
+        self.assertNotIn('Content-Security-Policy', mw(RequestFactory().get('/ja/blog/')))
         self.assertNotIn('Content-Security-Policy', mw(RequestFactory().get('/ja/blog/a.svg')))
 
 
@@ -438,6 +441,23 @@ class EditorTests(TestCase):
         self.assertEqual(response.status_code, 201)
         self.assertIn('/blog/images/', response.json()['url'])
         self.assertEqual(BlogImage.objects.get().uploader, self.user)
+
+    def test_image_upload_strips_gps(self):
+        """本文に貼った写真から撮影位置 (EXIF GPS) が公開されないこと。"""
+        from io import BytesIO
+        from PIL import Image
+        exif = Image.Exif()
+        exif[0x8825] = {1: 'N', 2: (35.0, 40.0, 52.0), 3: 'E', 4: (139.0, 46.0, 1.0)}
+        buf = BytesIO()
+        Image.new('RGB', (40, 30), 'green').save(buf, 'JPEG', exif=exif)
+        self.client.force_login(self.user)
+        upload = SimpleUploadedFile('home.jpg', buf.getvalue(), content_type='image/jpeg')
+        response = self.client.post(reverse('blog:upload_image'), {'image': upload})
+        self.assertEqual(response.status_code, 201)
+        image = BlogImage.objects.get()
+        self.assertNotIn('home', image.image.name)
+        with Image.open(image.image.path) as saved:
+            self.assertFalse(saved.getexif().get_ifd(0x8825))
 
     def test_svg_upload_is_sanitized(self):
         self.client.force_login(self.user)

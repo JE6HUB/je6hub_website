@@ -124,3 +124,16 @@ find ~/backups -mtime +14 -delete
 ```
 
 `crontab -e` で `0 4 * * * sh /home/deploy/backup.sh` を登録する。VPS 自体が壊れた場合に備え、`~/backups` は定期的に手元や外部ストレージ（Cloudflare R2、S3 など）にも複製する。VPS 事業者の自動バックアップ（スナップショット）を有効にしておくとさらに安全。
+
+## 8. アップロード済みファイルの位置情報を消す（2026-09 のセキュリティ修正後に 1 回）
+
+アップロード時に画像・動画の撮影位置（GPS）などを取り除く処理は、Lounge と Blogs では 2026-09 のセキュリティ修正から入った。それ以前に Lounge・Blogs へ投稿された写真・動画には撮影位置が残っている可能性があるため、修正をデプロイしたあとに 1 回だけ実行する（WanderLens は最初から除去済み）。
+
+```bash
+# 何が変わるかを確認
+docker compose -f docker-compose.prod.yml exec web python manage.py scrub_media --dry-run
+# 実行（画像・動画として読めないファイルは --delete-invalid で削除される）
+docker compose -f docker-compose.prod.yml exec web python manage.py scrub_media --delete-invalid
+```
+
+事前に 7. の手順でバックアップを取っておくこと。

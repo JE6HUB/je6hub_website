@@ -1,26 +1,30 @@
 from django.contrib import messages
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
-from django.core.exceptions import PermissionDenied
+from django.core.exceptions import PermissionDenied, ValidationError
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils.translation import gettext_lazy as _
 
+from core.uploads import sanitize_image, sanitize_video
+
 from .models import Channel, ChannelMembership, Message
 
-# 許可するMIMEタイプと対応するメディア種別
-_ALLOWED_MEDIA = {
-    'image/jpeg': Message.MEDIA_IMAGE,
-    'image/png':  Message.MEDIA_IMAGE,
-    'image/gif':  Message.MEDIA_IMAGE,
-    'image/webp': Message.MEDIA_IMAGE,
-    'image/heic': Message.MEDIA_IMAGE,
-    'video/mp4':           Message.MEDIA_VIDEO,
-    'video/quicktime':     Message.MEDIA_VIDEO,
-    'video/webm':          Message.MEDIA_VIDEO,
-    'video/x-msvideo':     Message.MEDIA_VIDEO,
-}
+# ブラウザが申告する Content-Type は偽装できるため、種別の目安にだけ使い、
+# 中身の検証とメタデータ (撮影位置など) の除去は core.uploads で行う。
 _MAX_IMAGE_BYTES = 20 * 1024 * 1024   # 20 MB
 _MAX_VIDEO_BYTES = 200 * 1024 * 1024  # 200 MB
+
+
+def _prepare_media(media_file):
+    """添付ファイルを検証し、(保存用ファイル, メディア種別) を返す。問題があれば ValidationError。"""
+    is_video = (media_file.content_type or '').startswith('video/')
+    limit = _MAX_VIDEO_BYTES if is_video else _MAX_IMAGE_BYTES
+    if media_file.size > limit:
+        raise ValidationError(_('ファイルサイズが上限（%(limit)sMB）を超えています。') % {'limit': limit // (1024 * 1024)})
+    if is_video:
+        return sanitize_video(media_file), Message.MEDIA_VIDEO
+    return sanitize_image(media_file), Message.MEDIA_IMAGE
+
 
 User = get_user_model()
 
@@ -107,16 +111,10 @@ def thread_view(request, channel_id):
 
         # ── メディアバリデーション ──
         if media_file:
-            mime = media_file.content_type or ''
-            if mime not in _ALLOWED_MEDIA:
-                messages.error(request, _('対応していないファイル形式です。画像（JPEG/PNG/GIF/WebP）または動画（MP4/MOV/WebM）を選択してください。'))
-                return redirect('community:thread', channel_id=channel.id)
-
-            media_type = _ALLOWED_MEDIA[mime]
-            limit = _MAX_VIDEO_BYTES if media_type == Message.MEDIA_VIDEO else _MAX_IMAGE_BYTES
-            if media_file.size > limit:
-                limit_mb = limit // (1024 * 1024)
-                messages.error(request, _('ファイルサイズが上限（%(limit)sMB）を超えています。') % {'limit': limit_mb})
+            try:
+                media_file, media_type = _prepare_media(media_file)
+            except ValidationError as exc:
+                messages.error(request, exc.messages[0])
                 return redirect('community:thread', channel_id=channel.id)
 
         if not text and not media_file:

@@ -208,3 +208,44 @@ class MessageMediaTests(TestCase):
         self.client.force_login(self.user)
         self.client.post(reverse('community:thread', args=[self.ch.id]), {'message': ''})
         self.assertEqual(Message.objects.count(), 0)
+
+    def test_html_disguised_as_image_is_rejected(self):
+        """Content-Type を image/png と偽った HTML は保存しない (同じドメインで実行される XSS の対策)。"""
+        self.client.force_login(self.user)
+        html = SimpleUploadedFile('evil.html', b'<html><script>alert(document.cookie)</script></html>', content_type='image/png')
+        self.client.post(reverse('community:thread', args=[self.ch.id]), {'message': '', 'media': html})
+        self.assertEqual(Message.objects.count(), 0)
+
+    def test_html_disguised_as_video_is_rejected(self):
+        self.client.force_login(self.user)
+        html = SimpleUploadedFile('evil.html', b'<html><script>alert(1)</script></html>', content_type='video/mp4')
+        self.client.post(reverse('community:thread', args=[self.ch.id]), {'message': '', 'media': html})
+        self.assertEqual(Message.objects.count(), 0)
+
+    def test_image_gps_is_removed_and_name_randomized(self):
+        from PIL import Image
+        self.client.force_login(self.user)
+        exif = Image.Exif()
+        exif[0x8825] = {1: 'N', 2: (35.0, 40.0, 52.0), 3: 'E', 4: (139.0, 46.0, 1.0)}
+        buf = BytesIO()
+        Image.new('RGB', (40, 30), 'red').save(buf, 'JPEG', exif=exif)
+        upload = SimpleUploadedFile('山田_自宅.jpg', buf.getvalue(), content_type='image/jpeg')
+        self.client.post(reverse('community:thread', args=[self.ch.id]), {'message': '', 'media': upload})
+        msg = Message.objects.get(channel=self.ch)
+        self.assertNotIn('自宅', msg.media.name)
+        self.assertRegex(msg.media.name, r'/[0-9a-f]{32}\.jpg$')
+        with Image.open(msg.media.path) as saved:
+            self.assertFalse(saved.getexif().get_ifd(0x8825))
+
+    def test_video_location_is_removed(self):
+        from core.tests import make_mp4
+        self.client.force_login(self.user)
+        upload = SimpleUploadedFile('clip.mov', make_mp4(), content_type='video/quicktime')
+        self.client.post(reverse('community:thread', args=[self.ch.id]), {'message': '', 'media': upload})
+        msg = Message.objects.get(channel=self.ch)
+        self.assertEqual(msg.media_type, 'video')
+        self.assertRegex(msg.media.name, r'/[0-9a-f]{32}\.mp4$')
+        with open(msg.media.path, 'rb') as f:
+            data = f.read()
+        self.assertNotIn(b'+35.6812', data)
+        self.assertNotIn(b'\xa9xyz', data)

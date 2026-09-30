@@ -17,13 +17,22 @@ www.{$SITE_DOMAIN} {
 {$SITE_DOMAIN} {
 	encode zstd gzip
 
+	# 送信サイズの上限 (Lounge の動画 200MB / WanderLens の写真 10 枚が最大)。
+	# 巨大なファイルを送りつけてディスクを埋める攻撃を、Django に届く前に止める
+	request_body {
+		max_size 260MB
+	}
+
 	# ユーザーアップロード(写真)は DEBUG=False では Django が配信しないため Caddy が直接返す
 	handle_path /media/* {
 		# core.middleware.MediaSvgSecurityMiddleware と同じヘッダー。
 		# Caddy が直接配信すると Django を通らないため、ここでも付ける。
 		header X-Content-Type-Options nosniff
 		@svg path_regexp svg (?i)\.svg$
+		@notsvg not path_regexp (?i)\.svg$
 		header @svg Content-Security-Policy "default-src 'none'; style-src 'unsafe-inline'; img-src data:; sandbox"
+		# 画像・動画以外 (過去にアップロードされた HTML など) が開かれてもスクリプトを動かさない
+		header @notsvg Content-Security-Policy "default-src 'none'; img-src 'self' data:; media-src 'self'; style-src 'unsafe-inline'; sandbox"
 		root * /srv/media
 		file_server
 	}

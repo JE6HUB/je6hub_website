@@ -24,12 +24,21 @@ APPLE_MUSIC_DEVELOPER_TOKEN = os.environ.get('APPLE_MUSIC_DEVELOPER_TOKEN', '')
 # 未設定時は安全側（本番想定）に倒し、ローカル開発では .env や docker-compose で明示的に True にする
 DEBUG = os.environ.get('DJANGO_DEBUG', 'False') == 'True'
 
+# 本番で SECRET_KEY が未設定・サンプルのままだと、セッションやメール認証リンクを第三者に偽造されてしまう。
+# 気づかずに公開しないよう、本番 (DEBUG=False) では起動を止める。
+if not DEBUG and (SECRET_KEY.startswith('django-insecure') or SECRET_KEY.startswith('change-me') or len(SECRET_KEY) < 32):
+    from django.core.exceptions import ImproperlyConfigured
+    raise ImproperlyConfigured('DJANGO_SECRET_KEY を .env に設定してください (50 文字程度のランダムな文字列)。')
+
 ALLOWED_HOSTS = [h for h in os.environ.get('DJANGO_ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',') if h]
 
 # 基本的なセキュリティヘッダーの有効化（XSS対策、クリックジャッキング対策など）
 SECURE_BROWSER_XSS_FILTER = True
 X_FRAME_OPTIONS = 'DENY'
 SECURE_CONTENT_TYPE_NOSNIFF = True
+SECURE_REFERRER_POLICY = 'strict-origin-when-cross-origin'
+# 1 回の送信で受け付けるファイル数 (WanderLens の写真 10 枚が最大)
+DATA_UPLOAD_MAX_NUMBER_FILES = 20
 
 # 本番(HTTPS)ではCookieをSecure化し、HTTPアクセスをHTTPSへリダイレクトする。
 # ローカル開発(DEBUG=True)ではHTTPSが無いため自動的に無効化する。
@@ -226,9 +235,15 @@ ACCOUNT_EMAIL_REQUIRED = False
 ACCOUNT_EMAIL_VERIFICATION = 'none'
 ACCOUNT_USERNAME_REQUIRED = True
 ACCOUNT_LOGIN_METHODS = {'username'}
+# allauth はソーシャルログイン (Sign in with Apple) だけに使う。
+# パスワードでの登録・ログインは accounts アプリ (メール認証つき) が担当するため、
+# allauth 側の /accounts/signup/ や /accounts/password/reset/ などは無効にする
+# (有効なままだとメール認証を経ずにアカウントを作れてしまう)。
+SOCIALACCOUNT_ONLY = True
 # ソーシャルログイン時の自動接続・サインアップ許可
 SOCIALACCOUNT_AUTO_SIGNUP = True
-SOCIALACCOUNT_LOGIN_ON_GET = True
+# 外部サイトのリンクや画像から勝手にログイン処理を始めさせない (ログイン CSRF 対策)。ボタンは POST で送る
+SOCIALACCOUNT_LOGIN_ON_GET = False
 
 # Apple プロバイダ設定
 APPLE_CLIENT_ID = os.environ.get('APPLE_CLIENT_ID', '')
