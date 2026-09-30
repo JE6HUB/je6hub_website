@@ -131,6 +131,19 @@ docker compose up -d
 
 起動時に `docker-entrypoint.sh` が自動的に `migrate` → `collectstatic` を実行してから `gunicorn` を起動する。`web` サービスは `8000` 番ポートで公開されるため、手前にリバースプロキシ（Nginx/Caddy等）を置きTLS終端を行うことを想定している。
 
+### 本番サーバー（VPS等）での起動
+
+VPS の用意からドメイン・バックアップまでの詳しい手順は [docs/deploy.md](docs/deploy.md) を参照。
+
+`docker-compose.yml` は開発用（DEBUG=True、`--reload`、ソースマウント）。本番は `docker-compose.prod.yml` を使う。Caddy が 80/443 で待ち受けて Let's Encrypt の証明書を自動取得し、`/media/` の写真を直接配信、それ以外を Gunicorn へ転送する。
+
+```bash
+# .env に DJANGO_SECRET_KEY, DJANGO_ALLOWED_HOSTS, DJANGO_CSRF_TRUSTED_ORIGINS,
+# DB_PASSWORD, SITE_DOMAIN, ACME_EMAIL を設定し、ドメインのA/AAAAレコードをサーバーに向けておく
+docker compose -f docker-compose.prod.yml up -d --build
+docker compose -f docker-compose.prod.yml exec web python manage.py createsuperuser
+```
+
 初回起動後、管理者ユーザーを作成する：
 
 ```bash

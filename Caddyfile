@@ -1,0 +1,26 @@
+{
+	email {$ACME_EMAIL}
+}
+
+www.{$SITE_DOMAIN} {
+	redir https://{$SITE_DOMAIN}{uri} permanent
+}
+
+{$SITE_DOMAIN} {
+	encode zstd gzip
+
+	# ユーザーアップロード(写真)は DEBUG=False では Django が配信しないため Caddy が直接返す
+	handle_path /media/* {
+		# core.middleware.MediaSvgSecurityMiddleware と同じヘッダー。
+		# Caddy が直接配信すると Django を通らないため、ここでも付ける。
+		header X-Content-Type-Options nosniff
+		@svg path_regexp svg (?i)\.svg$
+		header @svg Content-Security-Policy "default-src 'none'; style-src 'unsafe-inline'; img-src data:; sandbox"
+		root * /srv/media
+		file_server
+	}
+
+	handle {
+		reverse_proxy web:8000
+	}
+}

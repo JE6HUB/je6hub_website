@@ -1,0 +1,64 @@
+# 本番用 compose。開発用の docker-compose.yml とは独立して使う:
+#   docker compose -f docker-compose.prod.yml up -d --build
+# Caddy が 80/443 で待ち受け、Let's Encrypt の証明書を自動取得して web(Gunicorn) へ転送する。
+services:
+  db:
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${DB_NAME:-portfolio_db}
+      POSTGRES_USER: ${DB_USER:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD を .env に設定してください}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-postgres}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  web:
+    build: .
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      DB_HOST: db
+      DB_PORT: 5432
+      DJANGO_DEBUG: "False"
+      DJANGO_BEHIND_PROXY: "True"
+      # Gunicorn のワーカー数。メモリ1GBのサーバーなら2、2GB以上なら3〜4
+      WEB_CONCURRENCY: ${WEB_CONCURRENCY:-2}
+    command: gunicorn config.wsgi:application --bind 0.0.0.0:8000 --access-logfile -
+    depends_on:
+      db:
+        condition: service_healthy
+    # Gunicorn はホストに公開せず、Caddy からのみ到達させる
+    expose:
+      - "8000"
+    volumes:
+      - media_data:/app/my_website/media
+
+  caddy:
+    image: caddy:2
+    restart: unless-stopped
+    environment:
+      SITE_DOMAIN: ${SITE_DOMAIN:?SITE_DOMAIN を .env に設定してください}
+      ACME_EMAIL: ${ACME_EMAIL:?ACME_EMAIL を .env に設定してください}
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    depends_on:
+      - web
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - media_data:/srv/media:ro
+      - caddy_data:/data
+      - caddy_config:/config
+
+volumes:
+  postgres_data:
+  media_data:
+  caddy_data:
+  caddy_config:

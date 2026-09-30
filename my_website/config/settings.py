@@ -37,6 +37,16 @@ SECURE_SSL_REDIRECT = os.environ.get('DJANGO_SECURE_SSL_REDIRECT', 'True' if not
 CSRF_COOKIE_SECURE = not DEBUG
 SESSION_COOKIE_SECURE = not DEBUG
 
+# 本番ではリバースプロキシ(Caddy等)がTLSを終端し、Gunicornへは平文HTTPで転送する。
+# プロキシが付与する X-Forwarded-Proto を信頼しないと、SECURE_SSL_REDIRECT が無限リダイレクトになる。
+# Gunicornを直接インターネットに公開しない構成(docker-compose.prod.yml)でのみ有効にすること。
+if os.environ.get('DJANGO_BEHIND_PROXY', 'False') == 'True':
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
+# HTTPSのPOST(ログイン・お問い合わせ・Sign in with Apple のform_post等)で必要。
+# 例: https://example.com,https://www.example.com
+CSRF_TRUSTED_ORIGINS = [o for o in os.environ.get('DJANGO_CSRF_TRUSTED_ORIGINS', '').split(',') if o]
+
 # HSTSは「ドメイン全体が常にHTTPSで配信される」ことを確認した上で有効化すること。
 # 既定は無効(0秒)。本番でHTTPS配信が安定したら DJANGO_SECURE_HSTS_SECONDS を設定する。
 SECURE_HSTS_SECONDS = int(os.environ.get('DJANGO_SECURE_HSTS_SECONDS', '0'))
