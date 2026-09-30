@@ -396,26 +396,127 @@ html[lang="ja"] body { letter-spacing: 0; }
     color: #fff;
 }
 
-/* ── Small screens: ナビ項目が画面幅を超えるため、左寄せ + 横スクロールにして
-   先頭のロゴが常に見えるようにする ── */
+/* ── Mobile menu (スマートフォン用ヘッダー) ──
+   734px 以下ではナビ項目を並べきれないため、ロゴ + アカウント + メニューボタンだけを
+   表示し、残りは全画面メニューにまとめる (apple.com のモバイルナビと同じ構成)。 */
+.ap-globalnav-mobile-actions,
+.ap-mobile-menu { display: none; }
+
+.ap-nav-icon-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    border: none;
+    background: none;
+    color: #f5f5f7;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+.ap-menu-btn { position: relative; opacity: 0.8; }
+.ap-menu-btn:hover { opacity: 1; }
+.ap-menu-btn-bar {
+    position: absolute;
+    left: 13px;
+    width: 18px;
+    height: 1.5px;
+    border-radius: 1px;
+    background: currentColor;
+    transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.ap-menu-btn-bar:first-child { transform: translateY(-3.5px); }
+.ap-menu-btn-bar:last-child { transform: translateY(3.5px); }
+.ap-menu-btn[aria-expanded="true"] .ap-menu-btn-bar:first-child { transform: rotate(45deg); }
+.ap-menu-btn[aria-expanded="true"] .ap-menu-btn-bar:last-child { transform: rotate(-45deg); }
+
+@keyframes ap-menu-in {
+    from { opacity: 0; transform: translateY(-8px); }
+    to { opacity: 1; transform: none; }
+}
+
 @media (max-width: 734px) {
     .ap-globalnav-list {
-        justify-content: flex-start;
-        overflow-x: auto;
-        scrollbar-width: none;
-        padding: 0 16px;
+        justify-content: space-between;
+        padding: 0 4px 0 16px;
     }
-    .ap-globalnav-list::-webkit-scrollbar { display: none; }
-    .ap-globalnav-item { margin: 0 0.7rem; flex-shrink: 0; }
-    .ap-globalnav-item:first-child { margin-left: 0; }
-    .ap-glass-navbar {
-        max-width: calc(100vw - 24px);
-        overflow-x: auto;
-        scrollbar-width: none;
-        justify-content: flex-start;
+    .ap-globalnav-item { margin: 0; }
+    .ap-globalnav-item:not(:first-child):not(.ap-globalnav-mobile-actions) { display: none !important; }
+    .ap-globalnav-mobile-actions { display: flex; align-items: center; }
+
+    /* スマートフォンではスクロールしてもヘッダーを隠さず、横長のガラスナビは使わない */
+    .ap-glass-navbar { display: none; }
+    .ap-globalnav.ap-globalnav-hidden { transform: none; opacity: 1; }
+
+    .ap-mobile-menu:not([hidden]) {
+        position: fixed;
+        inset: 48px 0 0;
+        z-index: 9998;
+        display: flex;
+        flex-direction: column;
+        gap: 32px;
+        padding: 24px 32px calc(32px + env(safe-area-inset-bottom));
+        overflow-y: auto;
+        overscroll-behavior: contain;
+        background: rgba(0, 0, 0, 0.92);
+        backdrop-filter: saturate(180%) blur(20px);
+        -webkit-backdrop-filter: saturate(180%) blur(20px);
+        animation: ap-menu-in 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
     }
-    .ap-glass-navbar::-webkit-scrollbar { display: none; }
-    .ap-glass-navbar-link { flex-shrink: 0; }
+    .ap-mobile-menu-list { list-style: none; margin: 0; padding: 0; }
+    .ap-mobile-menu-list a {
+        display: block;
+        padding: 8px 0;
+        color: #f5f5f7;
+        font-family: var(--ap-font-display);
+        font-size: 28px;
+        font-weight: 600;
+        line-height: 1.2;
+        text-decoration: none;
+    }
+    .ap-mobile-menu-footer {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 4px;
+        padding-top: 20px;
+        border-top: 1px solid rgba(255, 255, 255, 0.12);
+    }
+    .ap-mobile-menu-sub {
+        display: inline-flex;
+        align-items: center;
+        gap: 12px;
+        min-height: 44px;
+        padding: 0;
+        border: none;
+        background: none;
+        color: var(--ap-text-muted);
+        font-size: 17px;
+        text-decoration: none;
+    }
+    .ap-mobile-menu-sub i { width: 18px; text-align: center; }
+    .ap-mobile-menu-lang {
+        display: inline-flex;
+        align-items: center;
+        gap: 12px;
+        min-height: 44px;
+        margin: 0;
+        color: var(--ap-text-muted);
+    }
+    .ap-mobile-menu-lang i { width: 18px; text-align: center; }
+    .ap-mobile-menu-lang select {
+        border: none;
+        background: transparent;
+        color: var(--ap-text-muted);
+        font-size: 17px; /* 16px 未満だと iOS がフォーカス時に拡大する */
+    }
+    .ap-mobile-menu-lang option { color: #000; }
+    body.ap-menu-open { overflow: hidden; }
+
+    /* 汎用パネルの余白を画面幅に合わせて詰める */
+    .ap-glass-panel { padding: 28px 20px; border-radius: 24px; }
 }
 
 /* 見出し・リード文の改行を整える (行長をそろえ、和文は文節で折り返す) */

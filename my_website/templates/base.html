@@ -14,7 +14,7 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
     <link href="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/6.4.0/mdb.min.css" rel="stylesheet" />
 
-    <link href="{% static 'css/style.css' %}?v=18" rel="stylesheet" />
+    <link href="{% static 'css/style.css' %}?v=19" rel="stylesheet" />
 
     {% block extra_head %}{% endblock %}
     {# ガラス (LiquidGlass) を使うページは templates/_liquid_glass_preload.html を入れる #}
@@ -93,8 +93,64 @@
                     <a href="{% url 'login' %}" class="ap-globalnav-link"><i class="fas fa-user-circle"></i></a>
                 {% endif %}
             </li>
+
+            <!-- スマートフォン用: アカウントとメニューボタン (734px 以下でのみ表示) -->
+            <li class="ap-globalnav-item ap-globalnav-mobile-actions">
+                <a href="{% if user.is_authenticated %}{% url 'profile' %}{% else %}{% url 'login' %}{% endif %}"
+                   class="ap-globalnav-link ap-nav-icon-btn"
+                   aria-label="{% if user.is_authenticated %}{{ user.username }}{% else %}{% trans 'サインイン' %}{% endif %}">
+                    <i class="fas {% if user.is_authenticated %}fa-user{% else %}fa-user-circle{% endif %}"></i>
+                </a>
+                <button type="button" class="ap-nav-icon-btn ap-menu-btn" id="ap-menu-btn"
+                        aria-controls="ap-mobile-menu" aria-expanded="false" aria-label="{% trans 'メニュー' %}">
+                    <span class="ap-menu-btn-bar"></span>
+                    <span class="ap-menu-btn-bar"></span>
+                </button>
+            </li>
         </ul>
     </nav>
+
+    <div class="ap-mobile-menu" id="ap-mobile-menu" hidden>
+        <nav aria-label="{% trans 'メニュー' %}">
+            <ul class="ap-mobile-menu-list">
+                <li><a href="/">{% trans "Home" %}</a></li>
+                <li><a href="{% url 'photraveler:map' %}">{% trans "WanderLens" %}</a></li>
+                <li><a href="{% if user.is_authenticated %}{% url 'community:list' %}{% else %}{% url 'login' %}?next={% url 'community:list' %}{% endif %}">{% trans "Lounge" %}</a></li>
+                <li><a href="{% url 'blog:list' %}">{% trans "Blogs" %}</a></li>
+                <li><a href="{% url 'core:resume' %}">{% trans "Resume" %}</a></li>
+                <li><a href="{% url 'core:contact' %}">{% trans "Contact" %}</a></li>
+            </ul>
+        </nav>
+
+        <div class="ap-mobile-menu-footer">
+            {% if user.is_authenticated %}
+                <a href="{% url 'profile' %}" class="ap-mobile-menu-sub"><i class="fas fa-user"></i>{{ user.username }}</a>
+                {% if user.is_staff %}
+                    <a href="{% url 'admin:index' %}" class="ap-mobile-menu-sub"><i class="fas fa-cog"></i>{% trans "Admin" %}</a>
+                {% endif %}
+                <form action="{% url 'logout' %}" method="post" class="m-0">
+                    {% csrf_token %}
+                    <button type="submit" class="ap-mobile-menu-sub"><i class="fas fa-sign-out-alt"></i>{% trans "サインアウト" %}</button>
+                </form>
+            {% else %}
+                <a href="{% url 'login' %}" class="ap-mobile-menu-sub"><i class="fas fa-user-circle"></i>{% trans "サインイン" %}</a>
+                <a href="{% url 'signup' %}" class="ap-mobile-menu-sub"><i class="fas fa-user-plus"></i>{% trans "アカウントを作成" %}</a>
+            {% endif %}
+
+            <form action="{% url 'set_language' %}" method="post" class="ap-mobile-menu-lang">
+                {% csrf_token %}
+                <input name="next" type="hidden" value="{{ redirect_to }}">
+                <i class="fas fa-globe" aria-hidden="true"></i>
+                <select name="language" onchange="this.form.submit()" aria-label="{% trans 'Language' %}">
+                    {% get_current_language as LANGUAGE_CODE %}
+                    {% get_available_languages as LANGUAGES %}
+                    {% for lang in LANGUAGES %}
+                        <option value="{{ lang.0 }}" {% if lang.0 == LANGUAGE_CODE %}selected{% endif %}>{{ lang.1 }}</option>
+                    {% endfor %}
+                </select>
+            </form>
+        </div>
+    </div>
 
     <!-- Main content -->
     {% block main_content %}
