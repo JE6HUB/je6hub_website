@@ -1,0 +1,21 @@
+{
+	email {$ACME_EMAIL}
+}
+
+www.{$SITE_DOMAIN} {
+	redir https://{$SITE_DOMAIN}{uri} permanent
+}
+
+{$SITE_DOMAIN} {
+	encode zstd gzip
+
+	# ユーザーアップロード(写真)は DEBUG=False では Django が配信しないため Caddy が直接返す
+	handle_path /media/* {
+		root * /srv/media
+		file_server
+	}
+
+	handle {
+		reverse_proxy web:8000
+	}
+}
