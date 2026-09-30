@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+{% load static i18n %}
+
+{% block title %}{% trans "通報する" %}{% endblock %}
+
+{% block extra_head %}
+<meta name="robots" content="noindex, nofollow">
+<link href="{% static 'css/dashboard.css' %}?v=1" rel="stylesheet" />
+{% endblock %}
+
+{% block content %}
+<div class="db-page" style="max-width: 640px;">
+    <h1 class="db-title mb-2">{% trans "通報する" %}</h1>
+    <p class="db-lead mb-4">{% blocktrans with label=kind.label %}この{{ label }}に問題がある場合は、理由を選んで送信してください。通報した人の名前が投稿者に知らされることはありません。{% endblocktrans %}</p>
+
+    <div class="db-card mb-4">
+        <pre class="db-snapshot" style="max-height: 200px;">{{ preview|truncatechars:600 }}</pre>
+    </div>
+
+    <form method="post" class="db-card">
+        {% csrf_token %}
+        <fieldset>
+            <legend class="ap-label">{{ form.reason.label }}</legend>
+            <ul class="db-report-reasons">
+                {% for radio in form.reason %}
+                <li><label>{{ radio.tag }} {{ radio.choice_label }}</label></li>
+                {% endfor %}
+            </ul>
+            {{ form.reason.errors }}
+        </fieldset>
+        <div class="db-form-row">
+            <label for="{{ form.detail.id_for_label }}">{{ form.detail.label }}</label>
+            {{ form.detail }}
+            {{ form.detail.errors }}
+        </div>
+        <div class="db-actions">
+            <button type="submit" class="db-btn db-btn--primary">{% trans "通報を送信" %}</button>
+            <a href="{{ back }}" class="db-btn">{% trans "キャンセル" %}</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

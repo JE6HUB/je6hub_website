@@ -86,6 +86,7 @@ INSTALLED_APPS = [
     'photraveler', # 写真×地図
     'community',   # チャット
     'blog',        # Blogs
+    'dashboard',   # 管理者ダッシュボード (アクセス集計・通報・ユーザー管理)
 ]
 
 SITE_ID = 1
@@ -111,6 +112,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'allauth.account.middleware.AccountMiddleware',     # allauth 必須
+    'dashboard.traffic.AccessLogMiddleware',            # ページビューと国・都市を日別に集計 (IP は保存しない)
 ]
 
 ROOT_URLCONF = 'config.urls'
@@ -131,6 +133,7 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
                 'django.template.context_processors.i18n', # i18n用
+                'dashboard.context_processors.admin_badges',  # ヘッダーの未対応通報数
             ],
             **({
                 'loaders': [
@@ -218,6 +221,11 @@ MEDIA_URL = 'media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# アクセス元の位置情報 (国・都市) を推定するオフラインのデータベース (MMDB 形式)。
+# DB-IP の IP to City Lite か MaxMind の GeoLite2 City を置く (docs/deploy.md 参照)。
+# ファイルが無ければ位置は「不明」として集計される。訪問者の IP を外部サービスへ送ることはない。
+GEOIP_DB_PATH = os.environ.get('GEOIP_DB_PATH', os.path.join(BASE_DIR.parent, 'geoip', 'city.mmdb'))
 
 # # ログインURLの指定（認証が必要なビューにアクセスした際のリダイレクト先）
 # LOGIN_URL = 'admin:login'

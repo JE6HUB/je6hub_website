@@ -1,0 +1,49 @@
+{% extends 'dashboard/_layout.html' %}
+{% load i18n %}
+
+{% block db_title %}{% trans "ユーザー" %}{% endblock %}
+
+{% block db_content %}
+<header class="db-head">
+    <div>
+        <h1 class="db-title">{% trans "ユーザー" %}</h1>
+        <p class="db-lead">{% blocktrans count counter=page.paginator.count %}{{ counter }} 人{% plural %}{{ counter }} 人{% endblocktrans %}</p>
+    </div>
+</header>
+
+<form method="get" class="db-filters" role="search">
+    <input type="search" name="q" value="{{ q }}" class="ap-input" placeholder="{% trans 'ユーザー名・メールアドレス・表示名で検索' %}" aria-label="{% trans 'ユーザーを検索' %}">
+    <select name="state" class="db-select" aria-label="{% trans '絞り込み' %}">
+        <option value="">{% trans "すべて" %}</option>
+        <option value="suspended"{% if state == 'suspended' %} selected{% endif %}>{% trans "凍結中" %}</option>
+        <option value="unverified"{% if state == 'unverified' %} selected{% endif %}>{% trans "メール未認証" %}</option>
+        <option value="staff"{% if state == 'staff' %} selected{% endif %}>{% trans "管理者" %}</option>
+    </select>
+    <button type="submit" class="db-btn db-btn--primary"><span class="material-symbols-outlined" aria-hidden="true">search</span>{% trans "検索" %}</button>
+</form>
+
+<section class="db-card">
+{% if page.object_list %}
+<div class="db-table-wrap">
+<table class="db-table">
+    <thead><tr><th>{% trans "ユーザー" %}</th><th>{% trans "メールアドレス" %}</th><th>{% trans "状態" %}</th><th class="num">{% trans "未対応の通報" %}</th><th>{% trans "登録日" %}</th><th>{% trans "最終ログイン" %}</th></tr></thead>
+    <tbody>
+    {% for u in page.object_list %}
+        <tr>
+            <td><a href="{% url 'dashboard:user_detail' u.pk %}">{{ u.username }}</a>{% if u.display_name %}<div class="db-muted" style="font-size:12px">{{ u.display_name }}</div>{% endif %}</td>
+            <td class="db-muted">{{ u.email|default:"—" }}</td>
+            <td>{% include 'dashboard/_user_state.html' %}</td>
+            <td class="num">{% if u.report_count %}<span class="db-badge db-badge--red">{{ u.report_count }}</span>{% else %}<span class="db-muted">0</span>{% endif %}</td>
+            <td class="db-muted" style="white-space:nowrap">{{ u.date_joined|date:"Y/m/d" }}</td>
+            <td class="db-muted" style="white-space:nowrap">{{ u.last_login|date:"Y/m/d H:i"|default:"—" }}</td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+</div>
+{% include 'dashboard/_pager.html' %}
+{% else %}
+<p class="db-empty">{% trans "該当するユーザーはいません。" %}</p>
+{% endif %}
+</section>
+{% endblock %}

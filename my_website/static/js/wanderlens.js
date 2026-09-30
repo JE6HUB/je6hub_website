@@ -237,6 +237,8 @@
         owner.textContent = `${t.by} ${p.owner}`;
         owner.href = userUrl(p.owner);
         if (cfg.canEdit) $('#wl-delete-form').action = url(cfg.urls.delete, p.id);
+        const report = $('#wl-sheet-report');
+        if (report) report.href = url(cfg.urls.reportPin, p.id);
         const idx = list.findIndex((x) => x.id === p.id);
         sheet.querySelector('[data-step="-1"]').disabled = idx <= 0;
         sheet.querySelector('[data-step="1"]').disabled = idx < 0 || idx >= list.length - 1;
@@ -285,7 +287,8 @@
             box.replaceChildren(...(data.comments.length ? data.comments.map((c) => h('div', { class: 'wl-comment' },
                 h('span', { class: 'wl-avatar wl-avatar--sm', 'aria-hidden': 'true', text: (c.author_name[0] || '?').toUpperCase() }),
                 h('div', {},
-                    h('p', { class: 'wl-comment-head' }, h('strong', { text: c.author_name }), h('span', { text: c.created_at })),
+                    h('p', { class: 'wl-comment-head' }, h('strong', { text: c.author_name }), h('span', { text: c.created_at }),
+                        c.id ? h('a', { class: 'wl-comment-report', href: url(cfg.urls.reportComment, c.id), text: t.report }) : null),
                     h('p', { class: 'wl-comment-text', text: c.text })))) : [h('p', { class: 'wl-muted', text: t.noComments })]));
         } catch (e) {
             box.replaceChildren(h('p', { class: 'wl-error', text: t.loadFailed }));

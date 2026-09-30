@@ -550,3 +550,7 @@ html[lang="ja"] body { letter-spacing: 0; }
 }
 .blog-segmented input:checked + span { background: #636366; color: #fff; }
 .blog-segmented input:focus-visible + span { outline: 2px solid var(--ap-accent); }
+
+/* ヘッダーのダッシュボードアイコン */
+.ap-dashboard-link { position: relative; }
+.ap-dashboard-badge { position: absolute; top: -6px; right: -10px; min-width: 16px; height: 16px; padding: 0 4px; border-radius: 8px; background: #ff453a; color: #fff; font-size: 10px; line-height: 16px; text-align: center; font-weight: 600; }

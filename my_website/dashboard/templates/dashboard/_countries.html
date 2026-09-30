@@ -1,0 +1,19 @@
+{% load i18n dashboard_tags %}
+{% if countries %}
+<div class="db-table-wrap">
+<table class="db-table">
+    <thead><tr><th>{% trans "国・地域" %}</th><th class="num">{% trans "訪問者" %}</th><th class="num">{% trans "ページビュー" %}</th></tr></thead>
+    <tbody>
+    {% for c in countries %}
+        <tr>
+            <td class="db-meter" style="--pct: {{ c.pct|stringformat:'s' }}%;"><span><span class="db-flag" aria-hidden="true">{{ c.country_code|flag }}</span>{% if c.country %}{{ c.country }}{% else %}<span class="db-muted">{% trans "不明" %}</span>{% endif %}</span></td>
+            <td class="num">{{ c.visitors }}</td>
+            <td class="num">{{ c.views }}</td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+</div>
+{% else %}
+<p class="db-empty">{% trans "まだデータがありません。" %}</p>
+{% endif %}

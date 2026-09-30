@@ -213,7 +213,8 @@ def verify_email_view(request, uidb64, token):
     except (TypeError, ValueError, OverflowError, CustomUser.DoesNotExist):
         user = None
 
-    if user is None or not email_verification_token.check_token(user, token):
+    # 管理者に凍結されたアカウント (dashboard.UserSuspension) は、古い認証リンクでも有効化しない
+    if user is None or hasattr(user, 'suspension') or not email_verification_token.check_token(user, token):
         return render(request, 'accounts/verification_failed.html', status=400)
 
     user.is_active = True
@@ -231,7 +232,7 @@ def resend_verification_view(request):
         if form.is_valid():
             email = form.cleaned_data['email']
             # 登録の有無が分からないよう、未認証ユーザーがいるかに関わらず同じ画面を返す
-            user = CustomUser.objects.filter(email__iexact=email, is_active=False, last_login__isnull=True).first()
+            user = CustomUser.objects.filter(email__iexact=email, is_active=False, last_login__isnull=True, suspension__isnull=True).first()
             if user:
                 send_verification_email(request, user)
             return render(request, 'accounts/verification_sent.html', {'email': email})

@@ -11,6 +11,9 @@ my_website/locale/*/LC_MESSAGES/*.mo
 # Env
 .env
 
+# アクセス元の位置情報データベース (サーバーでダウンロードして置く)
+geoip/
+
 # Editors / OS
 .vscode/
 .DS_Store

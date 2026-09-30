@@ -1,0 +1,91 @@
+{% extends 'dashboard/_layout.html' %}
+{% load i18n dashboard_tags %}
+
+{% block db_title %}{% trans "アクセス" %}{% endblock %}
+
+{% block db_content %}
+<header class="db-head">
+    <div>
+        <h1 class="db-title">{% trans "アクセス" %}</h1>
+        <p class="db-lead">{% trans "IP アドレスは保存せず、日ごとの件数と国・都市だけを集計しています。" %}</p>
+    </div>
+    <form method="get" class="db-actions">
+        <select name="days" class="db-select" onchange="this.form.submit()" aria-label="{% trans '期間' %}">
+            {% for d in period_choices %}
+            <option value="{{ d }}"{% if d == days %} selected{% endif %}>{% blocktrans %}過去 {{ d }} 日間{% endblocktrans %}</option>
+            {% endfor %}
+        </select>
+        <noscript><button class="db-btn">{% trans "表示" %}</button></noscript>
+    </form>
+</header>
+
+{% if not geoip_ready %}
+<div class="db-card" style="border: 1px solid rgba(255,159,10,.4); margin-bottom: 16px;">
+    <strong>{% trans "位置情報データベースが見つかりません。" %}</strong>
+    <span class="db-muted">{% trans "アクセス元の国・都市は「不明」として数えられます。サーバーに位置情報データベースを置く手順は docs/deploy.md の「アクセス解析」にあります。" %}</span>
+</div>
+{% endif %}
+
+<div class="db-grid">
+    <div class="db-card"><div class="db-stat-label">{% trans "ページビュー" %}</div><div class="db-stat-value">{{ total_views }}</div></div>
+    <div class="db-card"><div class="db-stat-label">{% trans "のべ訪問者" %}</div><div class="db-stat-value">{{ total_visitors }}</div><div class="db-stat-sub">{% trans "1日ごとの重複を除いた人数の合計" %}</div></div>
+    <div class="db-card"><div class="db-stat-label">{% trans "国・地域" %}</div><div class="db-stat-value">{{ countries|length }}</div></div>
+</div>
+
+<section class="db-card">
+    <h2>{% trans "日別" %}</h2>
+    {% include 'dashboard/_chart.html' %}
+</section>
+
+<div class="db-cols" style="margin-top: 16px;">
+    <section class="db-card">
+        <h2>{% trans "国・地域" %}</h2>
+        {% include 'dashboard/_countries.html' %}
+    </section>
+    <section class="db-card">
+        <h2>{% trans "都市" %}</h2>
+        {% if cities %}
+        <div class="db-table-wrap">
+        <table class="db-table">
+            <thead><tr><th>{% trans "都市" %}</th><th class="num">{% trans "訪問者" %}</th><th class="num">{% trans "ページビュー" %}</th></tr></thead>
+            <tbody>
+            {% for c in cities %}
+                <tr>
+                    <td class="db-meter" style="--pct: {{ c.pct|stringformat:'s' }}%;"><span><span class="db-flag" aria-hidden="true">{{ c.country_code|flag }}</span>{{ c.city }}{% if c.country %} <span class="db-muted">{{ c.country }}</span>{% endif %}</span></td>
+                    <td class="num">{{ c.visitors }}</td>
+                    <td class="num">{{ c.views }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        </div>
+        {% else %}
+        <p class="db-empty">{% trans "まだデータがありません。" %}</p>
+        {% endif %}
+    </section>
+</div>
+
+<section class="db-card" style="margin-top: 16px;">
+    <h2>{% trans "よく見られているページ" %}</h2>
+    {% if pages %}
+    <div class="db-table-wrap">
+    <table class="db-table">
+        <thead><tr><th>{% trans "ページ" %}</th><th class="num">{% trans "ページビュー" %}</th></tr></thead>
+        <tbody>
+        {% for p in pages %}
+            <tr><td class="db-meter" style="--pct: {{ p.pct|stringformat:'s' }}%;"><span class="db-mono">{{ p.path }}</span></td><td class="num">{{ p.views }}</td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    </div>
+    {% else %}
+    <p class="db-empty">{% trans "まだデータがありません。" %}</p>
+    {% endif %}
+</section>
+
+<p class="db-muted mt-3" style="font-size: 12px;">
+    {% trans "ボット・クローラーと管理画面へのアクセスは数えていません。" %}
+    {% trans "位置情報は IP アドレスからの推定で、正確でない場合があります。" %}
+    <a href="https://db-ip.com" rel="noopener" target="_blank" class="db-muted">IP Geolocation by DB-IP</a>
+</p>
+{% endblock %}

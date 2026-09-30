@@ -38,6 +38,7 @@ urlpatterns += i18n_patterns(
     path('community/', include('community.urls')), # チャット
     path('blog/', include('blog.urls')),           # Blogs
     path('accounts/', include('allauth.urls')),     # django-allauth (Sign in with Apple)
+    path('', include('dashboard.urls')),            # 管理者ダッシュボード /dashboard/ と通報 /report/
 )
 
 # 開発環境(DEBUG=True)のみ、アップロードされたメディアファイルを配信する設定

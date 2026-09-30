@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+{% load static i18n %}
+
+{% block title %}{% block db_title %}{% trans "管理者ダッシュボード" %}{% endblock %}{% endblock %}
+
+{% block extra_head %}
+<meta name="robots" content="noindex, nofollow">
+<link href="{% static 'css/dashboard.css' %}?v=1" rel="stylesheet" />
+{% endblock %}
+
+{% block content %}
+<div class="db-page">
+    <nav class="db-tabs" aria-label="{% trans '管理者ダッシュボード' %}">
+        <a href="{% url 'dashboard:index' %}" class="db-tab{% if section == 'index' %} is-active{% endif %}"><span class="material-symbols-outlined" aria-hidden="true">dashboard</span>{% trans "概要" %}</a>
+        <a href="{% url 'dashboard:traffic' %}" class="db-tab{% if section == 'traffic' %} is-active{% endif %}"><span class="material-symbols-outlined" aria-hidden="true">public</span>{% trans "アクセス" %}</a>
+        <a href="{% url 'dashboard:reports' %}" class="db-tab{% if section == 'reports' %} is-active{% endif %}"><span class="material-symbols-outlined" aria-hidden="true">flag</span>{% trans "通報" %}{% with n=dashboard_open_reports %}{% if n %} <span class="db-count">{{ n }}</span>{% endif %}{% endwith %}</a>
+        <a href="{% url 'dashboard:users' %}" class="db-tab{% if section == 'users' %} is-active{% endif %}"><span class="material-symbols-outlined" aria-hidden="true">group</span>{% trans "ユーザー" %}</a>
+        <a href="{% url 'dashboard:contacts' %}" class="db-tab{% if section == 'contacts' %} is-active{% endif %}"><span class="material-symbols-outlined" aria-hidden="true">mail</span>{% trans "お問い合わせ" %}</a>
+        <a href="{% url 'dashboard:log' %}" class="db-tab{% if section == 'log' %} is-active{% endif %}"><span class="material-symbols-outlined" aria-hidden="true">history</span>{% trans "操作履歴" %}</a>
+        <a href="{% url 'admin:index' %}" class="db-tab"><span class="material-symbols-outlined" aria-hidden="true">settings</span>{% trans "Django 管理画面" %}</a>
+    </nav>
+    {% block db_content %}{% endblock %}
+</div>
+{% endblock %}

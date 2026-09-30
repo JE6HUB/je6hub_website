@@ -201,6 +201,7 @@ def pin_comments(request, pin_id):
     if request.method == 'GET':
         comments = [
             {
+                'id':          c.id,
                 'author_name': c.author_name,
                 'text':        c.text,
                 'created_at':  c.created_at.strftime('%Y-%m-%d %H:%M'),
@@ -231,6 +232,7 @@ def pin_comments(request, pin_id):
 
     comment = PhotoComment.objects.create(pin=pin, author_name=author_name, text=text)
     return JsonResponse({
+        'id':          comment.id,
         'author_name': comment.author_name,
         'text':        comment.text,
         'created_at':  comment.created_at.strftime('%Y-%m-%d %H:%M'),

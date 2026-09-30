@@ -137,3 +137,21 @@ docker compose -f docker-compose.prod.yml exec web python manage.py scrub_media 
 ```
 
 事前に 7. の手順でバックアップを取っておくこと。
+
+## 9. 管理者ダッシュボードとアクセス解析
+
+スーパーユーザーでログインすると、ヘッダーのアカウント欄にメーター型のアイコンが出る（`/dashboard/`）。アクセス数・アクセス元の国と都市・通報・ユーザーの凍結/削除・お問い合わせ・操作履歴を扱える。スーパーユーザーは `docker compose -f docker-compose.prod.yml exec web python manage.py createsuperuser` で作る。
+
+アクセス元の国・都市は、訪問者の IP を外部サービスに送らず、サーバー上の位置情報データベース（MMDB 形式）で推定する。IP アドレスそのものは保存せず、日ごとの件数だけを残す。データベースを置くまでは、場所は「不明」として数えられる。
+
+無料の [DB-IP IP to City Lite](https://db-ip.com/db/download/ip-to-city-lite)（登録不要、CC BY 4.0。ダッシュボードに出典を表示済み）を使う場合:
+
+```bash
+cd ~/je6hub_website
+mkdir -p geoip
+curl -fL "https://download.db-ip.com/free/dbip-city-lite-$(date +%Y-%m).mmdb.gz" | gunzip > geoip/city.mmdb.new && mv geoip/city.mmdb.new geoip/city.mmdb
+```
+
+`geoip/` は web コンテナの `/app/geoip` に読み取り専用でマウントされる（`docker-compose.prod.yml`）。ファイルを差し替えると再起動なしで反映される。データは毎月更新されるので、`crontab -e` で `0 5 3 * * cd /home/deploy/je6hub_website && curl -fsL "https://download.db-ip.com/free/dbip-city-lite-$(date +\%Y-\%m).mmdb.gz" | gunzip > geoip/city.mmdb.new && mv geoip/city.mmdb.new geoip/city.mmdb` を登録しておくとよい。
+
+MaxMind の GeoLite2 City（要アカウント登録）を使う場合は、ダウンロードした `GeoLite2-City.mmdb` を `geoip/city.mmdb` として置けばよい。

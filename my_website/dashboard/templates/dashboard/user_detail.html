@@ -1,0 +1,142 @@
+{% extends 'dashboard/_layout.html' %}
+{% load i18n %}
+
+{% block db_title %}{{ target.username }}{% endblock %}
+
+{% block db_content %}
+<header class="db-head">
+    <div>
+        <a href="{% url 'dashboard:users' %}" class="ap-link" style="font-size: 14px;">{% trans "ユーザー一覧" %}</a>
+        <h1 class="db-title">{{ target.username }}</h1>
+        <p class="db-lead">{% with u=target %}{% include 'dashboard/_user_state.html' %}{% endwith %}</p>
+    </div>
+    <a href="{{ target.get_absolute_url }}" class="db-btn" target="_blank" rel="noopener"><span class="material-symbols-outlined" aria-hidden="true">open_in_new</span>{% trans "プロフィールを見る" %}</a>
+</header>
+
+<div class="db-cols">
+    <section class="db-card">
+        <h2>{% trans "アカウント" %}</h2>
+        <dl class="db-dl">
+            <dt>{% trans "表示名" %}</dt><dd>{{ target.display_name|default:"—" }}</dd>
+            <dt>{% trans "氏名" %}</dt><dd>{{ target.get_full_name|default:"—" }}</dd>
+            <dt>{% trans "メールアドレス" %}</dt><dd>{{ target.email|default:"—" }}</dd>
+            <dt>{% trans "ログイン方法" %}</dt><dd>{% if target.apple_user_id %}Sign in with Apple{% else %}{% trans "パスワード" %}{% endif %}</dd>
+            <dt>{% trans "登録日" %}</dt><dd>{{ target.date_joined|date:"Y/m/d H:i" }}</dd>
+            <dt>{% trans "最終ログイン" %}</dt><dd>{{ target.last_login|date:"Y/m/d H:i"|default:"—" }}</dd>
+            <dt>{% trans "Private 参加" %}</dt><dd>{% if target.is_approved_for_private %}{% trans "承認済み" %}{% else %}{% trans "未承認" %}{% endif %}</dd>
+            <dt>{% trans "送った通報" %}</dt><dd>{{ reports_made }}</dd>
+            {% if suspension %}
+            <dt>{% trans "凍結日時" %}</dt><dd>{{ suspension.created_at|date:"Y/m/d H:i" }}{% if suspension.created_by %} ({{ suspension.created_by.username }}){% endif %}</dd>
+            <dt>{% trans "凍結の理由" %}</dt><dd style="white-space: pre-wrap;">{{ suspension.reason|default:"—" }}</dd>
+            {% endif %}
+        </dl>
+    </section>
+    <section class="db-card">
+        <h2>{% trans "投稿" %}</h2>
+        <table class="db-table">
+            <tbody>
+            {% for label, n in counts %}<tr><td>{{ label }}</td><td class="num">{{ n }}</td></tr>{% endfor %}
+            </tbody>
+        </table>
+        {% if recent_posts %}
+        <h2 class="mt-3">{% trans "最近の記事" %}</h2>
+        <ul class="mb-0 ps-3">{% for p in recent_posts %}<li><a class="db-link" href="{{ p.get_absolute_url }}">{{ p.title }}</a> <span class="db-muted" style="font-size:12px">{{ p.get_status_display }}</span></li>{% endfor %}</ul>
+        {% endif %}
+        {% if recent_pins %}
+        <h2 class="mt-3">{% trans "最近のスポット" %}</h2>
+        <ul class="mb-0 ps-3">{% for p in recent_pins %}<li>{{ p.title }} <span class="db-muted" style="font-size:12px">{{ p.place_name }}</span></li>{% endfor %}</ul>
+        {% endif %}
+    </section>
+</div>
+
+<section class="db-card" style="margin-top: 16px;">
+    <h2>{% trans "このユーザーの投稿への通報" %}</h2>
+    {% if reports_received %}
+    <div class="db-table-wrap">
+    <table class="db-table">
+        <tbody>
+        {% for r in reports_received %}
+            <tr>
+                <td><a href="{% url 'dashboard:report_detail' r.kind r.object_id %}">{{ r.snapshot|truncatechars:70|default:"—" }}</a></td>
+                <td>{{ r.get_reason_display }}</td>
+                <td>{% include 'dashboard/_report_status.html' %}</td>
+                <td class="db-muted" style="white-space:nowrap">{{ r.created_at|date:"Y/m/d H:i" }}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    </div>
+    {% else %}
+    <p class="db-empty">{% trans "通報はありません。" %}</p>
+    {% endif %}
+</section>
+
+<section class="db-card" style="margin-top: 16px;">
+    <h2>{% trans "Private チャンネル" %}</h2>
+    <form method="post" class="db-actions">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="toggle_private">
+        <span class="db-muted" style="font-size: 14px;">{% if target.is_approved_for_private %}{% trans "Private チャンネルへの参加が承認されています。" %}{% else %}{% trans "Private チャンネルへの参加は承認されていません。" %}{% endif %}</span>
+        <button type="submit" class="db-btn">{% if target.is_approved_for_private %}{% trans "承認を取り消す" %}{% else %}{% trans "参加を承認する" %}{% endif %}</button>
+    </form>
+</section>
+
+{% if protected %}
+<section class="db-card" style="margin-top: 16px;">
+    <p class="db-muted mb-0">{% trans "自分自身や管理者 (スタッフ・スーパーユーザー) のアカウントは、ここから凍結・削除できません。必要な場合は Django 管理画面で権限を外してから操作してください。" %}</p>
+</section>
+{% else %}
+<section class="db-card db-danger-zone" style="margin-top: 16px;" id="suspend">
+    <h2>{% trans "凍結" %}</h2>
+    {% if suspension %}
+    <form method="post" class="db-actions">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="unsuspend">
+        <span class="db-muted" style="font-size: 14px;">{% trans "凍結中はログインできません。投稿はそのまま表示されます。" %}</span>
+        <button type="submit" class="db-btn">{% trans "凍結を解除" %}</button>
+    </form>
+    {% else %}
+    <form method="post">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="suspend">
+        <p class="db-muted" style="font-size: 14px;">{% trans "凍結すると、このユーザーはすぐにログアウトされ、ログインできなくなります。投稿は削除されません (必要なら個別に削除してください)。" %}</p>
+        <div class="db-form-row">
+            <label for="{{ suspend_form.reason.id_for_label }}">{{ suspend_form.reason.label }}</label>
+            {{ suspend_form.reason }}
+            {{ suspend_form.reason.errors }}
+        </div>
+        <button type="submit" class="db-btn db-btn--danger" onclick="return confirm('{% trans "このアカウントを凍結しますか？" %}');"><span class="material-symbols-outlined" aria-hidden="true">person_off</span>{% trans "アカウントを凍結" %}</button>
+    </form>
+    {% endif %}
+</section>
+
+<section class="db-card db-danger-zone" style="margin-top: 16px;">
+    <h2>{% trans "削除" %}</h2>
+    <form method="post">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="delete">
+        <p class="db-muted" style="font-size: 14px;">{% trans "アカウントと、このユーザーのメッセージ・記事・スポット・アップロードした画像をすべて削除します。元に戻せません。" %}</p>
+        <div class="db-form-row">
+            <label for="confirm-username">{% blocktrans with name=target.username %}確認のため「{{ name }}」と入力してください{% endblocktrans %}</label>
+            <input type="text" id="confirm-username" name="confirm_username" autocomplete="off" required>
+        </div>
+        <div class="db-form-row">
+            <label for="note-delete">{% trans "メモ (操作履歴に残ります)" %}</label>
+            <input type="text" id="note-delete" name="note" class="db-note" maxlength="500">
+        </div>
+        <button type="submit" class="db-btn db-btn--danger"><span class="material-symbols-outlined" aria-hidden="true">delete_forever</span>{% trans "アカウントを削除" %}</button>
+    </form>
+</section>
+{% endif %}
+
+{% if log %}
+<section class="db-card" style="margin-top: 16px;">
+    <h2>{% trans "このユーザーへの管理操作" %}</h2>
+    <table class="db-table"><tbody>
+    {% for entry in log %}
+        <tr><td>{{ entry.action_label }}</td><td class="db-muted">{{ entry.note }}</td><td class="db-muted">{{ entry.actor.username|default:"—" }}</td><td class="db-muted" style="white-space:nowrap">{{ entry.created_at|date:"Y/m/d H:i" }}</td></tr>
+    {% endfor %}
+    </tbody></table>
+</section>
+{% endif %}
+{% endblock %}

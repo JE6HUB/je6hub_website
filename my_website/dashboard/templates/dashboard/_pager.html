@@ -1,0 +1,7 @@
+{% load i18n %}{% if page.has_other_pages %}
+<nav class="db-pager" aria-label="{% trans 'ページ' %}">
+    {% if page.has_previous %}<a class="db-btn" href="?{% if q %}q={{ q|urlencode }}&amp;{% endif %}{% if state %}state={{ state|urlencode }}&amp;{% endif %}page={{ page.previous_page_number }}">← {% trans "前へ" %}</a>{% endif %}
+    <span class="db-muted">{{ page.number }} / {{ page.paginator.num_pages }}</span>
+    {% if page.has_next %}<a class="db-btn" href="?{% if q %}q={{ q|urlencode }}&amp;{% endif %}{% if state %}state={{ state|urlencode }}&amp;{% endif %}page={{ page.next_page_number }}">{% trans "次へ" %} →</a>{% endif %}
+</nav>
+{% endif %}
