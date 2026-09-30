@@ -1,3 +1,5 @@
+from unittest import mock
+
 from django.core import mail
 from django.test import TestCase, override_settings
 from django.urls import reverse
@@ -76,3 +78,16 @@ class CoreViewsTests(TestCase):
         })
         self.assertEqual(len(mail.outbox), 1)
         self.assertIn('Taro', mail.outbox[0].subject)
+
+    @override_settings(CONTACT_NOTIFY_EMAIL='admin@example.com')
+    def test_contact_notification_failure_is_logged_and_message_still_saved(self):
+        with mock.patch('core.views.send_mail', side_effect=OSError('smtp down')), \
+                self.assertLogs('core.views', level='ERROR') as logs:
+            response = self.client.post(reverse('core:contact'), {
+                'name': 'Taro',
+                'email': 'taro@example.com',
+                'message': 'Hello there',
+            })
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(ContactMessage.objects.count(), 1)
+        self.assertIn('smtp down', '\n'.join(logs.output))

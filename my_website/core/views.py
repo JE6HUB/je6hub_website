@@ -45,7 +45,6 @@ def contact_view(request):
                         ),
                         from_email=settings.DEFAULT_FROM_EMAIL,
                         recipient_list=[notify_email],
-                        fail_silently=True,
                     )
                 except Exception:
                     logger.exception('Failed to send contact notification email')
