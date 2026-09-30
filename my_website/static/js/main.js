@@ -116,7 +116,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 window.MusicKit.configure({
                     developerToken: token,
                     app: {
-                        name: 'Y.K. Nexus',
+                        name: 'JE6HUB.com',
                         build: '1.0.0',
                     },
                 });

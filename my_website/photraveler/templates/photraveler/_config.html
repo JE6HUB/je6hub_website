@@ -1,0 +1,32 @@
+{% load i18n %}
+<script id="wl-config" type="application/json">{
+    "mode": "{{ mode }}",
+    "canEdit": {% if can_edit %}true{% else %}false{% endif %},
+    "username": "{{ profile_user.username|default:''|escapejs }}",
+    "urls": {
+        "comments": "{% url 'photraveler:pin_comments' pin_id=0 %}",
+        "edit": "{% url 'photraveler:edit_pin' pin_id=0 %}",
+        "delete": "{% url 'photraveler:delete_pin' pin_id=0 %}",
+        "userMap": "{% url 'photraveler:user_map' '__user__' %}"
+    },
+    "t": {
+        "by": "{% trans 'by' %}",
+        "noComments": "{% trans 'まだコメントはありません。' %}",
+        "loading": "{% trans '読み込み中…' %}",
+        "loadFailed": "{% trans '読み込めませんでした。' %}",
+        "sendFailed": "{% trans '送信できませんでした。' %}",
+        "copied": "{% trans 'リンクをコピーしました' %}",
+        "confirmDelete": "{% trans 'このスポットを削除しますか？写真も削除されます。' %}",
+        "noPhoto": "{% trans '写真なし' %}",
+        "untitledPlace": "{% trans '場所未設定' %}",
+        "needLocation": "{% trans '地図で場所を選ぶか、位置情報付きの写真を追加してください。' %}",
+        "tooManyPhotos": "{% trans '写真の枚数が上限を超えています。' %}",
+        "remove": "{% trans '削除' %}",
+        "restore": "{% trans '元に戻す' %}",
+        "cover": "{% trans 'カバー' %}",
+        "addHere": "{% trans 'ここにスポットを追加' %}",
+        "noResults": "{% trans '見つかりませんでした' %}",
+        "places": "{% trans 'スポット' %}"
+    },
+    "maxPhotos": {{ max_photos|default:10 }}
+}</script>

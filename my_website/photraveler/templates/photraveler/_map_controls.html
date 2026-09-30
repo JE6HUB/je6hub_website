@@ -1,0 +1,16 @@
+{% load i18n %}
+<div class="wl-map-search" role="search">
+    <span class="material-symbols-outlined" aria-hidden="true">search</span>
+    <input type="search" id="wl-search" placeholder="{% trans '場所を検索' %}" aria-label="{% trans '場所を検索' %}" autocomplete="off">
+    <ul class="wl-suggest" id="wl-search-results" hidden></ul>
+</div>
+<div class="wl-map-controls">
+    <button type="button" class="wl-ctl" data-ctl="fit" title="{% trans 'すべてのスポットを表示' %}" aria-label="{% trans 'すべてのスポットを表示' %}">
+        <span class="material-symbols-outlined" aria-hidden="true">fit_screen</span></button>
+    {% if route %}
+    <button type="button" class="wl-ctl" data-ctl="route" aria-pressed="false" title="{% trans '旅のルートを表示' %}" aria-label="{% trans '旅のルートを表示' %}">
+        <span class="material-symbols-outlined" aria-hidden="true">route</span></button>
+    {% endif %}
+    <button type="button" class="wl-ctl" data-ctl="layer" aria-pressed="false" title="{% trans '航空写真' %}" aria-label="{% trans '航空写真' %}">
+        <span class="material-symbols-outlined" aria-hidden="true">satellite_alt</span></button>
+</div>

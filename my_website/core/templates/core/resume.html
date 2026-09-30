@@ -1,263 +1,254 @@
 {% extends 'base.html' %}
-{% load i18n %}
+{% load static i18n %}
 
 {% block title %}Resume — Yuta Kumadaki{% endblock %}
 
+{% block glass_preload %}{% include "_liquid_glass_preload.html" with hero="img/hero/resume-marble" %}{% endblock %}
+
+{% block extra_head %}
+<style>
+    .resume { max-width: 980px; margin: 0 auto; padding: 0 20px; text-align: left; }
+    .resume-section { padding: 88px 0 0; }
+    .resume-section > h2 {
+        font-size: clamp(32px, 4.5vw, 48px);
+        font-weight: 600;
+        letter-spacing: -0.003em;
+        margin: 0 0 32px;
+    }
+    .resume-lead { font-size: 21px; line-height: 1.52; color: var(--ap-text); margin: 0; }
+
+    .resume-stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; }
+    .resume-stat { background: var(--ap-card-bg); border-radius: 28px; padding: 32px; }
+    .resume-stat strong { display: block; font-size: clamp(40px, 5vw, 56px); font-weight: 600; line-height: 1.07; }
+    .resume-stat span { color: var(--ap-text-muted); font-size: 17px; }
+
+    .resume-tiles { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; }
+    .resume-tile { background: var(--ap-card-bg); border-radius: 28px; padding: 36px 32px; }
+    .resume-tile h3 { font-size: 24px; font-weight: 600; margin: 0 0 12px; }
+    .resume-tile p { color: var(--ap-text-muted); font-size: 17px; line-height: 1.47; margin: 0; }
+
+    .resume-rows { background: var(--ap-card-bg); border-radius: 28px; padding: 8px 32px; }
+    .resume-row { display: grid; grid-template-columns: 180px minmax(0, 1fr); gap: 24px; padding: 28px 0; }
+    .resume-row + .resume-row { border-top: 1px solid #424245; }
+    .resume-row-period { color: var(--ap-text-muted); font-size: 17px; }
+    .resume-row h3 { font-size: 21px; font-weight: 600; margin: 0; }
+    .resume-row-org { color: var(--ap-text-muted); font-size: 17px; margin: 2px 0 12px; }
+    .resume-row ul { margin: 0; padding-left: 1.1em; color: var(--ap-text); font-size: 17px; line-height: 1.6; }
+
+    .resume-skill-list { margin: 0; color: var(--ap-text-muted); font-size: 17px; line-height: 1.6; }
+
+    .resume-projects { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
+    .resume-project {
+        display: flex;
+        flex-direction: column;
+        background: var(--ap-card-bg);
+        border-radius: 28px;
+        overflow: hidden;
+        color: var(--ap-text);
+        text-decoration: none;
+    }
+    .resume-project:hover { color: var(--ap-text); }
+    .resume-project:hover .ap-link { text-decoration: underline; }
+    /* 写真を全面に敷いた大きなタイル (Apple の製品タイル風) */
+    .resume-feature {
+        position: relative;
+        display: block;
+        aspect-ratio: 4 / 5;
+        border-radius: 28px;
+        overflow: hidden;
+        color: #fff;
+        text-decoration: none;
+        background: var(--ap-card-bg);
+    }
+    .resume-feature:hover { color: #fff; }
+    .resume-feature-img {
+        position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;
+        transition: transform 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
+    }
+    .resume-feature:hover .resume-feature-img { transform: scale(1.03); }
+    .resume-feature::after {
+        content: ""; position: absolute; inset: 0;
+        background: linear-gradient(180deg, rgba(0,0,0,0.78) 0%, rgba(0,0,0,0.45) 30%, rgba(0,0,0,0) 58%);
+    }
+    .resume-feature-text { position: relative; z-index: 1; padding: 36px 36px 0; display: flex; flex-direction: column; gap: 6px; }
+    .resume-feature-text h3 { font-size: 32px; font-weight: 600; margin: 0; }
+    .resume-feature-text p { font-size: 19px; margin: 0; color: rgba(255,255,255,0.9); }
+    .resume-feature-text .ap-link { margin-top: 6px; color: #fff; } /* 写真の上のリンクは白 */
+    .resume-feature:hover .ap-link { text-decoration: underline; }
+    .resume-project-body { padding: 36px; display: flex; flex-direction: column; gap: 8px; flex: 1; }
+    .resume-project-body h3 { font-size: 24px; font-weight: 600; margin: 0; }
+    .resume-project-body p { color: var(--ap-text-muted); font-size: 17px; margin: 0; flex: 1; }
+    .resume-project-body .ap-link { margin-top: 8px; }
+
+    @media (max-width: 833px) {
+        .resume-tiles, .resume-projects { grid-template-columns: 1fr; }
+        .resume-row { grid-template-columns: 1fr; gap: 4px; }
+    }
+    @media (max-width: 480px) {
+        .resume-stats { grid-template-columns: 1fr; }
+        .resume-rows { padding: 4px 24px; }
+    }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="ap-section py-5">
-    
-    <!-- ── Hero ── -->
-    <header class="text-center mb-5 ap-reveal">
-        <div class="mx-auto mb-4" style="width: 120px; height: 120px; border-radius: 50%; background: linear-gradient(135deg, rgba(255,149,0,0.1), rgba(191,90,242,0.1)); display: flex; align-items: center; justify-content: center; box-shadow: inset 0 0 0 1px rgba(255,255,255,0.1);">
-            <span class="material-symbols-outlined" style="font-size: 64px; background: linear-gradient(135deg, #ff9f0a, #bf5af2); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">person</span>
-        </div>
-        <h1 class="ap-hero-title mb-2" style="font-size: clamp(40px, 6vw, 64px);">Yuta Kumadaki</h1>
-        <p class="ap-subhead mb-2" style="font-size: 18px;">AI Architect &amp; Photographer</p>
-        <p class="d-flex align-items-center justify-content-center gap-1 text-muted mb-4" style="font-size: 14px;">
-            <span class="material-symbols-outlined" aria-hidden="true" style="font-size: 18px;">location_on</span>
-            Tokyo, Japan
+<!-- Hero — LiquidGlass root (背景と glass ボタンはすべて root の直接の子) -->
+<section id="resume-glass-root" class="ap-section liquid-glass-root"
+    style="position: relative; overflow: hidden; padding-top: 110px; padding-bottom: 80px; text-align: center;">
+    {% include "_hero_image.html" with hero="img/hero/resume-marble" style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; pointer-events: none; z-index: 0;" %}
+    <div style="position: absolute; inset: 0; background: linear-gradient(180deg, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.25) 45%, rgba(0,0,0,0.75) 100%); pointer-events: none; z-index: 1;"></div>
+
+    <div style="position: relative; z-index: 2; pointer-events: none;">
+        <h1 class="ap-hero-title">Yuta Kumadaki</h1>
+        <p class="ap-hero-subtitle mx-auto" style="max-width: 600px; color: rgba(245,245,247,0.85);">
+            AI Architect &amp; Photographer. Tokyo.
         </p>
-        <div class="d-flex gap-3 justify-content-center flex-wrap">
-            <a href="{% url 'core:contact' %}" class="ap-btn ap-btn-primary" style="padding: 12px 28px;">
-                <span class="material-symbols-outlined align-middle me-1" aria-hidden="true" style="font-size: 18px;">mail</span>
-                {% trans "Contact Me" %}
-            </a>
-            <a href="{% url 'photraveler:map' %}" class="ap-btn ap-btn-outline" style="padding: 12px 28px;">
-                <span class="material-symbols-outlined align-middle me-1" aria-hidden="true" style="font-size: 18px;">photo_camera</span>
-                WanderLens
-            </a>
-        </div>
-    </header>
-
-    <!-- ── Stats ── -->
-    <div class="row g-3 justify-content-center mb-5 ap-reveal" style="max-width: 900px; margin: 0 auto;">
-        <div class="col-4">
-            <div class="ap-glass-panel text-center p-4">
-                <div class="fw-bold mb-1" style="font-size: clamp(28px, 4vw, 40px); background: linear-gradient(135deg, #ff9f0a, #bf5af2); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; line-height: 1;">5+</div>
-                <div class="text-uppercase fw-bold text-muted" style="font-size: 11px; letter-spacing: 0.1em;">{% trans "Years" %}</div>
-            </div>
-        </div>
-        <div class="col-4">
-            <div class="ap-glass-panel text-center p-4">
-                <div class="fw-bold mb-1" style="font-size: clamp(28px, 4vw, 40px); background: linear-gradient(135deg, #32d74b, #0a84ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; line-height: 1;">10+</div>
-                <div class="text-uppercase fw-bold text-muted" style="font-size: 11px; letter-spacing: 0.1em;">{% trans "Projects" %}</div>
-            </div>
-        </div>
-        <div class="col-4">
-            <div class="ap-glass-panel text-center p-4">
-                <div class="fw-bold mb-1" style="font-size: clamp(28px, 4vw, 40px); background: linear-gradient(135deg, #ff3b30, #ff9f0a); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; line-height: 1;">3</div>
-                <div class="text-uppercase fw-bold text-muted" style="font-size: 11px; letter-spacing: 0.1em;">{% trans "Domains" %}</div>
-            </div>
-        </div>
     </div>
 
-    <!-- ── Body ── -->
-    <div class="d-flex flex-column gap-5" style="max-width: 900px; margin: 0 auto;">
+    <a href="{% url 'core:contact' %}" id="resume-glass-btn-1" class="liquid-glass-btn"
+        data-config='{"button":true, "cornerRadius":28, "blurAmount":0.25, "brightness":-0.15}'
+        style="display: inline-flex; align-items: center; padding: 14px 28px; color: #fff; text-decoration: none; font-weight: 600; font-size: 17px; margin: 16px 8px 0; z-index: 2;">
+        <span class="label">{% trans "お問い合わせ" %}</span>
+    </a>
+    <a href="#work" id="resume-glass-btn-2" class="liquid-glass-btn"
+        data-config='{"button":true, "cornerRadius":28, "blurAmount":0.25, "brightness":-0.15}'
+        style="display: inline-flex; align-items: center; padding: 14px 28px; color: #fff; text-decoration: none; font-weight: 600; font-size: 17px; margin: 16px 8px 0; z-index: 2;">
+        <span class="label">{% trans "プロジェクトを見る" %}</span>
+    </a>
+</section>
 
-        <!-- Summary -->
-        <section class="ap-reveal">
-            <div class="d-flex align-items-center gap-3 mb-4">
-                <div style="width: 44px; height: 44px; border-radius: 12px; background: rgba(10,132,255,0.15); display: flex; align-items: center; justify-content: center;">
-                    <span class="material-symbols-outlined" style="color: #0a84ff;">person</span>
-                </div>
+<div class="resume">
+
+    <!-- 概要 -->
+    <section class="resume-section ap-reveal">
+        <h2>{% trans "概要" %}</h2>
+        <p class="resume-lead">
+            大規模言語モデル（LLM）のシステム設計・社会実装を専門とするAIアーキテクト。Transformer内部メカニズムの研究（Mechanistic Interpretability）に取り組みながら、Leica Q3によるフォトグラフィーも並行して続けている。
+        </p>
+        <div class="resume-stats" style="margin-top: 40px;">
+            <div class="resume-stat"><strong>5+</strong><span>{% trans "年の経験" %}</span></div>
+            <div class="resume-stat"><strong>10+</strong><span>{% trans "件のプロジェクト" %}</span></div>
+            <div class="resume-stat"><strong>3</strong><span>{% trans "つの専門領域" %}</span></div>
+        </div>
+    </section>
+
+    <!-- 専門領域 -->
+    <section class="resume-section ap-reveal">
+        <h2>{% trans "専門領域" %}</h2>
+        <div class="resume-tiles">
+            <div class="resume-tile">
+                <h3>AI Architecture</h3>
+                <p>大規模言語モデルの社会実装とシステム設計。Mechanistic Interpretability の研究を通じて LLM の内部構造を解明する。</p>
+            </div>
+            <div class="resume-tile">
+                <h3>Photography</h3>
+                <p>Leica Q3 による都市・旅・自然のスナップショット。世界中の記憶を地図にピン留めして共有する WanderLens を開発。</p>
+            </div>
+            <div class="resume-tile">
+                <h3>Community</h3>
+                <p>AI・クラフトビール・写真をテーマにしたコミュニティ Lounge と、誰でも書ける Blogs を運営。</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- 経歴 -->
+    <section class="resume-section ap-reveal">
+        <h2>{% trans "経歴" %}</h2>
+        <div class="resume-rows">
+            <div class="resume-row">
+                <div class="resume-row-period">2023 – {% trans "現在" %}</div>
                 <div>
-                    <p class="text-uppercase fw-bold text-muted mb-0" style="font-size: 11px; letter-spacing: 0.1em;">{% trans "About" %}</p>
-                    <h2 class="fw-bold text-light mb-0" style="font-size: 20px;">{% trans "Summary" %}</h2>
+                    <h3>AI Architect</h3>
+                    <p class="resume-row-org">Self / Freelance</p>
+                    <ul>
+                        <li>LLMを活用したシステム設計・プロダクト開発の技術支援</li>
+                        <li>Transformer アーキテクチャの内部解析 (Mechanistic Interpretability)</li>
+                        <li>RAG / Agent ワークフロー設計および評価フレームワーク構築</li>
+                    </ul>
                 </div>
             </div>
-            <div class="ap-glass-panel p-4 p-md-5">
-                <p class="mb-0 text-muted" style="font-size: 15px; line-height: 1.8;">
-                    大規模言語モデル（LLM）のシステム設計・社会実装を専門とするAIアーキテクト。Transformer内部メカニズムの研究（Mechanistic Interpretability）に取り組みながら、Leica Q3によるフォトグラフィーも並行して続けている。
-                </p>
-            </div>
-        </section>
-
-        <!-- Experience -->
-        <section class="ap-reveal">
-            <div class="d-flex align-items-center gap-3 mb-4">
-                <div style="width: 44px; height: 44px; border-radius: 12px; background: rgba(50,215,75,0.15); display: flex; align-items: center; justify-content: center;">
-                    <span class="material-symbols-outlined" style="color: #32d74b;">work</span>
-                </div>
+            <div class="resume-row">
+                <div class="resume-row-period">2020 – 2023</div>
                 <div>
-                    <p class="text-uppercase fw-bold text-muted mb-0" style="font-size: 11px; letter-spacing: 0.1em;">{% trans "Career" %}</p>
-                    <h2 class="fw-bold text-light mb-0" style="font-size: 20px;">{% trans "Experience" %}</h2>
+                    <h3>Software Engineer</h3>
+                    <p class="resume-row-org">Various projects</p>
+                    <ul>
+                        <li>Webアプリケーション開発（Django / Python）</li>
+                        <li>データパイプライン設計・運用</li>
+                    </ul>
                 </div>
             </div>
-            <div class="ap-glass-panel p-4 p-md-5">
-                <div style="position: relative; padding-left: 32px;">
-                    <!-- Timeline Line -->
-                    <div style="position: absolute; left: 7px; top: 12px; bottom: 12px; width: 2px; background: linear-gradient(to bottom, #32d74b, #0a84ff); opacity: 0.3;"></div>
-
-                    <!-- Item 1 -->
-                    <div class="mb-5 position-relative">
-                        <div style="position: absolute; left: -32px; top: 6px; width: 16px; height: 16px; border-radius: 50%; background: #32d74b; box-shadow: 0 0 0 4px rgba(50,215,75,0.2);"></div>
-                        <div class="d-flex flex-wrap justify-content-between align-items-start gap-2 mb-2">
-                            <h3 class="fw-bold text-light mb-0" style="font-size: 18px;">AI Architect</h3>
-                            <span class="fw-bold text-muted" style="font-size: 12px; padding: 4px 12px; background: rgba(255,255,255,0.05); border-radius: 12px;">2023 – {% trans "Present" %}</span>
-                        </div>
-                        <p class="fw-bold mb-3" style="font-size: 14px; color: #32d74b;">Self / Freelance</p>
-                        <ul class="text-muted m-0" style="padding-left: 20px; font-size: 14px; line-height: 1.6;">
-                            <li class="mb-1">LLMを活用したシステム設計・プロダクト開発の技術支援</li>
-                            <li class="mb-1">Transformer アーキテクチャの内部解析 (Mechanistic Interpretability)</li>
-                            <li>RAG / Agent ワークフロー設計および評価フレームワーク構築</li>
-                        </ul>
-                    </div>
-
-                    <!-- Item 2 -->
-                    <div class="position-relative">
-                        <div style="position: absolute; left: -32px; top: 6px; width: 16px; height: 16px; border-radius: 50%; background: #0a84ff; box-shadow: 0 0 0 4px rgba(10,132,255,0.2);"></div>
-                        <div class="d-flex flex-wrap justify-content-between align-items-start gap-2 mb-2">
-                            <h3 class="fw-bold text-light mb-0" style="font-size: 18px;">Software Engineer</h3>
-                            <span class="fw-bold text-muted" style="font-size: 12px; padding: 4px 12px; background: rgba(255,255,255,0.05); border-radius: 12px;">2020 – 2023</span>
-                        </div>
-                        <p class="fw-bold mb-3" style="font-size: 14px; color: #0a84ff;">Various projects</p>
-                        <ul class="text-muted m-0" style="padding-left: 20px; font-size: 14px; line-height: 1.6;">
-                            <li class="mb-1">Webアプリケーション開発（Django / Python）</li>
-                            <li>データパイプライン設計・運用</li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Skills -->
-        <section class="ap-reveal">
-            <div class="d-flex align-items-center gap-3 mb-4">
-                <div style="width: 44px; height: 44px; border-radius: 12px; background: rgba(255,159,10,0.15); display: flex; align-items: center; justify-content: center;">
-                    <span class="material-symbols-outlined" style="color: #ff9f0a;">engineering</span>
-                </div>
+            <div class="resume-row">
+                <div class="resume-row-period">2016 – 2020</div>
                 <div>
-                    <p class="text-uppercase fw-bold text-muted mb-0" style="font-size: 11px; letter-spacing: 0.1em;">{% trans "Expertise" %}</p>
-                    <h2 class="fw-bold text-light mb-0" style="font-size: 20px;">{% trans "Skills" %}</h2>
+                    <h3>{% trans "Computer Science" %}</h3>
+                    <p class="resume-row-org" style="margin-bottom: 0;">University · Japan</p>
                 </div>
             </div>
-            
-            <div class="row g-4">
-                <div class="col-md-4">
-                    <div class="ap-glass-panel h-100 p-4">
-                        <div class="d-flex align-items-center gap-2 mb-3 text-uppercase fw-bold text-muted" style="font-size: 12px; letter-spacing: 0.1em;">
-                            <span class="material-symbols-outlined" style="font-size: 16px;">psychology</span>
-                            AI / ML
-                        </div>
-                        <div class="d-flex flex-wrap gap-2">
-                            <span class="ap-chip">LLM</span>
-                            <span class="ap-chip">Transformers</span>
-                            <span class="ap-chip">RAG</span>
-                            <span class="ap-chip">MCP</span>
-                            <span class="ap-chip">Mech. Interp.</span>
-                            <span class="ap-chip">Agents</span>
-                        </div>
-                    </div>
-                </div>
+        </div>
+    </section>
 
-                <div class="col-md-4">
-                    <div class="ap-glass-panel h-100 p-4">
-                        <div class="d-flex align-items-center gap-2 mb-3 text-uppercase fw-bold text-muted" style="font-size: 12px; letter-spacing: 0.1em;">
-                            <span class="material-symbols-outlined" style="font-size: 16px;">code</span>
-                            {% trans "Engineering" %}
-                        </div>
-                        <div class="d-flex flex-wrap gap-2">
-                            <span class="ap-chip">Python</span>
-                            <span class="ap-chip">Django</span>
-                            <span class="ap-chip">PostgreSQL</span>
-                            <span class="ap-chip">Docker</span>
-                            <span class="ap-chip">Git</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-md-4">
-                    <div class="ap-glass-panel h-100 p-4">
-                        <div class="d-flex align-items-center gap-2 mb-3 text-uppercase fw-bold text-muted" style="font-size: 12px; letter-spacing: 0.1em;">
-                            <span class="material-symbols-outlined" style="font-size: 16px;">palette</span>
-                            {% trans "Creative" %}
-                        </div>
-                        <div class="d-flex flex-wrap gap-2">
-                            <span class="ap-chip">Photography</span>
-                            <span class="ap-chip">Leica Q3</span>
-                            <span class="ap-chip">UI Design</span>
-                        </div>
-                    </div>
-                </div>
+    <!-- スキル -->
+    <section class="resume-section ap-reveal">
+        <h2>{% trans "スキル" %}</h2>
+        <div class="resume-tiles">
+            <div class="resume-tile">
+                <h3>AI / ML</h3>
+                <p class="resume-skill-list">LLM, Transformers, RAG, MCP, Mechanistic Interpretability, Agents</p>
             </div>
-        </section>
-
-        <!-- Projects -->
-        <section class="ap-reveal">
-            <div class="d-flex align-items-center gap-3 mb-4">
-                <div style="width: 44px; height: 44px; border-radius: 12px; background: rgba(94,92,230,0.15); display: flex; align-items: center; justify-content: center;">
-                    <span class="material-symbols-outlined" style="color: #5e5ce6;">folder_open</span>
-                </div>
-                <div>
-                    <p class="text-uppercase fw-bold text-muted mb-0" style="font-size: 11px; letter-spacing: 0.1em;">{% trans "Work" %}</p>
-                    <h2 class="fw-bold text-light mb-0" style="font-size: 20px;">{% trans "Projects" %}</h2>
-                </div>
+            <div class="resume-tile">
+                <h3>{% trans "Engineering" %}</h3>
+                <p class="resume-skill-list">Python, Django, PostgreSQL, Docker, Git</p>
             </div>
-
-            <div class="row g-4">
-                <div class="col-md-6">
-                    <a href="#" class="ap-glass-panel ap-bento-card text-decoration-none d-flex flex-column h-100 p-0 overflow-hidden">
-                        <div style="height: 120px; background: linear-gradient(135deg, rgba(94,92,230,0.2), rgba(10,132,255,0.2)); display: flex; align-items: center; justify-content: center;">
-                            <span style="font-size: 48px;">🌐</span>
-                        </div>
-                        <div class="p-4 flex-grow-1 d-flex flex-column">
-                            <h3 class="fw-bold text-light mb-2" style="font-size: 18px;">Y.K. Nexus</h3>
-                            <p class="text-muted mb-4 flex-grow-1" style="font-size: 13px;">{% trans "このサイト。Django + Apple-inspired Glass UIで構築したポートフォリオ。" %}</p>
-                            <div class="d-flex flex-wrap gap-2">
-                                <span class="ap-chip">Django</span>
-                                <span class="ap-chip">PostgreSQL</span>
-                                <span class="ap-chip">Docker</span>
-                            </div>
-                        </div>
-                    </a>
-                </div>
-
-                <div class="col-md-6">
-                    <a href="{% url 'photraveler:map' %}" class="ap-glass-panel ap-bento-card text-decoration-none d-flex flex-column h-100 p-0 overflow-hidden">
-                        <div style="height: 120px; background: linear-gradient(135deg, rgba(50,215,75,0.2), rgba(255,159,10,0.2)); display: flex; align-items: center; justify-content: center;">
-                            <span style="font-size: 48px;">🗺️</span>
-                        </div>
-                        <div class="p-4 flex-grow-1 d-flex flex-column">
-                            <h3 class="fw-bold text-light mb-2" style="font-size: 18px;">WanderLens</h3>
-                            <p class="text-muted mb-4 flex-grow-1" style="font-size: 13px;">{% trans "写真と地図を組み合わせた旅の記録アプリ。Leaflet.jsで世界地図にピンを表示。" %}</p>
-                            <div class="d-flex flex-wrap gap-2">
-                                <span class="ap-chip">Leaflet.js</span>
-                                <span class="ap-chip">Django</span>
-                            </div>
-                        </div>
-                    </a>
-                </div>
+            <div class="resume-tile">
+                <h3>{% trans "Creative" %}</h3>
+                <p class="resume-skill-list">Photography, Leica Q3, UI Design</p>
             </div>
-        </section>
+        </div>
+    </section>
 
-        <!-- Education -->
-        <section class="ap-reveal">
-            <div class="d-flex align-items-center gap-3 mb-4">
-                <div style="width: 44px; height: 44px; border-radius: 12px; background: rgba(191,90,242,0.15); display: flex; align-items: center; justify-content: center;">
-                    <span class="material-symbols-outlined" style="color: #bf5af2;">school</span>
+    <!-- プロジェクト -->
+    <section class="resume-section ap-reveal" id="work" style="scroll-margin-top: 60px;">
+        <h2>{% trans "プロジェクト" %}</h2>
+        <div class="resume-projects">
+            <a href="{% url 'blog:list' %}" class="resume-feature">
+                {% include "_hero_image.html" with hero="img/hero/blogs-glass" class="resume-feature-img" sizes="(max-width: 833px) 100vw, 480px" lazy=True %}
+                <div class="resume-feature-text">
+                    <h3>Blogs</h3>
+                    <p>{% trans "テンプレートを選ぶだけで、洗練されたブログを。" %}</p>
+                    <span class="ap-link">{% trans "詳しく見る" %}</span>
                 </div>
-                <div>
-                    <p class="text-uppercase fw-bold text-muted mb-0" style="font-size: 11px; letter-spacing: 0.1em;">{% trans "Background" %}</p>
-                    <h2 class="fw-bold text-light mb-0" style="font-size: 20px;">{% trans "Education" %}</h2>
+            </a>
+            <a href="{% if user.is_authenticated %}{% url 'community:list' %}{% else %}{% url 'login' %}?next={% url 'community:list' %}{% endif %}" class="resume-feature">
+                {% include "_hero_image.html" with hero="img/hero/lounge-fluid" class="resume-feature-img" sizes="(max-width: 833px) 100vw, 480px" lazy=True %}
+                <div class="resume-feature-text">
+                    <h3>Community Lounge</h3>
+                    <p>{% trans "AI・写真・クラフトビールを語り合う場所。" %}</p>
+                    <span class="ap-link">{% trans "詳しく見る" %}</span>
                 </div>
-            </div>
-
-            <div class="ap-glass-panel p-4">
-                <div class="d-flex flex-wrap justify-content-between align-items-center gap-4">
-                    <div class="d-flex align-items-center gap-3">
-                        <div style="width: 56px; height: 56px; border-radius: 14px; background: rgba(255,255,255,0.05); display: flex; align-items: center; justify-content: center;">
-                            <span class="material-symbols-outlined" style="font-size: 28px; color: var(--ap-accent);">school</span>
-                        </div>
-                        <div>
-                            <h3 class="fw-bold text-light mb-1" style="font-size: 18px;">{% trans "Computer Science" %}</h3>
-                            <p class="text-muted mb-0" style="font-size: 14px;">University · Japan</p>
-                        </div>
-                    </div>
-                    <span class="fw-bold text-muted" style="font-size: 13px; padding: 6px 16px; background: rgba(255,255,255,0.05); border-radius: 12px;">2016 – 2020</span>
+            </a>
+            <a href="{% url 'photraveler:map' %}" class="resume-project">
+                <div class="resume-project-body">
+                    <h3>WanderLens</h3>
+                    <p>{% trans "旅の記憶を世界地図にピン留めするフォトトラベルジャーナル。" %}</p>
+                    <span class="ap-link">{% trans "詳しく見る" %}</span>
                 </div>
-            </div>
-        </section>
-
-    </div>
+            </a>
+            <a href="{% url 'core:home' %}" class="resume-project">
+                <div class="resume-project-body">
+                    <h3>JE6HUB.com</h3>
+                    <p>{% trans "このサイト。Django と PostgreSQL で構築。" %}</p>
+                    <span class="ap-link">{% trans "詳しく見る" %}</span>
+                </div>
+            </a>
+        </div>
+    </section>
 </div>
+
+<!-- CTA -->
+<section class="ap-section ap-reveal" style="padding-top: 120px; padding-bottom: 140px;">
+    <h2 class="ap-section-title">{% trans "一緒に、つくりましょう。" %}</h2>
+    <p class="ap-subhead mb-4">{% trans "プロジェクト相談、コラボレーション、または単純に話したいことがあれば。" %}</p>
+    <a href="{% url 'core:contact' %}" class="ap-btn ap-btn-primary">{% trans "お問い合わせ" %}</a>
+</section>
 {% endblock %}

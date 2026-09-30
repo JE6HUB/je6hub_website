@@ -1,0 +1,6 @@
+{% load static %}{% comment %}
+ページのキービジュアル (レスポンシブ画像)。hero は static/img/hero/ のファイル名の接頭辞。
+使い方: include "_hero_image.html" with hero="img/hero/blogs-glass" class="..." style="..."
+{% endcomment %}<img src="{% static hero|add:'-1280.jpg' %}"
+     srcset="{% static hero|add:'-1280.jpg' %} 1280w, {% static hero|add:'-1920.jpg' %} 1920w, {% static hero|add:'-2560.jpg' %} 2560w"
+     sizes="{{ sizes|default:'100vw' }}" alt="" {% if lazy %}loading="lazy"{% else %}fetchpriority="high"{% endif %}{% if class %} class="{{ class }}"{% endif %}{% if style %} style="{{ style }}"{% endif %}>

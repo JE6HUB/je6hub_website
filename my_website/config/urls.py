@@ -26,6 +26,7 @@ urlpatterns += i18n_patterns(
     # アプリ作成後に以下のコメントアウトを外します
     path('map/', include('photraveler.urls')),  # 写真×地図
     path('community/', include('community.urls')), # チャット
+    path('blog/', include('blog.urls')),           # Blogs
     path('accounts/', include('allauth.urls')),     # django-allauth (Sign in with Apple)
 )
 

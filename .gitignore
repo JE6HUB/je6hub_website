@@ -14,3 +14,7 @@ my_website/locale/*/LC_MESSAGES/*.mo
 # Editors / OS
 .vscode/
 .DS_Store
+
+# Scratch / reference material (not part of the project)
+_video_tmp/
+example_files/

@@ -1,0 +1,56 @@
+{% load i18n %}
+<!-- スポットの追加・編集 (持ち主のみ) -->
+<dialog id="wl-editor" class="wl-editor" aria-labelledby="wl-editor-title">
+    <form method="post" enctype="multipart/form-data" id="wl-editor-form"
+          data-add-url="{% url 'photraveler:add_pin' profile_user.username %}">
+        {% csrf_token %}
+        <div class="wl-editor-head">
+            <h2 id="wl-editor-title" class="wl-editor-title" data-add="{% trans 'スポットを追加' %}" data-edit="{% trans 'スポットを編集' %}"></h2>
+            <button type="button" class="wl-icon-btn" data-close aria-label="{% trans '閉じる' %}"><span class="material-symbols-outlined" aria-hidden="true">close</span></button>
+        </div>
+
+        <div class="wl-editor-body">
+            <div class="wl-editor-col">
+                <label class="ap-label">{% trans "写真" %} <small class="wl-muted">（{% blocktrans %}{{ max_photos }} 枚まで{% endblocktrans %}）</small></label>
+                <div class="wl-drop" id="wl-drop" tabindex="0" role="button" aria-label="{% trans '写真を選ぶ' %}">
+                    <span class="material-symbols-outlined" aria-hidden="true">add_photo_alternate</span>
+                    <span>{% trans "クリックまたはドラッグ＆ドロップ" %}</span>
+                    <small>{% trans "位置情報付きの写真なら、場所と日付が自動で入ります" %}</small>
+                </div>
+                <input type="file" name="photos" id="wl-photos-input" accept="image/jpeg,image/png,image/webp" multiple hidden>
+                <div class="wl-thumbs" id="wl-thumbs"></div>
+                <p class="wl-badge" id="wl-exif-badge" hidden>
+                    <span class="material-symbols-outlined" aria-hidden="true">my_location</span>{% trans "写真の位置情報を使用しました" %}
+                </p>
+
+                <label class="ap-label" for="wl-title">{% trans "タイトル" %} <span class="wl-required">*</span></label>
+                <input type="text" name="title" id="wl-title" class="ap-input" maxlength="200" required placeholder="{% trans '例: 夕暮れの清水寺' %}">
+
+                <label class="ap-label" for="wl-date">{% trans "訪れた日" %}</label>
+                <input type="date" name="visited_on" id="wl-date" class="ap-input">
+
+                <label class="ap-label" for="wl-desc">{% trans "メモ" %}</label>
+                <textarea name="description" id="wl-desc" class="ap-input" rows="4" maxlength="2000" placeholder="{% trans 'この場所の思い出を…' %}"></textarea>
+            </div>
+
+            <div class="wl-editor-col">
+                <label class="ap-label" for="wl-place">{% trans "場所" %} <span class="wl-required">*</span></label>
+                <div class="wl-place">
+                    <input type="text" name="place_name" id="wl-place" class="ap-input" maxlength="120" autocomplete="off" placeholder="{% trans '場所を検索、または地図をクリック' %}">
+                    <ul class="wl-suggest" id="wl-place-results" hidden></ul>
+                </div>
+                <div id="wl-editor-map" class="wl-editor-map"></div>
+                <p class="wl-muted wl-coords" id="wl-coords"></p>
+                <input type="hidden" name="country" id="wl-country">
+                <input type="hidden" name="latitude" id="wl-lat">
+                <input type="hidden" name="longitude" id="wl-lng">
+                <input type="hidden" name="photo_order" id="wl-photo-order">
+            </div>
+        </div>
+
+        <div class="wl-editor-foot">
+            <button type="button" class="ap-btn ap-btn-outline wl-btn" data-close>{% trans "キャンセル" %}</button>
+            <button type="submit" class="ap-btn ap-btn-primary wl-btn" id="wl-editor-submit">{% trans "保存" %}</button>
+        </div>
+    </form>
+</dialog>

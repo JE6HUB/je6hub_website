@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+{% load static i18n %}
+
+{% block title %}{% trans "マイブログ" %} — Blogs{% endblock %}
+
+{% block extra_head %}
+<link href="{% static 'css/blog.css' %}?v=21" rel="stylesheet" />
+{% endblock %}
+
+{% block content %}
+<div class="blog-page blog-page--narrow">
+    <a href="{% url 'blog:list' %}" class="blog-back">
+        <span class="material-symbols-outlined" aria-hidden="true">arrow_back</span>{% trans "Blogsに戻る" %}
+    </a>
+
+    <header class="blog-index-header">
+        <div>
+            <h1 class="ap-section-title mb-2" style="font-size: 40px;">{% trans "マイブログ" %}</h1>
+            <p class="blog-index-lead">{% trans "あなたの記事と下書き" %}</p>
+        </div>
+        <a href="{% url 'blog:create' %}" class="ap-btn ap-btn-primary blog-btn-sm">
+            {% trans "新しい記事" %}
+        </a>
+    </header>
+
+    {% if posts %}
+    <ul class="blog-mine-list">
+        {% for post in posts %}
+        <li class="blog-mine-item" style="--blog-accent: {{ post.accent }};">
+            <div class="blog-mine-thumb">
+                {% if post.cover_image %}
+                    <img src="{{ post.cover_image.url }}" alt="">
+                {% else %}
+                    <div class="blog-cover-fallback"><span>{{ post.title|first }}</span></div>
+                {% endif %}
+            </div>
+            <div class="blog-mine-info">
+                <span class="blog-status blog-status--{{ post.status }}">{{ post.get_status_display }}</span>
+                <a href="{{ post.get_absolute_url }}" class="blog-mine-title">{{ post.title }}</a>
+                <span class="blog-mine-meta">
+                    {{ post.get_template_display }} &nbsp;·&nbsp; {% trans "更新" %} {{ post.updated_at|date:"Y.m.d H:i" }}
+                </span>
+            </div>
+            <div class="blog-mine-actions">
+                <a href="{% url 'blog:edit' post.pk %}" class="blog-icon-btn" title="{% trans '編集' %}" aria-label="{% trans '編集' %}">
+                    <span class="material-symbols-outlined" aria-hidden="true">edit</span>
+                </a>
+                <form method="post" action="{% url 'blog:delete' post.pk %}" onsubmit="return confirm('{% trans "この記事を削除しますか？この操作は取り消せません。" %}');">
+                    {% csrf_token %}
+                    <button type="submit" class="blog-icon-btn blog-icon-btn--danger" title="{% trans '削除' %}" aria-label="{% trans '削除' %}">
+                        <span class="material-symbols-outlined" aria-hidden="true">delete</span>
+                    </button>
+                </form>
+            </div>
+        </li>
+        {% endfor %}
+    </ul>
+    {% else %}
+    <div class="blog-empty ap-glass-panel">
+        <span class="material-symbols-outlined" aria-hidden="true">edit_note</span>
+        <p>{% trans "まだ記事がありません。テンプレートを選んで、すぐに書き始められます。" %}</p>
+        <a href="{% url 'blog:create' %}" class="ap-btn ap-btn-primary blog-btn-sm">{% trans "最初の記事を書く" %}</a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

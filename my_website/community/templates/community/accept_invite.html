@@ -1,32 +1,42 @@
 {% extends 'base.html' %}
-{% load i18n %}
+{% load static i18n %}
 
 {% block title %}{% trans "招待の承諾" %} — {{ channel.name }}{% endblock %}
 
+{% block glass_preload %}{% include "_liquid_glass_preload.html" with hero="img/hero/lounge-fluid" %}{% endblock %}
+
+{% block extra_head %}
+<link href="{% static 'css/lounge.css' %}?v=5" rel="stylesheet" />
+{% endblock %}
+
 {% block content %}
-<div class="ap-section py-5" style="max-width:500px;">
-    <div class="ap-glass-panel text-center ap-reveal" style="padding:48px 36px; border: 1px solid rgba(50,215,75,0.3);">
-        <div style="width:72px;height:72px;border-radius:24px;background:rgba(50,215,75,0.15);display:flex;align-items:center;justify-content:center;margin:0 auto 32px;">
-            <span class="material-symbols-outlined" aria-hidden="true" style="color:#32d74b;font-size:36px;">mail</span>
-        </div>
-        <h2 class="ap-hero-title mb-3" style="font-size: 24px;">{% trans "招待が届いています" %}</h2>
-        <p class="ap-subhead mb-5" style="font-size: 15px;">
-            <strong class="text-light">{{ channel.name }}</strong>
-            {% trans "へ参加するよう招待されました。" %}
+<!-- Liquid Glass root: 背景と glass パネルはすべて直接の子 -->
+<section class="lounge-invite liquid-glass-root" id="invite-glass-root">
+    {% include "_hero_image.html" with hero="img/hero/lounge-fluid" class="lounge-hero-bg" %}
+    <div class="lounge-hero-tint"></div>
+
+    <div class="liquid-glass-panel lounge-invite-panel"
+         data-config='{"cornerRadius":40, "blurAmount":0.4, "brightness":-0.2}'>
+        <span class="label">
+            <span class="lounge-invite-icon"><span class="material-symbols-outlined" aria-hidden="true">mail</span></span>
+            <h1 class="lounge-invite-title">{% trans "招待が届いています" %}</h1>
+            <p class="lounge-invite-text">
+                <strong>{{ channel.name }}</strong> {% trans "へ参加するよう招待されました。" %}
+            </p>
             {% if membership.invited_by %}
-            <br><span class="text-muted" style="font-size:13px; display:inline-block; margin-top:8px;">{% trans "招待者" %}: {{ membership.invited_by.username }}</span>
+            <span class="lounge-invite-by">{% trans "招待者" %}: {{ membership.invited_by.username }}</span>
             {% endif %}
-        </p>
-        <div class="d-flex gap-3 justify-content-center flex-wrap">
-            <form method="post">
-                {% csrf_token %}
-                <button type="submit" class="ap-btn ap-btn-primary" style="padding:14px 32px; background: #32d74b; font-size: 16px;">
-                    <span class="material-symbols-outlined align-middle me-1" aria-hidden="true" style="font-size:20px;">check</span>
-                    {% trans "承諾する" %}
-                </button>
-            </form>
-            <a href="{% url 'community:list' %}" class="ap-btn ap-btn-outline" style="padding:14px 32px; border:none; background:rgba(255,255,255,0.05); font-size: 16px;">{% trans "後で" %}</a>
-        </div>
+        </span>
     </div>
-</div>
+
+    <div class="lounge-invite-actions">
+        <form method="post" class="m-0">
+            {% csrf_token %}
+            <button type="submit" class="lounge-btn lounge-btn--primary">
+                {% trans "承諾する" %}
+            </button>
+        </form>
+        <a href="{% url 'community:list' %}" class="lounge-btn lounge-btn--glass">{% trans "後で" %}</a>
+    </div>
+</section>
 {% endblock %}

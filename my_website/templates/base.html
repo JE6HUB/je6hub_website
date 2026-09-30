@@ -4,15 +4,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Portfolio & Apps{% endblock %}</title>
+    <title>{% block title %}{% endblock %}{% block title_suffix %} — JE6HUB.com{% endblock %}</title>
+    <meta property="og:site_name" content="JE6HUB.com">
+    <link rel="icon" href="{% static 'img/favicon.svg' %}" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="{% static 'img/apple-touch-icon.png' %}">
+    <meta name="theme-color" content="#000000">
 
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,400,0,0" rel="stylesheet" />
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
     <link href="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/6.4.0/mdb.min.css" rel="stylesheet" />
 
-    <link href="{% static 'css/style.css' %}?v=11" rel="stylesheet" />
+    <link href="{% static 'css/style.css' %}?v=18" rel="stylesheet" />
 
     {% block extra_head %}{% endblock %}
+    {# ガラス (LiquidGlass) を使うページは templates/_liquid_glass_preload.html を入れる #}
+    {% block glass_preload %}{% endblock %}
 </head>
 <body>
 
@@ -28,12 +34,13 @@
          whole document on every scroll frame (too expensive, and capturing
          <body> as root hung indefinitely — a real bug in the library). -->
     <nav class="ap-glass-navbar" id="ap-glass-navbar" aria-label="{% trans 'Global (condensed)' %}">
-        <a class="ap-glass-navbar-link" href="/" aria-label="Home">
-            <span class="material-symbols-outlined" style="font-size: 16px; vertical-align: middle;">je6hub</span>
+        <a class="ap-glass-navbar-link ap-logo-link" href="/">
+            {% include "_logo.html" with logo_id="condensed" %}
         </a>
         <a class="ap-glass-navbar-link" href="/">{% trans "Home" %}</a>
         <a class="ap-glass-navbar-link" href="{% url 'photraveler:map' %}">{% trans "WanderLens" %}</a>
         <a class="ap-glass-navbar-link" href="{% if user.is_authenticated %}{% url 'community:list' %}{% else %}{% url 'login' %}?next={% url 'community:list' %}{% endif %}">{% trans "Lounge" %}</a>
+        <a class="ap-glass-navbar-link" href="{% url 'blog:list' %}">{% trans "Blogs" %}</a>
         <a class="ap-glass-navbar-link" href="{% url 'core:resume' %}">{% trans "Resume" %}</a>
         <a class="ap-glass-navbar-link" href="{% url 'core:contact' %}">{% trans "Contact" %}</a>
     </nav>
@@ -42,13 +49,14 @@
     <nav class="ap-globalnav" id="ap-globalnav" aria-label="Global">
         <ul class="ap-globalnav-list">
             <li class="ap-globalnav-item">
-                <a class="ap-globalnav-link" href="/" aria-label="Home">
-                    <span class="material-symbols-outlined" style="font-size: 20px;">je6hub</span>
+                <a class="ap-globalnav-link ap-logo-link" href="/">
+                    {% include "_logo.html" with logo_id="global" %}
                 </a>
             </li>
             <li class="ap-globalnav-item"><a class="ap-globalnav-link" href="/">{% trans "Home" %}</a></li>
             <li class="ap-globalnav-item"><a class="ap-globalnav-link" href="{% url 'photraveler:map' %}">{% trans "WanderLens" %}</a></li>
             <li class="ap-globalnav-item"><a class="ap-globalnav-link" href="{% if user.is_authenticated %}{% url 'community:list' %}{% else %}{% url 'login' %}?next={% url 'community:list' %}{% endif %}">{% trans "Lounge" %}</a></li>
+            <li class="ap-globalnav-item"><a class="ap-globalnav-link" href="{% url 'blog:list' %}">{% trans "Blogs" %}</a></li>
             <li class="ap-globalnav-item"><a class="ap-globalnav-link" href="{% url 'core:resume' %}">{% trans "Resume" %}</a></li>
             <li class="ap-globalnav-item"><a class="ap-globalnav-link" href="{% url 'core:contact' %}">{% trans "Contact" %}</a></li>
             
@@ -100,13 +108,14 @@
         <div style="max-width: 980px; margin: 0 auto;">
             <div class="d-flex flex-column flex-md-row justify-content-between align-items-center gap-3">
                 <div>
-                    <span class="fw-bold text-light">Y.K. Nexus</span>
+                    <span class="fw-bold text-light">JE6HUB.com</span>
                     <span class="ms-3">© 2026 Yuta Kumadaki. All rights reserved.</span>
                 </div>
                 <div class="d-flex gap-4">
                     <a href="{% url 'core:resume' %}" class="text-decoration-none" style="color: var(--ap-text-muted);">Resume</a>
                     <a href="{% url 'photraveler:map' %}" class="text-decoration-none" style="color: var(--ap-text-muted);">WanderLens</a>
                     <a href="{% url 'community:list' %}" class="text-decoration-none" style="color: var(--ap-text-muted);">Lounge</a>
+                    <a href="{% url 'blog:list' %}" class="text-decoration-none" style="color: var(--ap-text-muted);">Blogs</a>
                     <a href="{% url 'core:contact' %}" class="text-decoration-none" style="color: var(--ap-text-muted);">Contact</a>
                 </div>
             </div>
@@ -134,23 +143,43 @@
     {% block extra_js %}{% endblock %}
 
     <script type="module">
-        import { LiquidGlass } from 'https://cdn.jsdelivr.net/npm/@ybouane/liquidglass/dist/index.js';
+        // LiquidGlass はガラスのあるページでのみ読み込む (バージョン固定で長期キャッシュ可能)
+        const roots = [...document.querySelectorAll('.liquid-glass-root')];
+        if (roots.length) {
+            const { LiquidGlass } = await import('https://cdn.jsdelivr.net/npm/@ybouane/liquidglass@1.0.3/dist/index.js');
 
-        // Wait for fonts so glass captures text at final size.
-        if (document.fonts && document.fonts.ready) {
-            await document.fonts.ready;
-        }
+            // ライブラリは読み込み未完了の <img> を描画せず、読み込み完了後も自動では
+            // 再描画しない。背景画像とフォントを待ってから init する (最大 2.5 秒)。
+            const loaded = (img) => img.complete ? Promise.resolve() : new Promise((resolve) => {
+                img.addEventListener('load', resolve, { once: true });
+                img.addEventListener('error', resolve, { once: true });
+            });
+            const fontsReady = document.fonts ? document.fonts.ready : Promise.resolve();
 
-        // Hero root — glass buttons are direct children with data-config already set.
-        const heroRoot = document.getElementById('hero-glass-root');
-        if (heroRoot) {
-            const glassEls = heroRoot.querySelectorAll('.liquid-glass-btn');
-            if (glassEls.length > 0) {
-                await LiquidGlass.init({
-                    root: heroRoot,
-                    glassElements: glassEls,
-                }).catch(err => console.error('LiquidGlass hero init failed:', err));
-            }
+            // Every .liquid-glass-root gets its own instance, initialised in parallel.
+            // Glass elements must be direct children of their root and carry
+            // their settings in data-config.
+            await Promise.all(roots.map(async (root) => {
+                const glassEls = root.querySelectorAll(':scope > .liquid-glass-btn, :scope > .liquid-glass-panel');
+                if (glassEls.length === 0) return;
+                const images = [...root.querySelectorAll(':scope > img')];
+                await Promise.race([
+                    Promise.all([fontsReady, ...images.map(loaded)]),
+                    new Promise((resolve) => setTimeout(resolve, 2500)),
+                ]);
+                try {
+                    const instance = await LiquidGlass.init({ root, glassElements: glassEls });
+                    root.classList.add('liquid-glass-ready');
+                    // タイムアウト後に読み込まれた画像は、届いた時点で再キャプチャさせる
+                    images.filter((img) => !img.complete).forEach((img) => {
+                        img.addEventListener('load', () => instance.markChanged(img), { once: true });
+                    });
+                } catch (err) {
+                    // WebGL unavailable etc. — fall back to CSS frosted glass
+                    root.classList.add('liquid-glass-fallback');
+                    console.error('LiquidGlass init failed:', err);
+                }
+            }));
         }
     </script>
 

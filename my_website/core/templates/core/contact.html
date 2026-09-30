@@ -1,131 +1,75 @@
 {% extends 'base.html' %}
 {% load i18n %}
 
-{% block title %}Contact — Y.K. Nexus{% endblock %}
+{% block title %}Contact{% endblock %}
+
+{% block extra_head %}
+<style>
+    .contact-page { max-width: 1000px; margin: 0 auto; }
+    .contact-grid { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 3fr); gap: 20px; align-items: start; text-align: left; }
+    .contact-tile-title { font-size: 24px; font-weight: 600; margin: 0 0 24px; }
+    .contact-icons { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 14px; }
+    .contact-icons a {
+        width: 56px; height: 56px; border-radius: 50%;
+        display: inline-flex; align-items: center; justify-content: center;
+        background: #2c2c2e; color: var(--ap-text); font-size: 22px; text-decoration: none;
+        transition: background-color 0.2s ease, color 0.2s ease;
+    }
+    .contact-icons a:hover { background: #3a3a3c; color: #fff; }
+    .contact-icons a:focus-visible { outline: 2px solid var(--ap-accent); outline-offset: 3px; }
+    @media (max-width: 767px) { .contact-grid { grid-template-columns: 1fr; } }
+</style>
+{% endblock %}
 
 {% block content %}
-<div class="ap-section py-5">
+<div class="ap-section contact-page">
 
-    <!-- Hero -->
-    <header class="text-center mb-5 ap-reveal">
-        <div class="d-inline-flex align-items-center gap-2 mb-3">
-            <div style="width: 32px; height: 1px; background: var(--ap-accent); opacity: 0.5;"></div>
-            <span class="text-uppercase fw-bold" style="font-size: 11px; letter-spacing: 0.15em; color: var(--ap-accent);">{% trans "Get in touch" %}</span>
-            <div style="width: 32px; height: 1px; background: var(--ap-accent); opacity: 0.5;"></div>
-        </div>
-        <h1 class="ap-hero-title mb-3" style="font-size: clamp(32px, 5vw, 56px);">
-            {% trans "Let's build" %}<br>
-            {% trans "something" %} <span class="ap-text-gradient">{% trans "together" %}</span>
-        </h1>
-        <p class="ap-subhead mx-auto" style="max-width: 440px;">
-            {% trans "プロジェクトのご相談・写真や技術に関する話・コラボレーション、なんでもお気軽に。" %}
+    <header class="text-center ap-reveal" style="margin-bottom: 64px;">
+        <h1 class="ap-hero-title" style="font-size: clamp(40px, 6vw, 72px);">{% trans "お問い合わせ" %}</h1>
+        <p class="ap-subhead mx-auto mb-0" style="max-width: 560px;">
+            {% trans "プロジェクトのご相談・写真や技術に関する話・コラボレーション等なんでもお気軽にご連絡ください。通常 24 時間以内にご返信します。" %}
         </p>
     </header>
 
-    <!-- Grid -->
-    <div class="row g-4 justify-content-center" style="max-width: 900px; margin: 0 auto;">
-
-        <!-- ── Left: Info panel ── -->
-        <div class="col-md-5">
-            <div class="d-flex flex-column gap-4 h-100 ap-reveal">
-
-                <div class="d-inline-flex align-items-center gap-2 px-3 py-2 rounded-pill" style="background: rgba(50,215,75,0.1); border: 1px solid rgba(50,215,75,0.2); width: fit-content;">
-                    <span style="width: 8px; height: 8px; border-radius: 50%; background: #32d74b; box-shadow: 0 0 0 0 rgba(50,215,75,0.5); animation: pulse 2s infinite;"></span>
-                    <span class="fw-bold" style="font-size: 13px; color: #32d74b;">{% trans "Available for new projects" %}</span>
-                </div>
-                <style>
-                    @keyframes pulse {
-                        0% { box-shadow: 0 0 0 0 rgba(50,215,75,0.5); }
-                        70% { box-shadow: 0 0 0 6px rgba(50,215,75,0); }
-                        100% { box-shadow: 0 0 0 0 rgba(50,215,75,0); }
-                    }
-                </style>
-
-                <div class="ap-glass-panel flex-grow-1 d-flex flex-column" style="padding: 24px;">
-                    <p class="text-uppercase fw-bold text-muted mb-4" style="font-size: 11px; letter-spacing: 0.1em;">{% trans "Reach me at" %}</p>
-                    
-                    <div class="d-flex flex-column gap-3">
-                        <a href="mailto:kumagt2000@gmail.com" class="d-flex align-items-center gap-3 text-decoration-none" style="padding: 12px; border-radius: 12px; background: rgba(255,255,255,0.03); transition: background 0.2s;">
-                            <div style="width: 40px; height: 40px; border-radius: 10px; background: rgba(10,132,255,0.15); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
-                                <span class="material-symbols-outlined" style="color: #0a84ff; font-size: 20px;">mail</span>
-                            </div>
-                            <div style="flex: 1; min-width: 0;">
-                                <div class="fw-bold text-muted text-uppercase mb-1" style="font-size: 11px; letter-spacing: 0.05em;">Email</div>
-                                <div class="fw-bold text-light" style="font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">kumagt2000@gmail.com</div>
-                            </div>
-                            <span class="material-symbols-outlined text-muted" style="font-size: 18px;">arrow_forward</span>
-                        </a>
-
-                        <a href="https://github.com/je6hub" target="_blank" rel="noopener noreferrer" class="d-flex align-items-center gap-3 text-decoration-none" style="padding: 12px; border-radius: 12px; background: rgba(255,255,255,0.03); transition: background 0.2s;">
-                            <div style="width: 40px; height: 40px; border-radius: 10px; background: rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
-                                <i class="fab fa-github" style="color: #fff; font-size: 20px;"></i>
-                            </div>
-                            <div style="flex: 1; min-width: 0;">
-                                <div class="fw-bold text-muted text-uppercase mb-1" style="font-size: 11px; letter-spacing: 0.05em;">GitHub</div>
-                                <div class="fw-bold text-light" style="font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">github.com/je6hub</div>
-                            </div>
-                            <span class="material-symbols-outlined text-muted" style="font-size: 18px;">arrow_forward</span>
-                        </a>
-                    </div>
-                </div>
-
-                <div class="d-flex align-items-center gap-2 text-muted px-2" style="font-size: 12px;">
-                    <span class="material-symbols-outlined" style="font-size: 16px; opacity: 0.7;">schedule</span>
-                    <span>{% trans "通常 24 時間以内にご返信します" %}</span>
-                </div>
-
-            </div>
+    <div class="contact-grid">
+        <!-- 連絡先 -->
+        <div class="ap-glass-panel contact-info ap-reveal">
+            <h2 class="contact-tile-title">{% trans "連絡先" %}</h2>
+            <ul class="contact-icons">
+                <li><a href="mailto:kumagt2000@gmail.com" aria-label="{% trans 'メール' %}" title="kumagt2000@gmail.com"><i class="fa-solid fa-envelope" aria-hidden="true"></i></a></li>
+                <li><a href="https://github.com/je6hub" target="_blank" rel="noopener noreferrer" aria-label="GitHub" title="GitHub"><i class="fa-brands fa-github" aria-hidden="true"></i></a></li>
+                <li><a href="https://www.facebook.com/kuma1611daki" target="_blank" rel="noopener noreferrer" aria-label="Facebook" title="Facebook"><i class="fa-brands fa-facebook-f" aria-hidden="true"></i></a></li>
+                <li><a href="https://www.linkedin.com/in/ykumadak" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn" title="LinkedIn"><i class="fa-brands fa-linkedin-in" aria-hidden="true"></i></a></li>
+            </ul>
         </div>
 
-        <!-- ── Right: Form ── -->
-        <div class="col-md-7">
-            <div class="ap-glass-panel h-100 ap-reveal" style="padding: 32px;">
-                <h2 class="d-flex align-items-center gap-2 mb-4 text-light fw-bold" style="font-size: 20px;">
-                    <span class="material-symbols-outlined" style="color: var(--ap-accent); font-size: 24px;">edit_square</span>
-                    {% trans "Send a message" %}
-                </h2>
+        <!-- フォーム -->
+        <div class="ap-glass-panel ap-reveal">
+            <h2 class="contact-tile-title">{% trans "メッセージを送る" %}</h2>
 
-                <form method="post" action="{% url 'core:contact' %}" id="contactForm" novalidate>
-                    {% csrf_token %}
-
-                    <div class="row g-3 mb-3">
-                        <div class="col-sm-6">
-                            <label class="form-label d-flex align-items-center gap-1 text-uppercase fw-bold text-muted mb-2" for="{{ form.name.id_for_label }}" style="font-size: 11px; letter-spacing: 0.05em;">
-                                <span class="material-symbols-outlined" style="font-size: 14px;">person</span>
-                                {% trans "Name" %}
-                            </label>
-                            <!-- The form fields render with their own classes, we should just style them generically inside ap-glass-panel if we can't add ap-input easily, or we can use django-widget-tweaks, but we can't here, so we add custom css -->
-                            {{ form.name }}
-                        </div>
-                        <div class="col-sm-6">
-                            <label class="form-label d-flex align-items-center gap-1 text-uppercase fw-bold text-muted mb-2" for="{{ form.email.id_for_label }}" style="font-size: 11px; letter-spacing: 0.05em;">
-                                <span class="material-symbols-outlined" style="font-size: 14px;">alternate_email</span>
-                                {% trans "Email" %}
-                            </label>
-                            {{ form.email }}
-                        </div>
+            <form method="post" action="{% url 'core:contact' %}" id="contactForm" novalidate>
+                {% csrf_token %}
+                <div class="row g-3 mb-3">
+                    <div class="col-sm-6">
+                        <label class="ap-label" for="{{ form.name.id_for_label }}">{% trans "お名前" %}</label>
+                        {{ form.name }}
                     </div>
-
-                    <div class="mb-4">
-                        <label class="form-label d-flex align-items-center gap-1 text-uppercase fw-bold text-muted mb-2" for="{{ form.message.id_for_label }}" style="font-size: 11px; letter-spacing: 0.05em;">
-                            <span class="material-symbols-outlined" style="font-size: 14px;">edit_note</span>
-                            {% trans "Message" %}
-                        </label>
-                        {{ form.message }}
-                        <div class="text-end mt-1 text-muted" id="msgCounter" style="font-size: 11px;"></div>
+                    <div class="col-sm-6">
+                        <label class="ap-label" for="{{ form.email.id_for_label }}">{% trans "メールアドレス" %}</label>
+                        {{ form.email }}
                     </div>
-
-                    <button type="submit" class="ap-btn ap-btn-primary w-100 d-flex justify-content-center align-items-center gap-2" style="padding: 14px; font-size: 15px;">
-                        <span>{% trans "Send Message" %}</span>
-                        <span class="material-symbols-outlined" style="font-size: 18px;">send</span>
-                    </button>
-
-                </form>
-            </div>
+                </div>
+                <div class="mb-4">
+                    <label class="ap-label" for="{{ form.message.id_for_label }}">{% trans "メッセージ" %}</label>
+                    {{ form.message }}
+                    <div class="text-end mt-1 text-muted" id="msgCounter" style="font-size: 12px;"></div>
+                </div>
+                <button type="submit" class="ap-btn ap-btn-primary w-100">{% trans "送信" %}</button>
+            </form>
         </div>
-
     </div>
 </div>
+
 {% endblock %}
 
 {% block extra_js %}
@@ -167,8 +111,6 @@
         form.addEventListener('submit', () => {
             btn.style.opacity = '0.7';
             btn.style.pointerEvents = 'none';
-            const icon = btn.querySelector('.material-symbols-outlined');
-            if (icon) icon.textContent = 'hourglass_top';
         });
     }
 })();

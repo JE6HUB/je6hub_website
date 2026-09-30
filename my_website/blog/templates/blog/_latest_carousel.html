@@ -1,0 +1,51 @@
+{% load i18n %}
+{# 最新記事の自動スクロールカルーセル (制御: static/js/blog-carousel.js) #}
+<section class="blog-carousel" data-carousel data-interval="5000"
+         aria-roledescription="carousel" aria-label="{% trans '最新の投稿' %}">
+    <div class="blog-carousel-head">
+        <h2 class="blog-section-title">{% trans "最新の投稿" %}</h2>
+    </div>
+
+    <div class="blog-carousel-track" tabindex="-1">
+        {% for post in latest %}
+        <article class="blog-slide" style="--blog-accent: {{ post.accent }};"
+                 role="group" aria-roledescription="slide"
+                 aria-label="{{ forloop.counter }} / {{ latest|length }}: {{ post.title }}">
+            <a href="{{ post.get_absolute_url }}" class="blog-card-link" aria-label="{{ post.title }}"></a>
+            <div class="blog-slide-media">
+                {% if post.cover_image %}
+                    <img src="{{ post.cover_image.url }}" alt="" {% if forloop.first %}fetchpriority="high"{% else %}loading="lazy"{% endif %}>
+                {% else %}
+                    <div class="blog-cover-fallback"><span>{{ post.title|first }}</span></div>
+                {% endif %}
+            </div>
+            <div class="blog-slide-body">
+                <span class="blog-kicker">{% if post.published_at %}{{ post.published_at|date:"Y.m.d" }}{% endif %}</span>
+                <h3 class="blog-slide-title">{{ post.title }}</h3>
+                {% if post.excerpt %}<p class="blog-slide-excerpt">{{ post.excerpt }}</p>{% endif %}
+                {% include "blog/_byline.html" %}
+            </div>
+        </article>
+        {% endfor %}
+    </div>
+
+    {% if latest|length > 1 %}
+    <div class="blog-carousel-controls">
+        <div class="blog-carousel-dots">
+            {% for post in latest %}
+            <button type="button" class="blog-dot{% if forloop.first %} is-active{% endif %}"
+                    aria-label="{% blocktrans with n=forloop.counter %}スライド {{ n }} を表示{% endblocktrans %}"
+                    {% if forloop.first %}aria-current="true"{% endif %}>
+                <span class="blog-dot-fill"></span>
+            </button>
+            {% endfor %}
+        </div>
+        <button type="button" class="blog-carousel-play"
+                data-label-pause="{% trans '自動再生を一時停止' %}" data-label-play="{% trans '自動再生を開始' %}"
+                aria-label="{% trans '自動再生を一時停止' %}">
+            <svg class="icon-pause" viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="5" width="4" height="14" rx="1.2"/><rect x="14" y="5" width="4" height="14" rx="1.2"/></svg>
+            <svg class="icon-play" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.6v12.8a1 1 0 0 0 1.52.85l10.2-6.4a1 1 0 0 0 0-1.7L9.52 4.75A1 1 0 0 0 8 5.6Z"/></svg>
+        </button>
+    </div>
+    {% endif %}
+</section>

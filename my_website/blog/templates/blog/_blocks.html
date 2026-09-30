@@ -1,0 +1,64 @@
+{% load i18n blog_demo %}{% comment %}
+ブロック形式の本文。body_blocks は保存時に blocks.normalize_blocks() で検証済み
+(style は列挙値のみ、セルの html は sanitize 済み、ボタンの URL は安全なスキームのみ)。
+{% endcomment %}
+<div class="blog-prose blog-blocks{% if post.template == 'minimal' %} blog-prose--dropcap{% endif %}">
+{% for b in post.body_blocks.blocks %}
+    {% with s=b.style %}
+    {% if b.type == 'divider' %}
+        <div class="bk bk-divider bk-divider--{{ b.variant }} bk-w-{{ s.width }} bk-space-{{ s.space }}"><hr></div>
+    {% elif b.type == 'spacer' %}
+        <div class="bk bk-spacer bk-spacer--{{ b.height }}" aria-hidden="true"></div>
+    {% elif b.type == 'demo' %}
+        {# HTML / CSS デモ: プレビューは sandbox 付き iframe (スクリプト不可・ページと分離)、コードはエスケープして表示 #}
+        <section class="bk bk-demo-block bk-w-{{ s.width }} bk-space-{{ s.space }}">
+            <div class="bk-demo" data-demo{% if b.card_width %} style="max-width: {{ b.card_width }}px;"{% endif %}>
+                {# 表示切り替え・コピーは、カードにホバーすると現れる丸いメニューボタンにまとめる #}
+                <div class="bk-demo-menu">
+                    <button type="button" class="bk-demo-fab" aria-expanded="false" aria-controls="bk-demo-menu-{{ b.id }}"
+                            aria-label="{% trans '表示とコピーのメニュー' %}" title="{% trans '表示とコピー' %}">
+                        <span class="bk-burger" aria-hidden="true"><i></i><i></i><i></i></span>
+                    </button>
+                    <div class="bk-demo-menu-panel" id="bk-demo-menu-{{ b.id }}" role="group" aria-label="{% trans '表示とコピー' %}">
+                        <div class="bk-demo-tabs" role="tablist" aria-label="{% trans '表示' %}">
+                            <button type="button" role="tab" aria-selected="true" data-tab="preview">{% trans "プレビュー" %}</button>
+                            <button type="button" role="tab" aria-selected="false" data-tab="html">HTML</button>
+                            <button type="button" role="tab" aria-selected="false" data-tab="css">CSS</button>
+                        </div>
+                        <div class="bk-demo-seg" data-tool="viewport" aria-label="{% trans 'プレビューの幅' %}">
+                            <button type="button" data-value="full" aria-pressed="true" title="{% trans '全幅' %}" aria-label="{% trans '全幅' %}"><span class="material-symbols-outlined" aria-hidden="true">desktop_windows</span></button>
+                            <button type="button" data-value="768" aria-pressed="false" title="{% trans 'タブレット (768px)' %}" aria-label="{% trans 'タブレット (768px)' %}"><span class="material-symbols-outlined" aria-hidden="true">tablet</span></button>
+                            <button type="button" data-value="375" aria-pressed="false" title="{% trans 'スマホ (375px)' %}" aria-label="{% trans 'スマホ (375px)' %}"><span class="material-symbols-outlined" aria-hidden="true">smartphone</span></button>
+                        </div>
+                        <button type="button" class="bk-demo-copy" data-copy>
+                            <span class="material-symbols-outlined" aria-hidden="true">content_copy</span><span data-copy-label>{% trans "コピー" %}</span>
+                        </button>
+                    </div>
+                </div>
+                <div class="bk-demo-panel" data-panel="preview">
+                    <div class="bk-demo-stage" style="height: {{ b|demo_height }}px;">
+                        <iframe class="bk-demo-frame" sandbox referrerpolicy="no-referrer" loading="lazy"
+                                title="{% trans 'HTML / CSS のプレビュー' %}" srcdoc="{{ b|srcdoc }}"></iframe>
+                    </div>
+                </div>
+                <div class="bk-demo-panel" data-panel="html" hidden><pre class="bk-demo-code"><code class="language-html">{{ b.html }}</code></pre></div>
+                <div class="bk-demo-panel" data-panel="css" hidden><pre class="bk-demo-code"><code class="language-css">{{ b.css }}</code></pre></div>
+            </div>
+        </section>
+    {% elif b.type == 'button' %}
+        {% if b.url and b.label %}
+        <div class="bk bk-button bk-align-{{ b.align }} bk-w-{{ s.width }} bk-space-{{ s.space }}">
+            <a href="{{ b.url }}" class="ap-btn {% if b.variant == 'secondary' %}ap-btn-outline{% else %}ap-btn-primary{% endif %}"{% if '://' in b.url %} target="_blank" rel="noopener noreferrer"{% endif %}>{{ b.label }}</a>
+        </div>
+        {% endif %}
+    {% else %}
+        <section class="bk bk-{{ b.type }} bk-cols-{{ b.columns }} bk-ratio-{{ b.ratio }} bk-bg-{{ s.bg }} bk-w-{{ s.width }} bk-space-{{ s.space }} bk-valign-{{ s.valign }} bk-size-{{ s.size }}{% if s.rule %} bk-rule{% endif %}{% if s.animate %} ap-reveal{% endif %}">
+            {% if b.type == 'callout' %}<span class="bk-callout-icon" aria-hidden="true">{{ b.icon }}</span>{% endif %}
+            <div class="bk-grid">
+                {% for cell in b.cells %}<div class="bk-cell">{{ cell.html|safe }}</div>{% endfor %}
+            </div>
+        </section>
+    {% endif %}
+    {% endwith %}
+{% endfor %}
+</div>
