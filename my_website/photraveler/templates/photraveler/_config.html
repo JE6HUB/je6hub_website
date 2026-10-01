@@ -29,7 +29,14 @@
         "addHere": "{% trans 'ここにスポットを追加' %}",
         "noResults": "{% trans '見つかりませんでした' %}",
         "places": "{% trans 'スポット' %}",
-        "report": "{% trans '通報' %}"
+        "report": "{% trans '通報' %}",
+        "mapUnavailable": "{% trans '地図を表示できません。Mapbox のアクセストークンが設定されていません。' %}"
+    },
+    "mapbox": {
+        "token": "{{ mapbox.token|escapejs }}",
+        "style": "{{ mapbox.style|escapejs }}",
+        "satellite": "{{ mapbox.satellite|escapejs }}",
+        "editorStyle": "{{ mapbox.editorStyle|escapejs }}"
     },
     "maxPhotos": {{ max_photos|default:10 }}
 }</script>
