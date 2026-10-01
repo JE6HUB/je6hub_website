@@ -1820,11 +1820,11 @@ msgstr ""
 "Your email address hasn't been confirmed yet. Please open the link in the "
 "confirmation email."
 
-msgid "ユーザー名またはパスワードが正しくありません。"
-msgstr "Incorrect username or password."
+msgid "ユーザー名・メールアドレスまたはパスワードが正しくありません。"
+msgstr "Incorrect username, email address, or password."
 
-msgid "Username"
-msgstr ""
+msgid "ユーザー名またはメールアドレス"
+msgstr "Username or email address"
 
 msgid "Password"
 msgstr ""

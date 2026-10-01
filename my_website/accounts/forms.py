@@ -31,17 +31,52 @@ class CustomUserChangeForm(UserChangeForm):
         fields = ("username", "email", "is_approved_for_private")
 
 class LoginForm(AuthenticationForm):
-    """メール未認証のユーザーには、パスワードが正しい場合に限り専用のメッセージを出す。"""
+    """ユーザー名またはメールアドレスでログインする。
+
+    メール未認証のユーザーには、パスワードが正しい場合に限り専用のメッセージを出す
+    (凍結中のアカウントは通常の「正しくありません」と同じ扱いにする)。
+    """
 
     unverified = False
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        field = self.fields["username"]
+        field.label = _("ユーザー名またはメールアドレス")
+        # メールアドレスはユーザー名 (150 文字) より長いことがある
+        field.max_length = 254
+        field.widget.attrs["maxlength"] = 254
+
+    @staticmethod
+    def resolve_username(identifier, password):
+        """入力がメールアドレスなら、対応するアカウントのユーザー名を返す。
+
+        「@」を含むユーザー名もあり得るので、同じユーザー名のアカウントがあればそちらを優先する。
+        メールアドレスが重複している場合は、パスワードが一致するアカウントを選ぶ。
+        見つからなければ入力をそのまま返し、通常どおり「正しくありません」になる。
+        """
+        if not identifier or "@" not in identifier:
+            return identifier
+        if CustomUser.objects.filter(username=identifier).exists():
+            return identifier
+        candidates = list(CustomUser.objects.filter(email__iexact=identifier.strip()).order_by("pk"))
+        if len(candidates) == 1:
+            return candidates[0].get_username()
+        for user in candidates:
+            if user.check_password(password):
+                return user.get_username()
+        return identifier
+
     def clean(self):
+        username = self.cleaned_data.get("username")
+        password = self.cleaned_data.get("password")
+        if username and password:
+            username = self.resolve_username(username, password)
+            self.cleaned_data["username"] = username
         try:
             return super().clean()
         except forms.ValidationError:
-            username = self.cleaned_data.get("username")
-            password = self.cleaned_data.get("password")
-            user = CustomUser.objects.filter(username=username, is_active=False).first()
+            user = CustomUser.objects.filter(username=username, is_active=False, suspension__isnull=True).first()
             if user and user.check_password(password):
                 self.unverified = True
             raise
