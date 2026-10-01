@@ -91,6 +91,82 @@ class SignupTests(TestCase):
         self.assertEqual(len(mail.outbox), 1)
 
 
+class LoginTests(TestCase):
+    password = 'a-very-strong-pass-1'
+
+    def setUp(self):
+        cache.clear()
+        self.user = User.objects.create_user(username='taro', email='Taro@Example.com', password=self.password)
+
+    def login(self, identifier, password=None):
+        return self.client.post(reverse('login'), {'username': identifier, 'password': password or self.password})
+
+    def logged_in_id(self):
+        return self.client.session.get('_auth_user_id')
+
+    def test_login_with_username(self):
+        response = self.login('taro')
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(self.logged_in_id(), str(self.user.pk))
+
+    def test_login_with_email_is_case_insensitive(self):
+        response = self.login('  taro@example.COM ')
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(self.logged_in_id(), str(self.user.pk))
+
+    def test_wrong_password_with_email_fails(self):
+        response = self.login('taro@example.com', 'wrong')
+        self.assertEqual(response.status_code, 200)
+        self.assertIsNone(self.logged_in_id())
+        self.assertFalse(response.context['form'].unverified)
+
+    def test_unknown_email_shows_same_error_as_wrong_password(self):
+        unknown = self.login('nobody@example.com')
+        self.client.post(reverse('logout'))
+        wrong = self.login('taro@example.com', 'wrong')
+        self.assertEqual(unknown.context['form'].errors, wrong.context['form'].errors)
+        self.assertFalse(unknown.context['form'].unverified)
+
+    def test_username_containing_at_sign_takes_priority(self):
+        other = User.objects.create_user(username='taro@example.com', password='another-strong-pass-2')
+        response = self.login('taro@example.com', 'another-strong-pass-2')
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(self.logged_in_id(), str(other.pk))
+
+    def test_duplicate_email_logs_in_account_whose_password_matches(self):
+        twin = User.objects.create_user(username='jiro', email='taro@example.com', password='another-strong-pass-2')
+        self.login('taro@example.com', 'another-strong-pass-2')
+        self.assertEqual(self.logged_in_id(), str(twin.pk))
+        self.client.post(reverse('logout'))
+        self.login('taro@example.com')
+        self.assertEqual(self.logged_in_id(), str(self.user.pk))
+
+    def test_unverified_user_sees_hint_when_logging_in_with_email(self):
+        self.user.is_active = False
+        self.user.save(update_fields=['is_active'])
+        response = self.login('taro@example.com')
+        self.assertIsNone(self.logged_in_id())
+        self.assertTrue(response.context['form'].unverified)
+
+    def test_suspended_user_cannot_login_and_gets_generic_error(self):
+        from dashboard.models import UserSuspension
+
+        UserSuspension.objects.create(user=self.user)
+        self.user.is_active = False
+        self.user.save(update_fields=['is_active'])
+        for identifier in ('taro', 'taro@example.com'):
+            response = self.login(identifier)
+            self.assertEqual(response.status_code, 200)
+            self.assertIsNone(self.logged_in_id())
+            self.assertFalse(response.context['form'].unverified)
+
+    def test_long_email_is_accepted(self):
+        email = 'a' * 160 + '@example.com'
+        user = User.objects.create_user(username='longmail', email=email, password=self.password)
+        self.login(email)
+        self.assertEqual(self.logged_in_id(), str(user.pk))
+
+
 class AppleMusicEndpointTests(TestCase):
     def setUp(self):
         cache.clear()

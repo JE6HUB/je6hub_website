@@ -17,7 +17,7 @@
                     {% trans "メールアドレスの確認が済んでいません。確認メールのリンクを開いてください。" %}
                     <a href="{% url 'resend_verification' %}" class="jh-link">{% trans "確認メールを再送" %}</a>
                 {% else %}
-                    {% trans "ユーザー名またはパスワードが正しくありません。" %}
+                    {% trans "ユーザー名・メールアドレスまたはパスワードが正しくありません。" %}
                 {% endif %}
             </div>
         {% endif %}
@@ -27,7 +27,7 @@
             <input type="hidden" name="next" value="{{ next|default:'/' }}">
 
             <div class="mb-4">
-                <input type="text" name="username" id="id_username" class="jh-input" placeholder="{% trans 'Username' %}" required autofocus />
+                <input type="text" name="username" id="id_username" class="jh-input" placeholder="{% trans 'ユーザー名またはメールアドレス' %}" aria-label="{% trans 'ユーザー名またはメールアドレス' %}" value="{{ form.username.value|default:'' }}" maxlength="254" autocomplete="username" autocapitalize="none" spellcheck="false" required autofocus />
             </div>
 
             <div class="mb-4">
