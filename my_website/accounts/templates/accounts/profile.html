@@ -137,6 +137,15 @@
                     </div>
                 </form>
             </div>
+
+            {% if not user_obj.is_staff and not user_obj.is_superuser %}
+            <!-- 退会 -->
+            <div class="ap-glass-panel ap-reveal mt-4">
+                <h3 class="mb-2 fw-semibold" style="font-size: 21px; color: #ff453a;">{% trans "退会" %}</h3>
+                <p class="small text-muted mb-3">{% trans "アカウントと、投稿・写真などのデータをすべて削除します。" %}</p>
+                <a href="{% url 'account_delete' %}" class="ap-btn ap-btn-outline" style="border-color: rgba(255,59,48,0.5); color: #ff453a;">{% trans "退会手続きへ" %}</a>
+            </div>
+            {% endif %}
         </div>
     </div>
 </div>

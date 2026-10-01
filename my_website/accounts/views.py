@@ -6,7 +6,8 @@ import urllib.parse
 import urllib.request
 
 from django.contrib import messages
-from django.contrib.auth import login
+from django.contrib.auth import login, logout
+from django.contrib.auth.decorators import login_required
 from django.core.mail import send_mail
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
@@ -17,10 +18,13 @@ from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
 from django.utils.translation import gettext_lazy as _
 
-from blog.models import Post
+from blog.models import BlogImage, Post
+from community.models import Channel, ChannelMembership, Message
+from dashboard.models import ModerationLog
 from photraveler.models import MapPin, PinPhoto
 
-from .forms import CustomUserCreationForm, ResendVerificationForm, UserProfileForm
+from .deletion import delete_account
+from .forms import AccountDeleteForm, CustomUserCreationForm, ResendVerificationForm, UserProfileForm
 from .models import CustomUser
 from .ratelimit import ratelimit
 from .tokens import email_verification_token
@@ -240,3 +244,42 @@ def resend_verification_view(request):
         form = ResendVerificationForm()
 
     return render(request, 'accounts/resend_verification.html', {'form': form})
+
+@login_required
+@ratelimit('account_delete', limit=10, period=600, methods=('POST',))
+def account_delete_view(request):
+    """退会 (アカウントの削除)。確認画面で削除される内容を示し、パスワードかユーザー名の入力で確定する。"""
+    user = request.user
+    # 管理者が退会するとサイトを管理できなくなるおそれがあるため、権限を外してからにする
+    if user.is_staff or user.is_superuser:
+        messages.error(request, _('管理者のアカウントは退会できません。Django 管理画面で権限を外してから退会してください。'))
+        return redirect('profile')
+
+    if request.method == 'POST':
+        form = AccountDeleteForm(user, request.POST)
+        if form.is_valid():
+            username = user.username
+            delete_account(user)
+            ModerationLog.objects.create(actor=None, action='user_withdraw', target=username)
+            logout(request)
+            messages.success(request, _('退会しました。ご利用ありがとうございました。'))
+            return redirect('core:home')
+    else:
+        form = AccountDeleteForm(user)
+
+    owned_channels = Channel.objects.filter(created_by=user)
+    return render(request, 'accounts/delete_account.html', {
+        'form': form,
+        'counts': [
+            (_('Lounge のメッセージ'), Message.objects.filter(sender=user).count()),
+            (_('Blogs の記事 (下書きを含む)'), Post.objects.filter(author=user).count()),
+            (_('Blogs にアップロードした画像'), BlogImage.objects.filter(uploader=user).count()),
+            (_('WanderLens のスポット'), MapPin.objects.filter(user=user).count()),
+            (_('WanderLens の写真'), PinPhoto.objects.filter(pin__user=user).count()),
+        ],
+        'handed_over_channels': [c for c in owned_channels
+                                 if c.memberships.filter(status=ChannelMembership.STATUS_ACTIVE).exclude(user=user).exists()],
+        'deleted_channels': [c for c in owned_channels
+                             if not c.memberships.filter(status=ChannelMembership.STATUS_ACTIVE).exclude(user=user).exists()],
+        'social_accounts': user.socialaccount_set.all(),
+    })

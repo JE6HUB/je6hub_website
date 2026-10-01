@@ -16,11 +16,12 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 from django.utils.translation import gettext as _
 
+from accounts.deletion import delete_account
 from accounts.ratelimit import is_rate_limited
-from blog.models import BlogImage, Post
+from blog.models import Post
 from community.models import Message
 from core.models import ContactMessage
-from photraveler.models import MapPin, PhotoComment, PinPhoto
+from photraveler.models import MapPin, PhotoComment
 
 from .geo import database_info as geoip_database_info
 from .content import KINDS, get_object
@@ -344,21 +345,6 @@ def _protected(request, target):
     return target.pk == request.user.pk or target.is_superuser or target.is_staff
 
 
-def _delete_user_files(target):
-    for msg in Message.objects.filter(sender=target).exclude(media=''):
-        if msg.media:
-            msg.media.delete(save=False)
-    for post in Post.objects.filter(author=target).exclude(cover_image=''):
-        if post.cover_image:
-            post.cover_image.delete(save=False)
-    for img in BlogImage.objects.filter(uploader=target):
-        img.image.delete(save=False)
-    for ph in PinPhoto.objects.filter(pin__user=target):
-        ph.image.delete(save=False)
-        if ph.thumbnail:
-            ph.thumbnail.delete(save=False)
-
-
 @superuser_required
 def user_detail(request, pk):
     target = get_object_or_404(User.objects.select_related('suspension'), pk=pk)
@@ -403,8 +389,7 @@ def user_detail(request, pk):
                 return redirect('dashboard:user_detail', pk=pk)
             username = target.username
             with transaction.atomic():
-                _delete_user_files(target)
-                target.delete()
+                delete_account(target)
                 _log(request, 'user_delete', username, request.POST.get('note', ''))
             messages.success(request, _('「%(name)s」と投稿をすべて削除しました。') % {'name': username})
             return redirect('dashboard:users')
