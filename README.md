@@ -113,7 +113,7 @@ python manage.py runserver
 | `DJANGO_DEBUG` | デバッグモード | `False`（安全側） |
 | `DJANGO_ALLOWED_HOSTS` | 許可ホスト（カンマ区切り） | `localhost,127.0.0.1` |
 | `DJANGO_SECURE_SSL_REDIRECT` | HTTP→HTTPSリダイレクト | DEBUG時False、それ以外True |
-| `DJANGO_SECURE_HSTS_SECONDS` | HSTSの有効期間（秒） | `0`（無効）。HTTPS配信が安定してから設定する |
+| `DJANGO_SECURE_HSTS_SECONDS` | HSTSの有効期間（秒）。Caddy 構成では `Caddyfile` が HSTS を付けるため不要 | `0`（無効） |
 | `DB_NAME` / `DB_USER` / `DB_PASSWORD` / `DB_HOST` / `DB_PORT` | PostgreSQL接続情報 | — |
 | `APPLE_MUSIC_DEVELOPER_TOKEN` | MusicKit用の開発者トークン | 空（Apple Music関連機能が404を返す） |
 | `EMAIL_HOST` 等 | お問い合わせ通知用SMTP設定 | 未設定ならコンソール出力バックエンド |
@@ -167,7 +167,7 @@ pytest
 - [ ] `.env` に強力な `DJANGO_SECRET_KEY` を設定（`python -c "import secrets;print(secrets.token_urlsafe(50))"` などで生成）
 - [ ] `DJANGO_DEBUG=False`、`DJANGO_ALLOWED_HOSTS` に実ドメインを設定
 - [ ] PostgreSQLの接続情報・パスワードを本番用に設定
-- [ ] HTTPS配信を確認した上で `DJANGO_SECURE_HSTS_SECONDS` を有効化（例: `31536000`）
+- [ ] HSTS が付いていることを確認（`curl -sI https://je6hub.com | grep -i strict`。Caddy 構成では `Caddyfile` が付ける）
 - [ ] `CONTACT_NOTIFY_EMAIL` とSMTP設定でお問い合わせ通知が届くことを確認
 - [ ] `createsuperuser` でスーパーユーザーを作成（community の初期チャンネルseedはこの後の `migrate` で投入される）
 - [ ] `media/` をボリュームまたは外部ストレージ（S3等）でバックアップ

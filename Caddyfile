@@ -10,11 +10,21 @@
 	}
 }
 
+# HSTS: このドメインには今後 HTTPS でしか接続しないようブラウザに記憶させる。
+# Caddy が返すすべての応答 (Django・/media/・www のリダイレクト) に付けるため、ここで一元的に設定する。
+# ">" は Django 側の値を含め、最終的な応答ヘッダーをこの値で置き換える指定。
+# preload は外せなくなるため付けない (hstspreload.org への登録は別途判断する)。
+(hsts) {
+	header >Strict-Transport-Security "max-age=31536000; includeSubDomains"
+}
+
 www.{$SITE_DOMAIN} {
+	import hsts
 	redir https://{$SITE_DOMAIN}{uri} permanent
 }
 
 {$SITE_DOMAIN} {
+	import hsts
 	encode zstd gzip
 
 	# 送信サイズの上限 (Lounge の動画 200MB / WanderLens の写真 10 枚が最大)。
