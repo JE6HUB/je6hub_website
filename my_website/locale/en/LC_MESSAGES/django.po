@@ -1855,6 +1855,34 @@ msgstr ""
 msgid "アカウントをお持ちの場合はサインイン"
 msgstr "Already have an account? Sign in"
 
+msgid "プロフィールを作成しましょう！"
+msgstr "Let's create your profile!"
+
+msgid ""
+"表示名や自己紹介を設定すると、ほかのユーザーにあなたのことが伝わります。あと"
+"からいつでも変更できます。"
+msgstr ""
+"Add a display name and a short bio so other people can get to know you. You "
+"can change them any time."
+
+msgid "スキップ"
+msgstr "Skip"
+
+msgid "続ける"
+msgstr "Continue"
+
+msgid "プロフィールを設定"
+msgstr "Set up your profile"
+
+msgid "プロフィールを保存できませんでした。時間をおいてもう一度お試しください。"
+msgstr "Couldn't save your profile. Please try again in a moment."
+
+msgid "保存する"
+msgstr "Save"
+
+msgid "プロフィールを作成しました。"
+msgstr "Your profile has been created."
+
 msgid "退会"
 msgstr "Delete account"
 

@@ -7,6 +7,8 @@ import uuid
 
 from allauth.socialaccount.adapter import DefaultSocialAccountAdapter
 
+from .onboarding import request_profile_onboarding
+
 
 class AppleSocialAccountAdapter(DefaultSocialAccountAdapter):
     """Adapter to customise how Apple social accounts are created.
@@ -52,4 +54,6 @@ class AppleSocialAccountAdapter(DefaultSocialAccountAdapter):
             user.apple_user_id = apple_uid
             user.save(update_fields=["apple_user_id"])
 
+        # 新規登録の直後に、プロフィール作成のモーダルを一度だけ表示する
+        request_profile_onboarding(request)
         return user

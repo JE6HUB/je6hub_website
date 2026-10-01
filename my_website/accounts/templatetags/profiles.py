@@ -2,7 +2,17 @@ from django import template
 from django.utils.html import format_html
 from django.utils.translation import gettext as _
 
+from ..onboarding import pop_profile_onboarding
+
 register = template.Library()
+
+
+@register.inclusion_tag('accounts/_onboarding_modal.html', takes_context=True)
+def profile_onboarding_modal(context):
+    """サインアップ直後のページで、プロフィール作成のモーダルを一度だけ出力する (base.html から呼ぶ)。"""
+    request = context.get('request')
+    show = bool(request and request.user.is_authenticated and pop_profile_onboarding(request))
+    return {'show': show, 'user': request.user if show else None, 'csrf_token': context.get('csrf_token')}
 
 
 @register.simple_tag

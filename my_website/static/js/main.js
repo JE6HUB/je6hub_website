@@ -568,6 +568,130 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 
+// サインアップ直後のプロフィール作成モーダル (accounts/_onboarding_modal.html)
+// 「続ける」で枠はそのまま中身だけを入力画面に切り替え、同時に枠の大きさを中身に合わせて変える。
+document.addEventListener('DOMContentLoaded', () => {
+    const modal = document.getElementById('ob-modal');
+    if (!modal || typeof modal.showModal !== 'function') return;
+
+    const panel = document.getElementById('ob-panel');
+    const intro = modal.querySelector('[data-ob-step="intro"]');
+    const formStep = modal.querySelector('[data-ob-step="form"]');
+    const form = document.getElementById('ob-form');
+    const submitButton = form.querySelector('button[type="submit"]');
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const wait = (ms) => new Promise((resolve) => setTimeout(resolve, reduceMotion ? 0 : ms));
+
+    let morphTimer = null;
+    let closing = false;
+
+    // 中身を変えて、枠の大きさを変更前から変更後へトランジションさせる
+    const morph = (change) => {
+        const from = panel.getBoundingClientRect();
+        change();
+        panel.style.width = '';
+        panel.style.height = '';
+        const to = panel.getBoundingClientRect();
+        panel.style.width = `${from.width}px`;
+        panel.style.height = `${from.height}px`;
+        void panel.offsetWidth; // 変更前の大きさを確定させてから、変更後の大きさを指定する
+        panel.style.width = `${to.width}px`;
+        panel.style.height = `${to.height}px`;
+        clearTimeout(morphTimer);
+        // 終わったら固定を外し、エラー表示などで中身が変わっても追従できるようにする
+        morphTimer = setTimeout(() => {
+            panel.style.width = '';
+            panel.style.height = '';
+        }, reduceMotion ? 0 : 550);
+    };
+
+    const close = async () => {
+        if (closing) return;
+        closing = true;
+        modal.classList.add('is-leaving');
+        await wait(400);
+        modal.close();
+        modal.remove();
+    };
+
+    const showForm = async () => {
+        if (closing || !formStep.hidden) return;
+        morph(() => {
+            intro.classList.add('is-exiting');
+            formStep.classList.add('is-entering');
+            formStep.hidden = false;
+        });
+        modal.setAttribute('aria-labelledby', 'ob-form-title');
+        await wait(120); // 出ていく文字が薄くなり始めてから、新しい文字を浮かび上がらせる
+        formStep.classList.remove('is-entering');
+        await wait(400);
+        intro.hidden = true;
+        intro.classList.remove('is-exiting');
+        form.querySelector('input, textarea')?.focus({ preventScroll: true });
+    };
+
+    const showErrors = (errors) => {
+        morph(() => {
+            form.querySelectorAll('[data-ob-error]').forEach((el) => {
+                const messages = errors[el.dataset.obError] || [];
+                el.textContent = messages.join(' ');
+                el.closest('.ob-field')?.classList.toggle('has-error', messages.length > 0);
+            });
+        });
+    };
+
+    const showToast = (message) => {
+        const container = document.querySelector('.toast-container');
+        if (!container || typeof mdb === 'undefined') return;
+        const toast = document.createElement('div');
+        toast.className = 'toast align-items-center text-bg-dark border-0 mb-2';
+        toast.setAttribute('role', 'status');
+        toast.style.cssText = 'background: rgba(28,28,30,0.8)!important; backdrop-filter: blur(20px); border-radius: 12px;';
+        toast.innerHTML = '<div class="d-flex"><div class="toast-body fw-bold text-light"></div></div>';
+        toast.querySelector('.toast-body').textContent = message;
+        container.appendChild(toast);
+        new mdb.Toast(toast, { delay: 5000 }).show();
+    };
+
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        submitButton.disabled = true;
+        try {
+            const response = await fetch(form.action, {
+                method: 'POST',
+                body: new FormData(form),
+                headers: { 'X-Requested-With': 'fetch', Accept: 'application/json' },
+                credentials: 'same-origin',
+            });
+            const data = await response.json().catch(() => ({}));
+            if (response.ok) {
+                showErrors({});
+                close();
+                if (data.message) showToast(data.message);
+                return;
+            }
+            showErrors(data.errors || { __all__: [form.dataset.error] });
+        } catch {
+            showErrors({ __all__: [form.dataset.error] });
+        }
+        submitButton.disabled = false;
+    });
+
+    modal.addEventListener('click', (e) => {
+        if (e.target.closest('[data-ob-skip]')) close();
+        else if (e.target.closest('[data-ob-continue]')) showForm();
+    });
+    // Esc はスキップと同じ扱いにする (いきなり消さず、アニメーションさせる)
+    modal.addEventListener('cancel', (e) => {
+        e.preventDefault();
+        close();
+    });
+
+    modal.showModal();
+    modal.querySelector('[data-ob-continue]').focus({ preventScroll: true });
+    requestAnimationFrame(() => requestAnimationFrame(() => modal.classList.add('is-open')));
+});
+
 // Apple-style Reveal Animations
 document.addEventListener('DOMContentLoaded', () => {
     const observer = new IntersectionObserver((entries) => {

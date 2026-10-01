@@ -48,6 +48,14 @@ class ResendVerificationForm(forms.Form):
     email = forms.EmailField(label=_("メールアドレス"))
 
 
+class OnboardingProfileForm(forms.ModelForm):
+    """サインアップ直後のモーダルで入力する公開プロフィール (あとからプロフィール編集で変更できる)。"""
+
+    class Meta:
+        model = CustomUser
+        fields = ("display_name", "bio", "location", "website")
+
+
 class UserProfileForm(forms.ModelForm):
     """User profile edit form including favorite track information."""
 
