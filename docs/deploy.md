@@ -97,7 +97,7 @@ docker compose -f docker-compose.prod.yml exec web python manage.py createsuperu
   - Return URLs: `https://je6hub.com/ja/accounts/apple/login/callback/` と `https://je6hub.com/en/accounts/apple/login/callback/`
   - `.env` の `APPLE_CLIENT_ID` / `APPLE_TEAM_ID` / `APPLE_KEY_ID` / `APPLE_SECRET_KEY` を設定して `up -d` し直す
 - **お問い合わせ通知**: `EMAIL_*` と `CONTACT_NOTIFY_EMAIL` を設定し、フォームから送って届くことを確認する
-- **HSTS**: HTTPS で問題なく数日運用できたら `DJANGO_SECURE_HSTS_SECONDS=31536000` にする（一度有効にすると HTTP に戻せないので最後に）
+- **HSTS**: `Caddyfile` がすべての応答に `Strict-Transport-Security: max-age=31536000; includeSubDomains` を付ける（設定不要）。ブラウザが 1 年間 HTTPS でしか接続しなくなるため、`je6hub.com` とそのサブドメインは HTTPS で配信し続けること。Cloudflare のプロキシを使う場合は SSL/TLS → Edge 証明書 → **HSTS を有効化** でも同じ値（最大有効期間 12 か月、サブドメインを含める: オン、プリロード: オフ、No-Sniff: オン）を設定すると、Cloudflare の Security Insights の「Domains without HSTS」が解消される
 
 ## 6. 更新（デプロイ）
 
