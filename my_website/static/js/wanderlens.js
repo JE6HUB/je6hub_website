@@ -198,7 +198,10 @@
         $('#wl-gallery').classList.toggle('is-empty', !photos.length);
         $('#wl-gallery').classList.toggle('is-single', photos.length < 2);
         track.replaceChildren(...(photos.length
-            ? photos.map((ph) => h('figure', { class: 'wl-slide' }, h('img', { src: ph.url, alt: p.title, loading: 'lazy' })))
+            ? photos.map((ph) => h('figure', { class: 'wl-slide' },
+                // 縦横比が枠と合わない写真の余白を、同じ写真のぼかしで埋める
+                h('img', { class: 'wl-slide-bg', src: ph.thumb, alt: '', 'aria-hidden': 'true' }),
+                h('img', { class: 'wl-slide-img', src: ph.url, alt: p.title, loading: 'lazy' })))
             : [h('div', { class: 'wl-slide wl-slide--empty' }, icon('photo_camera'), h('span', { text: t.noPhoto }))]));
         dots.replaceChildren(...photos.map((_, i) => h('button', {
             type: 'button', class: 'wl-dot', 'aria-label': `${i + 1} / ${photos.length}`, onclick: () => goSlide(i),
