@@ -19,10 +19,15 @@
     </form>
 </header>
 
-{% if not geoip_ready %}
+{% if not geoip %}
 <div class="db-card" style="border: 1px solid rgba(255,159,10,.4); margin-bottom: 16px;">
     <strong>{% trans "位置情報データベースが見つかりません。" %}</strong>
-    <span class="db-muted">{% trans "アクセス元の国・都市は「不明」として数えられます。サーバーに位置情報データベースを置く手順は docs/deploy.md の「アクセス解析」にあります。" %}</span>
+    <span class="db-muted">{% trans "アクセス元の国・都市は「不明」として数えられます。サーバーで manage.py update_geoip を実行すると取得できます (docs/deploy.md の「アクセス解析」)。" %}</span>
+</div>
+{% elif geoip.stale %}
+<div class="db-card" style="border: 1px solid rgba(255,159,10,.4); margin-bottom: 16px;">
+    <strong>{% trans "位置情報データベースが更新されていません。" %}</strong>
+    <span class="db-muted">{% trans "geoip コンテナのログ (docker compose logs geoip) を確認してください。" %}</span>
 </div>
 {% endif %}
 
@@ -86,6 +91,11 @@
 <p class="db-muted mt-3" style="font-size: 12px;">
     {% trans "ボット・クローラーと管理画面へのアクセスは数えていません。" %}
     {% trans "位置情報は IP アドレスからの推定で、正確でない場合があります。" %}
+    {% if geoip %}{% blocktrans with name=geoip.name built=geoip.built_at|date:"Y-m-d" %}位置情報データベース: {{ name }} ({{ built }} 版)。{% endblocktrans %}{% endif %}
+    {% if geoip.is_maxmind %}
+    This product includes GeoLite2 data created by MaxMind, available from <a href="https://www.maxmind.com" rel="noopener" target="_blank" class="db-muted">https://www.maxmind.com</a>.
+    {% else %}
     <a href="https://db-ip.com" rel="noopener" target="_blank" class="db-muted">IP Geolocation by DB-IP</a>
+    {% endif %}
 </p>
 {% endblock %}

@@ -19,6 +19,7 @@ services:
 
   web:
     build: .
+    image: je6hub-web
     restart: unless-stopped
     env_file:
       - .env
@@ -40,6 +41,19 @@ services:
       - media_data:/app/my_website/media
       # アクセス元の位置情報データベース (docs/deploy.md の「アクセス解析」を参照)
       - ./geoip:/app/geoip:ro
+
+  # 位置情報データベースを取得し、1 日 1 回新しい版を確認して差し替える (docs/deploy.md の 9 章)。
+  # web は ./geoip を読み取り専用で使い、差し替えは再起動なしで反映される
+  geoip:
+    build: .
+    image: je6hub-web
+    restart: unless-stopped
+    env_file:
+      - .env
+    entrypoint: ["sh", "-c"]
+    command: ["while :; do python manage.py update_geoip; sleep 86400; done"]
+    volumes:
+      - ./geoip:/app/geoip
 
   caddy:
     image: caddy:2

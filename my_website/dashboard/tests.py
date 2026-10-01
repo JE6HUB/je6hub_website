@@ -1,11 +1,20 @@
+import gzip
+import io
+import json
+import os
 import shutil
+import tarfile
 import tempfile
-from datetime import timedelta
+import urllib.error
+from base64 import b64encode
+from datetime import datetime, timedelta, timezone as dt_timezone
+from types import SimpleNamespace
 from unittest import mock
 
 from django.contrib.auth import get_user_model
 from django.core.cache import cache
 from django.core.files.uploadedfile import SimpleUploadedFile
+from django.core.management import CommandError, call_command
 from django.test import TestCase, override_settings
 from django.urls import reverse
 from django.utils import timezone
@@ -313,3 +322,136 @@ class TrafficTests(Fixtures):
     def test_flag(self):
         self.assertEqual(flag('JP'), '🇯🇵')
         self.assertEqual(flag(''), '🌐')
+
+
+class GeoipUpdateTests(TestCase):
+    """manage.py update_geoip: 取得・検証・入れ替え。ネットワークと MMDB の読み込みはモックする。"""
+
+    def setUp(self):
+        self.dir = tempfile.mkdtemp()
+        self.addCleanup(shutil.rmtree, self.dir)
+        self.db = os.path.join(self.dir, 'city.mmdb')
+        override = override_settings(GEOIP_DB_PATH=self.db, GEOIP_SOURCE='dbip',
+                                     MAXMIND_ACCOUNT_ID='', MAXMIND_LICENSE_KEY='')
+        override.enable()
+        self.addCleanup(override.disable)
+        self.now = datetime(2026, 10, 2, 5, 0, tzinfo=dt_timezone.utc)
+        self.requests = []
+        self.files = {}  # URL -> 返す本文 (無ければ 404)
+
+    def urlopen(self, request, timeout=None):
+        self.requests.append(request)
+        if request.full_url not in self.files:
+            raise urllib.error.HTTPError(request.full_url, 404, 'Not Found', {}, None)
+        return io.BytesIO(self.files[request.full_url])
+
+    def fake_reader(self, path):
+        with open(path, 'rb') as f:
+            content = f.read()
+        if not content.startswith(b'MMDB'):
+            raise ValueError('not an mmdb')
+        reader = mock.Mock()
+        reader.metadata.return_value = SimpleNamespace(
+            database_type=content[4:].decode(), build_epoch=int(self.now.timestamp()))
+        reader.get.return_value = {'country': {'iso_code': 'US'}}
+        return reader
+
+    def run_command(self, *args):
+        cmd = 'dashboard.management.commands.update_geoip'
+        with mock.patch(f'{cmd}.urllib.request.urlopen', side_effect=self.urlopen), \
+                mock.patch('maxminddb.open_database', side_effect=self.fake_reader), \
+                mock.patch(f'{cmd}.datetime', wraps=datetime) as dt:
+            dt.now.return_value = self.now
+            out = io.StringIO()
+            call_command('update_geoip', *args, stdout=out)
+            return out.getvalue()
+
+    def dbip_url(self, release):
+        return f'https://download.db-ip.com/free/dbip-city-lite-{release}.mmdb.gz'
+
+    def info(self):
+        with open(self.db + '.json', encoding='utf-8') as f:
+            return json.load(f)
+
+    def test_downloads_dbip_for_this_month(self):
+        self.files[self.dbip_url('2026-10')] = gzip.compress(b'MMDBDBIPCityLite')
+        self.run_command()
+        with open(self.db, 'rb') as f:
+            self.assertEqual(f.read(), b'MMDBDBIPCityLite')
+        self.assertEqual(self.info()['release'], '2026-10')
+        self.assertEqual(self.info()['source'], 'dbip')
+        self.assertEqual(sorted(os.listdir(self.dir)), ['city.mmdb', 'city.mmdb.json'])
+
+        # 同じ月はもう取りに行かない
+        self.requests.clear()
+        self.assertIn('最新です', self.run_command())
+        self.assertEqual(self.requests, [])
+
+    def test_falls_back_to_last_month_until_published(self):
+        self.files[self.dbip_url('2026-09')] = gzip.compress(b'MMDBDBIPCityLite')
+        self.run_command()
+        self.assertEqual(self.info()['release'], '2026-09')
+
+        # 今月の版が出るまでは今月分だけ確認し、先月分を取り直さない
+        self.requests.clear()
+        self.assertIn('まだ公開されていません', self.run_command())
+        self.assertEqual([r.full_url for r in self.requests], [self.dbip_url('2026-10')])
+
+        self.files[self.dbip_url('2026-10')] = gzip.compress(b'MMDBDBIPCityLite')
+        self.run_command()
+        self.assertEqual(self.info()['release'], '2026-10')
+
+    def test_invalid_download_keeps_current_database(self):
+        with open(self.db, 'wb') as f:
+            f.write(b'MMDBDBIPCityLite-old')
+        for body, error in ((b'<html>error</html>', 'MMDB として読めません'),
+                            (b'MMDBDBIPCountryLite', '都市のデータベースではありません')):
+            self.files[self.dbip_url('2026-10')] = gzip.compress(body)
+            with self.assertRaisesMessage(CommandError, error):
+                self.run_command('--force')
+            with open(self.db, 'rb') as f:
+                self.assertEqual(f.read(), b'MMDBDBIPCityLite-old')
+            self.assertEqual(sorted(os.listdir(self.dir)), ['city.mmdb'])
+
+    def test_maxmind_requires_credentials(self):
+        with self.assertRaisesMessage(CommandError, 'MAXMIND_LICENSE_KEY'):
+            self.run_command('--source', 'maxmind')
+
+    @override_settings(GEOIP_SOURCE='maxmind', MAXMIND_ACCOUNT_ID='123', MAXMIND_LICENSE_KEY='secret')
+    def test_maxmind_extracts_mmdb_from_archive(self):
+        archive = io.BytesIO()
+        with tarfile.open(fileobj=archive, mode='w:gz') as tar:
+            for name, body in (('GeoLite2-City_20261001/LICENSE.txt', b'license'),
+                               ('GeoLite2-City_20261001/GeoLite2-City.mmdb', b'MMDBGeoLite2-City')):
+                member = tarfile.TarInfo(name)
+                member.size = len(body)
+                tar.addfile(member, io.BytesIO(body))
+        url = 'https://download.maxmind.com/geoip/databases/GeoLite2-City/download?suffix=tar.gz'
+        self.files[url] = archive.getvalue()
+        self.run_command()
+        with open(self.db, 'rb') as f:
+            self.assertEqual(f.read(), b'MMDBGeoLite2-City')
+        self.assertEqual(self.info()['source'], 'maxmind')
+        # 認証はリダイレクト先 (別ホストの保存先) へ引き継がれないヘッダーで送る
+        request = self.requests[0]
+        self.assertNotIn('Authorization', request.headers)
+        self.assertEqual(request.unredirected_hdrs['Authorization'], 'Basic ' + b64encode(b'123:secret').decode())
+
+        # 7 日以内は取り直さない
+        self.requests.clear()
+        self.run_command()
+        self.assertEqual(self.requests, [])
+
+    def test_traffic_page_shows_database_and_attribution(self):
+        admin = User.objects.create_superuser('boss', 'boss@example.com', 'pass-12345-long')
+        self.client.force_login(admin)
+        built = timezone.now() - timedelta(days=3)
+        info = {'name': 'MaxMind GeoLite2 City', 'is_maxmind': True, 'built_at': built, 'stale': False}
+        with mock.patch('dashboard.views.geoip_database_info', return_value=info):
+            response = self.client.get(reverse('dashboard:traffic'))
+        self.assertContains(response, 'MaxMind GeoLite2 City')
+        self.assertContains(response, 'GeoLite2 data created by MaxMind')
+        with mock.patch('dashboard.views.geoip_database_info', return_value=None):
+            response = self.client.get(reverse('dashboard:traffic'))
+        self.assertContains(response, '位置情報データベースが見つかりません')
+        self.assertContains(response, 'IP Geolocation by DB-IP')

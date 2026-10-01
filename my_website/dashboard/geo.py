@@ -58,3 +58,24 @@ def lookup(ip):
         return '', '', ''
     code = ((record.get('country') or {}).get('iso_code') or '')[:2]
     return code, _name(record, 'country')[:80], _name(record, 'city')[:120]
+
+
+# 毎月更新されるので、これより古い版はダッシュボードで警告する
+STALE_AFTER_DAYS = 45
+
+
+def database_info():
+    """ダッシュボードに出す、いま使っているデータベースの情報。無ければ None。"""
+    reader = _get_reader()
+    if reader is None:
+        return None
+    from datetime import datetime, timezone as dt_timezone
+    meta = reader.metadata()
+    built = datetime.fromtimestamp(meta.build_epoch, dt_timezone.utc)
+    is_maxmind = 'GeoLite' in meta.database_type
+    return {
+        'name': 'MaxMind GeoLite2 City' if is_maxmind else 'DB-IP IP to City Lite',
+        'is_maxmind': is_maxmind,
+        'built_at': built,
+        'stale': (datetime.now(dt_timezone.utc) - built).days > STALE_AFTER_DAYS,
+    }
