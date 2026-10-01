@@ -248,3 +248,72 @@ class SecurityHardeningTests(TestCase):
         response = self.client.get(reverse('apple_login'))
         # GET では Apple へ転送せず、確認画面を表示するだけ
         self.assertNotEqual(response.status_code, 302)
+
+
+class ProfileOnboardingTests(TestCase):
+    password = 'a-very-strong-pass-1'
+
+    def setUp(self):
+        cache.clear()
+
+    def test_modal_shows_once_after_email_verification(self):
+        self.client.post(reverse('signup'), {
+            'username': 'newuser', 'email': 'new@example.com',
+            'password1': self.password, 'password2': self.password,
+        })
+        verify_url = re.search(r'https?://\S+/signup/verify/\S+/', mail.outbox[-1].body).group(0)
+        response = self.client.get(verify_url, follow=True)
+        self.assertContains(response, 'id="ob-modal"')
+        self.assertContains(response, 'プロフィールを作成しましょう！')
+
+        response = self.client.get(reverse('community:list'))
+        self.assertNotContains(response, 'id="ob-modal"')
+
+    def test_modal_not_shown_on_normal_login(self):
+        User.objects.create_user(username='member', password=self.password)
+        self.client.post(reverse('login'), {'username': 'member', 'password': self.password})
+        self.assertNotContains(self.client.get('/', follow=True), 'id="ob-modal"')
+
+    def test_apple_signup_requests_modal(self):
+        from unittest import mock
+
+        from allauth.socialaccount.adapter import DefaultSocialAccountAdapter
+        from django.contrib.sessions.backends.db import SessionStore
+        from django.test import RequestFactory
+
+        from .adapters import AppleSocialAccountAdapter
+        from .onboarding import SESSION_KEY
+
+        user = User.objects.create_user(username='apple_x', apple_user_id='sub-1')
+        request = RequestFactory().get('/')
+        request.session = SessionStore()
+        sociallogin = mock.Mock()
+        sociallogin.account.uid = 'sub-1'
+        with mock.patch.object(DefaultSocialAccountAdapter, 'save_user', return_value=user):
+            AppleSocialAccountAdapter(request).save_user(request, sociallogin)
+        self.assertTrue(request.session[SESSION_KEY])
+
+    def test_save_profile(self):
+        user = User.objects.create_user(username='member', password=self.password)
+        self.client.force_login(user)
+        response = self.client.post(reverse('profile_onboarding'), {
+            'display_name': 'Yuta', 'bio': 'Hello', 'location': 'Tokyo', 'website': 'https://example.com',
+        })
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()['public_name'], 'Yuta')
+        user.refresh_from_db()
+        self.assertEqual((user.display_name, user.bio, user.location, user.website),
+                         ('Yuta', 'Hello', 'Tokyo', 'https://example.com'))
+
+    def test_save_profile_returns_field_errors(self):
+        user = User.objects.create_user(username='member', password=self.password)
+        self.client.force_login(user)
+        response = self.client.post(reverse('profile_onboarding'), {'display_name': 'x', 'website': 'not a url'})
+        self.assertEqual(response.status_code, 400)
+        self.assertIn('website', response.json()['errors'])
+
+    def test_save_profile_requires_login_and_post(self):
+        self.assertEqual(self.client.post(reverse('profile_onboarding'), {'display_name': 'x'}).status_code, 401)
+        user = User.objects.create_user(username='member', password=self.password)
+        self.client.force_login(user)
+        self.assertEqual(self.client.get(reverse('profile_onboarding')).status_code, 405)
