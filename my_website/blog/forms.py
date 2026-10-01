@@ -5,7 +5,7 @@ from django.utils.translation import gettext_lazy as _
 from core.uploads import sanitize_image
 
 from .blocks import blocks_to_html, normalize_blocks
-from .models import Post
+from .models import Comment, Post
 from .svg import is_svg_upload, sanitized_svg_upload
 
 MAX_IMAGE_BYTES = 10 * 1024 * 1024  # 10 MB
@@ -82,3 +82,15 @@ class ImageUploadForm(forms.Form):
 
     def clean_image(self):
         return validate_image_upload(self.cleaned_data['image'])
+
+
+class CommentForm(forms.ModelForm):
+    class Meta:
+        model = Comment
+        fields = ('text',)
+
+    def clean_text(self):
+        text = self.cleaned_data['text'].strip()
+        if not text:
+            raise forms.ValidationError(_('コメントを入力してください。'))
+        return text

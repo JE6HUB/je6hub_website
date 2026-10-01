@@ -38,7 +38,7 @@
                 <div id="wl-comment-list" class="wl-comment-list"></div>
                 <form id="wl-comment-form" class="wl-comment-form" novalidate>
                     {% csrf_token %}
-                    <input type="text" id="wl-comment-input" class="jh-input" maxlength="500" placeholder="{% trans 'コメントを書く…' %}" aria-label="{% trans 'コメントを書く' %}" required>
+                    <input type="text" id="wl-comment-input" class="jh-input" data-mention-input maxlength="500" placeholder="{% trans 'コメントを書く…' %}" aria-label="{% trans 'コメントを書く' %}" required>
                     <button type="submit" class="jh-btn jh-btn-primary wl-btn">{% trans "送信" %}</button>
                 </form>
                 <p class="wl-error" id="wl-comment-error" hidden></p>

@@ -10,10 +10,12 @@ from django.urls import reverse
 from django.utils.translation import gettext as _
 from django.views.decorators.http import require_POST
 
-from .forms import ImageUploadForm, PostForm
+from accounts.mentions import notify_mentions
+from accounts.ratelimit import is_rate_limited
 from photraveler.models import MapPin
 
-from .models import BlogImage, Post
+from .forms import CommentForm, ImageUploadForm, PostForm
+from .models import BlogImage, Comment, Post, PostLike
 
 POSTS_PER_PAGE = 12
 LATEST_CAROUSEL_SIZE = 6
@@ -63,8 +65,84 @@ def post_detail(request, pk):
         'post': post,
         'is_author': is_author,
         'more_posts': more_posts,
+        **_reactions_context(request, post),
         **_journey_context(post),
     })
+
+
+def _reactions_context(request, post, comment_form=None):
+    user = request.user
+    comments = list(post.comments.select_related('author', 'post'))
+    for comment in comments:
+        comment.deletable = comment.can_delete(user)
+    return {
+        'like_count': post.likes.count(),
+        'liked': user.is_authenticated and post.likes.filter(user=user).exists(),
+        'comments': comments,
+        'comment_form': comment_form or CommentForm(),
+    }
+
+
+def _get_published_post(pk):
+    post = get_object_or_404(Post.objects.select_related('author'), pk=pk)
+    if not post.is_published:
+        raise Http404
+    return post
+
+
+def _wants_json(request):
+    return 'application/json' in request.headers.get('Accept', '')
+
+
+# ─── いいね・コメント ────────────────────────────────────────
+
+@login_required
+@require_POST
+def post_like(request, pk):
+    """いいねを付ける / 外す (トグル)。fetch からは JSON、フォーム送信なら記事に戻る。"""
+    post = _get_published_post(pk)
+    like, created = PostLike.objects.get_or_create(post=post, user=request.user)
+    if not created:
+        like.delete()
+    if _wants_json(request):
+        return JsonResponse({'liked': created, 'count': post.likes.count()})
+    return redirect(post.get_absolute_url() + '#reactions')
+
+
+@login_required
+@require_POST
+def comment_create(request, pk):
+    post = _get_published_post(pk)
+    if is_rate_limited(request, 'blog_comment', limit=20, period=600):
+        messages.error(request, _('コメントの送信回数が多すぎます。しばらくしてからお試しください。'))
+        return redirect(post.get_absolute_url() + '#comments')
+
+    form = CommentForm(request.POST)
+    if not form.is_valid():
+        messages.error(request, _('コメントを入力してください。'))
+        return redirect(post.get_absolute_url() + '#comments')
+
+    comment = form.save(commit=False)
+    comment.post = post
+    comment.author = request.user
+    comment.save()
+    notify_mentions(
+        request, comment.text, author=request.user, url=comment.get_absolute_url(),
+        where=lambda: _('ブログ記事「%(title)s」のコメント') % {'title': post.title},
+    )
+    return redirect(comment.get_absolute_url())
+
+
+@login_required
+@require_POST
+def comment_delete(request, pk):
+    comment = get_object_or_404(Comment.objects.select_related('post'), pk=pk)
+    if not comment.can_delete(request.user):
+        raise PermissionDenied
+    post = comment.post
+    comment.delete()
+    messages.success(request, _('コメントを削除しました。'))
+    return redirect(post.get_absolute_url() + '#comments')
 
 
 def _journey_context(post):

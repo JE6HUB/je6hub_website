@@ -2,6 +2,7 @@ from django import template
 from django.utils.html import format_html
 from django.utils.translation import gettext as _
 
+from ..mentions import link_mentions
 from ..onboarding import pop_profile_onboarding
 
 register = template.Library()
@@ -54,3 +55,12 @@ def avatar(user):
         return format_html('<img class="jh-avatar-img" src="{}" alt="" loading="lazy" decoding="async">', image.url)
     name = getattr(user, 'public_name', '') or getattr(user, 'username', '')
     return name[:1].upper()
+
+
+@register.filter
+def mentions(text):
+    """テキストをエスケープし、@ユーザー名 をプロフィールへのリンクにする。改行は |linebreaksbr と組み合わせる。
+
+        {{ comment.text|mentions|linebreaksbr }}
+    """
+    return link_mentions(text)

@@ -9,6 +9,7 @@ from django.contrib import messages
 from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required
 from django.core.mail import send_mail
+from django.db.models import Q
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
 from django.shortcuts import get_object_or_404, redirect, render
@@ -25,7 +26,10 @@ from dashboard.models import ModerationLog
 from photraveler.models import MapPin, PinPhoto
 
 from .deletion import delete_account
-from .forms import AccountDeleteForm, CustomUserCreationForm, OnboardingProfileForm, ResendVerificationForm, UserProfileForm
+from .forms import (
+    AccountDeleteForm, CustomUserCreationForm, NotificationSettingsForm, OnboardingProfileForm,
+    ResendVerificationForm, UserProfileForm,
+)
 from .models import CustomUser
 from .onboarding import request_profile_onboarding
 from .ratelimit import ratelimit
@@ -135,8 +139,42 @@ def profile_view(request):
     context = {
         'user_obj': user,
         'form': form,
+        'notification_form': NotificationSettingsForm(instance=user),
     }
     return render(request, 'accounts/profile.html', context)
+
+
+@login_required
+@require_POST
+def notification_settings_view(request):
+    """プロフィール編集の「通知」から送られる。チェックが外れていれば (送信されなければ) オフになる。"""
+    form = NotificationSettingsForm(request.POST, instance=request.user)
+    if form.is_valid():
+        form.save()
+        messages.success(request, _('通知設定を保存しました。'))
+    return redirect(reverse('profile') + '#notifications')
+
+
+MENTION_SUGGESTIONS = 8
+
+
+@login_required
+@ratelimit('mention_search', limit=120, period=60)
+def mention_search_view(request):
+    """@ のあとに入力された文字で、メンション候補のユーザーを返す (入力欄の補完用)。"""
+    query = request.GET.get('q', '').strip().lstrip('@')[:150]
+    users = CustomUser.objects.filter(is_active=True)
+    if query:
+        users = users.filter(Q(username__istartswith=query) | Q(display_name__icontains=query))
+    users = users.order_by('username')[:MENTION_SUGGESTIONS]
+    return JsonResponse({'users': [
+        {
+            'username': u.username,
+            'name': u.public_name,
+            'avatar': u.avatar.url if u.avatar else '',
+        }
+        for u in users
+    ]})
 
 @require_POST
 def profile_onboarding_view(request):

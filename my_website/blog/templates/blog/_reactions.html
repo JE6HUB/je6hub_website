@@ -1,0 +1,66 @@
+{% load i18n profiles %}
+<section class="blog-reactions" id="reactions" aria-label="{% trans 'いいねとコメント' %}">
+    <div class="blog-like-row">
+        {% if user.is_authenticated %}
+        <form method="post" action="{% url 'blog:like' post.pk %}" class="blog-like-form" data-like-form>
+            {% csrf_token %}
+            <button type="submit" class="blog-like-btn{% if liked %} is-liked{% endif %}" aria-pressed="{{ liked|yesno:'true,false' }}"
+                    aria-label="{% trans 'いいね' %}">
+                <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M12 20.6l-1.3-1.2C5.9 15.1 3 12.4 3 8.9 3 6.1 5.2 4 7.9 4c1.6 0 3.1.7 4.1 1.9C13 4.7 14.5 4 16.1 4 18.8 4 21 6.1 21 8.9c0 3.5-2.9 6.2-7.7 10.5L12 20.6z"/></svg>
+                <span>{% trans "いいね" %}</span>
+            </button>
+        </form>
+        {% else %}
+        <a class="blog-like-btn" href="{% url 'login' %}?next={{ request.path|urlencode }}%23reactions">
+            <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M12 20.6l-1.3-1.2C5.9 15.1 3 12.4 3 8.9 3 6.1 5.2 4 7.9 4c1.6 0 3.1.7 4.1 1.9C13 4.7 14.5 4 16.1 4 18.8 4 21 6.1 21 8.9c0 3.5-2.9 6.2-7.7 10.5L12 20.6z"/></svg>
+            <span>{% trans "いいね" %}</span>
+        </a>
+        {% endif %}
+        <span class="blog-like-count" data-like-count aria-live="polite">{% blocktrans with count=like_count %}{{ count }} 件のいいね{% endblocktrans %}</span>
+    </div>
+
+    <div class="blog-comments" id="comments">
+        <h2 class="blog-comments-title">{% trans "コメント" %} <span>{{ comments|length }}</span></h2>
+
+        {% for comment in comments %}
+        <article class="blog-comment" id="comment-{{ comment.pk }}">
+            <span class="blog-avatar" data-profile="{{ comment.author.username }}" aria-hidden="true">{% avatar comment.author %}</span>
+            <div class="blog-comment-body">
+                <p class="blog-comment-head">
+                    <a href="{{ comment.author.get_absolute_url }}" class="blog-comment-name" {% profile_trigger comment.author link=True %}>{{ comment.author.public_name }}</a>
+                    {% if comment.author_id == post.author_id %}<span class="blog-comment-badge">{% trans "著者" %}</span>{% endif %}
+                    <time datetime="{{ comment.created_at|date:'c' }}">{{ comment.created_at|date:"Y.m.d H:i" }}</time>
+                </p>
+                <p class="blog-comment-text">{{ comment.text|mentions|linebreaksbr }}</p>
+                <div class="blog-comment-actions">
+                    {% if comment.deletable %}
+                    <form method="post" action="{% url 'blog:comment_delete' comment.pk %}" onsubmit="return confirm('{% trans "このコメントを削除しますか？" %}');">
+                        {% csrf_token %}
+                        <button type="submit">{% trans "削除" %}</button>
+                    </form>
+                    {% endif %}
+                    {% if user.is_authenticated and comment.author_id != user.id %}
+                    <a href="{% url 'dashboard:report' 'blog_comment' comment.pk %}">{% trans "通報" %}</a>
+                    {% endif %}
+                </div>
+            </div>
+        </article>
+        {% empty %}
+        <p class="blog-comments-empty">{% trans "まだコメントはありません。" %}</p>
+        {% endfor %}
+
+        {% if user.is_authenticated %}
+        <form method="post" action="{% url 'blog:comment_create' post.pk %}" class="blog-comment-form">
+            {% csrf_token %}
+            <span class="blog-avatar" aria-hidden="true">{% avatar user %}</span>
+            <div class="blog-comment-field">
+                <textarea id="blogCommentText" name="text" class="jh-input" rows="3" maxlength="{{ comment_form.fields.text.max_length }}" required
+                          aria-label="{% trans 'コメントを書く' %}" placeholder="{% trans 'コメントを書く… @ユーザー名 でメンションできます' %}" data-mention-input></textarea>
+                <button type="submit" class="jh-btn jh-btn-primary blog-btn-sm">{% trans "コメントする" %}</button>
+            </div>
+        </form>
+        {% else %}
+        <p class="blog-comments-login"><a href="{% url 'login' %}?next={{ request.path|urlencode }}%23comments">{% trans "ログインしてコメントする" %}</a></p>
+        {% endif %}
+    </div>
+</section>
