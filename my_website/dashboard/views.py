@@ -1,6 +1,5 @@
 import functools
 import mimetypes
-import os
 from datetime import timedelta
 
 from django.conf import settings
@@ -23,6 +22,7 @@ from community.models import Message
 from core.models import ContactMessage
 from photraveler.models import MapPin, PhotoComment, PinPhoto
 
+from .geo import database_info as geoip_database_info
 from .content import KINDS, get_object
 from .forms import ReportForm, SuspendForm
 from .models import (
@@ -142,7 +142,7 @@ def traffic(request):
         'countries': _countries(start),
         'cities': _with_pct(cities, 'visitors'),
         'pages': _with_pct(pages),
-        'geoip_ready': bool(settings.GEOIP_DB_PATH) and os.path.exists(settings.GEOIP_DB_PATH),
+        'geoip': geoip_database_info(),
     })
 
 

@@ -232,9 +232,13 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # アクセス元の位置情報 (国・都市) を推定するオフラインのデータベース (MMDB 形式)。
-# DB-IP の IP to City Lite か MaxMind の GeoLite2 City を置く (docs/deploy.md 参照)。
+# DB-IP の IP to City Lite か MaxMind の GeoLite2 City を `manage.py update_geoip` で取得する (docs/deploy.md 参照)。
 # ファイルが無ければ位置は「不明」として集計される。訪問者の IP を外部サービスへ送ることはない。
 GEOIP_DB_PATH = os.environ.get('GEOIP_DB_PATH', os.path.join(BASE_DIR.parent, 'geoip', 'city.mmdb'))
+# `manage.py update_geoip` の取得元: dbip (DB-IP City Lite, 登録不要) か maxmind (GeoLite2 City)
+GEOIP_SOURCE = os.environ.get('GEOIP_SOURCE', 'dbip')
+MAXMIND_ACCOUNT_ID = os.environ.get('MAXMIND_ACCOUNT_ID', '')
+MAXMIND_LICENSE_KEY = os.environ.get('MAXMIND_LICENSE_KEY', '')
 
 # # ログインURLの指定（認証が必要なビューにアクセスした際のリダイレクト先）
 # LOGIN_URL = 'admin:login'

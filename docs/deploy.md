@@ -145,14 +145,37 @@ docker compose -f docker-compose.prod.yml exec web python manage.py scrub_media 
 
 アクセス元の国・都市は、訪問者の IP を外部サービスに送らず、サーバー上の位置情報データベース（MMDB 形式）で推定する。IP アドレスそのものは保存せず、日ごとの件数だけを残す。データベースを置くまでは、場所は「不明」として数えられる。
 
-無料の [DB-IP IP to City Lite](https://db-ip.com/db/download/ip-to-city-lite)（登録不要、CC BY 4.0。ダッシュボードに出典を表示済み）を使う場合:
+位置情報データベースは `docker-compose.prod.yml` の **geoip コンテナ** が自動で管理する（設定不要）。
+
+- 起動時に `geoip/city.mmdb` を取得し、その後は 1 日 1 回新しい版が出ていないか確認して差し替える
+- ダウンロードしたファイルは、開けること・都市のデータベースであること・既知の IP の国を引けることを確かめてから入れ替える。失敗しても動いているデータベースはそのまま残る
+- `geoip/` は web コンテナの `/app/geoip` に読み取り専用でマウントされ、差し替えは再起動なしで反映される
+- ダッシュボードの「アクセス」ページの下に、使っているデータベースと版の日付が出る。45 日以上更新されていないと警告が出るので、そのときはログを確認する
 
 ```bash
-cd ~/je6hub_website
-mkdir -p geoip
-curl -fL "https://download.db-ip.com/free/dbip-city-lite-$(date +%Y-%m).mmdb.gz" | gunzip > geoip/city.mmdb.new && mv geoip/city.mmdb.new geoip/city.mmdb
+docker compose -f docker-compose.prod.yml logs geoip                         # 取得・更新の記録
+docker compose -f docker-compose.prod.yml exec geoip python manage.py update_geoip --force   # 今すぐ取り直す
 ```
 
-`geoip/` は web コンテナの `/app/geoip` に読み取り専用でマウントされる（`docker-compose.prod.yml`）。ファイルを差し替えると再起動なしで反映される。データは毎月更新されるので、`crontab -e` で `0 5 3 * * cd /home/deploy/je6hub_website && curl -fsL "https://download.db-ip.com/free/dbip-city-lite-$(date +\%Y-\%m).mmdb.gz" | gunzip > geoip/city.mmdb.new && mv geoip/city.mmdb.new geoip/city.mmdb` を登録しておくとよい。
+以前の手順で `crontab` に DB-IP のダウンロードを登録していた場合は、その行を削除する（geoip コンテナと二重に動くため）。
 
-MaxMind の GeoLite2 City（要アカウント登録）を使う場合は、ダウンロードした `GeoLite2-City.mmdb` を `geoip/city.mmdb` として置けばよい。
+### 取得元とライセンス
+
+| `GEOIP_SOURCE` | データベース | 登録 | 更新 | ライセンス上の注意 |
+|---|---|---|---|---|
+| `dbip`（既定） | [DB-IP IP to City Lite](https://db-ip.com/db/download/ip-to-city-lite) | 不要 | 毎月初め | CC BY 4.0。出典の表示が必要（ダッシュボードに「IP Geolocation by DB-IP」を表示済み） |
+| `maxmind` | [MaxMind GeoLite2 City](https://dev.maxmind.com/geoip/geolite2-free-geolocation-data) | 必要（無料） | 週 2 回 | GeoLite 利用規約。新しい版が出たら 30 日以内に差し替える（geoip コンテナが 7 日ごとに取り直す）。出典の表示が必要（ダッシュボードに表示済み） |
+
+既定の DB-IP のままなら何もしなくてよい。GeoLite2 に切り替える場合:
+
+1. [MaxMind の GeoLite 登録ページ](https://www.maxmind.com/en/geolite2/signup) で無料アカウントを作る
+2. ログイン後、Account → **Manage License Keys** → **Generate new license key** でキーを作る（キーは作成時にしか表示されないので控える）。アカウント ID は同じ画面の上部に出ている
+3. `.env` に次を設定して `docker compose -f docker-compose.prod.yml up -d` し直す
+
+   ```
+   GEOIP_SOURCE=maxmind
+   MAXMIND_ACCOUNT_ID=123456
+   MAXMIND_LICENSE_KEY=（作ったキー）
+   ```
+
+開発環境では `python manage.py update_geoip` を実行すると、リポジトリ直下の `geoip/city.mmdb` に取得される（`geoip/` は git 管理外）。
