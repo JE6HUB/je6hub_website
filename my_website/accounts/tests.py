@@ -317,3 +317,117 @@ class ProfileOnboardingTests(TestCase):
         user = User.objects.create_user(username='member', password=self.password)
         self.client.force_login(user)
         self.assertEqual(self.client.get(reverse('profile_onboarding')).status_code, 405)
+
+
+class AccountDeleteTests(TestCase):
+    password = 'a-very-strong-pass-1'
+
+    def setUp(self):
+        import shutil
+        import tempfile
+        from django.test import override_settings
+
+        cache.clear()
+        self.media_root = tempfile.mkdtemp()
+        self.addCleanup(shutil.rmtree, self.media_root, ignore_errors=True)
+        override = override_settings(MEDIA_ROOT=self.media_root)
+        override.enable()
+        self.addCleanup(override.disable)
+
+        self.user = User.objects.create_user('leaver', 'leaver@example.com', self.password, display_name='Leaver')
+        self.other = User.objects.create_user('stayer', 'stayer@example.com', self.password)
+        self.url = reverse('account_delete')
+
+    def make_content(self):
+        from django.core.files.uploadedfile import SimpleUploadedFile
+
+        from blog.models import BlogImage, Post
+        from community.models import Channel, ChannelMembership, Message
+        from photraveler.models import MapPin, PinPhoto
+
+        files = []
+        shared = Channel.objects.create(name='shared', created_by=self.user)
+        ChannelMembership.objects.create(channel=shared, user=self.user, role='owner')
+        ChannelMembership.objects.create(channel=shared, user=self.other)
+        solo = Channel.objects.create(name='solo', created_by=self.user)
+        ChannelMembership.objects.create(channel=solo, user=self.user, role='owner')
+        other_msg = Message.objects.create(channel=shared, sender=self.other, text='keep me')
+        solo_msg = Message.objects.create(channel=solo, sender=self.user, media=SimpleUploadedFile('a.png', b'x'))
+        msg = Message.objects.create(channel=shared, sender=self.user, media=SimpleUploadedFile('b.mp4', b'x'))
+        post = Post.objects.create(author=self.user, title='t', cover_image=SimpleUploadedFile('c.png', b'x'))
+        img = BlogImage.objects.create(uploader=self.user, image=SimpleUploadedFile('d.png', b'x'))
+        pin = MapPin.objects.create(user=self.user, title='p', latitude=1, longitude=2)
+        photo = PinPhoto.objects.create(pin=pin, image=SimpleUploadedFile('e.jpg', b'x'),
+                                        thumbnail=SimpleUploadedFile('f.jpg', b'x'))
+        files = [solo_msg.media, msg.media, post.cover_image, img.image, photo.image, photo.thumbnail]
+        for f in files:
+            self.assertTrue(f.storage.exists(f.name))
+        return shared, solo, other_msg, files
+
+    def test_requires_login(self):
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 302)
+        self.assertIn(reverse('login'), response['Location'])
+
+    def test_confirmation_page_lists_what_will_be_deleted(self):
+        self.make_content()
+        self.client.force_login(self.user)
+        response = self.client.get(self.url)
+        self.assertContains(response, 'shared')
+        self.assertContains(response, 'solo')
+        self.assertTrue(User.objects.filter(pk=self.user.pk).exists())
+
+    def test_wrong_password_or_missing_agreement_keeps_account(self):
+        self.client.force_login(self.user)
+        self.client.post(self.url, {'confirm': 'wrong-password', 'agree': 'on'})
+        self.client.post(self.url, {'confirm': self.password})
+        self.assertTrue(User.objects.filter(pk=self.user.pk).exists())
+
+    def test_delete_removes_account_content_and_files(self):
+        from community.models import Channel, ChannelMembership, Message
+        from dashboard.models import ModerationLog
+
+        shared, solo, other_msg, files = self.make_content()
+        self.client.force_login(self.user)
+        with self.captureOnCommitCallbacks(execute=True):
+            response = self.client.post(self.url, {'confirm': self.password, 'agree': 'on'})
+        self.assertRedirects(response, reverse('core:home'), fetch_redirect_response=False)
+        self.assertFalse(User.objects.filter(pk=self.user.pk).exists())
+        for f in files:
+            self.assertFalse(f.storage.exists(f.name), f.name)
+        # ほかのメンバーがいるチャンネルは引き継がれ、その人のメッセージは残る
+        shared.refresh_from_db()
+        self.assertEqual(shared.created_by, self.other)
+        self.assertTrue(shared.is_owner(self.other))
+        self.assertTrue(Message.objects.filter(pk=other_msg.pk).exists())
+        self.assertFalse(Message.objects.filter(sender_id=self.user.pk).exists())
+        self.assertFalse(Channel.objects.filter(pk=solo.pk).exists())
+        self.assertFalse(ChannelMembership.objects.filter(user_id=self.user.pk).exists())
+        self.assertEqual(ModerationLog.objects.get().action, 'user_withdraw')
+        # ログアウトされている
+        self.assertNotIn('_auth_user_id', self.client.session)
+
+    def test_social_only_user_confirms_with_username(self):
+        from allauth.socialaccount.models import SocialAccount
+
+        self.user.set_unusable_password()
+        self.user.save()
+        SocialAccount.objects.create(user=self.user, provider='apple', uid='apple-sub')
+        self.client.force_login(self.user)
+        self.client.post(self.url, {'confirm': 'someone-else', 'agree': 'on'})
+        self.assertTrue(User.objects.filter(pk=self.user.pk).exists())
+        self.client.post(self.url, {'confirm': 'leaver', 'agree': 'on'})
+        self.assertFalse(User.objects.filter(pk=self.user.pk).exists())
+        self.assertFalse(SocialAccount.objects.filter(uid='apple-sub').exists())
+
+    def test_staff_cannot_withdraw(self):
+        self.user.is_staff = True
+        self.user.save()
+        self.client.force_login(self.user)
+        response = self.client.post(self.url, {'confirm': self.password, 'agree': 'on'})
+        self.assertRedirects(response, reverse('profile'), fetch_redirect_response=False)
+        self.assertTrue(User.objects.filter(pk=self.user.pk).exists())
+
+    def test_profile_links_to_delete_page(self):
+        self.client.force_login(self.user)
+        self.assertContains(self.client.get(reverse('profile')), self.url)

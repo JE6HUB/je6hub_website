@@ -1882,3 +1882,81 @@ msgstr "Save"
 
 msgid "プロフィールを作成しました。"
 msgstr "Your profile has been created."
+
+msgid "退会"
+msgstr "Delete account"
+
+msgid "アカウントと、投稿・写真などのデータをすべて削除します。"
+msgstr "Permanently delete your account and everything you've posted, including photos."
+
+msgid "退会手続きへ"
+msgstr "Delete account…"
+
+msgid "アカウントを削除すると、元に戻すことはできません。"
+msgstr "Deleting your account can't be undone."
+
+msgid "削除されるもの"
+msgstr "What will be deleted"
+
+msgid "プロフィール (ユーザー名・表示名・自己紹介・メールアドレス・氏名・お気に入りの曲)"
+msgstr "Your profile (username, display name, bio, email, name and favorite track)"
+
+msgid "アップロードした画像・動画のファイル"
+msgstr "Image and video files you uploaded"
+
+msgid "チャンネルへの参加情報"
+msgstr "Your channel memberships"
+
+msgid "連携しているソーシャルログイン"
+msgstr "Linked social sign-in"
+
+msgid "作成したチャンネル"
+msgstr "Channels you created"
+
+msgid "「%(name)s」はほかのメンバーに引き継がれます (あなたのメッセージは削除されます)。"
+msgstr "\"%(name)s\" will be handed over to another member (your messages will be deleted)."
+
+msgid "「%(name)s」はほかにメンバーがいないため削除されます。"
+msgstr "\"%(name)s\" has no other members and will be deleted."
+
+msgid "確認のため、パスワードを入力してください"
+msgstr "Enter your password to confirm"
+
+msgid "確認のため、ユーザー名「%(username)s」を入力してください"
+msgstr "Type your username \"%(username)s\" to confirm"
+
+msgid "退会する"
+msgstr "Delete my account"
+
+msgid "投稿や写真も含め、すべて削除されることを理解しました"
+msgstr "I understand that everything, including my posts and photos, will be deleted"
+
+msgid "パスワード"
+msgstr "Password"
+
+msgid "パスワードが正しくありません。"
+msgstr "Incorrect password."
+
+msgid "ユーザー名が一致しません。"
+msgstr "The username doesn't match."
+
+msgid "管理者のアカウントは退会できません。Django 管理画面で権限を外してから退会してください。"
+msgstr "Admin accounts can't be deleted here. Remove the admin permissions in the Django admin first."
+
+msgid "退会しました。ご利用ありがとうございました。"
+msgstr "Your account has been deleted. Thank you for using the site."
+
+msgid "Lounge のメッセージ"
+msgstr "Lounge messages"
+
+msgid "Blogs の記事 (下書きを含む)"
+msgstr "Blog posts (including drafts)"
+
+msgid "Blogs にアップロードした画像"
+msgstr "Images uploaded to Blogs"
+
+msgid "WanderLens のスポット"
+msgstr "WanderLens spots"
+
+msgid "WanderLens の写真"
+msgstr "WanderLens photos"
