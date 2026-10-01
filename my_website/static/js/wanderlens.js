@@ -50,77 +50,142 @@
         return u.toString();
     };
 
-    // ── 地図 ─────────────────────────────────────────
-    // 地図タイル: API キー不要の Esri ダークグレー (地名は別レイヤーで重ねる)。
-    // CARTO の無料タイルは API キー必須になり透かしが入るため使わない。
-    const ESRI = 'https://server.arcgisonline.com/ArcGIS/rest/services';
-    const ESRI_ATTR = 'Tiles &copy; Esri &mdash; Esri, HERE, Garmin, &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors';
-    const TILES = {
-        dark: L.layerGroup([
-            L.tileLayer(`${ESRI}/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}`, { attribution: ESRI_ATTR, maxNativeZoom: 16, maxZoom: 19 }),
-            L.tileLayer(`${ESRI}/Canvas/World_Dark_Gray_Reference/MapServer/tile/{z}/{y}/{x}`, { maxNativeZoom: 16, maxZoom: 19 }),
-        ]),
-        satellite: L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
-            attribution: 'Tiles &copy; Esri', maxZoom: 19,
-        }),
-    };
-    const map = L.map('wl-map', { zoomControl: false, worldCopyJump: true, minZoom: 2 }).setView([30, 10], 2);
-    L.control.zoom({ position: 'bottomright' }).addTo(map);
-    TILES.dark.addTo(map);
-
-    function markerIcon(pin) {
-        const photo = pin.photos[0];
-        const el = h('div', { class: `wl-marker${photo ? '' : ' wl-marker--dot'}` },
-            photo ? h('img', { src: photo.thumb, alt: '', loading: 'lazy' }) : icon('location_on'));
-        return L.divIcon({ html: el, className: 'wl-marker-wrap', iconSize: [52, 52], iconAnchor: [26, 60] });
+    // ── 地図 (Mapbox GL JS) ───────────────────────────────
+    // スタイルは settings の MAPBOX_STYLE などで Mapbox Studio のものに差し替えられる。
+    mapboxgl.accessToken = cfg.mapbox.token;
+    const STYLES = { dark: cfg.mapbox.style, satellite: cfg.mapbox.satellite };
+    const CLUSTER_MAX_ZOOM = 14; // これより拡大すると、まとめずに 1 件ずつ表示する
+    const map = new mapboxgl.Map({
+        container: 'wl-map',
+        style: STYLES.dark,
+        center: [10, 30],
+        zoom: 1.3,
+        minZoom: 1,
+        projection: 'globe',
+        language: lang,
+    });
+    map.addControl(new mapboxgl.NavigationControl({ showCompass: false }), 'bottom-right');
+    if (!cfg.mapbox.token) {
+        $('#wl-map').append(h('p', { class: 'wl-map-notice', role: 'status', text: t.mapUnavailable }));
     }
-    const cluster = L.markerClusterGroup({
-        showCoverageOnHover: false,
-        maxClusterRadius: 64,
-        spiderfyDistanceMultiplier: 1.6,
-        iconCreateFunction(c) {
-            const children = c.getAllChildMarkers();
-            const withPhoto = children.find((m) => m.options.pin.photos.length);
-            const el = h('div', { class: 'wl-marker wl-marker--cluster' },
-                withPhoto ? h('img', { src: withPhoto.options.pin.photos[0].thumb, alt: '' }) : icon('photo_library'),
-                h('span', { class: 'wl-marker-count', text: String(c.getChildCount()) }));
-            return L.divIcon({ html: el, className: 'wl-marker-wrap', iconSize: [60, 60], iconAnchor: [30, 68] });
-        },
+
+    const pinById = new Map(pins.map((p) => [p.id, p]));
+    // 訪れた順 (旅のルート・前後移動)
+    const ordered = [...pins].sort((a, b) => dateOf(a).localeCompare(dateOf(b)) || a.id - b.id);
+    // まとまりの表紙: 写真のあるピンのうち pins の並びで最初のもの (cover が最小のもの)
+    const NO_COVER = 1e9;
+    const pinsGeoJSON = {
+        type: 'FeatureCollection',
+        features: pins.map((p, i) => ({
+            type: 'Feature',
+            geometry: { type: 'Point', coordinates: [p.lng, p.lat] },
+            properties: { id: p.id, cover: p.photos.length ? i : NO_COVER },
+        })),
+    };
+    const routeGeoJSON = {
+        type: 'Feature',
+        geometry: { type: 'LineString', coordinates: ordered.map((p) => [p.lng, p.lat]) },
+        properties: {},
+    };
+    let routeOn = false;
+
+    // スタイルを切り替えるとソースとレイヤーが消えるので、読み込むたびに追加し直す
+    map.on('style.load', () => {
+        if (!map.getFog()) map.setFog({ color: '#1c1c1e', 'high-color': '#0b1a33', 'space-color': '#000', 'star-intensity': 0.25 });
+        map.addSource('wl-pins', {
+            type: 'geojson',
+            data: pinsGeoJSON,
+            cluster: true,
+            clusterMaxZoom: CLUSTER_MAX_ZOOM,
+            clusterRadius: 56,
+            clusterProperties: { cover: ['min', ['get', 'cover']] },
+        });
+        // 写真マーカーは HTML で描くため見えないレイヤー。ソースのタイルを読み込ませるためだけに置く
+        map.addLayer({ id: 'wl-pins-hit', type: 'circle', source: 'wl-pins', paint: { 'circle-radius': 0, 'circle-opacity': 0 } });
+        map.addSource('wl-route', { type: 'geojson', data: routeGeoJSON });
+        map.addLayer({
+            id: 'wl-route',
+            type: 'line',
+            source: 'wl-route',
+            layout: { 'line-cap': 'round', 'line-join': 'round', visibility: routeOn ? 'visible' : 'none' },
+            paint: { 'line-color': '#2997ff', 'line-width': 3, 'line-opacity': 0.85, 'line-dasharray': [0.1, 2.6] },
+        });
     });
-    const markers = new Map();
-    pins.forEach((p) => {
-        const m = L.marker([p.lat, p.lng], { icon: markerIcon(p), pin: p, title: p.title, riseOnHover: true });
-        m.on('click', () => openSheet(p));
-        markers.set(p.id, m);
-        cluster.addLayer(m);
-    });
-    map.addLayer(cluster);
+
+    // 写真マーカー (クラスタも同じ見た目で、件数バッジ付き)
+    function markerElement({ photo, count = 0, label, onActivate }) {
+        const inner = count
+            ? h('div', { class: 'wl-marker wl-marker--cluster' },
+                photo ? h('img', { src: photo.thumb, alt: '' }) : icon('photo_library'),
+                h('span', { class: 'wl-marker-count', text: String(count) }))
+            : h('div', { class: `wl-marker${photo ? '' : ' wl-marker--dot'}` },
+                photo ? h('img', { src: photo.thumb, alt: '', loading: 'lazy' }) : icon('location_on'));
+        const el = h('div', { class: 'wl-marker-wrap', role: 'button', tabindex: '0', 'aria-label': label, title: label }, inner);
+        el.addEventListener('click', (e) => { e.stopPropagation(); onActivate(); });
+        el.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onActivate(); } });
+        return el;
+    }
+    const markerCache = new Map(); // key → mapboxgl.Marker
+    let shown = new Map();
+    function buildMarker(f) {
+        const coords = f.geometry.coordinates;
+        const props = f.properties;
+        if (props.cluster) {
+            const coverPin = props.cover < NO_COVER ? pins[props.cover] : null;
+            const el = markerElement({
+                photo: coverPin && coverPin.photos[0],
+                count: props.point_count,
+                label: `${props.point_count} ${t.places}`,
+                onActivate: () => map.getSource('wl-pins').getClusterExpansionZoom(props.cluster_id, (err, zoom) => {
+                    if (!err) map.easeTo({ center: coords, zoom: Math.min(zoom, CLUSTER_MAX_ZOOM + 1) });
+                }),
+            });
+            return new mapboxgl.Marker({ element: el, anchor: 'bottom' }).setLngLat(coords);
+        }
+        const p = pinById.get(props.id);
+        const el = markerElement({ photo: p.photos[0], label: p.title, onActivate: () => openSheet(p) });
+        return new mapboxgl.Marker({ element: el, anchor: 'bottom' }).setLngLat([p.lng, p.lat]);
+    }
+    function updateMarkers() {
+        if (!map.getSource('wl-pins') || !map.isSourceLoaded('wl-pins')) return;
+        const next = new Map();
+        map.querySourceFeatures('wl-pins').forEach((f) => {
+            const key = f.properties.cluster ? `c${f.properties.cluster_id}` : `p${f.properties.id}`;
+            if (next.has(key)) return; // タイルの境目で同じ点が重複して返る
+            let m = markerCache.get(key);
+            if (!m) { m = buildMarker(f); markerCache.set(key, m); }
+            next.set(key, m);
+            if (!shown.has(key)) m.addTo(map);
+        });
+        shown.forEach((m, key) => { if (!next.has(key)) m.remove(); });
+        shown = next;
+    }
+    map.on('render', updateMarkers);
 
     const fitAll = (animate = true) => {
         if (!pins.length) return;
-        map.fitBounds(L.latLngBounds(pins.map((p) => [p.lat, p.lng])), { padding: [60, 60], maxZoom: 12, animate });
+        const bounds = new mapboxgl.LngLatBounds();
+        pins.forEach((p) => bounds.extend([p.lng, p.lat]));
+        map.fitBounds(bounds, { padding: 60, maxZoom: 12, duration: animate ? 1200 : 0 });
     };
     fitAll(false);
-
-    // 旅のルート (訪れた順)
-    const ordered = [...pins].sort((a, b) => dateOf(a).localeCompare(dateOf(b)) || a.id - b.id);
-    const route = L.polyline(ordered.map((p) => [p.lat, p.lng]), {
-        color: '#2997ff', weight: 3, opacity: 0.85, dashArray: '2 8', lineCap: 'round',
-    });
+    const focusPin = (p, animate = true) => {
+        const opts = { center: [p.lng, p.lat], zoom: Math.max(map.getZoom(), CLUSTER_MAX_ZOOM + 1) };
+        if (animate) map.flyTo({ ...opts, duration: 800 }); else map.jumpTo(opts);
+    };
 
     document.querySelectorAll('.wl-ctl').forEach((btn) => btn.addEventListener('click', () => {
         const ctl = btn.dataset.ctl;
         if (ctl === 'fit') fitAll();
         if (ctl === 'route') {
-            const on = btn.getAttribute('aria-pressed') !== 'true';
-            btn.setAttribute('aria-pressed', String(on));
-            if (on) route.addTo(map); else route.remove();
+            routeOn = btn.getAttribute('aria-pressed') !== 'true';
+            btn.setAttribute('aria-pressed', String(routeOn));
+            if (map.getLayer('wl-route')) map.setLayoutProperty('wl-route', 'visibility', routeOn ? 'visible' : 'none');
         }
         if (ctl === 'layer') {
             const sat = btn.getAttribute('aria-pressed') !== 'true';
             btn.setAttribute('aria-pressed', String(sat));
-            map.removeLayer(sat ? TILES.dark : TILES.satellite);
-            (sat ? TILES.satellite : TILES.dark).addTo(map);
+            map.setStyle(sat ? STYLES.satellite : STYLES.dark);
         }
     }));
 
@@ -181,8 +246,9 @@
     }
     attachSearch($('#wl-search'), $('#wl-search-results'), (r) => {
         const bb = r.boundingbox && r.boundingbox.map(Number);
-        if (bb) map.flyToBounds([[bb[0], bb[2]], [bb[1], bb[3]]], { maxZoom: 14, duration: 1.2 });
-        else map.flyTo([Number(r.lat), Number(r.lon)], 12);
+        // Nominatim の boundingbox は [南, 北, 西, 東]
+        if (bb) map.fitBounds([[bb[2], bb[0]], [bb[3], bb[1]]], { maxZoom: 14, duration: 1200 });
+        else map.flyTo({ center: [Number(r.lon), Number(r.lat)], zoom: 12 });
     });
 
     // ── 詳細シート ───────────────────────────────────────
@@ -287,8 +353,7 @@
         const p = current;
         sheet.close();
         showView('map');
-        const m = markers.get(p.id);
-        cluster.zoomToShowLayer(m, () => map.flyTo([p.lat, p.lng], Math.max(map.getZoom(), 13), { duration: 0.8 }));
+        focusPin(p);
         document.getElementById('wl-map').scrollIntoView({ behavior: 'smooth', block: 'center' });
     });
     $('#wl-sheet-copy').addEventListener('click', () => copy(pinLink(current)));
@@ -377,7 +442,7 @@
         document.querySelectorAll('.wl-view').forEach((v) => { v.hidden = v.dataset.view !== name; });
         const radio = document.querySelector(`input[name="wl-view"][value="${name}"]`);
         if (radio) radio.checked = true;
-        if (name === 'map') setTimeout(() => map.invalidateSize(), 0);
+        if (name === 'map') setTimeout(() => map.resize(), 0);
     }
     document.querySelectorAll('input[name="wl-view"]').forEach((r) => r.addEventListener('change', () => showView(r.value)));
 
@@ -401,28 +466,36 @@
         let placeTouched = false; // 場所名を手入力したら逆ジオコーディングで上書きしない
         let locationSource = null; // 'manual' | 'exif'
 
-        // 小さな地図 (位置の確認・調整)
-        // 位置合わせ用: 道路や建物まで見える OpenStreetMap 標準タイル
-        const mini = L.map('wl-editor-map', { zoomControl: true }).setView([35.68, 139.76], 4);
-        L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            maxZoom: 19,
-            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-        }).addTo(mini);
-        const pinIcon = L.divIcon({ html: h('div', { class: 'wl-marker wl-marker--dot wl-marker--edit' }, icon('location_on')), className: 'wl-marker-wrap', iconSize: [40, 40], iconAnchor: [20, 46] });
+        // 小さな地図 (位置の確認・調整)。地図の読み込みは課金対象なので、初めて編集画面を開いたときに作る
+        let mini = null;
         let miniMarker = null;
+        function ensureMini() {
+            if (mini) return;
+            mini = new mapboxgl.Map({
+                container: 'wl-editor-map',
+                style: cfg.mapbox.editorStyle, // 位置合わせ用: 道路や建物まで見えるスタイル
+                center: [139.76, 35.68],
+                zoom: 4,
+                language: lang,
+            });
+            mini.addControl(new mapboxgl.NavigationControl({ showCompass: false }), 'top-right');
+            mini.on('click', (e) => setLocation(e.lngLat.lat, e.lngLat.lng, { fly: false }));
+        }
 
         function setLocation(lat, lng, { source = 'manual', fly = true, lookup = true } = {}) {
             f.lat.value = Number(lat).toFixed(6);
             f.lng.value = Number(lng).toFixed(6);
             locationSource = source;
             $('#wl-coords').textContent = `${Number(lat).toFixed(5)}, ${Number(lng).toFixed(5)}`;
+            ensureMini();
             if (!miniMarker) {
-                miniMarker = L.marker([lat, lng], { icon: pinIcon, draggable: true }).addTo(mini);
-                miniMarker.on('dragend', () => { const ll = miniMarker.getLatLng(); setLocation(ll.lat, ll.lng, { fly: false }); });
+                const el = h('div', { class: 'wl-marker-wrap wl-marker-wrap--edit' }, h('div', { class: 'wl-marker wl-marker--dot wl-marker--edit' }, icon('location_on')));
+                miniMarker = new mapboxgl.Marker({ element: el, anchor: 'bottom', draggable: true }).setLngLat([lng, lat]).addTo(mini);
+                miniMarker.on('dragend', () => { const ll = miniMarker.getLngLat(); setLocation(ll.lat, ll.lng, { fly: false }); });
             } else {
-                miniMarker.setLatLng([lat, lng]);
+                miniMarker.setLngLat([lng, lat]);
             }
-            if (fly) mini.setView([lat, lng], Math.max(mini.getZoom(), 13));
+            if (fly) mini.jumpTo({ center: [lng, lat], zoom: Math.max(mini.getZoom(), 13) });
             $('#wl-exif-badge').hidden = source !== 'exif';
             if (lookup) reverseLookup(lat, lng);
         }
@@ -435,7 +508,6 @@
                 if (!placeTouched) f.place.value = lab.place || lab.city;
             } catch (e) { /* ネットワークエラー時は場所名なしで保存できる */ }
         }
-        mini.on('click', (e) => setLocation(e.latlng.lat, e.latlng.lng, { fly: false }));
         f.place.addEventListener('input', () => { placeTouched = true; });
         attachSearch(f.place, $('#wl-place-results'), (r) => {
             const lab = geo.label(r);
@@ -527,12 +599,14 @@
             }
             renderThumbs();
             dlg.showModal();
+            ensureMini();
             setTimeout(() => {
-                mini.invalidateSize();
+                mini.resize();
+                const here = { center: map.getCenter(), zoom: Math.max(map.getZoom(), 3) };
                 if (pin) setLocation(pin.lat, pin.lng, { lookup: false });
                 else if (at) setLocation(at.lat, at.lng);
-                else if (miniMarker) { miniMarker.remove(); miniMarker = null; mini.setView(map.getCenter(), Math.max(map.getZoom(), 3)); }
-                else mini.setView(map.getCenter(), Math.max(map.getZoom(), 3));
+                else if (miniMarker) { miniMarker.remove(); miniMarker = null; mini.jumpTo(here); }
+                else mini.jumpTo(here);
                 f.title.focus();
             }, 30);
         }
@@ -558,15 +632,24 @@
         const edit = $('#wl-sheet-edit');
         if (edit) edit.addEventListener('click', () => { const p = current; sheet.close(); open(p); });
         // 地図の右クリック / 長押しで、その場所に追加
-        map.on('contextmenu', (e) => open(null, e.latlng));
+        map.on('contextmenu', (e) => open(null, e.lngLat));
+        // Mapbox はタッチの長押しで contextmenu を出さないので、自前で判定する
+        let pressTimer = null;
+        const cancelPress = () => clearTimeout(pressTimer);
+        map.on('touchstart', (e) => {
+            cancelPress();
+            if (e.originalEvent.touches.length !== 1 || e.originalEvent.target.closest('.mapboxgl-marker')) return;
+            const at = e.lngLat;
+            pressTimer = setTimeout(() => open(null, at), 600);
+        });
+        ['touchend', 'touchcancel', 'movestart', 'zoomstart'].forEach((ev) => map.on(ev, cancelPress));
     }
 
     // ── 共有リンク (?pin=ID) で開く ──────────────────────────
     const initial = Number(new URLSearchParams(location.search).get('pin'));
     const initialPin = pins.find((p) => p.id === initial);
     if (initialPin) {
-        const m = markers.get(initialPin.id);
-        cluster.zoomToShowLayer(m, () => {});
+        focusPin(initialPin, false);
         openSheet(initialPin);
     }
 })();

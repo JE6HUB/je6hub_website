@@ -82,6 +82,14 @@ class DiscoveryViewTests(WanderLensTestCase):
         self.assertNotContains(response, 'onerror=alert(1)></script>')
         self.assertContains(response, '\\u003Cimg src=x onerror=alert(1)\\u003E')
 
+    @override_settings(MAPBOX_ACCESS_TOKEN='pk.test-token', MAPBOX_STYLE='mapbox://styles/je6hub/custom')
+    def test_map_config_carries_mapbox_settings(self):
+        response = self.client.get(reverse('photraveler:map'))
+        self.assertContains(response, 'mapbox-gl.js')
+        cfg = json.loads(response.content.decode().split('id="wl-config" type="application/json">')[1].split('</script>')[0])
+        self.assertEqual(cfg['mapbox']['token'], 'pk.test-token')
+        self.assertEqual(cfg['mapbox']['style'], 'mapbox://styles/je6hub/custom')
+
 
 # ─── ユーザーのマップ ───────────────────────────────────
 

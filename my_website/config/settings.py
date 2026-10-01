@@ -21,6 +21,15 @@ SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'django-insecure-dummy-key-for-
 # Full-track playback requires a valid Apple Music developer token.
 APPLE_MUSIC_DEVELOPER_TOKEN = os.environ.get('APPLE_MUSIC_DEVELOPER_TOKEN', '')
 
+# Mapbox (WanderLens の地図)
+# 公開トークン (pk.) はブラウザに渡るため、Mapbox の管理画面で URL 制限をかけておくこと。
+MAPBOX_ACCESS_TOKEN = os.environ.get('MAPBOX_ACCESS_TOKEN', '')
+# Mapbox Studio で作ったスタイルの URL (mapbox://styles/<user>/<id>) に差し替えられる
+MAPBOX_STYLE = os.environ.get('MAPBOX_STYLE', 'mapbox://styles/mapbox/dark-v11')
+MAPBOX_SATELLITE_STYLE = os.environ.get('MAPBOX_SATELLITE_STYLE', 'mapbox://styles/mapbox/satellite-streets-v12')
+# スポット編集画面の位置合わせ用 (道路や建物まで見えるスタイル)
+MAPBOX_EDITOR_STYLE = os.environ.get('MAPBOX_EDITOR_STYLE', 'mapbox://styles/mapbox/streets-v12')
+
 # 未設定時は安全側（本番想定）に倒し、ローカル開発では .env や docker-compose で明示的に True にする
 DEBUG = os.environ.get('DJANGO_DEBUG', 'False') == 'True'
 

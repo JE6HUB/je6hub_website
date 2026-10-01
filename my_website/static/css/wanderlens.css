@@ -34,7 +34,7 @@
    地図
    ========================================= */
 .wl-map { width: 100%; height: 100%; background: #111; }
-.leaflet-container { font-family: var(--ap-font-text); background: #111; }
+.mapboxgl-map { font-family: var(--ap-font-text); }
 .wl-hero { position: relative; height: min(78vh, 780px); min-height: 520px; }
 .wl-map--hero { position: absolute; inset: 0; }
 .wl-map-frame {
@@ -91,7 +91,7 @@
     position: absolute;
     z-index: 500;
     right: max(20px, calc((100vw - 1200px) / 2 + 20px));
-    bottom: 110px;
+    bottom: 150px; /* 右下のズームボタンと帰属表示の上に置く */
     display: flex;
     flex-direction: column;
     border-radius: 14px;
@@ -101,7 +101,7 @@
     -webkit-backdrop-filter: saturate(180%) blur(20px);
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
 }
-.wl-map-frame .wl-map-controls { right: 16px; bottom: 100px; }
+.wl-map-frame .wl-map-controls { right: 16px; bottom: 140px; }
 .wl-ctl {
     width: 44px;
     height: 44px;
@@ -140,21 +140,44 @@
 .wl-suggest li small { font-size: 12px; color: var(--ap-text-muted); }
 .wl-suggest li.is-empty { color: var(--ap-text-muted); cursor: default; }
 
-/* Leaflet のズームボタン・帰属表示をダークに */
-.leaflet-bar { border: none !important; border-radius: 14px !important; overflow: hidden; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4) !important; }
-.leaflet-bar a { background: rgba(28, 28, 30, 0.85) !important; color: var(--ap-text) !important; border-bottom-color: rgba(255, 255, 255, 0.1) !important; width: 44px !important; height: 44px !important; line-height: 44px !important; }
-.leaflet-bar a:hover { background: #2c2c2e !important; }
-.leaflet-control-attribution { background: rgba(0, 0, 0, 0.55) !important; color: #86868b !important; font-size: 10px; }
-.leaflet-control-attribution a { color: #a1a1a6 !important; }
-.wl-hero .leaflet-bottom.leaflet-right { right: max(0px, calc((100vw - 1200px) / 2)); }
+/* Mapbox のズームボタン・帰属表示をダークに */
+.mapboxgl-ctrl-group { border-radius: 14px !important; overflow: hidden; background: rgba(28, 28, 30, 0.85) !important; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4) !important; }
+.mapboxgl-ctrl-group button { width: 44px !important; height: 44px !important; }
+.mapboxgl-ctrl-group button + button { border-top-color: rgba(255, 255, 255, 0.1) !important; }
+.mapboxgl-ctrl-group button:hover { background: #2c2c2e !important; }
+.mapboxgl-ctrl-group .mapboxgl-ctrl-icon { filter: invert(1); }
+.mapboxgl-ctrl-attrib.mapboxgl-compact, .mapboxgl-ctrl-attrib { background: rgba(0, 0, 0, 0.55) !important; color: #86868b; font-size: 10px; }
+.mapboxgl-ctrl-attrib a { color: #a1a1a6 !important; }
+.mapboxgl-ctrl-attrib-button { filter: invert(1); }
+.wl-hero .mapboxgl-ctrl-bottom-right { right: max(0px, calc((100vw - 1200px) / 2)); }
+/* ズームボタンを上の操作ボタン (.wl-map-controls) と縦にそろえる */
+.wl-hero .mapboxgl-ctrl-bottom-right .mapboxgl-ctrl { margin-right: 20px; }
+.wl-map-frame .mapboxgl-ctrl-bottom-right .mapboxgl-ctrl { margin-right: 16px; }
+.wl-map-notice {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    z-index: 2;
+    max-width: min(90%, 360px);
+    margin: 0;
+    padding: 12px 16px;
+    border-radius: 14px;
+    background: rgba(28, 28, 30, 0.9);
+    color: var(--ap-text-muted);
+    font-size: 14px;
+    text-align: center;
+    transform: translate(-50%, -50%);
+}
 
 /* ── 写真マーカー (Apple 写真アプリの「場所」風) ── */
-.wl-marker-wrap { background: none; border: none; }
+.wl-marker-wrap { padding-bottom: 8px; cursor: pointer; outline: none; } /* 下の余白 = しっぽの長さ。anchor: bottom でしっぽの先を座標に合わせる */
+.wl-marker-wrap:focus-visible .wl-marker { box-shadow: 0 0 0 3px var(--ap-accent), 0 6px 18px rgba(0, 0, 0, 0.45); }
+.wl-marker-wrap--edit { padding-bottom: 6px; cursor: grab; }
 .wl-marker {
     position: relative;
     width: 52px;
     height: 52px;
-    box-sizing: border-box; /* iconSize (52px) と見た目のサイズを一致させ、しっぽを座標の真上に置く */
+    box-sizing: border-box; /* 見た目のサイズを 52px に固定し、しっぽを座標の真上に置く */
     border-radius: 14px;
     padding: 3px;
     background: #fff;
@@ -175,10 +198,7 @@
     z-index: -1;
 }
 .wl-marker img { width: 100%; height: 100%; object-fit: cover; border-radius: 11px; display: block; }
-/* leaflet.css の `.leaflet-container .leaflet-marker-pane img { width: auto; max-width: none !important }` が
-   上のルールより詳細度が高く、写真が元の縦横比のまま枠からはみ出す / 余白が出るのを防ぐ */
-.leaflet-container .wl-marker img { width: 100%; height: 100%; max-width: 100% !important; max-height: 100% !important; }
-.leaflet-marker-icon:hover .wl-marker { transform: scale(1.08); }
+.wl-marker-wrap:hover .wl-marker { transform: scale(1.08); }
 .wl-marker--dot { display: flex; align-items: center; justify-content: center; background: var(--ap-accent); }
 .wl-marker--dot::after { background: var(--ap-accent); }
 .wl-marker--dot .material-symbols-outlined { color: #fff; font-size: 26px; }
@@ -517,6 +537,7 @@
 }
 .wl-badge { display: inline-flex; align-items: center; gap: 6px; margin: 10px 0 0; font-size: 13px; color: #30d158; }
 .wl-badge .material-symbols-outlined { font-size: 16px; }
+.wl-badge[hidden] { display: none; }
 .wl-place { position: relative; }
 .wl-editor-map { height: 320px; margin-top: 12px; border-radius: 16px; overflow: hidden; background: #2c2c2e; }
 .wl-coords { margin: 8px 0 0; font-variant-numeric: tabular-nums; }
@@ -564,7 +585,7 @@
     .wl-map-search input,
     .wl-comment-form .ap-input,
     .wl-editor-col .ap-input { font-size: 16px; }
-    /* 検索欄のすぐ下に置き、右下の Leaflet ズームボタンと重ならないようにする */
+    /* 検索欄のすぐ下に置き、右下のズームボタンと重ならないようにする */
     .wl-map-controls,
     .wl-map-frame .wl-map-controls { right: 12px; bottom: auto; top: 68px; }
     .wl-map-frame { border-radius: 20px; height: 64vh; min-height: 380px; }

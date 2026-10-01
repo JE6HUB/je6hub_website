@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
@@ -43,6 +44,15 @@ def _pins_payload(queryset):
     return [_pin_to_dict(p) for p in pins]
 
 
+def _mapbox_config():
+    return {
+        'token':       settings.MAPBOX_ACCESS_TOKEN,
+        'style':       settings.MAPBOX_STYLE,
+        'satellite':   settings.MAPBOX_SATELLITE_STYLE,
+        'editorStyle': settings.MAPBOX_EDITOR_STYLE,
+    }
+
+
 def _stats(pins):
     return {
         'places':    len(pins),
@@ -70,6 +80,7 @@ def map_view(request):
         'recent':    pins[:8],
         'travelers': travelers,
         'stats':     _stats(pins),
+        'mapbox':    _mapbox_config(),
     })
 
 
@@ -86,6 +97,7 @@ def user_map_view(request, username):
         'can_edit':     request.user.is_authenticated and request.user == profile_user,
         'stats':        _stats(pins),
         'max_photos':   MAX_PHOTOS_PER_PIN,
+        'mapbox':       _mapbox_config(),
     })
 
 
