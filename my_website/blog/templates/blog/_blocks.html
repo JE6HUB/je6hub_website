@@ -1,7 +1,19 @@
-{% load i18n l10n blog_demo %}{% comment %}
+{% load i18n l10n blog_demo blog_journey %}{% comment %}
 ブロック形式の本文。body_blocks は保存時に blocks.normalize_blocks() で検証済み
 (style は列挙値のみ、セルの html は sanitize 済み、ボタンの URL は安全なスキームのみ)。
+地図のシーンがある記事 (旅する記事) は、本文の横 (狭い画面では上) に地図を固定する。
 {% endcomment %}
+{% if post.has_map %}
+<div class="journey" data-journey>
+    <aside class="journey-map" aria-label="{% trans '旅の地図' %}">
+        <div class="journey-map-canvas" id="journey-map"></div>
+        <div class="journey-hud" aria-hidden="true">
+            <span class="journey-hud-num" data-hud-num>—</span>
+            <span class="journey-hud-label" data-hud-label>{% trans "旅のはじまり" %}</span>
+            <span class="journey-hud-progress"><i data-hud-bar></i></span>
+        </div>
+    </aside>
+{% endif %}
 <div class="blog-prose blog-blocks{% if post.template == 'minimal' %} blog-prose--dropcap{% endif %}">
 {% for b in post.body_blocks.blocks %}
     {% with s=b.style %}
@@ -82,6 +94,24 @@
                 <div class="bk-demo-panel" data-panel="css" hidden><pre class="bk-demo-code"><code class="language-css">{{ b.css }}</code></pre></div>
             </div>
         </section>
+    {% elif b.type == 'map' %}
+        {% if b.lat is not None %}{% with info=journey_photos|scene_info:b.id %}
+        <section class="bk bk-scene bk-w-text bk-space-{{ s.space }}" data-scene="{{ b.id }}" id="scene-{{ b.id }}">
+            <div class="bk-scene-card">
+                <span class="bk-scene-num" aria-hidden="true">{{ info.number|stringformat:"02d" }}</span>
+                <div class="bk-scene-text">
+                    {% if info.country or info.visited %}<p class="bk-scene-kicker">{{ info.country }}{% if info.country and info.visited %} · {% endif %}{% if info.visited %}{{ info.visited|date:"Y.m.d" }}{% endif %}</p>{% endif %}
+                    <h3 class="bk-scene-title"><span class="material-symbols-outlined" aria-hidden="true">location_on</span>{{ b.label|default:_("この場所") }}</h3>
+                    {% if b.note %}<p class="bk-scene-note">{{ b.note }}</p>{% endif %}
+                </div>
+                {% if info.thumbs %}
+                <a class="bk-scene-photos" href="{{ info.url }}" title="{% trans 'WanderLens で写真を見る' %}">
+                    {% for t in info.thumbs %}<img src="{{ t }}" alt="" loading="lazy">{% endfor %}
+                </a>
+                {% endif %}
+            </div>
+        </section>
+        {% endwith %}{% endif %}
     {% elif b.type == 'button' %}
         {% if b.url and b.label %}
         <div class="bk bk-button bk-align-{{ b.align }} bk-w-{{ s.width }} bk-space-{{ s.space }}">
@@ -99,3 +129,6 @@
     {% endwith %}
 {% endfor %}
 </div>
+{% if post.has_map %}
+</div>
+{% endif %}

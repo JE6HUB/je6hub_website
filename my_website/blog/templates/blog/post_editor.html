@@ -6,7 +6,7 @@
 {% block extra_head %}
 <link href="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.snow.css" rel="stylesheet" />
 <link href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" rel="stylesheet" />
-<link href="{% static 'css/blog.css' %}?v=27" rel="stylesheet" />
+<link href="{% static 'css/blog.css' %}?v=28" rel="stylesheet" />
 {% endblock %}
 
 {% block content %}
@@ -267,7 +267,9 @@
 <script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/marked@12.0.2/marked.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.js"></script>
+{{ journey_config|json_script:"blog-journey-config" }}
 <script>
+    window.BLOG_JOURNEY = JSON.parse(document.getElementById('blog-journey-config').textContent);
     window.BLOG_EDITOR_I18N = {
         placeholder: "{% trans 'テキストを入力、または「/」でブロックを追加' %}",
         uploading: "{% trans '画像をアップロード中…' %}",
@@ -286,7 +288,7 @@
                 image: "{% trans '画像' %}", mediaText: "{% trans '画像とテキスト' %}", callout: "{% trans 'コールアウト' %}",
                 quote: "{% trans '引用' %}", math: "{% trans '数式' %}", code: "{% trans 'コード' %}",
                 divider: "{% trans '区切り線' %}", spacer: "{% trans '余白' %}", button: "{% trans 'ボタン' %}",
-                demo: "{% trans 'HTML / CSS' %}",
+                demo: "{% trans 'HTML / CSS' %}", map: "{% trans '地図のシーン' %}",
             },
             typeDesc: {
                 text: "{% trans '本文を書く' %}", heading: "{% trans 'セクションの見出し' %}", cols2: "{% trans '2つの列に分けて並べる' %}",
@@ -295,6 +297,18 @@
                 quote: "{% trans '大きな引用文' %}", math: "{% trans 'LaTeX の数式' %}", code: "{% trans 'コードブロック' %}",
                 divider: "{% trans 'セクションを区切る' %}", spacer: "{% trans '縦の余白' %}", button: "{% trans 'リンクボタン' %}",
                 demo: "{% trans 'UI をプレビューしてコードを共有' %}",
+                map: "{% trans 'スクロールで地図がこの場所へ飛ぶ (旅する記事)' %}",
+            },
+            map: {
+                pickPin: "{% trans 'WanderLens のピンから選ぶ…' %}",
+                noPins: "{% trans '地図をクリックして場所を指定' %}",
+                noToken: "{% trans 'Mapbox のアクセストークンが未設定のため、地図は表示できません。緯度・経度を入力してください。' %}",
+                loading: "{% trans '地図を読み込み中…' %}",
+                label: "{% trans '場所の名前' %}",
+                note: "{% trans 'ひとこと (任意)' %}",
+                lat: "{% trans '緯度' %}", lng: "{% trans '経度' %}",
+                zoom: "{% trans 'ズーム' %}", pitch: "{% trans '傾き' %}", bearing: "{% trans '方位' %}",
+                hint: "{% trans '地図をクリックして場所を決め、ドラッグや回転で見せたい角度に合わせると、その視点で記事の地図が飛んできます。' %}",
             },
             kind: "{% trans '種類' %}", columns: "{% trans '列' %}", ratio: "{% trans '比率' %}", icon: "{% trans 'アイコン' %}",
             background: "{% trans '背景' %}", width: "{% trans '幅' %}", spacing: "{% trans '余白' %}", valign: "{% trans '縦位置' %}",
@@ -336,6 +350,6 @@
 <script src="{% static 'js/blog-editor-markdown.js' %}?v=3"></script>
 <script src="{% static 'js/blog-editor-images.js' %}?v=3"></script>
 <script src="{% static 'js/blog-demo-kit.js' %}?v=1"></script>
-<script src="{% static 'js/blog-blocks.js' %}?v=9"></script>
+<script src="{% static 'js/blog-blocks.js' %}?v=10"></script>
 <script src="{% static 'js/blog-editor.js' %}?v=10"></script>
 {% endblock %}

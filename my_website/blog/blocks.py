@@ -32,7 +32,7 @@ MAX_JSON_BYTES = 3 * 1024 * 1024
 
 # 本文を持つブロック (セルごとに Quill のリッチテキスト)
 RICH_TYPES = {'text', 'callout', 'quote'}
-BLOCK_TYPES = RICH_TYPES | {'divider', 'spacer', 'button', 'demo'}
+BLOCK_TYPES = RICH_TYPES | {'divider', 'spacer', 'button', 'demo', 'map'}
 
 STYLE_CHOICES = {
     'bg': ('none', 'gray', 'tint', 'accent', 'light'),
@@ -83,6 +83,14 @@ DEMO_VARS_SCRIPT = (
     'st.textContent=":root,*,::before,::after{"+c+"}"});'
 )
 DEMO_VARS_SCRIPT_HASH = 'sha256-' + base64.b64encode(hashlib.sha256(DEMO_VARS_SCRIPT.encode()).digest()).decode()
+
+# 旅する記事: 地図のシーン。記事にこのブロックがあると、本文の横に地図が固定され、
+# スクロールでシーンに入るたびにカメラがその場所へ飛ぶ (blog-journey.js)
+MAP_LABEL_MAX = 80
+MAP_NOTE_MAX = 120
+MAP_ZOOM = (1, 18, 11)        # (最小, 最大, 既定)
+MAP_PITCH = (0, 70, 50)
+MAP_BEARING = (-180, 180, 0)
 
 _ID_RE = re.compile(r'^[A-Za-z0-9_-]{1,32}$')
 _SAFE_URL_RE = re.compile(r'^(https?://|mailto:|/(?!/))', re.IGNORECASE)
@@ -156,6 +164,16 @@ def _clean_label(raw, key):
     return value.strip()[:DEMO_COMPARE_LABEL_MAX]
 
 
+def _bounded(value, lo, hi, default=None):
+    value = _number(value)
+    return value if value is not None and lo <= value <= hi else default
+
+
+def _clean_text(raw, key, limit):
+    value = raw.get(key) if isinstance(raw.get(key), str) else ''
+    return ' '.join(value.split())[:limit]
+
+
 def _clean_cell(raw):
     raw = raw if isinstance(raw, dict) else {}
     delta = raw.get('delta')
@@ -203,6 +221,21 @@ def _clean_block(raw, index):
             before_label=_clean_label(raw, 'before_label') if compare else '',
             after_label=_clean_label(raw, 'after_label') if compare else '',
         )
+    elif block_type == 'map':
+        pin = raw.get('pin')
+        block.update(
+            # WanderLens のピン (写真を出すため)。場所そのものは lat / lng に必ず写して持つ
+            pin=pin if isinstance(pin, int) and not isinstance(pin, bool) and pin > 0 else None,
+            lat=_bounded(raw.get('lat'), -90, 90),
+            lng=_bounded(raw.get('lng'), -180, 180),
+            label=_clean_text(raw, 'label', MAP_LABEL_MAX),
+            note=_clean_text(raw, 'note', MAP_NOTE_MAX),
+            zoom=_bounded(raw.get('zoom'), *MAP_ZOOM[:2], MAP_ZOOM[2]),
+            pitch=_bounded(raw.get('pitch'), *MAP_PITCH[:2], MAP_PITCH[2]),
+            bearing=_bounded(raw.get('bearing'), *MAP_BEARING[:2], MAP_BEARING[2]),
+        )
+        if block['lat'] is None or block['lng'] is None:
+            block['lat'] = block['lng'] = None
     elif block_type == 'button':
         url = raw.get('url') if isinstance(raw.get('url'), str) else ''
         label = raw.get('label') if isinstance(raw.get('label'), str) else ''
@@ -246,6 +279,8 @@ def blocks_to_html(data):
             parts.append(f'<pre>{escape(block["html"])}</pre><pre>{escape(block["css"])}</pre>')
             if block.get('compare') and (block['before_html'] or block['before_css']):
                 parts.append(f'<pre>{escape(block["before_html"])}</pre><pre>{escape(block["before_css"])}</pre>')
+        elif block['type'] == 'map' and block.get('label'):
+            parts.append(f'<p>{escape(block["label"])}</p>')
         elif block['type'] == 'button' and block.get('label') and block.get('url'):
             parts.append(f'<p><a href="{escape(block["url"])}">{escape(block["label"])}</a></p>')
     return sanitize_html(''.join(parts))

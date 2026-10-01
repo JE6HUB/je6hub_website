@@ -21,6 +21,33 @@ window.BlogBlocks = (() => {
     // 記事ページと同じ srcdoc (blog-demo-kit.js / blog/blocks.py の demo_srcdoc と対応) を組み立てて、
     // sandbox 付き iframe でプレビューする。スクリプトは動かず、ページ本体からも分離される。
     const Kit = window.BlogDemoKit;
+
+    // ── 地図のシーン (旅する記事) ─────────────────────────
+    // blog/blocks.py の MAP_ZOOM / MAP_PITCH / MAP_BEARING と対応
+    const MAP_DEFAULTS = { zoom: 11, pitch: 50, bearing: 0 };
+    const JOURNEY = window.BLOG_JOURNEY || { pins: [], mapbox: {} };
+    const MAPBOX_VERSION = '3.32.0';
+    let mapboxLoading = null;
+    /** Mapbox GL JS を最初の地図ブロックが現れたときにだけ読み込む */
+    function loadMapbox() {
+        if (window.mapboxgl) return Promise.resolve(window.mapboxgl);
+        if (!JOURNEY.mapbox.token) return Promise.reject(new Error('no token'));
+        if (!mapboxLoading) {
+            mapboxLoading = new Promise((resolve, reject) => {
+                const css = document.createElement('link');
+                css.rel = 'stylesheet';
+                css.href = `https://api.mapbox.com/mapbox-gl-js/v${MAPBOX_VERSION}/mapbox-gl.css`;
+                document.head.append(css);
+                const js = document.createElement('script');
+                js.src = `https://api.mapbox.com/mapbox-gl-js/v${MAPBOX_VERSION}/mapbox-gl.js`;
+                js.onload = () => { window.mapboxgl.accessToken = JOURNEY.mapbox.token; resolve(window.mapboxgl); };
+                js.onerror = reject;
+                document.head.append(js);
+            });
+        }
+        return mapboxLoading;
+    }
+    const round = (n, d = 2) => Math.round(n * 10 ** d) / 10 ** d;
     const DEMO_HEIGHTS = { s: 240, m: 380, l: 560 };
     // カード幅の下限: プレビューの中身が収まる幅と、この値の大きい方 (エディタが使える幅)
     const DEMO_MIN_WIDTH = 320;
@@ -63,6 +90,7 @@ window.BlogBlocks = (() => {
         { key: 'math', icon: 'function', type: 'text', apply: (ed, b) => ed.options.openMath(b.cells[0].quill) },
         { key: 'code', icon: 'code_blocks', type: 'text', apply: (ed, b) => b.cells[0].quill.formatLine(0, 1, 'code-block', true) },
         { key: 'demo', icon: 'web', type: 'demo' },
+        { key: 'map', icon: 'travel_explore', type: 'map' },
         { key: 'divider', icon: 'horizontal_rule', type: 'divider' },
         { key: 'spacer', icon: 'height', type: 'spacer' },
         { key: 'button', icon: 'smart_button', type: 'button' },
@@ -143,6 +171,10 @@ window.BlogBlocks = (() => {
                     } else if (b.type === 'divider') out.variant = b.variant;
                     else if (b.type === 'spacer') out.height = b.height;
                     else if (b.type === 'button') Object.assign(out, { label: b.label, url: b.url, variant: b.variant, align: b.align });
+                    else if (b.type === 'map') Object.assign(out, {
+                        pin: b.pin, lat: b.lat, lng: b.lng, label: b.label, note: b.note,
+                        zoom: b.zoom, pitch: b.pitch, bearing: b.bearing,
+                    });
                     else if (b.type === 'demo') Object.assign(out, {
                         html: b.html, css: b.css, bg: b.bg, height: b.height, layout: b.layout, card_width: b.cardWidth,
                         controls: b.controls, compare: b.compare, before_html: b.beforeHtml, before_css: b.beforeCss,
@@ -186,6 +218,14 @@ window.BlogBlocks = (() => {
                 beforeCss: data.before_css || '',
                 beforeLabel: data.before_label || '',
                 afterLabel: data.after_label || '',
+                // 地図のシーン (label は場所の名前として共用)
+                pin: Number.isInteger(data.pin) ? data.pin : null,
+                lat: Number.isFinite(data.lat) ? data.lat : null,
+                lng: Number.isFinite(data.lng) ? data.lng : null,
+                note: data.note || '',
+                zoom: Number.isFinite(data.zoom) ? data.zoom : MAP_DEFAULTS.zoom,
+                pitch: Number.isFinite(data.pitch) ? data.pitch : MAP_DEFAULTS.pitch,
+                bearing: Number.isFinite(data.bearing) ? data.bearing : MAP_DEFAULTS.bearing,
                 cells: [],
             };
             block.el = this.renderShell(block);
@@ -262,6 +302,8 @@ window.BlogBlocks = (() => {
                 bk.innerHTML = `<span class="bk-spacer-label">${esc(this.t.types.spacer)}</span>`;
             } else if (block.type === 'demo') {
                 this.renderDemo(block, bk);
+            } else if (block.type === 'map') {
+                this.renderMap(block, bk);
             } else if (block.type === 'button') {
                 bk.classList.add(`bk-align-${block.align}`);
                 const cls = block.variant === 'secondary' ? 'ap-btn ap-btn-outline' : 'ap-btn ap-btn-primary';
@@ -449,6 +491,136 @@ window.BlogBlocks = (() => {
                     area.dispatchEvent(new Event('input'));
                 });
             });
+        }
+
+        /** 地図のシーン: WanderLens のピンか、地図のクリックで場所を決め、
+         *  ミニ地図を動かした視点 (ズーム・傾き・方位) をそのまま記事のカメラにする */
+        renderMap(block, bk) {
+            const t = this.t;
+            bk.classList.add('bk-mapedit-block');
+            const pinOptions = JOURNEY.pins.map((p) => `<option value="${p.id}"${p.id === block.pin ? ' selected' : ''}>${esc(p.title)}${p.place ? ` · ${esc(p.place)}` : ''}</option>`).join('');
+            const slider = (f, min, max, step, unit) => `<label class="bk-mapedit-slider"><span>${esc(t.map[f])}</span>
+                <input type="range" data-f="${f}" min="${min}" max="${max}" step="${step}" value="${block[f]}"><output data-out="${f}" data-unit="${unit}"></output></label>`;
+            bk.innerHTML = `
+                <div class="bk-mapedit">
+                    <div class="bk-mapedit-head">
+                        <span class="bk-mapedit-badge"><span class="material-symbols-outlined" aria-hidden="true">travel_explore</span>${esc(t.types.map)}</span>
+                        ${JOURNEY.pins.length ? `<select class="bk-menu-input bk-mapedit-pin" data-f="pin" aria-label="${esc(t.map.pickPin)}">
+                            <option value="">${esc(t.map.pickPin)}</option>${pinOptions}</select>` : `<span class="bk-mapedit-nopins">${esc(t.map.noPins)}</span>`}
+                    </div>
+                    <div class="bk-mapedit-body">
+                        <div class="bk-mapedit-map"><p class="bk-mapedit-fallback">${esc(JOURNEY.mapbox.token ? t.map.loading : t.map.noToken)}</p></div>
+                        <div class="bk-mapedit-fields">
+                            <input type="text" class="bk-menu-input" data-f="label" maxlength="80" placeholder="${esc(t.map.label)}" aria-label="${esc(t.map.label)}">
+                            <input type="text" class="bk-menu-input" data-f="note" maxlength="120" placeholder="${esc(t.map.note)}" aria-label="${esc(t.map.note)}">
+                            <div class="bk-mapedit-coords">
+                                <input type="number" class="bk-menu-input" data-f="lat" step="any" min="-90" max="90" placeholder="${esc(t.map.lat)}" aria-label="${esc(t.map.lat)}">
+                                <input type="number" class="bk-menu-input" data-f="lng" step="any" min="-180" max="180" placeholder="${esc(t.map.lng)}" aria-label="${esc(t.map.lng)}">
+                            </div>
+                            ${slider('zoom', 1, 18, 0.1, '')}
+                            ${slider('pitch', 0, 70, 1, '°')}
+                            ${slider('bearing', -180, 180, 1, '°')}
+                            <p class="bk-mapedit-hint">${esc(t.map.hint)}</p>
+                        </div>
+                    </div>
+                </div>`;
+            const q = (f) => bk.querySelector(`[data-f="${f}"]`);
+            const out = (f) => bk.querySelector(`[data-out="${f}"]`);
+            const mapEl = bk.querySelector('.bk-mapedit-map');
+            let map = null;
+            let marker = null;
+            let syncing = false;
+
+            const fill = () => {
+                q('label').value = block.label;
+                q('note').value = block.note;
+                q('lat').value = block.lat ?? '';
+                q('lng').value = block.lng ?? '';
+                ['zoom', 'pitch', 'bearing'].forEach((f) => { q(f).value = block[f]; out(f).textContent = round(block[f], 1) + out(f).dataset.unit; });
+            };
+            const camera = () => ({ center: [block.lng, block.lat], zoom: block.zoom, pitch: block.pitch, bearing: block.bearing });
+            const placeMarker = () => {
+                if (!map || block.lat === null) return;
+                if (!marker) {
+                    const el = document.createElement('div');
+                    el.className = 'bk-mapedit-marker';
+                    marker = new window.mapboxgl.Marker({ element: el, anchor: 'bottom', draggable: true }).setLngLat([block.lng, block.lat]).addTo(map);
+                    marker.on('dragend', () => { const ll = marker.getLngLat(); setLocation(ll.lat, ll.lng, false); });
+                } else {
+                    marker.setLngLat([block.lng, block.lat]);
+                }
+            };
+            const show = (fly) => {
+                if (!map || block.lat === null) return;
+                syncing = true;
+                if (fly) map.flyTo({ ...camera(), duration: 1600, essential: true });
+                else map.jumpTo(camera());
+                map.once('moveend', () => { syncing = false; });
+            };
+            const setLocation = (lat, lng, fly = true) => {
+                block.lat = round(lat, 6);
+                block.lng = round(lng, 6);
+                fill();
+                placeMarker();
+                show(fly);
+                this.changed();
+            };
+
+            q('pin') && q('pin').addEventListener('change', (e) => {
+                const pin = JOURNEY.pins.find((p) => String(p.id) === e.target.value);
+                block.pin = pin ? pin.id : null;
+                if (pin) {
+                    if (!block.label) block.label = pin.place || pin.title;
+                    setLocation(pin.lat, pin.lng);
+                }
+                this.changed();
+            });
+            ['label', 'note'].forEach((f) => q(f).addEventListener('input', () => { block[f] = q(f).value; this.changed(); }));
+            ['lat', 'lng'].forEach((f) => q(f).addEventListener('change', () => {
+                const lat = Number(q('lat').value);
+                const lng = Number(q('lng').value);
+                if (q('lat').value !== '' && q('lng').value !== '' && Math.abs(lat) <= 90 && Math.abs(lng) <= 180) setLocation(lat, lng);
+            }));
+            ['zoom', 'pitch', 'bearing'].forEach((f) => q(f).addEventListener('input', () => {
+                block[f] = Number(q(f).value);
+                out(f).textContent = round(block[f], 1) + out(f).dataset.unit;
+                show(false);
+                this.changed();
+            }));
+            fill();
+
+            loadMapbox().then((mapboxgl) => {
+                if (!bk.isConnected) return;
+                mapEl.innerHTML = '';
+                map = new mapboxgl.Map({
+                    container: mapEl,
+                    style: JOURNEY.mapbox.style,
+                    projection: 'globe',
+                    center: block.lat !== null ? [block.lng, block.lat] : [139.76, 35.68],
+                    zoom: block.lat !== null ? block.zoom : 1.5,
+                    pitch: block.lat !== null ? block.pitch : 0,
+                    bearing: block.lat !== null ? block.bearing : 0,
+                    cooperativeGestures: true, // エディタのスクロールを奪わない (Ctrl / ⌘ + スクロールでズーム)
+                    language: document.documentElement.lang || undefined,
+                });
+                map.addControl(new mapboxgl.NavigationControl({ visualizePitch: true }), 'top-right');
+                map.on('style.load', () => {
+                    if (!map.getSource('bk-dem')) map.addSource('bk-dem', { type: 'raster-dem', url: 'mapbox://mapbox.mapbox-terrain-dem-v1', tileSize: 512, maxzoom: 14 });
+                    map.setTerrain({ source: 'bk-dem', exaggeration: 1.25 });
+                    map.setFog({});
+                });
+                placeMarker();
+                map.on('click', (e) => setLocation(e.lngLat.lat, e.lngLat.lng));
+                // 書き手が動かした視点 (ズーム・傾き・方位) を記事のカメラとして保存する
+                map.on('moveend', (e) => {
+                    if (syncing || !e.originalEvent || block.lat === null) return;
+                    block.zoom = round(Math.min(18, Math.max(1, map.getZoom())), 2);
+                    block.pitch = round(Math.min(70, map.getPitch()), 1);
+                    block.bearing = round(((map.getBearing() + 540) % 360) - 180, 1);
+                    fill();
+                    this.changed();
+                });
+            }).catch(() => { /* トークンなし: 数値の入力だけで設定できる */ });
         }
 
         /** デモカードの幅のドラッグ変更。カードは中央寄せなので、端を動かした量の 2 倍だけ幅が変わる */
@@ -872,6 +1044,8 @@ window.BlogBlocks = (() => {
                 parts.push(row(t.spacing, seg('space', s.space, [['none', t.none], ['s', 'S'], ['m', 'M'], ['l', 'L']])));
             } else if (block.type === 'spacer') {
                 parts.push(row(t.height, seg('height', block.height, [['s', 'S'], ['m', 'M'], ['l', 'L']])));
+            } else if (block.type === 'map') {
+                parts.push(row(t.spacing, seg('space', s.space, [['none', t.none], ['s', 'S'], ['m', 'M'], ['l', 'L']])));
             } else if (block.type === 'demo') {
                 parts.push(row(t.background, seg('bg', block.bg, [['dark', t.demoBg.dark], ['light', t.demoBg.light], ['checker', t.demoBg.checker]])));
                 parts.push(row(t.height, seg('height', block.height, [['s', 'S'], ['m', 'M'], ['l', 'L']])));

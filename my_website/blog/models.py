@@ -150,6 +150,17 @@ class Post(models.Model):
         return self.uses_blocks and any(b['type'] == 'demo' for b in self.body_blocks['blocks'])
 
     @property
+    def map_scenes(self):
+        """旅する記事の地図シーン (場所が決まっているもの) を本文の順に。"""
+        if not self.uses_blocks:
+            return []
+        return [b for b in self.body_blocks['blocks'] if b['type'] == 'map' and b.get('lat') is not None]
+
+    @property
+    def has_map(self):
+        return bool(self.map_scenes)
+
+    @property
     def has_math(self):
         return 'ql-formula' in self.body_html or 'ql-math-display' in self.body_html
 

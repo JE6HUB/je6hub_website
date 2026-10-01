@@ -2005,3 +2005,48 @@ msgstr "Min"
 
 msgid "最大"
 msgstr "Max"
+
+msgid "旅のはじまり"
+msgstr "Start of the journey"
+
+msgid "この場所"
+msgstr "This place"
+
+msgid "WanderLens で写真を見る"
+msgstr "See the photos on WanderLens"
+
+msgid "地図を表示できません。Mapbox のアクセストークンが設定されていません。"
+msgstr "The map is unavailable because no Mapbox access token is set."
+
+msgid "地図のシーン"
+msgstr "Map scene"
+
+msgid "スクロールで地図がこの場所へ飛ぶ (旅する記事)"
+msgstr "The map flies here as readers scroll (journey post)"
+
+msgid "WanderLens のピンから選ぶ…"
+msgstr "Pick a WanderLens pin…"
+
+msgid "地図をクリックして場所を指定"
+msgstr "Click the map to set the place"
+
+msgid "Mapbox のアクセストークンが未設定のため、地図は表示できません。緯度・経度を入力してください。"
+msgstr "No Mapbox access token is set, so the map cannot be shown. Enter the latitude and longitude instead."
+
+msgid "地図を読み込み中…"
+msgstr "Loading the map…"
+
+msgid "ひとこと (任意)"
+msgstr "A short note (optional)"
+
+msgid "ズーム"
+msgstr "Zoom"
+
+msgid "傾き"
+msgstr "Tilt"
+
+msgid "方位"
+msgstr "Bearing"
+
+msgid "地図をクリックして場所を決め、ドラッグや回転で見せたい角度に合わせると、その視点で記事の地図が飛んできます。"
+msgstr "Click the map to choose the place, then drag and rotate to the angle you want; the article map will fly in with that view."

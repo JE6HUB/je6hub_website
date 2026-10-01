@@ -305,6 +305,86 @@ class PlayableDemoTests(TestCase):
         self.assertIn('.legacy{}', blocks_to_html(normalize_blocks({'blocks': [b]})))
 
 
+class JourneyTests(TestCase):
+    """旅する記事: 地図のシーン。"""
+
+    def scene(self, **kw):
+        data = {'type': 'map', 'lat': 35.0116, 'lng': 135.7681, 'label': ' 京都 ', **kw}
+        return normalize_blocks({'blocks': [data]})['blocks'][0]
+
+    def test_scene_is_validated(self):
+        b = self.scene(pin=3, note='朝の  鴨川', zoom=14.5, pitch=60, bearing=-30, extra='x')
+        self.assertEqual({k: b[k] for k in ('pin', 'lat', 'lng', 'label', 'note', 'zoom', 'pitch', 'bearing')},
+                         {'pin': 3, 'lat': 35.0116, 'lng': 135.7681, 'label': '京都', 'note': '朝の 鴨川',
+                          'zoom': 14.5, 'pitch': 60, 'bearing': -30})
+        self.assertNotIn('extra', b)
+        b = self.scene(pin=True, zoom=99, pitch='45', bearing=float('nan'))
+        self.assertEqual((b['pin'], b['zoom'], b['pitch'], b['bearing']), (None, 11, 50, 0))
+
+    def test_scene_without_valid_location_has_none(self):
+        for lat, lng in ((91, 0), (0, 181), ('35', 135), (35, None)):
+            b = self.scene(lat=lat, lng=lng)
+            self.assertEqual((b['lat'], b['lng']), (None, None), (lat, lng))
+
+    def test_article_shows_map_only_with_located_scenes(self):
+        user = make_user('traveler')
+        plain = make_post(user, body_blocks={'blocks': [{'type': 'map', 'label': 'どこか'}]})
+        self.assertFalse(plain.has_map)
+        html = self.client.get(plain.get_absolute_url()).content.decode()
+        self.assertNotIn('mapbox-gl.js', html)
+        self.assertNotIn('data-journey', html)
+
+        post = make_post(user, body_blocks={'blocks': [
+            {'type': 'text', 'cells': [{'html': '<p>旅のはじまり</p>'}]},
+            {'type': 'map', 'lat': 35.0, 'lng': 135.7, 'label': '京都', 'note': '<b>夜</b>'},
+            {'type': 'map', 'lat': 34.69, 'lng': 135.5, 'label': '大阪'},
+        ]})
+        self.assertTrue(post.has_map)
+        response = self.client.get(post.get_absolute_url())
+        html = response.content.decode()
+        self.assertIn('data-journey', html)
+        self.assertIn('mapbox-gl.js', html)
+        self.assertIn('id="journey-scenes"', html)
+        self.assertEqual(html.count('class="bk bk-scene'), 2)
+        self.assertIn('>02</span>', html)
+        self.assertIn('&lt;b&gt;夜&lt;/b&gt;', html)  # 本文に HTML としては入らない
+        scenes = response.context['journey_scenes']
+        self.assertEqual([s['label'] for s in scenes], ['京都', '大阪'])
+
+    def test_photos_come_only_from_the_authors_own_pins(self):
+        from photraveler.models import MapPin, PinPhoto
+        author, other = make_user('owner'), make_user('stranger')
+        mine = MapPin.objects.create(user=author, title='Kyoto', country='Japan', latitude=35, longitude=135.7)
+        theirs = MapPin.objects.create(user=other, title='Secret', latitude=1, longitude=1)
+        PinPhoto.objects.create(pin=mine, image='photraveler/a.jpg')
+        PinPhoto.objects.create(pin=theirs, image='photraveler/secret.jpg')
+        post = make_post(author, body_blocks={'blocks': [
+            {'type': 'map', 'id': 's1', 'pin': mine.id, 'lat': 35, 'lng': 135.7, 'label': 'Kyoto'},
+            {'type': 'map', 'id': 's2', 'pin': theirs.id, 'lat': 1, 'lng': 1, 'label': 'Elsewhere'},
+        ]})
+        response = self.client.get(post.get_absolute_url())
+        photos = response.context['journey_photos']
+        self.assertEqual(photos['s1']['thumbs'], ['/media/photraveler/a.jpg'])
+        self.assertIn(f'?pin={mine.id}', photos['s1']['url'])
+        self.assertEqual(photos['s2']['thumbs'], [])
+        self.assertNotContains(response, 'secret.jpg')
+        self.assertContains(response, 'Japan')
+
+    def test_editor_lists_only_own_pins(self):
+        from photraveler.models import MapPin
+        user = make_user('writer9')
+        MapPin.objects.create(user=user, title='Mine', latitude=10, longitude=20)
+        MapPin.objects.create(user=make_user('x9'), title='NotMine', latitude=1, longitude=1)
+        self.client.force_login(user)
+        response = self.client.get(reverse('blog:create'))
+        pins = response.context['journey_config']['pins']
+        self.assertEqual([p['title'] for p in pins], ['Mine'])
+        self.assertContains(response, 'id="blog-journey-config"')
+
+    def test_scene_label_is_searchable(self):
+        self.assertIn('京都', blocks_to_html(normalize_blocks({'blocks': [{'type': 'map', 'lat': 1, 'lng': 1, 'label': '京都'}]})))
+
+
 class PostModelTests(TestCase):
     def test_publishing_sets_published_at(self):
         post = make_post(make_user('a'), status=Post.STATUS_DRAFT)
