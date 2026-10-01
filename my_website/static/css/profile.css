@@ -444,3 +444,34 @@ strong[data-profile][role="button"]:hover { color: var(--jh-accent); }
     .ob-modal, .ob-modal::backdrop, .ob-panel, .ob-step { transition-duration: 0.01s; }
     .ob-modal, .ob-step.is-exiting, .ob-step.is-entering { transform: none; filter: none; }
 }
+
+/* ── ユーザー画像の選択 (accounts/_avatar_picker.html) ── */
+.jh-avatar-picker { display: flex; align-items: center; gap: 18px; text-align: left; }
+.jh-avatar-picker-preview {
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    background: linear-gradient(145deg, #48484a, #2c2c2e);
+    color: #fff;
+    font-size: 30px;
+    font-weight: 600;
+}
+.jh-avatar-picker-body { min-width: 0; }
+.jh-avatar-picker-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; margin-bottom: 6px; }
+.jh-avatar-picker-actions .jh-btn { padding: 8px 16px; font-size: 15px; white-space: nowrap; }
+.jh-avatar-picker-btn { position: relative; cursor: pointer; }
+/* ファイル選択の input は見えなくして、ボタン (label) から開く。キーボードのフォーカスはボタンに表示する */
+.jh-avatar-picker-input {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+    pointer-events: none;
+}
+.jh-avatar-picker-btn:focus-within { outline: 2px solid var(--jh-accent, #2997ff); outline-offset: 2px; }
+.jh-avatar-picker-remove { background: none; border: none; color: #ff453a; }
+.jh-avatar-picker-hint { font-size: 12px; color: var(--jh-text-muted); }

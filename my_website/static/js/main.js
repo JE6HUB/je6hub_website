@@ -568,6 +568,48 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 
+// ユーザー画像の選択 (accounts/_avatar_picker.html)
+// 選んだ画像をその場でプレビューし、「削除」で頭文字の表示に戻す (保存はフォームの送信時)。
+document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('[data-avatar-picker]').forEach((picker) => {
+        const input = picker.querySelector('[data-avatar-input]');
+        const preview = picker.querySelector('[data-avatar-preview]');
+        const removeButton = picker.querySelector('[data-avatar-remove]');
+        const clear = picker.querySelector('[data-avatar-clear]');
+        let objectUrl = null;
+
+        const showImage = (src) => {
+            const img = document.createElement('img');
+            img.className = 'jh-avatar-img';
+            img.alt = '';
+            img.src = src;
+            preview.replaceChildren(img);
+        };
+        const releaseUrl = () => {
+            if (objectUrl) URL.revokeObjectURL(objectUrl);
+            objectUrl = null;
+        };
+
+        input.addEventListener('change', () => {
+            const file = input.files && input.files[0];
+            if (!file) return;
+            releaseUrl();
+            objectUrl = URL.createObjectURL(file);
+            showImage(objectUrl);
+            clear.checked = false;
+            removeButton.hidden = false;
+        });
+
+        removeButton.addEventListener('click', () => {
+            releaseUrl();
+            input.value = '';
+            clear.checked = true;
+            preview.textContent = picker.dataset.initial || '';
+            removeButton.hidden = true;
+        });
+    });
+});
+
 // サインアップ直後のプロフィール作成モーダル (accounts/_onboarding_modal.html)
 // 「続ける」で枠はそのまま中身だけを入力画面に切り替え、同時に枠の大きさを中身に合わせて変える。
 document.addEventListener('DOMContentLoaded', () => {
@@ -666,6 +708,16 @@ document.addEventListener('DOMContentLoaded', () => {
             const data = await response.json().catch(() => ({}));
             if (response.ok) {
                 showErrors({});
+                if (data.avatar_url) {
+                    // ヘッダーのアカウントアイコンを新しいユーザー画像に差し替える
+                    document.querySelectorAll('[data-nav-account] i.fa-user').forEach((icon) => {
+                        const img = document.createElement('img');
+                        img.className = 'jh-nav-avatar';
+                        img.alt = '';
+                        img.src = data.avatar_url;
+                        icon.replaceWith(img);
+                    });
+                }
                 close();
                 if (data.message) showToast(data.message);
                 return;

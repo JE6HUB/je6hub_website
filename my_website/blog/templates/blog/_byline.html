@@ -1,6 +1,6 @@
 {% load i18n profiles %}
 <div class="blog-byline">
-    <span class="blog-avatar" data-profile="{{ post.author.username }}" aria-hidden="true">{{ post.author.public_name|first|upper }}</span>
+    <span class="blog-avatar" data-profile="{{ post.author.username }}" aria-hidden="true">{% avatar post.author %}</span>
     <span class="blog-byline-text">
         <a href="{{ post.author.get_absolute_url }}" class="blog-byline-name" {% profile_trigger post.author link=True %}>{{ post.author.public_name }}</a>
         <span class="blog-byline-meta">

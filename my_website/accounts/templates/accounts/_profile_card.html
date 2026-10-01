@@ -1,9 +1,9 @@
-{% load i18n %}
+{% load i18n profiles %}
 {# プロフィールモーダルの中身。/users/<username>/card/ で返し、main.js が #pf-modal に差し込む #}
 {% with u=profile_user %}
 <div class="pf-card">
     <div class="pf-card-head">
-        <span class="pf-avatar" aria-hidden="true">{{ u.public_name|first|upper }}</span>
+        <span class="pf-avatar" aria-hidden="true">{% avatar u %}</span>
         <div class="pf-card-names">
             <h2 class="pf-card-name" id="pf-modal-title">{{ u.public_name }}</h2>
             <p class="pf-card-handle">@{{ u.username }}</p>

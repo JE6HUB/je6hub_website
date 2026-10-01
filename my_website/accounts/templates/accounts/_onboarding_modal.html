@@ -16,9 +16,14 @@
         <section class="ob-step ob-step--form" data-ob-step="form" hidden>
             <h2 class="ob-title" id="ob-form-title">{% trans "プロフィールを設定" %}</h2>
             <p class="ob-lead">{% trans "ここに入力した内容は、ほかのユーザーにも表示されます。" %}</p>
-            <form class="ob-form" id="ob-form" method="post" action="{% url 'profile_onboarding' %}" novalidate
+            <form class="ob-form" id="ob-form" method="post" action="{% url 'profile_onboarding' %}" enctype="multipart/form-data" novalidate
                   data-error="{% trans 'プロフィールを保存できませんでした。時間をおいてもう一度お試しください。' %}">
                 {% csrf_token %}
+                <div class="ob-field">
+                    <span class="jh-label">{% trans "ユーザー画像" %}</span>
+                    {% include "accounts/_avatar_picker.html" with u=user %}
+                    <div class="ob-error" data-ob-error="avatar"></div>
+                </div>
                 <div class="ob-field">
                     <label class="jh-label" for="obDisplayName">{% trans "表示名" %}</label>
                     <input type="text" class="form-control jh-input" id="obDisplayName" name="display_name" maxlength="50"

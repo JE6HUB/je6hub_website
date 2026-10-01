@@ -1,0 +1,17 @@
+{% load i18n profiles %}
+{# ユーザー画像の選択・削除 (プロフィール編集とサインアップ直後のモーダルで共通)。プレビューと削除は main.js が行う #}
+<div class="jh-avatar-picker" data-avatar-picker data-initial="{{ u.public_name|first|upper }}">
+    <span class="jh-avatar-picker-preview" data-avatar-preview aria-hidden="true">{% avatar u %}</span>
+    <div class="jh-avatar-picker-body">
+        <div class="jh-avatar-picker-actions">
+            <label class="jh-btn jh-btn-outline jh-avatar-picker-btn">
+                <span>{% trans "画像を選択" %}</span>
+                <input type="file" name="avatar" class="jh-avatar-picker-input" data-avatar-input
+                       accept="image/jpeg,image/png,image/webp,image/gif" aria-label="{% trans 'ユーザー画像を選択' %}">
+            </label>
+            <button type="button" class="jh-btn jh-avatar-picker-remove" data-avatar-remove{% if not u.avatar %} hidden{% endif %}>{% trans "削除" %}</button>
+        </div>
+        <input type="checkbox" name="avatar_clear" value="1" hidden data-avatar-clear>
+        <div class="jh-avatar-picker-hint">{% trans "JPEG / PNG / WebP / GIF、10MB まで。正方形に切り抜いて表示されます。" %}</div>
+    </div>
+</div>

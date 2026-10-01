@@ -37,3 +37,20 @@ def profile_trigger(user, link=False):
         user.username,
         _('%(name)s のプロフィール') % {'name': user.public_name},
     )
+
+
+@register.simple_tag
+def avatar(user):
+    """アバターの中身。ユーザー画像があれば <img>、なければ表示名の頭文字を出力する。
+
+        <span class="blog-avatar" aria-hidden="true">{% avatar post.author %}</span>
+
+    画像は外側の要素いっぱいに表示する (丸く切り抜くのは外側の border-radius)。
+    """
+    if not user:
+        return ''
+    image = getattr(user, 'avatar', None)
+    if image:
+        return format_html('<img class="jh-avatar-img" src="{}" alt="" loading="lazy" decoding="async">', image.url)
+    name = getattr(user, 'public_name', '') or getattr(user, 'username', '')
+    return name[:1].upper()
