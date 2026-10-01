@@ -2050,3 +2050,9 @@ msgstr "Bearing"
 
 msgid "地図をクリックして場所を決め、ドラッグや回転で見せたい角度に合わせると、その視点で記事の地図が飛んできます。"
 msgstr "Click the map to choose the place, then drag and rotate to the angle you want; the article map will fly in with that view."
+
+msgid "地図を閉じる"
+msgstr "Close map"
+
+msgid "地図を開く"
+msgstr "Open map"
