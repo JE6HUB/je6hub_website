@@ -116,7 +116,7 @@ python manage.py runserver
 | `DJANGO_SECURE_HSTS_SECONDS` | HSTSの有効期間（秒）。Caddy 構成では `Caddyfile` が HSTS を付けるため不要 | `0`（無効） |
 | `DB_NAME` / `DB_USER` / `DB_PASSWORD` / `DB_HOST` / `DB_PORT` | PostgreSQL接続情報 | — |
 | `APPLE_MUSIC_DEVELOPER_TOKEN` | MusicKit用の開発者トークン | 空（Apple Music関連機能が404を返す） |
-| `MAPBOX_ACCESS_TOKEN` | WanderLens の地図に使う Mapbox の公開トークン（URL 制限を推奨） | 空（地図の代わりに案内を表示） |
+| `MAPBOX_ACCESS_TOKEN` | WanderLens の地図に使う Mapbox の公開トークン（pk.。URL 制限は Safari で動かなくなるため付けない） | 空（地図の代わりに案内を表示） |
 | `MAPBOX_STYLE` / `MAPBOX_SATELLITE_STYLE` / `MAPBOX_EDITOR_STYLE` | 地図・航空写真・編集画面のスタイル URL（Mapbox Studio のスタイルに差し替え可） | Mapbox 標準の dark / satellite-streets / streets |
 | `EMAIL_HOST` 等 | お問い合わせ通知用SMTP設定 | 未設定ならコンソール出力バックエンド |
 | `CONTACT_NOTIFY_EMAIL` | お問い合わせ通知の送信先 | 空（通知メール送信をスキップ） |
