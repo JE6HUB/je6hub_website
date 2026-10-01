@@ -19,21 +19,21 @@
     <a class="visually-hidden-focusable" href="#content">Skip to content</a>
 
     <!-- Apple-style Global Nav -->
-    <nav class="ap-globalnav" aria-label="Global">
-        <ul class="ap-globalnav-list">
-            <li class="ap-globalnav-item">
-                <a class="ap-globalnav-link" href="/" aria-label="Home">
+    <nav class="jh-globalnav" aria-label="Global">
+        <ul class="jh-globalnav-list">
+            <li class="jh-globalnav-item">
+                <a class="jh-globalnav-link" href="/" aria-label="Home">
                     <span class="material-symbols-outlined" style="font-size: 20px;">apple</span>
                 </a>
             </li>
-            <li class="ap-globalnav-item"><a class="ap-globalnav-link" href="/">{% trans "Home" %}</a></li>
-            <li class="ap-globalnav-item"><a class="ap-globalnav-link" href="{% url 'photraveler:map' %}">{% trans "WanderLens" %}</a></li>
-            <li class="ap-globalnav-item"><a class="ap-globalnav-link" href="{% if user.is_authenticated %}{% url 'community:list' %}{% else %}{% url 'login' %}?next={% url 'community:list' %}{% endif %}">{% trans "Lounge" %}</a></li>
-            <li class="ap-globalnav-item"><a class="ap-globalnav-link" href="{% url 'core:resume' %}">{% trans "Resume" %}</a></li>
-            <li class="ap-globalnav-item"><a class="ap-globalnav-link" href="{% url 'core:contact' %}">{% trans "Contact" %}</a></li>
+            <li class="jh-globalnav-item"><a class="jh-globalnav-link" href="/">{% trans "Home" %}</a></li>
+            <li class="jh-globalnav-item"><a class="jh-globalnav-link" href="{% url 'photraveler:map' %}">{% trans "WanderLens" %}</a></li>
+            <li class="jh-globalnav-item"><a class="jh-globalnav-link" href="{% if user.is_authenticated %}{% url 'community:list' %}{% else %}{% url 'login' %}?next={% url 'community:list' %}{% endif %}">{% trans "Lounge" %}</a></li>
+            <li class="jh-globalnav-item"><a class="jh-globalnav-link" href="{% url 'core:resume' %}">{% trans "Resume" %}</a></li>
+            <li class="jh-globalnav-item"><a class="jh-globalnav-link" href="{% url 'core:contact' %}">{% trans "Contact" %}</a></li>
             
             <!-- Auth & Language -->
-            <li class="ap-globalnav-item ms-auto d-flex align-items-center gap-3">
+            <li class="jh-globalnav-item ms-auto d-flex align-items-center gap-3">
                 <form action="{% url 'set_language' %}" method="post" class="m-0">
                     {% csrf_token %}
                     <input name="next" type="hidden" value="{{ redirect_to }}">
@@ -49,20 +49,20 @@
                 </form>
 
                 {% if user.is_authenticated %}
-                    <a href="{% url 'profile' %}" class="ap-globalnav-link" aria-label="{{ user.username }}" title="{{ user.username }}">
+                    <a href="{% url 'profile' %}" class="jh-globalnav-link" aria-label="{{ user.username }}" title="{{ user.username }}">
                         <i class="fas fa-user"></i>
                     </a>
                     {% if user.is_staff %}
-                        <a href="{% url 'admin:index' %}" class="ap-globalnav-link" aria-label="{% trans 'Admin' %}">
+                        <a href="{% url 'admin:index' %}" class="jh-globalnav-link" aria-label="{% trans 'Admin' %}">
                             <i class="fas fa-cog"></i>
                         </a>
                     {% endif %}
                     <form action="{% url 'logout' %}" method="post" class="m-0 p-0">
                         {% csrf_token %}
-                        <button type="submit" class="ap-globalnav-link bg-transparent border-0 p-0 m-0"><i class="fas fa-sign-out-alt"></i></button>
+                        <button type="submit" class="jh-globalnav-link bg-transparent border-0 p-0 m-0"><i class="fas fa-sign-out-alt"></i></button>
                     </form>
                 {% else %}
-                    <a href="{% url 'login' %}" class="ap-globalnav-link"><i class="fas fa-user-circle"></i></a>
+                    <a href="{% url 'login' %}" class="jh-globalnav-link"><i class="fas fa-user-circle"></i></a>
                 {% endif %}
             </li>
         </ul>
@@ -76,7 +76,7 @@
     {% endblock %}
 
     <!-- Footer -->
-    <footer class="ap-section" style="padding: 40px 20px; border-top: 1px solid rgba(255,255,255,0.1); font-size: 12px; color: var(--ap-text-muted);">
+    <footer class="jh-section" style="padding: 40px 20px; border-top: 1px solid rgba(255,255,255,0.1); font-size: 12px; color: var(--jh-text-muted);">
         <div style="max-width: 980px; margin: 0 auto;">
             <div class="d-flex flex-column flex-md-row justify-content-between align-items-center gap-3">
                 <div>
@@ -84,10 +84,10 @@
                     <span class="ms-3">© 2026 Yuta Kumadaki. All rights reserved.</span>
                 </div>
                 <div class="d-flex gap-4">
-                    <a href="{% url 'core:resume' %}" class="text-decoration-none" style="color: var(--ap-text-muted);">Resume</a>
-                    <a href="{% url 'photraveler:map' %}" class="text-decoration-none" style="color: var(--ap-text-muted);">WanderLens</a>
-                    <a href="{% url 'community:list' %}" class="text-decoration-none" style="color: var(--ap-text-muted);">Lounge</a>
-                    <a href="{% url 'core:contact' %}" class="text-decoration-none" style="color: var(--ap-text-muted);">Contact</a>
+                    <a href="{% url 'core:resume' %}" class="text-decoration-none" style="color: var(--jh-text-muted);">Resume</a>
+                    <a href="{% url 'photraveler:map' %}" class="text-decoration-none" style="color: var(--jh-text-muted);">WanderLens</a>
+                    <a href="{% url 'community:list' %}" class="text-decoration-none" style="color: var(--jh-text-muted);">Lounge</a>
+                    <a href="{% url 'core:contact' %}" class="text-decoration-none" style="color: var(--jh-text-muted);">Contact</a>
                 </div>
             </div>
         </div>

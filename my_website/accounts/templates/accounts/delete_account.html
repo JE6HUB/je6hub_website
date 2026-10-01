@@ -4,11 +4,11 @@
 {% block title %}{% trans "退会" %}{% endblock %}
 
 {% block content %}
-<div class="ap-section d-flex align-items-center justify-content-center" style="min-height: 80vh;">
-    <div class="ap-glass-panel ap-reveal" style="width: 100%; max-width: 560px;">
+<div class="jh-section d-flex align-items-center justify-content-center" style="min-height: 80vh;">
+    <div class="jh-glass-panel jh-reveal" style="width: 100%; max-width: 560px;">
         <div class="text-center mb-4">
-            <h1 class="ap-hero-title" style="font-size: 40px;">{% trans "退会" %}</h1>
-            <p class="ap-subhead mt-2 mb-0" style="font-size: 17px;">{% trans "アカウントを削除すると、元に戻すことはできません。" %}</p>
+            <h1 class="jh-hero-title" style="font-size: 40px;">{% trans "退会" %}</h1>
+            <p class="jh-subhead mt-2 mb-0" style="font-size: 17px;">{% trans "アカウントを削除すると、元に戻すことはできません。" %}</p>
         </div>
 
         <h2 class="text-light fw-semibold mb-2" style="font-size: 19px;">{% trans "削除されるもの" %}</h2>
@@ -43,7 +43,7 @@
             {% endif %}
 
             <div class="mb-3 text-start">
-                <label class="ap-label" for="id_confirm">
+                <label class="jh-label" for="id_confirm">
                     {% if form.uses_password %}
                         {% trans "確認のため、パスワードを入力してください" %}
                     {% else %}
@@ -54,7 +54,7 @@
                     <div class="text-danger small mb-1" style="color: #ff453a!important;">{{ form.confirm.errors|striptags }}</div>
                 {% endif %}
                 <input type="{% if form.uses_password %}password{% else %}text{% endif %}" name="confirm" id="id_confirm"
-                       class="ap-input {% if form.confirm.errors %}border-danger{% endif %}"
+                       class="jh-input {% if form.confirm.errors %}border-danger{% endif %}"
                        autocomplete="{% if form.uses_password %}current-password{% else %}off{% endif %}" required>
             </div>
 
@@ -66,13 +66,13 @@
                 {% endif %}
             </div>
 
-            <button class="ap-btn w-100" type="submit" style="font-size: 17px; background: #ff3b30; color: #fff; border: none;">
+            <button class="jh-btn w-100" type="submit" style="font-size: 17px; background: #ff3b30; color: #fff; border: none;">
                 {% trans "退会する" %}
             </button>
         </form>
 
         <div class="text-center mt-4">
-            <a href="{% url 'profile' %}" class="ap-link" style="font-size: 17px;">{% trans "キャンセル" %}</a>
+            <a href="{% url 'profile' %}" class="jh-link" style="font-size: 17px;">{% trans "キャンセル" %}</a>
         </div>
     </div>
 </div>

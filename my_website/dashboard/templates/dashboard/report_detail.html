@@ -6,7 +6,7 @@
 {% block db_content %}
 <header class="db-head">
     <div>
-        <a href="{% url 'dashboard:reports' %}" class="ap-link" style="font-size: 14px;">{% trans "通報の一覧" %}</a>
+        <a href="{% url 'dashboard:reports' %}" class="jh-link" style="font-size: 14px;">{% trans "通報の一覧" %}</a>
         <h1 class="db-title">{{ kind.label }} #{{ object_id }}</h1>
         {% if not obj %}<p class="db-lead">{% trans "この投稿はすでに削除されています。通報時点の内容を表示しています。" %}</p>{% endif %}
     </div>

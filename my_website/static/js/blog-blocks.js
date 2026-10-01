@@ -306,7 +306,7 @@ window.BlogBlocks = (() => {
                 this.renderMap(block, bk);
             } else if (block.type === 'button') {
                 bk.classList.add(`bk-align-${block.align}`);
-                const cls = block.variant === 'secondary' ? 'ap-btn ap-btn-outline' : 'ap-btn ap-btn-primary';
+                const cls = block.variant === 'secondary' ? 'jh-btn jh-btn-outline' : 'jh-btn jh-btn-primary';
                 bk.innerHTML = `<button type="button" class="${cls}">${esc(block.label || this.t.buttonPlaceholder)}</button>`;
                 bk.querySelector('button').addEventListener('click', () => this.openMenu(block, bk.querySelector('button')));
             }

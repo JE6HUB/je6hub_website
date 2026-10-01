@@ -4,29 +4,29 @@
 {% block title %}Profile — {{ user_obj.username }}{% endblock %}
 
 {% block content %}
-<div class="ap-section py-5">
+<div class="jh-section py-5">
     <div class="row justify-content-center">
         <div class="col-md-10">
             <!-- Profile Info -->
-            <div class="ap-glass-panel text-center mb-4 ap-reveal">
+            <div class="jh-glass-panel text-center mb-4 jh-reveal">
                 <div class="mb-3">
                     <span class="profile-monogram" aria-hidden="true">{{ user_obj.public_name|first|upper }}</span>
-                    <h2 class="ap-hero-title mt-3" style="font-size: 40px;">{{ user_obj.public_name }}</h2>
-                    <p class="ap-subhead mb-1" style="font-size: 17px;">@{{ user_obj.username }}</p>
-                    <p class="ap-subhead mb-2" style="font-size: 17px;">{% if user_obj.email %}{{ user_obj.email }}{% else %}{% trans "No email provided" %}{% endif %}</p>
+                    <h2 class="jh-hero-title mt-3" style="font-size: 40px;">{{ user_obj.public_name }}</h2>
+                    <p class="jh-subhead mb-1" style="font-size: 17px;">@{{ user_obj.username }}</p>
+                    <p class="jh-subhead mb-2" style="font-size: 17px;">{% if user_obj.email %}{{ user_obj.email }}{% else %}{% trans "No email provided" %}{% endif %}</p>
                 </div>
 
                 <div class="d-flex justify-content-center flex-wrap gap-3">
-                    <a href="{{ user_obj.get_absolute_url }}" class="ap-btn ap-btn-primary">{% trans "プロフィールを表示" %}</a>
+                    <a href="{{ user_obj.get_absolute_url }}" class="jh-btn jh-btn-primary">{% trans "プロフィールを表示" %}</a>
                     <form action="{% url 'logout' %}" method="post" class="m-0">
                         {% csrf_token %}
-                        <button type="submit" class="ap-btn ap-btn-outline" style="border-color: rgba(255,59,48,0.5); color: #ff453a;">{% trans "サインアウト" %}</button>
+                        <button type="submit" class="jh-btn jh-btn-outline" style="border-color: rgba(255,59,48,0.5); color: #ff453a;">{% trans "サインアウト" %}</button>
                     </form>
                 </div>
             </div>
 
             <!-- Profile Edit Form -->
-            <div class="ap-glass-panel ap-reveal">
+            <div class="jh-glass-panel jh-reveal">
                 <h3 class="mb-4 text-light fw-semibold" style="font-size: 28px;">{% trans "プロフィール編集" %}</h3>
                 <form method="post" class="needs-validation">
                     {% csrf_token %}
@@ -42,27 +42,27 @@
                     <p class="small text-muted mb-4">{% trans "ここに入力した内容は、ほかのユーザーにも表示されます。" %}</p>
 
                     <div class="mb-4">
-                        <label class="ap-label" for="profileDisplayName">{% trans "表示名" %}</label>
-                        <input type="text" class="form-control ap-input" id="profileDisplayName" name="display_name" maxlength="50"
+                        <label class="jh-label" for="profileDisplayName">{% trans "表示名" %}</label>
+                        <input type="text" class="form-control jh-input" id="profileDisplayName" name="display_name" maxlength="50"
                                value="{{ form.display_name.value|default:'' }}" placeholder="{{ user_obj.username }}">
                         <div class="small text-muted mt-2">{% trans "未入力の場合はユーザー名が表示されます。" %}</div>
                     </div>
 
                     <div class="mb-4">
-                        <label class="ap-label" for="profileBio">{% trans "自己紹介" %}</label>
-                        <textarea class="form-control ap-input" id="profileBio" name="bio" rows="4" maxlength="300"
+                        <label class="jh-label" for="profileBio">{% trans "自己紹介" %}</label>
+                        <textarea class="form-control jh-input" id="profileBio" name="bio" rows="4" maxlength="300"
                                   placeholder="{% trans '好きなこと、書いていること、旅したい場所など' %}">{{ form.bio.value|default:'' }}</textarea>
                     </div>
 
                     <div class="row mb-4">
                         <div class="col-md-6">
-                            <label class="ap-label" for="profileLocation">{% trans "拠点" %}</label>
-                            <input type="text" class="form-control ap-input" id="profileLocation" name="location" maxlength="60"
+                            <label class="jh-label" for="profileLocation">{% trans "拠点" %}</label>
+                            <input type="text" class="form-control jh-input" id="profileLocation" name="location" maxlength="60"
                                    value="{{ form.location.value|default:'' }}" placeholder="{% trans '例: 東京' %}">
                         </div>
                         <div class="col-md-6 mt-4 mt-md-0">
-                            <label class="ap-label" for="profileWebsite">{% trans "ウェブサイト" %}</label>
-                            <input type="url" class="form-control ap-input" id="profileWebsite" name="website"
+                            <label class="jh-label" for="profileWebsite">{% trans "ウェブサイト" %}</label>
+                            <input type="url" class="form-control jh-input" id="profileWebsite" name="website"
                                    value="{{ form.website.value|default:'' }}" placeholder="https://">
                         </div>
                     </div>
@@ -73,18 +73,18 @@
                     <p class="small text-muted mb-4">{% trans "メールアドレスと氏名は公開されません。" %}</p>
 
                     <div class="mb-4">
-                        <label class="ap-label" for="profileEmail">{% trans "メールアドレス" %}</label>
-                        <input type="email" class="form-control ap-input" id="profileEmail" name="email" value="{{ form.email.value|default:'' }}">
+                        <label class="jh-label" for="profileEmail">{% trans "メールアドレス" %}</label>
+                        <input type="email" class="form-control jh-input" id="profileEmail" name="email" value="{{ form.email.value|default:'' }}">
                     </div>
 
                     <div class="row mb-4">
                         <div class="col-md-6">
-                            <label class="ap-label" for="profileFirstName">{% trans "名" %}</label>
-                            <input type="text" class="form-control ap-input" id="profileFirstName" name="first_name" value="{{ form.first_name.value|default:'' }}">
+                            <label class="jh-label" for="profileFirstName">{% trans "名" %}</label>
+                            <input type="text" class="form-control jh-input" id="profileFirstName" name="first_name" value="{{ form.first_name.value|default:'' }}">
                         </div>
                         <div class="col-md-6 mt-4 mt-md-0">
-                            <label class="ap-label" for="profileLastName">{% trans "姓" %}</label>
-                            <input type="text" class="form-control ap-input" id="profileLastName" name="last_name" value="{{ form.last_name.value|default:'' }}">
+                            <label class="jh-label" for="profileLastName">{% trans "姓" %}</label>
+                            <input type="text" class="form-control jh-input" id="profileLastName" name="last_name" value="{{ form.last_name.value|default:'' }}">
                         </div>
                     </div>
 
@@ -93,32 +93,32 @@
                     <h4 class="mb-4 text-light fw-semibold" style="font-size: 21px;">{% trans "お気に入りの曲" %}</h4>
 
                     <div class="mb-4">
-                        <label class="ap-label" for="appleMusicSearchTerm">{% trans "Apple Music で検索" %}</label>
+                        <label class="jh-label" for="appleMusicSearchTerm">{% trans "Apple Music で検索" %}</label>
                         <div class="d-flex gap-2">
-                            <input type="search" class="form-control ap-input" id="appleMusicSearchTerm" placeholder="{% trans '曲名 / アーティスト名' %}">
-                            <button type="button" class="ap-btn ap-btn-primary flex-shrink-0 text-nowrap" id="appleMusicSearchBtn">{% trans "検索" %}</button>
+                            <input type="search" class="form-control jh-input" id="appleMusicSearchTerm" placeholder="{% trans '曲名 / アーティスト名' %}">
+                            <button type="button" class="jh-btn jh-btn-primary flex-shrink-0 text-nowrap" id="appleMusicSearchBtn">{% trans "検索" %}</button>
                         </div>
                         <div class="small text-muted mt-2">{% trans "検索結果から選ぶと自動入力されます。" %}</div>
                     </div>
 
                     <div class="mb-4">
-                        <label class="ap-label" for="favoriteTrackTitle">{% trans "曲名" %}</label>
-                        <input type="text" class="form-control ap-input" id="favoriteTrackTitle" name="favorite_track_title" value="{{ form.favorite_track_title.value|default:'' }}" placeholder="e.g., All Of Me">
+                        <label class="jh-label" for="favoriteTrackTitle">{% trans "曲名" %}</label>
+                        <input type="text" class="form-control jh-input" id="favoriteTrackTitle" name="favorite_track_title" value="{{ form.favorite_track_title.value|default:'' }}" placeholder="e.g., All Of Me">
                     </div>
 
                     <div class="mb-4">
-                        <label class="ap-label" for="favoriteTrackArtist">{% trans "アーティスト名" %}</label>
-                        <input type="text" class="form-control ap-input" id="favoriteTrackArtist" name="favorite_track_artist" value="{{ form.favorite_track_artist.value|default:'' }}" placeholder="e.g., Nao">
+                        <label class="jh-label" for="favoriteTrackArtist">{% trans "アーティスト名" %}</label>
+                        <input type="text" class="form-control jh-input" id="favoriteTrackArtist" name="favorite_track_artist" value="{{ form.favorite_track_artist.value|default:'' }}" placeholder="e.g., Nao">
                     </div>
 
                     <div class="mb-4">
-                        <label class="ap-label" for="favoriteTrackImageUrl">{% trans "ジャケット画像URL" %}</label>
-                        <input type="url" class="form-control ap-input" id="favoriteTrackImageUrl" name="favorite_track_image_url" value="{{ form.favorite_track_image_url.value|default:'' }}" placeholder="https://...">
+                        <label class="jh-label" for="favoriteTrackImageUrl">{% trans "ジャケット画像URL" %}</label>
+                        <input type="url" class="form-control jh-input" id="favoriteTrackImageUrl" name="favorite_track_image_url" value="{{ form.favorite_track_image_url.value|default:'' }}" placeholder="https://...">
                     </div>
 
                     <div class="mb-4">
-                        <label class="ap-label" for="favoriteTrackAppleMusicUrl">{% trans "Apple Music リンク" %}</label>
-                        <input type="url" class="form-control ap-input" id="favoriteTrackAppleMusicUrl" name="favorite_track_apple_music_url" value="{{ form.favorite_track_apple_music_url.value|default:'' }}" placeholder="https://music.apple.com/...">
+                        <label class="jh-label" for="favoriteTrackAppleMusicUrl">{% trans "Apple Music リンク" %}</label>
+                        <input type="url" class="form-control jh-input" id="favoriteTrackAppleMusicUrl" name="favorite_track_apple_music_url" value="{{ form.favorite_track_apple_music_url.value|default:'' }}" placeholder="https://music.apple.com/...">
                     </div>
 
                     <input type="hidden" id="favoriteTrackAppleMusicId" name="favorite_track_apple_music_id" value="{{ form.favorite_track_apple_music_id.value|default:'' }}">
@@ -126,24 +126,24 @@
 
                     {% if user_obj.has_favorite_track %}
                     <div class="mb-4">
-                        <label class="ap-label">{% trans "現在の設定" %}</label>
+                        <label class="jh-label">{% trans "現在の設定" %}</label>
                         {% include "accounts/_track_player.html" with profile_user=user_obj %}
                     </div>
                     {% endif %}
 
                     <div class="mt-5 pt-3" style="border-top: 1px solid rgba(255,255,255,0.1);">
-                        <button type="submit" class="ap-btn ap-btn-primary me-2">{% trans "保存" %}</button>
-                        <a href="{% url 'core:home' %}" class="ap-btn ap-btn-outline" style="border:none;">{% trans "キャンセル" %}</a>
+                        <button type="submit" class="jh-btn jh-btn-primary me-2">{% trans "保存" %}</button>
+                        <a href="{% url 'core:home' %}" class="jh-btn jh-btn-outline" style="border:none;">{% trans "キャンセル" %}</a>
                     </div>
                 </form>
             </div>
 
             {% if not user_obj.is_staff and not user_obj.is_superuser %}
             <!-- 退会 -->
-            <div class="ap-glass-panel ap-reveal mt-4">
+            <div class="jh-glass-panel jh-reveal mt-4">
                 <h3 class="mb-2 fw-semibold" style="font-size: 21px; color: #ff453a;">{% trans "退会" %}</h3>
                 <p class="small text-muted mb-3">{% trans "アカウントと、投稿・写真などのデータをすべて削除します。" %}</p>
-                <a href="{% url 'account_delete' %}" class="ap-btn ap-btn-outline" style="border-color: rgba(255,59,48,0.5); color: #ff453a;">{% trans "退会手続きへ" %}</a>
+                <a href="{% url 'account_delete' %}" class="jh-btn jh-btn-outline" style="border-color: rgba(255,59,48,0.5); color: #ff453a;">{% trans "退会手続きへ" %}</a>
             </div>
             {% endif %}
         </div>
@@ -153,7 +153,7 @@
 <!-- Apple Music Search Modal -->
 <div class="modal fade" id="appleMusicSearchModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
-        <div class="modal-content ap-glass-panel" style="padding: 0;">
+        <div class="modal-content jh-glass-panel" style="padding: 0;">
             <div class="modal-header" style="border-bottom: 1px solid rgba(255, 255, 255, 0.1); padding: 20px;">
                 <h5 class="modal-title fw-bold text-light">{% trans "Apple Music 検索" %}</h5>
                 <button type="button" class="btn-close btn-close-white" data-mdb-dismiss="modal" aria-label="Close"></button>
@@ -164,8 +164,8 @@
                 <div id="appleMusicModalResults" class="mt-3"></div>
             </div>
             <div class="modal-footer" style="border-top: 1px solid rgba(255, 255, 255, 0.1); padding: 16px 20px;">
-                <button type="button" class="ap-btn ap-btn-outline" id="appleMusicLoadMoreBtn" style="display:none; margin-right: auto;">{% trans "さらに見る" %}</button>
-                <button type="button" class="ap-btn ap-btn-primary" data-mdb-dismiss="modal">{% trans "閉じる" %}</button>
+                <button type="button" class="jh-btn jh-btn-outline" id="appleMusicLoadMoreBtn" style="display:none; margin-right: auto;">{% trans "さらに見る" %}</button>
+                <button type="button" class="jh-btn jh-btn-primary" data-mdb-dismiss="modal">{% trans "閉じる" %}</button>
             </div>
         </div>
     </div>
@@ -177,7 +177,7 @@
     display: inline-flex; align-items: center; justify-content: center;
     font-size: 40px; font-weight: 600; color: #fff; background: #3a3a3c;
 }
-/* 検索結果のアイテムにAppleスタイルを適用 */
+/* 検索結果のアイテムのスタイル */
 .am-result-item {
     background: rgba(255,255,255,0.06);
     border-radius: 16px;
@@ -265,7 +265,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const btn = document.createElement('button');
         btn.type = 'button';
-        btn.className = 'ap-btn ap-btn-outline';
+        btn.className = 'jh-btn jh-btn-outline';
         btn.style.padding = '4px 12px';
         btn.style.fontSize = '13px';
         btn.textContent = '{% trans "設定" as t %}{{ t|escapejs }}';

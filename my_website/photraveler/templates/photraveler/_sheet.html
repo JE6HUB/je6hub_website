@@ -18,7 +18,7 @@
             </div>
             <p class="wl-sheet-desc" id="wl-sheet-desc"></p>
             <div class="wl-sheet-actions" id="wl-sheet-actions">
-                <a class="ap-link" id="wl-sheet-owner" href="#"></a>
+                <a class="jh-link" id="wl-sheet-owner" href="#"></a>
                 <button type="button" class="wl-text-btn" id="wl-sheet-locate">{% trans "地図で見る" %}</button>
                 <button type="button" class="wl-text-btn" id="wl-sheet-copy">{% trans "リンクをコピー" %}</button>
                 {% if not can_edit %}
@@ -38,8 +38,8 @@
                 <div id="wl-comment-list" class="wl-comment-list"></div>
                 <form id="wl-comment-form" class="wl-comment-form" novalidate>
                     {% csrf_token %}
-                    <input type="text" id="wl-comment-input" class="ap-input" maxlength="500" placeholder="{% trans 'コメントを書く…' %}" aria-label="{% trans 'コメントを書く' %}" required>
-                    <button type="submit" class="ap-btn ap-btn-primary wl-btn">{% trans "送信" %}</button>
+                    <input type="text" id="wl-comment-input" class="jh-input" maxlength="500" placeholder="{% trans 'コメントを書く…' %}" aria-label="{% trans 'コメントを書く' %}" required>
+                    <button type="submit" class="jh-btn jh-btn-primary wl-btn">{% trans "送信" %}</button>
                 </form>
                 <p class="wl-error" id="wl-comment-error" hidden></p>
             </section>

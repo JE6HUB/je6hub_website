@@ -380,8 +380,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // Scroll-collapsing Nav → Condensed Glass Nav
 document.addEventListener('DOMContentLoaded', () => {
-    const fullNav = document.getElementById('ap-globalnav');
-    const glassNav = document.getElementById('ap-glass-navbar');
+    const fullNav = document.getElementById('jh-globalnav');
+    const glassNav = document.getElementById('jh-glass-navbar');
     if (!fullNav || !glassNav) return;
 
     const SCROLL_THRESHOLD = 80;
@@ -391,8 +391,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const syncNav = () => {
         const isScrolled = window.scrollY > SCROLL_THRESHOLD;
         if (isScrolled !== lastState) {
-            fullNav.classList.toggle('ap-globalnav-hidden', isScrolled);
-            glassNav.classList.toggle('ap-glass-navbar-visible', isScrolled);
+            fullNav.classList.toggle('jh-globalnav-hidden', isScrolled);
+            glassNav.classList.toggle('jh-glass-navbar-visible', isScrolled);
             lastState = isScrolled;
         }
         ticking = false;
@@ -410,14 +410,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // Mobile Menu (734px 以下で表示される全画面メニュー)
 document.addEventListener('DOMContentLoaded', () => {
-    const button = document.getElementById('ap-menu-btn');
-    const menu = document.getElementById('ap-mobile-menu');
+    const button = document.getElementById('jh-menu-btn');
+    const menu = document.getElementById('jh-mobile-menu');
     if (!button || !menu) return;
 
     const setOpen = (open) => {
         menu.hidden = !open;
         button.setAttribute('aria-expanded', String(open));
-        document.body.classList.toggle('ap-menu-open', open);
+        document.body.classList.toggle('jh-menu-open', open);
     };
 
     button.addEventListener('click', () => setOpen(menu.hidden));
@@ -692,7 +692,7 @@ document.addEventListener('DOMContentLoaded', () => {
     requestAnimationFrame(() => requestAnimationFrame(() => modal.classList.add('is-open')));
 });
 
-// Apple-style Reveal Animations
+// Reveal Animations
 document.addEventListener('DOMContentLoaded', () => {
     const observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
@@ -703,5 +703,5 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }, { threshold: 0.15, rootMargin: '0px 0px -50px 0px' });
 
-    document.querySelectorAll('.ap-reveal').forEach(el => observer.observe(el));
+    document.querySelectorAll('.jh-reveal').forEach(el => observer.observe(el));
 });

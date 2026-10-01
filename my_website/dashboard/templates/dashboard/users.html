@@ -12,7 +12,7 @@
 </header>
 
 <form method="get" class="db-filters" role="search">
-    <input type="search" name="q" value="{{ q }}" class="ap-input" placeholder="{% trans 'ユーザー名・メールアドレス・表示名で検索' %}" aria-label="{% trans 'ユーザーを検索' %}">
+    <input type="search" name="q" value="{{ q }}" class="jh-input" placeholder="{% trans 'ユーザー名・メールアドレス・表示名で検索' %}" aria-label="{% trans 'ユーザーを検索' %}">
     <select name="state" class="db-select" aria-label="{% trans '絞り込み' %}">
         <option value="">{% trans "すべて" %}</option>
         <option value="suspended"{% if state == 'suspended' %} selected{% endif %}>{% trans "凍結中" %}</option>

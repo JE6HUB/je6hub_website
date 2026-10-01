@@ -4,19 +4,19 @@
 {% block title %}{% trans "メールを確認してください" %}{% endblock %}
 
 {% block content %}
-<div class="ap-section d-flex align-items-center justify-content-center" style="min-height: 80vh;">
-    <div class="ap-glass-panel ap-reveal" style="width: 100%; max-width: 440px;">
+<div class="jh-section d-flex align-items-center justify-content-center" style="min-height: 80vh;">
+    <div class="jh-glass-panel jh-reveal" style="width: 100%; max-width: 440px;">
         <div class="text-center">
-            <h1 class="ap-hero-title" style="font-size: 40px;">{% trans "メールを確認してください" %}</h1>
+            <h1 class="jh-hero-title" style="font-size: 40px;">{% trans "メールを確認してください" %}</h1>
             {% if send_failed %}
-                <p class="ap-subhead mt-3 mb-0" style="font-size: 17px;">{% trans "アカウントは作成されましたが、確認メールを送信できませんでした。時間をおいて、下のリンクから再送してください。" %}</p>
+                <p class="jh-subhead mt-3 mb-0" style="font-size: 17px;">{% trans "アカウントは作成されましたが、確認メールを送信できませんでした。時間をおいて、下のリンクから再送してください。" %}</p>
             {% else %}
-                <p class="ap-subhead mt-3 mb-0" style="font-size: 17px;">{% blocktrans %}{{ email }} に確認メールを送りました。メール内のリンクを開くと登録が完了します。{% endblocktrans %}</p>
+                <p class="jh-subhead mt-3 mb-0" style="font-size: 17px;">{% blocktrans %}{{ email }} に確認メールを送りました。メール内のリンクを開くと登録が完了します。{% endblocktrans %}</p>
             {% endif %}
         </div>
 
         <div class="text-center mt-5">
-            <a href="{% url 'resend_verification' %}" class="ap-link" style="font-size: 17px;">
+            <a href="{% url 'resend_verification' %}" class="jh-link" style="font-size: 17px;">
                 {% trans "メールが届かない場合は再送" %}
             </a>
         </div>

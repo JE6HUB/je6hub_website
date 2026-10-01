@@ -15,40 +15,40 @@
         letter-spacing: -0.003em;
         margin: 0 0 32px;
     }
-    .resume-lead { font-size: 21px; line-height: 1.52; color: var(--ap-text); margin: 0; }
+    .resume-lead { font-size: 21px; line-height: 1.52; color: var(--jh-text); margin: 0; }
 
     .resume-stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; }
-    .resume-stat { background: var(--ap-card-bg); border-radius: 28px; padding: 32px; }
+    .resume-stat { background: var(--jh-card-bg); border-radius: 28px; padding: 32px; }
     .resume-stat strong { display: block; font-size: clamp(40px, 5vw, 56px); font-weight: 600; line-height: 1.07; }
-    .resume-stat span { color: var(--ap-text-muted); font-size: 17px; }
+    .resume-stat span { color: var(--jh-text-muted); font-size: 17px; }
 
     .resume-tiles { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; }
-    .resume-tile { background: var(--ap-card-bg); border-radius: 28px; padding: 36px 32px; }
+    .resume-tile { background: var(--jh-card-bg); border-radius: 28px; padding: 36px 32px; }
     .resume-tile h3 { font-size: 24px; font-weight: 600; margin: 0 0 12px; }
-    .resume-tile p { color: var(--ap-text-muted); font-size: 17px; line-height: 1.47; margin: 0; }
+    .resume-tile p { color: var(--jh-text-muted); font-size: 17px; line-height: 1.47; margin: 0; }
 
-    .resume-rows { background: var(--ap-card-bg); border-radius: 28px; padding: 8px 32px; }
+    .resume-rows { background: var(--jh-card-bg); border-radius: 28px; padding: 8px 32px; }
     .resume-row { display: grid; grid-template-columns: 180px minmax(0, 1fr); gap: 24px; padding: 28px 0; }
     .resume-row + .resume-row { border-top: 1px solid #424245; }
-    .resume-row-period { color: var(--ap-text-muted); font-size: 17px; }
+    .resume-row-period { color: var(--jh-text-muted); font-size: 17px; }
     .resume-row h3 { font-size: 21px; font-weight: 600; margin: 0; }
-    .resume-row-org { color: var(--ap-text-muted); font-size: 17px; margin: 2px 0 12px; }
-    .resume-row ul { margin: 0; padding-left: 1.1em; color: var(--ap-text); font-size: 17px; line-height: 1.6; }
+    .resume-row-org { color: var(--jh-text-muted); font-size: 17px; margin: 2px 0 12px; }
+    .resume-row ul { margin: 0; padding-left: 1.1em; color: var(--jh-text); font-size: 17px; line-height: 1.6; }
 
-    .resume-skill-list { margin: 0; color: var(--ap-text-muted); font-size: 17px; line-height: 1.6; }
+    .resume-skill-list { margin: 0; color: var(--jh-text-muted); font-size: 17px; line-height: 1.6; }
 
     .resume-projects { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
     .resume-project {
         display: flex;
         flex-direction: column;
-        background: var(--ap-card-bg);
+        background: var(--jh-card-bg);
         border-radius: 28px;
         overflow: hidden;
-        color: var(--ap-text);
+        color: var(--jh-text);
         text-decoration: none;
     }
-    .resume-project:hover { color: var(--ap-text); }
-    .resume-project:hover .ap-link { text-decoration: underline; }
+    .resume-project:hover { color: var(--jh-text); }
+    .resume-project:hover .jh-link { text-decoration: underline; }
     /* 写真を全面に敷いた大きなタイル (Apple の製品タイル風) */
     .resume-feature {
         position: relative;
@@ -58,7 +58,7 @@
         overflow: hidden;
         color: #fff;
         text-decoration: none;
-        background: var(--ap-card-bg);
+        background: var(--jh-card-bg);
     }
     .resume-feature:hover { color: #fff; }
     .resume-feature-img {
@@ -73,12 +73,12 @@
     .resume-feature-text { position: relative; z-index: 1; padding: 36px 36px 0; display: flex; flex-direction: column; gap: 6px; }
     .resume-feature-text h3 { font-size: 32px; font-weight: 600; margin: 0; }
     .resume-feature-text p { font-size: 19px; margin: 0; color: rgba(255,255,255,0.9); }
-    .resume-feature-text .ap-link { margin-top: 6px; color: #fff; } /* 写真の上のリンクは白 */
-    .resume-feature:hover .ap-link { text-decoration: underline; }
+    .resume-feature-text .jh-link { margin-top: 6px; color: #fff; } /* 写真の上のリンクは白 */
+    .resume-feature:hover .jh-link { text-decoration: underline; }
     .resume-project-body { padding: 36px; display: flex; flex-direction: column; gap: 8px; flex: 1; }
     .resume-project-body h3 { font-size: 24px; font-weight: 600; margin: 0; }
-    .resume-project-body p { color: var(--ap-text-muted); font-size: 17px; margin: 0; flex: 1; }
-    .resume-project-body .ap-link { margin-top: 8px; }
+    .resume-project-body p { color: var(--jh-text-muted); font-size: 17px; margin: 0; flex: 1; }
+    .resume-project-body .jh-link { margin-top: 8px; }
 
     @media (max-width: 833px) {
         .resume-tiles, .resume-projects { grid-template-columns: 1fr; }
@@ -93,14 +93,14 @@
 
 {% block content %}
 <!-- Hero — LiquidGlass root (背景と glass ボタンはすべて root の直接の子) -->
-<section id="resume-glass-root" class="ap-section liquid-glass-root"
+<section id="resume-glass-root" class="jh-section liquid-glass-root"
     style="position: relative; overflow: hidden; padding-top: 110px; padding-bottom: 80px; text-align: center;">
     {% include "_hero_image.html" with hero="img/hero/resume-marble" style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; pointer-events: none; z-index: 0;" %}
     <div style="position: absolute; inset: 0; background: linear-gradient(180deg, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.25) 45%, rgba(0,0,0,0.75) 100%); pointer-events: none; z-index: 1;"></div>
 
     <div style="position: relative; z-index: 2; pointer-events: none;">
-        <h1 class="ap-hero-title">Yuta Kumadaki</h1>
-        <p class="ap-hero-subtitle mx-auto" style="max-width: 600px; color: rgba(245,245,247,0.85);">
+        <h1 class="jh-hero-title">Yuta Kumadaki</h1>
+        <p class="jh-hero-subtitle mx-auto" style="max-width: 600px; color: rgba(245,245,247,0.85);">
             AI Architect &amp; Photographer. Tokyo.
         </p>
     </div>
@@ -120,7 +120,7 @@
 <div class="resume">
 
     <!-- 概要 -->
-    <section class="resume-section ap-reveal">
+    <section class="resume-section jh-reveal">
         <h2>{% trans "概要" %}</h2>
         <p class="resume-lead">
             {% trans "大規模言語モデル（LLM）のシステム設計・社会実装を専門とするAIアーキテクト。Transformer内部メカニズムの研究（Mechanistic Interpretability）に取り組みながら、Leica Q3によるフォトグラフィーも並行して続けている。" %}
@@ -133,7 +133,7 @@
     </section>
 
     <!-- 専門領域 -->
-    <section class="resume-section ap-reveal">
+    <section class="resume-section jh-reveal">
         <h2>{% trans "専門領域" %}</h2>
         <div class="resume-tiles">
             <div class="resume-tile">
@@ -152,7 +152,7 @@
     </section>
 
     <!-- 経歴 -->
-    <section class="resume-section ap-reveal">
+    <section class="resume-section jh-reveal">
         <h2>{% trans "経歴" %}</h2>
         <div class="resume-rows">
             <div class="resume-row">
@@ -184,7 +184,7 @@
     </section>
 
     <!-- スキル -->
-    <section class="resume-section ap-reveal">
+    <section class="resume-section jh-reveal">
         <h2>{% trans "スキル" %}</h2>
         <div class="resume-tiles">
             <div class="resume-tile">
@@ -203,7 +203,7 @@
     </section>
 
     <!-- プロジェクト -->
-    <section class="resume-section ap-reveal" id="work" style="scroll-margin-top: 60px;">
+    <section class="resume-section jh-reveal" id="work" style="scroll-margin-top: 60px;">
         <h2>{% trans "プロジェクト" %}</h2>
         <div class="resume-projects">
             <a href="{% url 'blog:list' %}" class="resume-feature">
@@ -211,7 +211,7 @@
                 <div class="resume-feature-text">
                     <h3>Blogs</h3>
                     <p>{% trans "テンプレートを選ぶだけで、洗練されたブログを。" %}</p>
-                    <span class="ap-link">{% trans "詳しく見る" %}</span>
+                    <span class="jh-link">{% trans "詳しく見る" %}</span>
                 </div>
             </a>
             <a href="{% if user.is_authenticated %}{% url 'community:list' %}{% else %}{% url 'login' %}?next={% url 'community:list' %}{% endif %}" class="resume-feature">
@@ -219,21 +219,21 @@
                 <div class="resume-feature-text">
                     <h3>Community Lounge</h3>
                     <p>{% trans "AI・写真・クラフトビールを語り合う場所。" %}</p>
-                    <span class="ap-link">{% trans "詳しく見る" %}</span>
+                    <span class="jh-link">{% trans "詳しく見る" %}</span>
                 </div>
             </a>
             <a href="{% url 'photraveler:map' %}" class="resume-project">
                 <div class="resume-project-body">
                     <h3>WanderLens</h3>
                     <p>{% trans "旅の記憶を世界地図にピン留めするフォトトラベルジャーナル。" %}</p>
-                    <span class="ap-link">{% trans "詳しく見る" %}</span>
+                    <span class="jh-link">{% trans "詳しく見る" %}</span>
                 </div>
             </a>
             <a href="{% url 'core:home' %}" class="resume-project">
                 <div class="resume-project-body">
                     <h3>JE6HUB.com</h3>
                     <p>{% trans "このサイト。Django と PostgreSQL で構築。" %}</p>
-                    <span class="ap-link">{% trans "詳しく見る" %}</span>
+                    <span class="jh-link">{% trans "詳しく見る" %}</span>
                 </div>
             </a>
         </div>
@@ -241,9 +241,9 @@
 </div>
 
 <!-- CTA -->
-<section class="ap-section ap-reveal" style="padding-top: 120px; padding-bottom: 140px;">
-    <h2 class="ap-section-title">{% trans "一緒に、つくりましょう。" %}</h2>
-    <p class="ap-subhead mb-4">{% trans "プロジェクト相談、コラボレーション、または単純に話したいことがあれば。" %}</p>
-    <a href="{% url 'core:contact' %}" class="ap-btn ap-btn-primary">{% trans "お問い合わせ" %}</a>
+<section class="jh-section jh-reveal" style="padding-top: 120px; padding-bottom: 140px;">
+    <h2 class="jh-section-title">{% trans "一緒に、つくりましょう。" %}</h2>
+    <p class="jh-subhead mb-4">{% trans "プロジェクト相談、コラボレーション、または単純に話したいことがあれば。" %}</p>
+    <a href="{% url 'core:contact' %}" class="jh-btn jh-btn-primary">{% trans "お問い合わせ" %}</a>
 </section>
 {% endblock %}

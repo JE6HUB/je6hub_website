@@ -12,7 +12,7 @@
 <div class="pf-page">
 
     <!-- プロフィール -->
-    <header class="pf-hero ap-reveal">
+    <header class="pf-hero jh-reveal">
         <span class="pf-avatar pf-avatar--xl" aria-hidden="true">{{ u.public_name|first|upper }}</span>
         <h1 class="pf-hero-name">{{ u.public_name }}</h1>
         <p class="pf-hero-handle">@{{ u.username }}</p>
@@ -26,13 +26,13 @@
         </ul>
         {% if is_self %}
             <div class="pf-hero-actions">
-                <a href="{% url 'profile' %}" class="ap-btn ap-btn-primary">{% trans "プロフィールを編集" %}</a>
+                <a href="{% url 'profile' %}" class="jh-btn jh-btn-primary">{% trans "プロフィールを編集" %}</a>
             </div>
         {% endif %}
     </header>
 
     <!-- 数字 -->
-    <dl class="pf-stats pf-stats--lg ap-reveal">
+    <dl class="pf-stats pf-stats--lg jh-reveal">
         <div><dt>{% trans "記事" %}</dt><dd>{{ stats.posts }}</dd></div>
         <div><dt>{% trans "スポット" %}</dt><dd>{{ stats.places }}</dd></div>
         <div><dt>{% trans "国と地域" %}</dt><dd>{{ stats.countries }}</dd></div>
@@ -41,25 +41,25 @@
 
     <!-- お気に入りの曲 -->
     {% if u.has_favorite_track %}
-    <section class="pf-section ap-reveal">
+    <section class="pf-section jh-reveal">
         {% include "accounts/_track_player.html" with large=True %}
     </section>
     {% elif is_self %}
-    <section class="pf-section ap-reveal">
+    <section class="pf-section jh-reveal">
         <div class="pf-empty">
             <span class="material-symbols-outlined" aria-hidden="true">music_note</span>
             <p>{% trans "お気に入りの曲を設定すると、ここでプレビュー再生できます。" %}</p>
-            <a href="{% url 'profile' %}" class="ap-link">{% trans "曲を設定する" %}</a>
+            <a href="{% url 'profile' %}" class="jh-link">{% trans "曲を設定する" %}</a>
         </div>
     </section>
     {% endif %}
 
     <!-- 記事 -->
-    <section class="pf-section ap-reveal">
+    <section class="pf-section jh-reveal">
         <div class="pf-section-head">
             <h2>{% trans "記事" %}</h2>
             {% if stats.posts %}
-                <a href="{% url 'blog:list' %}?author={{ u.username|urlencode }}" class="ap-link">{% trans "すべて見る" %}</a>
+                <a href="{% url 'blog:list' %}?author={{ u.username|urlencode }}" class="jh-link">{% trans "すべて見る" %}</a>
             {% endif %}
         </div>
         {% if recent_posts %}
@@ -72,10 +72,10 @@
     </section>
 
     <!-- WanderLens -->
-    <section class="pf-section ap-reveal">
+    <section class="pf-section jh-reveal">
         <div class="pf-section-head">
             <h2>WanderLens</h2>
-            <a href="{% url 'photraveler:user_map' u.username %}" class="ap-link">{% trans "旅の地図を見る" %}</a>
+            <a href="{% url 'photraveler:user_map' u.username %}" class="jh-link">{% trans "旅の地図を見る" %}</a>
         </div>
         {% if recent_pins %}
             <ul class="pf-spots">

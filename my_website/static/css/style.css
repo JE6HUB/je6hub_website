@@ -1,47 +1,47 @@
 @charset "UTF-8";
 
 /* =========================================
-   Apple-Style Design System (ap-theme)
+   JE6HUB Design System (jh-theme)
    ========================================= */
 
 :root {
-    /* Typography — apple.com (日本) と同じフォントスタック。
+    /* Typography — システムフォント優先のフォントスタック。
        SF Pro はライセンス上ウェブフォントとして配布できないため埋め込まず、
        Apple 端末では OS 標準の SF Pro / ヒラギノ (= SF Pro JP の和文) がそのまま使われる。
-       見出し (20px 以上) は Display、本文は Text の光学サイズを使うのも apple.com と同じ。 */
-    --ap-font-text: "SF Pro JP", "SF Pro Text", "SF Pro Icons", -apple-system, BlinkMacSystemFont,
+       見出し (20px 以上) は Display、本文は Text の光学サイズを使う。 */
+    --jh-font-text: "SF Pro JP", "SF Pro Text", "SF Pro Icons", -apple-system, BlinkMacSystemFont,
         "Hiragino Kaku Gothic Pro", "ヒラギノ角ゴ Pro W3", "Hiragino Sans", "Helvetica Neue", Helvetica, Arial,
         "メイリオ", Meiryo, sans-serif;
-    --ap-font-display: "SF Pro JP", "SF Pro Display", "SF Pro Icons", -apple-system, BlinkMacSystemFont,
+    --jh-font-display: "SF Pro JP", "SF Pro Display", "SF Pro Icons", -apple-system, BlinkMacSystemFont,
         "Hiragino Kaku Gothic Pro", "ヒラギノ角ゴ Pro W3", "Hiragino Sans", "Helvetica Neue", Helvetica, Arial,
         "メイリオ", Meiryo, sans-serif;
-    --ap-font-serif: "New York", ui-serif, "Hiragino Mincho ProN", "Yu Mincho", Georgia, serif;
-    --ap-font-mono: "SF Mono", ui-monospace, Menlo, Consolas, monospace;
+    --jh-font-serif: "New York", ui-serif, "Hiragino Mincho ProN", "Yu Mincho", Georgia, serif;
+    --jh-font-mono: "SF Mono", ui-monospace, Menlo, Consolas, monospace;
 
     /* MDB (Bootstrap) の Roboto 指定を上書き */
-    --mdb-body-font-family: var(--ap-font-text);
-    --mdb-btn-font-family: var(--ap-font-text);
-    --mdb-font-roboto: var(--ap-font-text);
-    --mdb-font-monospace: var(--ap-font-mono);
+    --mdb-body-font-family: var(--jh-font-text);
+    --mdb-btn-font-family: var(--jh-font-text);
+    --mdb-font-roboto: var(--jh-font-text);
+    --mdb-font-monospace: var(--jh-font-mono);
 
     /* Colors - Pure Dark Mode */
-    --ap-bg: #000000;
-    --ap-text: #f5f5f7;
-    --ap-text-muted: #86868b;
-    --ap-card-bg: #1c1c1e; /* 枠線なしカード用: 黒背景から面の明度差で浮かせる */
-    --ap-card-border: rgba(255, 255, 255, 0.1);
-    --ap-accent: #2997ff; /* Apple Blue (リンク / ダーク背景) */
-    --ap-button: #0071e3; /* Apple のボタン青 */
-    --ap-button-hover: #0077ed;
-    --ap-nav-bg: rgba(0, 0, 0, 0.72);
-    --ap-glass: rgba(28, 28, 30, 0.6);
-    --ap-glass-border: rgba(255, 255, 255, 0.15);
+    --jh-bg: #000000;
+    --jh-text: #f5f5f7;
+    --jh-text-muted: #86868b;
+    --jh-card-bg: #1c1c1e; /* 枠線なしカード用: 黒背景から面の明度差で浮かせる */
+    --jh-card-border: rgba(255, 255, 255, 0.1);
+    --jh-accent: #2997ff; /* アクセントの青 (リンク / ダーク背景) */
+    --jh-button: #0071e3; /* ボタンの青 */
+    --jh-button-hover: #0077ed;
+    --jh-nav-bg: rgba(0, 0, 0, 0.72);
+    --jh-glass: rgba(28, 28, 30, 0.6);
+    --jh-glass-border: rgba(255, 255, 255, 0.15);
 }
 
 body {
-    background-color: var(--ap-bg);
-    color: var(--ap-text);
-    font-family: var(--ap-font-text);
+    background-color: var(--jh-bg);
+    color: var(--jh-text);
+    font-family: var(--jh-font-text);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     letter-spacing: -0.022em;
@@ -56,16 +56,16 @@ body {
    Typography
    ========================================= */
 
-/* apple.com と同様、大きな文字 (見出し類) は SF Pro Display、それ以外は SF Pro Text */
+/* 大きな文字 (見出し類) は SF Pro Display、それ以外は SF Pro Text */
 h1, h2, h3,
-.ap-hero-title,
-.ap-hero-subtitle,
-.ap-section-title {
-    font-family: var(--ap-font-display);
+.jh-hero-title,
+.jh-hero-subtitle,
+.jh-section-title {
+    font-family: var(--jh-font-display);
 }
-code, kbd, pre, samp { font-family: var(--ap-font-mono); }
+code, kbd, pre, samp { font-family: var(--jh-font-mono); }
 
-.ap-hero-title {
+.jh-hero-title {
     font-size: clamp(48px, 8vw, 96px);
     font-weight: 600;
     letter-spacing: -0.015em;
@@ -73,15 +73,15 @@ code, kbd, pre, samp { font-family: var(--ap-font-mono); }
     margin-bottom: 0.2em;
 }
 
-.ap-hero-subtitle {
+.jh-hero-subtitle {
     font-size: clamp(21px, 4vw, 28px);
     font-weight: 400;
     letter-spacing: 0.004em;
-    color: var(--ap-text-muted);
+    color: var(--jh-text-muted);
     margin-bottom: 1em;
 }
 
-.ap-section-title {
+.jh-section-title {
     font-size: clamp(32px, 5vw, 56px);
     font-weight: 600;
     letter-spacing: -0.005em;
@@ -89,56 +89,56 @@ code, kbd, pre, samp { font-family: var(--ap-font-mono); }
     margin-bottom: 0.5em;
 }
 
-.ap-eyebrow {
+.jh-eyebrow {
     font-size: 19px;
     font-weight: 600;
     letter-spacing: 0.012em;
-    color: var(--ap-text-muted);
+    color: var(--jh-text-muted);
     margin-bottom: 0.4em;
     display: block;
 }
 
 /* 本文サイズのリード文 */
-.ap-subhead {
+.jh-subhead {
     font-size: 19px;
     line-height: 1.42;
     letter-spacing: 0.012em;
-    color: var(--ap-text-muted);
+    color: var(--jh-text-muted);
 }
 
-/* 以前のグラデーション文字は使わない (Apple は単色) */
-.ap-text-gradient { color: inherit; }
+/* 以前のグラデーション文字は使わない (単色) */
+.jh-text-gradient { color: inherit; }
 
 /* 技術名などの補足: タグではなく本文中の短い語として並べる */
-.ap-chip {
+.jh-chip {
     display: inline;
     font-size: 14px;
-    color: var(--ap-text-muted);
+    color: var(--jh-text-muted);
 }
-.ap-chip + .ap-chip::before { content: " · "; }
+.jh-chip + .jh-chip::before { content: " · "; }
 
 /* 「詳しく見る ›」形式のテキストリンク */
-.ap-link {
-    color: var(--ap-accent);
+.jh-link {
+    color: var(--jh-accent);
     text-decoration: none;
     font-size: 17px;
 }
-.ap-link:hover { text-decoration: underline; color: var(--ap-accent); }
-.ap-link::after { content: " ›"; }
+.jh-link:hover { text-decoration: underline; color: var(--jh-accent); }
+.jh-link::after { content: " ›"; }
 
-/* 和文は字間を詰めない (apple.com/jp と同じ) */
+/* 和文は字間を詰めない */
 html[lang="ja"] body { letter-spacing: 0; }
 
 /* =========================================
-   Global Header (ap-globalnav)
+   Global Header (jh-globalnav)
    ========================================= */
-.ap-globalnav {
+.jh-globalnav {
     position: fixed;
     top: 0;
     left: 0;
     right: 0;
     height: 48px;
-    background: var(--ap-nav-bg);
+    background: var(--jh-nav-bg);
     backdrop-filter: saturate(180%) blur(20px);
     -webkit-backdrop-filter: saturate(180%) blur(20px);
     z-index: 9999;
@@ -148,7 +148,7 @@ html[lang="ja"] body { letter-spacing: 0; }
     transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.4s ease;
 }
 
-.ap-globalnav.ap-globalnav-hidden {
+.jh-globalnav.jh-globalnav-hidden {
     transform: translateY(-100%);
     opacity: 0;
 }
@@ -165,7 +165,7 @@ html[lang="ja"] body { letter-spacing: 0; }
    samples a fixed sibling snapshot, which looked
    visually disconnected from the real page here.
    ========================================= */
-.ap-glass-navbar {
+.jh-glass-navbar {
     position: fixed;
     top: 12px;
     left: 50%;
@@ -175,10 +175,10 @@ html[lang="ja"] body { letter-spacing: 0; }
     gap: 2px;
     padding: 8px 10px;
     border-radius: 28px;
-    background: var(--ap-glass);
+    background: var(--jh-glass);
     backdrop-filter: saturate(180%) blur(20px) brightness(0.85);
     -webkit-backdrop-filter: saturate(180%) blur(20px) brightness(0.85);
-    border: 1px solid var(--ap-glass-border);
+    border: 1px solid var(--jh-glass-border);
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
     transform: translate(-50%, -16px);
     opacity: 0;
@@ -186,13 +186,13 @@ html[lang="ja"] body { letter-spacing: 0; }
     transition: opacity 0.4s cubic-bezier(0.2, 0.8, 0.2, 1), transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
-.ap-glass-navbar.ap-glass-navbar-visible {
+.jh-glass-navbar.jh-glass-navbar-visible {
     opacity: 1;
     transform: translate(-50%, 0);
     pointer-events: auto;
 }
 
-.ap-glass-navbar-link {
+.jh-glass-navbar-link {
     color: #fff;
     font-size: 12px;
     font-weight: 600;
@@ -206,12 +206,12 @@ html[lang="ja"] body { letter-spacing: 0; }
     transition: opacity 0.2s ease, background 0.2s ease;
 }
 
-.ap-glass-navbar-link:hover {
+.jh-glass-navbar-link:hover {
     opacity: 1;
     background: rgba(255, 255, 255, 0.1);
 }
 
-.ap-globalnav-list {
+.jh-globalnav-list {
     display: flex;
     justify-content: center;
     align-items: center;
@@ -222,11 +222,11 @@ html[lang="ja"] body { letter-spacing: 0; }
     width: 100%;
 }
 
-.ap-globalnav-item {
+.jh-globalnav-item {
     margin: 0 1rem;
 }
 
-.ap-globalnav-link {
+.jh-globalnav-link {
     color: #f5f5f7;
     font-size: 12px;
     font-weight: 400;
@@ -236,19 +236,19 @@ html[lang="ja"] body { letter-spacing: 0; }
     transition: opacity 0.2s ease;
 }
 
-.ap-globalnav-link:hover {
+.jh-globalnav-link:hover {
     opacity: 1;
 }
 
 /* ── Logo ── */
-.ap-logo-link { display: inline-flex; align-items: center; }
+.jh-logo-link { display: inline-flex; align-items: center; }
 .je6hub-logo { display: block; width: auto; height: 20px; color: inherit; }
-.ap-glass-navbar .je6hub-logo { height: 16px; }
+.jh-glass-navbar .je6hub-logo { height: 16px; }
 
 /* =========================================
    Buttons
    ========================================= */
-.ap-btn {
+.jh-btn {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -263,37 +263,37 @@ html[lang="ja"] body { letter-spacing: 0; }
     cursor: pointer;
 }
 
-.ap-btn-primary {
-    background-color: var(--ap-button);
+.jh-btn-primary {
+    background-color: var(--jh-button);
     color: #fff;
 }
-.ap-btn-primary:hover {
-    background-color: var(--ap-button-hover);
+.jh-btn-primary:hover {
+    background-color: var(--jh-button-hover);
     color: #fff;
 }
 
-.ap-btn-accent {
-    background-color: var(--ap-accent);
+.jh-btn-accent {
+    background-color: var(--jh-accent);
     color: #fff;
 }
-.ap-btn-accent:hover {
+.jh-btn-accent:hover {
     background-color: #1a7fd9;
 }
 
-.ap-btn-outline {
+.jh-btn-outline {
     background-color: transparent;
-    color: var(--ap-accent);
-    border: 1px solid var(--ap-accent);
+    color: var(--jh-accent);
+    border: 1px solid var(--jh-accent);
 }
-.ap-btn-outline:hover {
-    background-color: var(--ap-accent);
+.jh-btn-outline:hover {
+    background-color: var(--jh-accent);
     color: #fff;
 }
 
 /* =========================================
-   Bento Grid (ap-bento)
+   Bento Grid (jh-bento)
    ========================================= */
-.ap-bento-container {
+.jh-bento-container {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
     gap: 24px;
@@ -302,8 +302,8 @@ html[lang="ja"] body { letter-spacing: 0; }
     margin: 0 auto;
 }
 
-.ap-bento-card {
-    background: var(--ap-card-bg);
+.jh-bento-card {
+    background: var(--jh-card-bg);
     border-radius: 32px;
     padding: 40px;
     display: flex;
@@ -314,11 +314,11 @@ html[lang="ja"] body { letter-spacing: 0; }
     transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
-.ap-bento-card:hover {
+.jh-bento-card:hover {
     transform: scale(1.02);
 }
 
-.ap-bento-card-image {
+.jh-bento-card-image {
     width: 100%;
     height: auto;
     border-radius: 16px;
@@ -329,8 +329,8 @@ html[lang="ja"] body { letter-spacing: 0; }
 /* =========================================
    Glass Card (For Forms / Content)
    ========================================= */
-.ap-glass-panel {
-    background: var(--ap-card-bg);
+.jh-glass-panel {
+    background: var(--jh-card-bg);
     border: none;
     border-radius: 28px;
     padding: 40px;
@@ -339,44 +339,44 @@ html[lang="ja"] body { letter-spacing: 0; }
 /* =========================================
    Scroll Reveal Animations
    ========================================= */
-.ap-reveal {
+.jh-reveal {
     opacity: 0;
     transform: translateY(24px);
     transition: opacity 0.8s cubic-bezier(0.2, 0.8, 0.2, 1), transform 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
-.ap-reveal.visible {
+.jh-reveal.visible {
     opacity: 1;
     transform: translateY(0);
 }
 
 /* Utility layout */
-.ap-section {
+.jh-section {
     padding: 120px 20px;
     text-align: center;
 }
 
 /* Form Elements */
-.ap-input {
+.jh-input {
     width: 100%;
     background: #000;
     border: 1px solid #424245;
-    color: var(--ap-text);
+    color: var(--jh-text);
     padding: 16px;
     border-radius: 12px;
     font-size: 17px;
     transition: all 0.2s ease;
 }
-.ap-input:focus {
+.jh-input:focus {
     outline: none;
-    border-color: var(--ap-accent);
+    border-color: var(--jh-accent);
     box-shadow: 0 0 0 3px rgba(41, 151, 255, 0.35);
 }
-.ap-label {
+.jh-label {
     display: block;
     font-size: 14px;
     font-weight: 600;
-    color: var(--ap-text);
+    color: var(--jh-text);
     margin-bottom: 8px;
 }
 
@@ -398,11 +398,11 @@ html[lang="ja"] body { letter-spacing: 0; }
 
 /* ── Mobile menu (スマートフォン用ヘッダー) ──
    734px 以下ではナビ項目を並べきれないため、ロゴ + アカウント + メニューボタンだけを
-   表示し、残りは全画面メニューにまとめる (apple.com のモバイルナビと同じ構成)。 */
-.ap-globalnav-mobile-actions,
-.ap-mobile-menu { display: none; }
+   表示し、残りは全画面メニューにまとめる。 */
+.jh-globalnav-mobile-actions,
+.jh-mobile-menu { display: none; }
 
-.ap-nav-icon-btn {
+.jh-nav-icon-btn {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -416,9 +416,9 @@ html[lang="ja"] body { letter-spacing: 0; }
     cursor: pointer;
 }
 
-.ap-menu-btn { position: relative; opacity: 0.8; }
-.ap-menu-btn:hover { opacity: 1; }
-.ap-menu-btn-bar {
+.jh-menu-btn { position: relative; opacity: 0.8; }
+.jh-menu-btn:hover { opacity: 1; }
+.jh-menu-btn-bar {
     position: absolute;
     left: 13px;
     width: 18px;
@@ -427,30 +427,30 @@ html[lang="ja"] body { letter-spacing: 0; }
     background: currentColor;
     transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
-.ap-menu-btn-bar:first-child { transform: translateY(-3.5px); }
-.ap-menu-btn-bar:last-child { transform: translateY(3.5px); }
-.ap-menu-btn[aria-expanded="true"] .ap-menu-btn-bar:first-child { transform: rotate(45deg); }
-.ap-menu-btn[aria-expanded="true"] .ap-menu-btn-bar:last-child { transform: rotate(-45deg); }
+.jh-menu-btn-bar:first-child { transform: translateY(-3.5px); }
+.jh-menu-btn-bar:last-child { transform: translateY(3.5px); }
+.jh-menu-btn[aria-expanded="true"] .jh-menu-btn-bar:first-child { transform: rotate(45deg); }
+.jh-menu-btn[aria-expanded="true"] .jh-menu-btn-bar:last-child { transform: rotate(-45deg); }
 
-@keyframes ap-menu-in {
+@keyframes jh-menu-in {
     from { opacity: 0; transform: translateY(-8px); }
     to { opacity: 1; transform: none; }
 }
 
 @media (max-width: 734px) {
-    .ap-globalnav-list {
+    .jh-globalnav-list {
         justify-content: space-between;
         padding: 0 4px 0 16px;
     }
-    .ap-globalnav-item { margin: 0; }
-    .ap-globalnav-item:not(:first-child):not(.ap-globalnav-mobile-actions) { display: none !important; }
-    .ap-globalnav-mobile-actions { display: flex; align-items: center; }
+    .jh-globalnav-item { margin: 0; }
+    .jh-globalnav-item:not(:first-child):not(.jh-globalnav-mobile-actions) { display: none !important; }
+    .jh-globalnav-mobile-actions { display: flex; align-items: center; }
 
     /* スマートフォンではスクロールしてもヘッダーを隠さず、横長のガラスナビは使わない */
-    .ap-glass-navbar { display: none; }
-    .ap-globalnav.ap-globalnav-hidden { transform: none; opacity: 1; }
+    .jh-glass-navbar { display: none; }
+    .jh-globalnav.jh-globalnav-hidden { transform: none; opacity: 1; }
 
-    .ap-mobile-menu:not([hidden]) {
+    .jh-mobile-menu:not([hidden]) {
         position: fixed;
         inset: 48px 0 0;
         z-index: 9998;
@@ -463,20 +463,20 @@ html[lang="ja"] body { letter-spacing: 0; }
         background: rgba(0, 0, 0, 0.92);
         backdrop-filter: saturate(180%) blur(20px);
         -webkit-backdrop-filter: saturate(180%) blur(20px);
-        animation: ap-menu-in 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+        animation: jh-menu-in 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
     }
-    .ap-mobile-menu-list { list-style: none; margin: 0; padding: 0; }
-    .ap-mobile-menu-list a {
+    .jh-mobile-menu-list { list-style: none; margin: 0; padding: 0; }
+    .jh-mobile-menu-list a {
         display: block;
         padding: 8px 0;
         color: #f5f5f7;
-        font-family: var(--ap-font-display);
+        font-family: var(--jh-font-display);
         font-size: 28px;
         font-weight: 600;
         line-height: 1.2;
         text-decoration: none;
     }
-    .ap-mobile-menu-footer {
+    .jh-mobile-menu-footer {
         display: flex;
         flex-direction: column;
         align-items: flex-start;
@@ -484,7 +484,7 @@ html[lang="ja"] body { letter-spacing: 0; }
         padding-top: 20px;
         border-top: 1px solid rgba(255, 255, 255, 0.12);
     }
-    .ap-mobile-menu-sub {
+    .jh-mobile-menu-sub {
         display: inline-flex;
         align-items: center;
         gap: 12px;
@@ -492,35 +492,35 @@ html[lang="ja"] body { letter-spacing: 0; }
         padding: 0;
         border: none;
         background: none;
-        color: var(--ap-text-muted);
+        color: var(--jh-text-muted);
         font-size: 17px;
         text-decoration: none;
     }
-    .ap-mobile-menu-sub i { width: 18px; text-align: center; }
-    .ap-mobile-menu-lang {
+    .jh-mobile-menu-sub i { width: 18px; text-align: center; }
+    .jh-mobile-menu-lang {
         display: inline-flex;
         align-items: center;
         gap: 12px;
         min-height: 44px;
         margin: 0;
-        color: var(--ap-text-muted);
+        color: var(--jh-text-muted);
     }
-    .ap-mobile-menu-lang i { width: 18px; text-align: center; }
-    .ap-mobile-menu-lang select {
+    .jh-mobile-menu-lang i { width: 18px; text-align: center; }
+    .jh-mobile-menu-lang select {
         border: none;
         background: transparent;
-        color: var(--ap-text-muted);
+        color: var(--jh-text-muted);
         font-size: 17px; /* 16px 未満だと iOS がフォーカス時に拡大する */
     }
-    .ap-mobile-menu-lang option { color: #000; }
-    body.ap-menu-open { overflow: hidden; }
+    .jh-mobile-menu-lang option { color: #000; }
+    body.jh-menu-open { overflow: hidden; }
 
     /* 汎用パネルの余白を画面幅に合わせて詰める */
-    .ap-glass-panel { padding: 28px 20px; border-radius: 24px; }
+    .jh-glass-panel { padding: 28px 20px; border-radius: 24px; }
 }
 
 /* 見出し・リード文の改行を整える (行長をそろえ、和文は文節で折り返す) */
-.ap-hero-title, .ap-hero-subtitle, .ap-section-title, .ap-subhead {
+.jh-hero-title, .jh-hero-subtitle, .jh-section-title, .jh-subhead {
     text-wrap: balance;
     word-break: auto-phrase;
 }
@@ -529,7 +529,7 @@ html[lang="ja"] body { letter-spacing: 0; }
 /* =========================================
    共通コンポーネント
    ========================================= */
-/* セグメントコントロール (Apple の UISegmentedControl 風) */
+/* セグメントコントロール (iOS の UISegmentedControl 風) */
 .blog-segmented {
     display: inline-flex;
     align-self: flex-start;
@@ -545,12 +545,12 @@ html[lang="ja"] body { letter-spacing: 0; }
     border-radius: 7px;
     font-size: 14px;
     font-weight: 500;
-    color: var(--ap-text-muted);
+    color: var(--jh-text-muted);
     transition: background-color 0.2s ease, color 0.2s ease;
 }
 .blog-segmented input:checked + span { background: #636366; color: #fff; }
-.blog-segmented input:focus-visible + span { outline: 2px solid var(--ap-accent); }
+.blog-segmented input:focus-visible + span { outline: 2px solid var(--jh-accent); }
 
 /* ヘッダーのダッシュボードアイコン */
-.ap-dashboard-link { position: relative; }
-.ap-dashboard-badge { position: absolute; top: -6px; right: -10px; min-width: 16px; height: 16px; padding: 0 4px; border-radius: 8px; background: #ff453a; color: #fff; font-size: 10px; line-height: 16px; text-align: center; font-weight: 600; }
+.jh-dashboard-link { position: relative; }
+.jh-dashboard-badge { position: absolute; top: -6px; right: -10px; min-width: 16px; height: 16px; padding: 0 4px; border-radius: 8px; background: #ff453a; color: #fff; font-size: 10px; line-height: 16px; text-align: center; font-weight: 600; }

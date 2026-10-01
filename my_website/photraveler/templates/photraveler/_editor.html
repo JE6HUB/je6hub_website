@@ -11,7 +11,7 @@
 
         <div class="wl-editor-body">
             <div class="wl-editor-col">
-                <label class="ap-label">{% trans "写真" %} <small class="wl-muted">（{% blocktrans %}{{ max_photos }} 枚まで{% endblocktrans %}）</small></label>
+                <label class="jh-label">{% trans "写真" %} <small class="wl-muted">（{% blocktrans %}{{ max_photos }} 枚まで{% endblocktrans %}）</small></label>
                 <div class="wl-drop" id="wl-drop" tabindex="0" role="button" aria-label="{% trans '写真を選ぶ' %}">
                     <span class="material-symbols-outlined" aria-hidden="true">add_photo_alternate</span>
                     <span>{% trans "クリックまたはドラッグ＆ドロップ" %}</span>
@@ -23,20 +23,20 @@
                     <span class="material-symbols-outlined" aria-hidden="true">my_location</span>{% trans "写真の位置情報を使用しました" %}
                 </p>
 
-                <label class="ap-label" for="wl-title">{% trans "タイトル" %} <span class="wl-required">*</span></label>
-                <input type="text" name="title" id="wl-title" class="ap-input" maxlength="200" required placeholder="{% trans '例: 夕暮れの清水寺' %}">
+                <label class="jh-label" for="wl-title">{% trans "タイトル" %} <span class="wl-required">*</span></label>
+                <input type="text" name="title" id="wl-title" class="jh-input" maxlength="200" required placeholder="{% trans '例: 夕暮れの清水寺' %}">
 
-                <label class="ap-label" for="wl-date">{% trans "訪れた日" %}</label>
-                <input type="date" name="visited_on" id="wl-date" class="ap-input">
+                <label class="jh-label" for="wl-date">{% trans "訪れた日" %}</label>
+                <input type="date" name="visited_on" id="wl-date" class="jh-input">
 
-                <label class="ap-label" for="wl-desc">{% trans "メモ" %}</label>
-                <textarea name="description" id="wl-desc" class="ap-input" rows="4" maxlength="2000" placeholder="{% trans 'この場所の思い出を…' %}"></textarea>
+                <label class="jh-label" for="wl-desc">{% trans "メモ" %}</label>
+                <textarea name="description" id="wl-desc" class="jh-input" rows="4" maxlength="2000" placeholder="{% trans 'この場所の思い出を…' %}"></textarea>
             </div>
 
             <div class="wl-editor-col">
-                <label class="ap-label" for="wl-place">{% trans "場所" %} <span class="wl-required">*</span></label>
+                <label class="jh-label" for="wl-place">{% trans "場所" %} <span class="wl-required">*</span></label>
                 <div class="wl-place">
-                    <input type="text" name="place_name" id="wl-place" class="ap-input" maxlength="120" autocomplete="off" placeholder="{% trans '場所を検索、または地図をクリック' %}">
+                    <input type="text" name="place_name" id="wl-place" class="jh-input" maxlength="120" autocomplete="off" placeholder="{% trans '場所を検索、または地図をクリック' %}">
                     <ul class="wl-suggest" id="wl-place-results" hidden></ul>
                 </div>
                 <div id="wl-editor-map" class="wl-editor-map"></div>
@@ -49,8 +49,8 @@
         </div>
 
         <div class="wl-editor-foot">
-            <button type="button" class="ap-btn ap-btn-outline wl-btn" data-close>{% trans "キャンセル" %}</button>
-            <button type="submit" class="ap-btn ap-btn-primary wl-btn" id="wl-editor-submit">{% trans "保存" %}</button>
+            <button type="button" class="jh-btn jh-btn-outline wl-btn" data-close>{% trans "キャンセル" %}</button>
+            <button type="submit" class="jh-btn jh-btn-primary wl-btn" id="wl-editor-submit">{% trans "保存" %}</button>
         </div>
     </form>
 </dialog>

@@ -12,28 +12,28 @@
     .contact-icons a {
         width: 56px; height: 56px; border-radius: 50%;
         display: inline-flex; align-items: center; justify-content: center;
-        background: #2c2c2e; color: var(--ap-text); font-size: 22px; text-decoration: none;
+        background: #2c2c2e; color: var(--jh-text); font-size: 22px; text-decoration: none;
         transition: background-color 0.2s ease, color 0.2s ease;
     }
     .contact-icons a:hover { background: #3a3a3c; color: #fff; }
-    .contact-icons a:focus-visible { outline: 2px solid var(--ap-accent); outline-offset: 3px; }
+    .contact-icons a:focus-visible { outline: 2px solid var(--jh-accent); outline-offset: 3px; }
     @media (max-width: 767px) { .contact-grid { grid-template-columns: 1fr; } }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="ap-section contact-page">
+<div class="jh-section contact-page">
 
-    <header class="text-center ap-reveal" style="margin-bottom: 64px;">
-        <h1 class="ap-hero-title" style="font-size: clamp(40px, 6vw, 72px);">{% trans "お問い合わせ" %}</h1>
-        <p class="ap-subhead mx-auto mb-0" style="max-width: 560px;">
+    <header class="text-center jh-reveal" style="margin-bottom: 64px;">
+        <h1 class="jh-hero-title" style="font-size: clamp(40px, 6vw, 72px);">{% trans "お問い合わせ" %}</h1>
+        <p class="jh-subhead mx-auto mb-0" style="max-width: 560px;">
             {% trans "プロジェクトのご相談・写真や技術に関する話・コラボレーション等なんでもお気軽にご連絡ください。通常 24 時間以内にご返信します。" %}
         </p>
     </header>
 
     <div class="contact-grid">
         <!-- 連絡先 -->
-        <div class="ap-glass-panel contact-info ap-reveal">
+        <div class="jh-glass-panel contact-info jh-reveal">
             <h2 class="contact-tile-title">{% trans "連絡先" %}</h2>
             <ul class="contact-icons">
                 <li><a href="mailto:kumagt2000@gmail.com" aria-label="{% trans 'メール' %}" title="kumagt2000@gmail.com"><i class="fa-solid fa-envelope" aria-hidden="true"></i></a></li>
@@ -44,27 +44,27 @@
         </div>
 
         <!-- フォーム -->
-        <div class="ap-glass-panel ap-reveal">
+        <div class="jh-glass-panel jh-reveal">
             <h2 class="contact-tile-title">{% trans "メッセージを送る" %}</h2>
 
             <form method="post" action="{% url 'core:contact' %}" id="contactForm" novalidate>
                 {% csrf_token %}
                 <div class="row g-3 mb-3">
                     <div class="col-sm-6">
-                        <label class="ap-label" for="{{ form.name.id_for_label }}">{% trans "お名前" %}</label>
+                        <label class="jh-label" for="{{ form.name.id_for_label }}">{% trans "お名前" %}</label>
                         {{ form.name }}
                     </div>
                     <div class="col-sm-6">
-                        <label class="ap-label" for="{{ form.email.id_for_label }}">{% trans "メールアドレス" %}</label>
+                        <label class="jh-label" for="{{ form.email.id_for_label }}">{% trans "メールアドレス" %}</label>
                         {{ form.email }}
                     </div>
                 </div>
                 <div class="mb-4">
-                    <label class="ap-label" for="{{ form.message.id_for_label }}">{% trans "メッセージ" %}</label>
+                    <label class="jh-label" for="{{ form.message.id_for_label }}">{% trans "メッセージ" %}</label>
                     {{ form.message }}
                     <div class="text-end mt-1 text-muted" id="msgCounter" style="font-size: 12px;"></div>
                 </div>
-                <button type="submit" class="ap-btn ap-btn-primary w-100">{% trans "送信" %}</button>
+                <button type="submit" class="jh-btn jh-btn-primary w-100">{% trans "送信" %}</button>
             </form>
         </div>
     </div>
@@ -78,7 +78,7 @@
     /* Style django form fields */
     const inputs = document.querySelectorAll('#contactForm input[type="text"], #contactForm input[type="email"], #contactForm textarea');
     inputs.forEach(input => {
-        input.classList.add('ap-input');
+        input.classList.add('jh-input');
     });
     const textarea = document.querySelector('#contactForm textarea');
     if (textarea) {

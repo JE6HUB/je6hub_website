@@ -84,7 +84,7 @@ class AccessControlTests(Fixtures):
         Report.objects.create(kind='message', object_id=self.msg.pk, reporter=self.bob, reason='spam')
         response = self.client.get('/ja/')
         self.assertContains(response, dashboard_url)
-        self.assertContains(response, 'ap-dashboard-badge')
+        self.assertContains(response, 'jh-dashboard-badge')
 
 
 class ReportingTests(Fixtures):
