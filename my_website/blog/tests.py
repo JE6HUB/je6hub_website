@@ -348,6 +348,8 @@ class JourneyTests(TestCase):
         self.assertEqual(html.count('class="bk bk-scene'), 2)
         self.assertIn('>02</span>', html)
         self.assertIn('&lt;b&gt;夜&lt;/b&gt;', html)  # 本文に HTML としては入らない
+        self.assertIn('data-journey-toggle', html)  # 地図の開閉ボタン (閉じる・開く)
+        self.assertEqual(html.count('aria-controls="journey-map-panel"'), 2)
         scenes = response.context['journey_scenes']
         self.assertEqual([s['label'] for s in scenes], ['京都', '大阪'])
 

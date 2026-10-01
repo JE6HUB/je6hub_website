@@ -2716,21 +2716,30 @@ button.bk-callout-icon:hover { background: rgba(255, 255, 255, 0.08); }
 /* =========================================
    旅する記事: 地図のシーンと固定の地図 (blog-journey.js)
    ========================================= */
+/* 地図の列の幅。閉じると 0 になり、本文がその分広がる (トランジションのため登録する) */
+@property --journey-map-w { syntax: '<length>'; inherits: true; initial-value: 0px; }
 .journey {
+    --journey-map-w: 42svh;
     position: relative;
     display: grid;
     grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto minmax(0, 1fr);
     width: 100vw;
     margin-left: calc(50% - 50vw);
+    overflow-anchor: none; /* 開閉時の位置合わせは blog-journey.js が行う */
 }
 .journey-map {
-    order: -1;
     position: sticky;
     top: 0;
     z-index: 5;
-    height: 46svh;
+    grid-column: 1;
+    grid-row: 1;
+    height: calc(var(--journey-map-w) + 8px);
     padding: 8px 8px 0;
     box-sizing: border-box;
+    overflow: hidden;
+    background: var(--ap-bg, #000);
+    transition: height 0.5s cubic-bezier(0.2, 0.8, 0.2, 1), padding 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 .journey-map-canvas {
     position: relative;
@@ -2740,6 +2749,7 @@ button.bk-callout-icon:hover { background: rgba(255, 255, 255, 0.08); }
     overflow: hidden;
     background: radial-gradient(120% 90% at 50% 40%, #1b2440 0%, #0b0b10 70%);
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.45), inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+    transition: opacity 0.35s ease, transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 .journey-map-canvas.is-unavailable {
     display: grid;
@@ -2749,24 +2759,137 @@ button.bk-callout-icon:hover { background: rgba(255, 255, 255, 0.08); }
     font-size: 14px;
     text-align: center;
 }
-.journey .blog-blocks { min-width: 0; }
+/* 本文の列: 中身は必ずこの列の中に収める (地図の下に潜り込ませない) */
+.journey .blog-blocks {
+    grid-column: 1;
+    grid-row: 2;
+    min-width: 0;
+    overflow-x: clip;
+}
+.journey .blog-blocks .bk { max-width: min(100%, calc(var(--bk-max) + 40px)); }
 .journey .blog-blocks .bk-w-full,
 .journey .blog-blocks .bk-w-wide { --bk-max: 100%; }
 .journey .blog-blocks .bk-w-full[class*="bk-bg-"]:not(.bk-bg-none) { padding-inline: 20px; border-radius: 24px; }
 
+/* 閉じた状態: 地図の列 (スマホでは上の帯) をたたむ */
+.journey.is-map-closed { --journey-map-w: 0px; }
+.journey.is-map-closed .journey-map { padding-top: 0; }
+.journey.is-map-closed .journey-map-canvas { opacity: 0; transform: scale(0.97); pointer-events: none; }
+
+/* スマホではヘッダー (48px) が固定なので、その下に地図を留める */
+@media (max-width: 734px) {
+    .journey-map { top: 48px; }
+}
+@media (max-width: 959px) {
+    .journey.is-map-closed .journey-map { height: 0; padding: 0; }
+}
+
 @media (min-width: 960px) {
-    .journey { grid-template-columns: minmax(0, 1fr) minmax(0, 1.08fr); }
+    .journey {
+        --journey-map-w: clamp(360px, 44vw, 820px);
+        grid-template-columns: minmax(0, 1fr) var(--journey-map-w);
+        grid-template-rows: auto;
+        transition: --journey-map-w 0.55s cubic-bezier(0.2, 0.8, 0.2, 1);
+    }
     .journey-map {
-        order: 0;
         grid-column: 2;
         grid-row: 1;
         align-self: start;
         height: 100vh;
         height: 100svh;
-        padding: 16px 16px 16px 8px;
+        padding: 16px 16px 16px 0;
+        background: none;
+        transition: padding 0.55s cubic-bezier(0.2, 0.8, 0.2, 1);
     }
+    .journey.is-map-closed .journey-map { padding: 16px 0; }
     .journey-map-canvas { border-radius: 28px; }
-    .journey .blog-blocks { grid-column: 1; grid-row: 1; --blog-measure: 640px; padding-inline: max(8px, calc((100vw - 1440px) / 4)); }
+    .journey .blog-blocks {
+        grid-row: 1;
+        --blog-measure: 680px;
+        padding-inline: clamp(16px, 3vw, 56px);
+        box-sizing: border-box;
+    }
+    .journey.is-map-closed .blog-blocks { --blog-measure: 760px; }
+}
+
+/* 地図の開閉 */
+.journey-close {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    z-index: 3;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    height: 36px;
+    padding: 0 14px 0 10px;
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    border-radius: 980px;
+    background: rgba(28, 28, 30, 0.55);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    backdrop-filter: blur(20px) saturate(180%);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+    color: #f5f5f7;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.2s ease, transform 0.2s ease;
+}
+.journey-close:hover { background: rgba(58, 58, 60, 0.7); }
+.journey-close:active { transform: scale(0.96); }
+.journey-close:focus-visible, .journey-open:focus-visible { outline: 2px solid var(--ap-accent); outline-offset: 3px; }
+.journey-close .material-symbols-outlined, .journey-open .material-symbols-outlined { font-size: 18px; }
+@media (min-width: 960px) {
+    /* デスクトップでは上中央にサイトのナビ (ガラス) が出るので、右上の少し下に置く */
+    .journey-close { top: 20px; right: 20px; }
+}
+/* 閉じているあいだ、画面の右下に出る「地図を開く」 */
+.journey-open {
+    position: fixed;
+    right: 20px;
+    bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+    z-index: 60;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    max-width: min(340px, calc(100vw - 40px));
+    height: 48px;
+    padding: 0 18px 0 8px;
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    border-radius: 980px;
+    background: rgba(28, 28, 30, 0.6);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    backdrop-filter: blur(20px) saturate(180%);
+    box-shadow: 0 14px 40px rgba(0, 0, 0, 0.45);
+    color: #f5f5f7;
+    font-size: 14px;
+    cursor: pointer;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(16px) scale(0.96);
+    transition: opacity 0.3s ease, transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1), visibility 0s linear 0.4s;
+}
+.journey.is-map-closed.is-in-view .journey-open {
+    opacity: 1;
+    visibility: visible;
+    transform: none;
+    transition-delay: 0s;
+}
+.journey-open-icon {
+    display: grid;
+    place-items: center;
+    flex: none;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: var(--blog-accent);
+    color: #1d1d1f;
+}
+.journey-open-text { display: grid; min-width: 0; text-align: left; line-height: 1.2; }
+.journey-open-text small { color: rgba(245, 245, 247, 0.6); font-size: 11px; }
+.journey-open-text strong { overflow: hidden; font-weight: 600; white-space: nowrap; text-overflow: ellipsis; }
+@media (prefers-reduced-motion: reduce) {
+    .journey, .journey-map, .journey-map-canvas, .journey-open { transition: none; }
 }
 
 /* HUD: 地図の左下に今のシーン (上はサイトのナビが重なるので避ける。Mapbox のロゴの上) */
@@ -2792,9 +2915,7 @@ button.bk-callout-icon:hover { background: rgba(255, 255, 255, 0.08); }
     pointer-events: none;
 }
 @media (min-width: 960px) { .journey-hud { bottom: 48px; left: 28px; } }
-/* スマホではヘッダー (48px) が固定なので、その下に地図を留める */
 @media (max-width: 734px) {
-    .journey-map { top: 48px; height: calc(42svh + 8px); padding-bottom: 8px; background: var(--ap-bg, #000); }
     .journey-hud { left: 12px; bottom: 30px; min-width: 0; padding: 10px 12px 12px; }
 }
 .journey-hud-num { font: 600 12px/1 "SF Mono", ui-monospace, Menlo, monospace; color: var(--blog-accent); letter-spacing: 0.04em; }

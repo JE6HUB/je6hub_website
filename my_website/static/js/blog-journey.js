@@ -6,6 +6,7 @@
  * - 最初のシーンより前は、旅全体が収まる俯瞰
  * - 訪れた順にルートを引き、進んだ区間を明るく描く。マーカーを押すとそのシーンへスクロール
  * - 到着後はゆっくり回り込む (動きを減らす設定のとき・地図を触ったときは止める)
+ * - 地図はいつでも閉じて本文を広く読める。閉じている間は右下の「地図を開く」から戻せる (状態はこの端末に記憶)
  */
 (() => {
     const root = document.querySelector('[data-journey]');
@@ -21,6 +22,13 @@
     const REDUCED = window.matchMedia('(prefers-reduced-motion: reduce)');
     const pad = (n) => String(n).padStart(2, '0');
     const canvas = document.getElementById('journey-map');
+    const toggles = root.querySelectorAll('[data-journey-toggle]');
+    const openLabel = root.querySelector('[data-open-label]');
+    const STORE_KEY = 'blog-journey-map-closed';
+    const store = {
+        get() { try { return localStorage.getItem(STORE_KEY) === '1'; } catch (e) { return false; } },
+        set(v) { try { localStorage.setItem(STORE_KEY, v ? '1' : '0'); } catch (e) { /* 保存できなくても動く */ } },
+    };
 
     if (!window.mapboxgl || !cfg.mapbox.token || !scenes.length) {
         canvas.classList.add('is-unavailable');
@@ -117,6 +125,7 @@
 
     const go = (index, instant) => {
         if (!map || !map.isStyleLoaded()) return;
+        if (root.classList.contains('is-map-closed')) return; // 閉じている間は動かさない (開いたときに合わせる)
         userTouched = false;
         const s = scenes[index];
         const cam = index < 0 ? overview() : { center: [s.lng, s.lat], zoom: s.zoom, pitch: s.pitch, bearing: s.bearing };
@@ -142,6 +151,7 @@
             active = current;
             hudNum.textContent = current < 0 ? '—' : `${pad(current + 1)} / ${pad(scenes.length)}`;
             hudLabel.textContent = current < 0 ? cfg.t.start : (scenes[current].label || cfg.t.here);
+            openLabel.textContent = current < 0 ? cfg.t.start : `${pad(current + 1)} ${scenes[current].label || cfg.t.here}`;
             go(current, instant);
         }
         // 旅全体 (最初のシーン〜記事の終わり) のうち、どこまで読んだか
@@ -153,6 +163,58 @@
             const p = end > top ? (window.scrollY - top) / (end - top) : 1;
             hudBar.style.transform = `scaleX(${Math.max(0, Math.min(1, p)).toFixed(4)})`;
         }
+    }
+
+    // ── 開閉 ──
+    const setClosed = (closed, { save = true } = {}) => {
+        root.classList.toggle('is-map-closed', closed);
+        toggles.forEach((b) => b.setAttribute('aria-expanded', String(!closed)));
+        if (save) store.set(closed);
+    };
+    // 列の幅が変わり終えたら地図の大きさを合わせ、今いるシーンへ視点を戻す
+    const panel = root.querySelector('.journey-map');
+    let resizeTimer = 0;
+    const settle = () => {
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(() => {
+            if (!map || root.classList.contains('is-map-closed')) return;
+            map.resize();
+            if (active > -2) go(active, true);
+        }, 60);
+    };
+    panel.addEventListener('transitionend', settle);
+    root.addEventListener('transitionend', (e) => { if (e.target === root) settle(); });
+    // 開閉で本文の幅や地図の帯の高さが変わっても、読んでいた段落が画面の同じ位置に留まるようにする
+    const keepReadingPosition = () => {
+        const blocks = [...root.querySelectorAll('.blog-blocks > .bk')];
+        const anchor = blocks.find((el) => el.getBoundingClientRect().bottom > window.innerHeight * 0.5);
+        if (!anchor) return;
+        const top = anchor.getBoundingClientRect().top;
+        const until = performance.now() + 700;
+        const step = () => {
+            const delta = anchor.getBoundingClientRect().top - top;
+            if (Math.abs(delta) > 0.5) window.scrollBy(0, delta);
+            if (performance.now() < until) requestAnimationFrame(step);
+        };
+        requestAnimationFrame(step);
+    };
+    toggles.forEach((b) => b.addEventListener('click', () => {
+        const closing = !root.classList.contains('is-map-closed');
+        keepReadingPosition();
+        setClosed(closing);
+        if (!closing) settle();
+        // 閉じたらフォーカスを「開く」へ、開いたら「閉じる」へ移す
+        const next = root.querySelector(closing ? '.journey-open' : '.journey-close');
+        if (next && document.activeElement === b) next.focus({ preventScroll: true });
+    }));
+    setClosed(store.get(), { save: false });
+    // 「地図を開く」は旅の区間を読んでいるあいだだけ出す
+    if ('IntersectionObserver' in window) {
+        new IntersectionObserver((entries) => {
+            root.classList.toggle('is-in-view', entries[0].isIntersecting);
+        }, { rootMargin: '-30% 0px -30% 0px' }).observe(root);
+    } else {
+        root.classList.add('is-in-view');
     }
 
     let ticking = false;

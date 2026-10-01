@@ -5,14 +5,21 @@
 {% endcomment %}
 {% if post.has_map %}
 <div class="journey" data-journey>
-    <aside class="journey-map" aria-label="{% trans '旅の地図' %}">
+    <aside class="journey-map" id="journey-map-panel" aria-label="{% trans '旅の地図' %}">
         <div class="journey-map-canvas" id="journey-map"></div>
+        <button type="button" class="journey-close" data-journey-toggle aria-expanded="true" aria-controls="journey-map-panel">
+            <span class="material-symbols-outlined" aria-hidden="true">close_fullscreen</span>{% trans "地図を閉じる" %}
+        </button>
         <div class="journey-hud" aria-hidden="true">
             <span class="journey-hud-num" data-hud-num>—</span>
             <span class="journey-hud-label" data-hud-label>{% trans "旅のはじまり" %}</span>
             <span class="journey-hud-progress"><i data-hud-bar></i></span>
         </div>
     </aside>
+    <button type="button" class="journey-open" data-journey-toggle aria-expanded="false" aria-controls="journey-map-panel">
+        <span class="journey-open-icon" aria-hidden="true"><span class="material-symbols-outlined">map</span></span>
+        <span class="journey-open-text"><small>{% trans "地図を開く" %}</small><strong data-open-label>{% trans "旅のはじまり" %}</strong></span>
+    </button>
 {% endif %}
 <div class="blog-prose blog-blocks{% if post.template == 'minimal' %} blog-prose--dropcap{% endif %}">
 {% for b in post.body_blocks.blocks %}
