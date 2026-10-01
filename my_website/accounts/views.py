@@ -123,7 +123,7 @@ def profile_view(request):
     user = request.user
     
     if request.method == 'POST':
-        form = UserProfileForm(request.POST, instance=user)
+        form = UserProfileForm(request.POST, request.FILES, instance=user)
         if form.is_valid():
             form.save()
             messages.success(request, _('プロフィールが更新されました。'))
@@ -144,13 +144,14 @@ def profile_onboarding_view(request):
     if not request.user.is_authenticated:
         return JsonResponse({"detail": "Authentication required"}, status=401)
 
-    form = OnboardingProfileForm(request.POST, instance=request.user)
+    form = OnboardingProfileForm(request.POST, request.FILES, instance=request.user)
     if not form.is_valid():
         return JsonResponse({"errors": {name: [str(e) for e in errs] for name, errs in form.errors.items()}}, status=400)
     user = form.save()
     return JsonResponse({
         "message": str(_('プロフィールを作成しました。')),
         "public_name": user.public_name,
+        "avatar_url": user.avatar.url if user.avatar else "",
     })
 
 

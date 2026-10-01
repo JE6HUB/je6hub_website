@@ -319,6 +319,121 @@ class ProfileOnboardingTests(TestCase):
         self.assertEqual(self.client.get(reverse('profile_onboarding')).status_code, 405)
 
 
+def image_bytes(fmt='JPEG', size=(800, 400), mode='RGB', color='blue'):
+    from io import BytesIO
+
+    from PIL import Image
+    buf = BytesIO()
+    image = Image.new(mode, size, color)
+    if fmt == 'JPEG':
+        exif = Image.Exif()
+        exif[0x8825] = {1: 'N', 2: (35.0, 40.0, 52.0), 3: 'E', 4: (139.0, 46.0, 1.0)}
+        image.save(buf, fmt, exif=exif)
+    else:
+        image.save(buf, fmt)
+    return buf.getvalue()
+
+
+class AvatarTests(TestCase):
+    password = 'a-very-strong-pass-1'
+
+    def setUp(self):
+        import shutil
+        import tempfile
+        from django.test import override_settings
+
+        cache.clear()
+        self.media_root = tempfile.mkdtemp()
+        self.addCleanup(shutil.rmtree, self.media_root, ignore_errors=True)
+        override = override_settings(MEDIA_ROOT=self.media_root)
+        override.enable()
+        self.addCleanup(override.disable)
+        self.user = User.objects.create_user('member', 'member@example.com', self.password, display_name='Yuta')
+        self.client.force_login(self.user)
+
+    def profile_data(self, **extra):
+        return {'display_name': 'Yuta', 'email': 'member@example.com', **extra}
+
+    def upload(self, data=None, name='me.jpg'):
+        from django.core.files.uploadedfile import SimpleUploadedFile
+        return SimpleUploadedFile(name, data or image_bytes(), content_type='image/jpeg')
+
+    def test_upload_is_cropped_square_and_stripped(self):
+        from PIL import Image
+
+        self.client.post(reverse('profile'), self.profile_data(avatar=self.upload()))
+        self.user.refresh_from_db()
+        self.assertRegex(self.user.avatar.name, r'^avatars/\d{4}/\d{2}/[0-9a-f]{32}\.jpg$')
+        with Image.open(self.user.avatar.path) as img:
+            self.assertEqual(img.size, (400, 400))
+            self.assertEqual(len(img.getexif()), 0)
+
+    def test_large_image_is_resized_and_transparency_kept(self):
+        from PIL import Image
+
+        png = image_bytes('PNG', size=(2000, 1500), mode='RGBA', color=(0, 0, 0, 0))
+        self.client.post(reverse('profile'), self.profile_data(avatar=self.upload(png, 'a.png')))
+        self.user.refresh_from_db()
+        self.assertTrue(self.user.avatar.name.endswith('.png'))
+        with Image.open(self.user.avatar.path) as img:
+            self.assertEqual(img.size, (512, 512))
+            self.assertEqual(img.mode, 'RGBA')
+
+    def test_non_image_is_rejected(self):
+        response = self.client.post(reverse('profile'), self.profile_data(
+            avatar=self.upload(b'<html><script>alert(1)</script></html>', 'evil.jpg')))
+        self.assertEqual(response.status_code, 200)
+        self.assertIn('avatar', response.context['form'].errors)
+        self.user.refresh_from_db()
+        self.assertFalse(self.user.avatar)
+
+    def test_replace_and_remove_delete_old_file(self):
+        self.client.post(reverse('profile'), self.profile_data(avatar=self.upload()))
+        self.user.refresh_from_db()
+        first = self.user.avatar.name
+        with self.captureOnCommitCallbacks(execute=True):
+            self.client.post(reverse('profile'), self.profile_data(avatar=self.upload()))
+        self.user.refresh_from_db()
+        second = self.user.avatar.name
+        self.assertNotEqual(first, second)
+        storage = self.user.avatar.storage
+        self.assertFalse(storage.exists(first))
+        self.assertTrue(storage.exists(second))
+
+        with self.captureOnCommitCallbacks(execute=True):
+            self.client.post(reverse('profile'), self.profile_data(avatar_clear='1'))
+        self.user.refresh_from_db()
+        self.assertFalse(self.user.avatar)
+        self.assertFalse(storage.exists(second))
+
+    def test_saving_profile_without_avatar_keeps_it(self):
+        self.client.post(reverse('profile'), self.profile_data(avatar=self.upload()))
+        self.user.refresh_from_db()
+        name = self.user.avatar.name
+        self.client.post(reverse('profile'), self.profile_data(bio='updated'))
+        self.user.refresh_from_db()
+        self.assertEqual(self.user.avatar.name, name)
+
+    def test_onboarding_accepts_avatar(self):
+        response = self.client.post(reverse('profile_onboarding'), {'display_name': 'Yuta', 'avatar': self.upload()})
+        self.assertEqual(response.status_code, 200)
+        self.user.refresh_from_db()
+        self.assertTrue(self.user.avatar)
+        self.assertEqual(response.json()['avatar_url'], self.user.avatar.url)
+
+    def test_avatar_shown_in_header_and_profile(self):
+        self.client.post(reverse('profile'), self.profile_data(avatar=self.upload()))
+        self.user.refresh_from_db()
+        response = self.client.get(reverse('user_profile', args=['member']))
+        self.assertContains(response, f'class="jh-nav-avatar" src="{self.user.avatar.url}"')
+        self.assertContains(response, f'class="jh-avatar-img" src="{self.user.avatar.url}"')
+        # 画像がない人は頭文字
+        self.client.post(reverse('profile'), self.profile_data(avatar_clear='1'))
+        response = self.client.get(reverse('user_card', args=['member']))
+        self.assertNotContains(response, 'jh-avatar-img')
+        self.assertContains(response, '>Y</span>')
+
+
 class AccountDeleteTests(TestCase):
     password = 'a-very-strong-pass-1'
 
@@ -359,7 +474,9 @@ class AccountDeleteTests(TestCase):
         pin = MapPin.objects.create(user=self.user, title='p', latitude=1, longitude=2)
         photo = PinPhoto.objects.create(pin=pin, image=SimpleUploadedFile('e.jpg', b'x'),
                                         thumbnail=SimpleUploadedFile('f.jpg', b'x'))
-        files = [solo_msg.media, msg.media, post.cover_image, img.image, photo.image, photo.thumbnail]
+        self.user.avatar = SimpleUploadedFile('g.jpg', b'x')
+        self.user.save()
+        files = [solo_msg.media, msg.media, post.cover_image, img.image, photo.image, photo.thumbnail, self.user.avatar]
         for f in files:
             self.assertTrue(f.storage.exists(f.name))
         return shared, solo, other_msg, files

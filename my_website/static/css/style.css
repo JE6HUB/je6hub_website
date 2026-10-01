@@ -240,6 +240,25 @@ html[lang="ja"] body { letter-spacing: 0; }
     opacity: 1;
 }
 
+/* ── ユーザー画像 ── */
+/* 頭文字のアバター (.blog-avatar など) の中に入れる画像。丸い切り抜きは外側の border-radius に合わせる */
+.jh-avatar-img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: inherit;
+}
+/* ヘッダーのアカウントアイコン */
+.jh-nav-avatar {
+    display: inline-block;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    object-fit: cover;
+    vertical-align: middle;
+}
+
 /* ── Logo ── */
 .jh-logo-link { display: inline-flex; align-items: center; }
 .je6hub-logo { display: block; width: auto; height: 20px; color: inherit; }
@@ -497,6 +516,7 @@ html[lang="ja"] body { letter-spacing: 0; }
         text-decoration: none;
     }
     .jh-mobile-menu-sub i { width: 18px; text-align: center; }
+    .jh-mobile-menu-sub .jh-nav-avatar { width: 20px; height: 20px; margin: 0 -1px; }
     .jh-mobile-menu-lang {
         display: inline-flex;
         align-items: center;

@@ -151,7 +151,7 @@
 
     <footer class="blog-article-footer">
         <div class="blog-author-card jh-glass-panel">
-            <span class="blog-avatar blog-avatar--lg" data-profile="{{ post.author.username }}" aria-hidden="true">{{ post.author.public_name|first|upper }}</span>
+            <span class="blog-avatar blog-avatar--lg" data-profile="{{ post.author.username }}" aria-hidden="true">{% avatar post.author %}</span>
             <div>
                 <span class="blog-kicker">{% trans "Written by" %}</span>
                 <p class="blog-author-name"><a href="{{ post.author.get_absolute_url }}" {% profile_trigger post.author link=True %}>{{ post.author.public_name }}</a></p>

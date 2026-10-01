@@ -1,9 +1,12 @@
 from urllib.parse import urlparse
 
 from django import forms
+from django.core.exceptions import ValidationError
+from django.db import transaction
 from django.contrib.auth.forms import AuthenticationForm, UserCreationForm, UserChangeForm
 from django.utils.translation import gettext_lazy as _
 
+from .avatars import process_avatar
 from .models import CustomUser
 
 class CustomUserCreationForm(UserCreationForm):
@@ -48,7 +51,39 @@ class ResendVerificationForm(forms.Form):
     email = forms.EmailField(label=_("メールアドレス"))
 
 
-class OnboardingProfileForm(forms.ModelForm):
+class AvatarFormMixin(forms.Form):
+    """ユーザー画像の変更・削除。ModelForm と一緒に継承して使う (enctype="multipart/form-data" が必要)。"""
+
+    avatar = forms.FileField(label=_("ユーザー画像"), required=False)
+    avatar_clear = forms.BooleanField(label=_("ユーザー画像を削除"), required=False)
+
+    def clean_avatar(self):
+        uploaded = self.cleaned_data.get("avatar")
+        if not uploaded:
+            return None
+        try:
+            return process_avatar(uploaded)
+        except ValidationError as exc:
+            raise forms.ValidationError(exc.messages)
+
+    def save(self, commit=True):
+        user = super().save(commit=False)
+        old = user.avatar.name if user.avatar else ""
+        new = self.cleaned_data.get("avatar")
+        if new:
+            user.avatar.save(new.name, new, save=False)
+        elif self.cleaned_data.get("avatar_clear"):
+            user.avatar = ""
+        if commit:
+            user.save()
+            if old and old != (user.avatar.name or ""):
+                storage = user.avatar.storage
+                # 保存が確定してから古いファイルを消す
+                transaction.on_commit(lambda: storage.delete(old))
+        return user
+
+
+class OnboardingProfileForm(AvatarFormMixin, forms.ModelForm):
     """サインアップ直後のモーダルで入力する公開プロフィール (あとからプロフィール編集で変更できる)。"""
 
     class Meta:
@@ -56,7 +91,7 @@ class OnboardingProfileForm(forms.ModelForm):
         fields = ("display_name", "bio", "location", "website")
 
 
-class UserProfileForm(forms.ModelForm):
+class UserProfileForm(AvatarFormMixin, forms.ModelForm):
     """User profile edit form including favorite track information."""
 
     class Meta:

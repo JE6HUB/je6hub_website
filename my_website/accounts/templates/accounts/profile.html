@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% load i18n %}
+{% load i18n profiles %}
 
 {% block title %}Profile — {{ user_obj.username }}{% endblock %}
 
@@ -10,7 +10,7 @@
             <!-- Profile Info -->
             <div class="jh-glass-panel text-center mb-4 jh-reveal">
                 <div class="mb-3">
-                    <span class="profile-monogram" aria-hidden="true">{{ user_obj.public_name|first|upper }}</span>
+                    <span class="profile-monogram" aria-hidden="true">{% avatar user_obj %}</span>
                     <h2 class="jh-hero-title mt-3" style="font-size: 40px;">{{ user_obj.public_name }}</h2>
                     <p class="jh-subhead mb-1" style="font-size: 17px;">@{{ user_obj.username }}</p>
                     <p class="jh-subhead mb-2" style="font-size: 17px;">{% if user_obj.email %}{{ user_obj.email }}{% else %}{% trans "No email provided" %}{% endif %}</p>
@@ -28,7 +28,7 @@
             <!-- Profile Edit Form -->
             <div class="jh-glass-panel jh-reveal">
                 <h3 class="mb-4 text-light fw-semibold" style="font-size: 28px;">{% trans "プロフィール編集" %}</h3>
-                <form method="post" class="needs-validation">
+                <form method="post" class="needs-validation" enctype="multipart/form-data">
                     {% csrf_token %}
 
                     {% if form.errors %}
@@ -40,6 +40,11 @@
 
                     <h4 class="mb-2 text-light fw-semibold" style="font-size: 21px;">{% trans "公開プロフィール" %}</h4>
                     <p class="small text-muted mb-4">{% trans "ここに入力した内容は、ほかのユーザーにも表示されます。" %}</p>
+
+                    <div class="mb-4">
+                        <span class="jh-label d-block">{% trans "ユーザー画像" %}</span>
+                        {% include "accounts/_avatar_picker.html" with u=user_obj %}
+                    </div>
 
                     <div class="mb-4">
                         <label class="jh-label" for="profileDisplayName">{% trans "表示名" %}</label>

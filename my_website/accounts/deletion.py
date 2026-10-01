@@ -5,7 +5,7 @@
 紐づいているので、ユーザーと一緒に削除される。ただしデータベースの行を消してもファイルは
 ストレージに残るため、アップロードされた画像・動画はここで先に削除する。
 
-ほかに一緒に消えるもの: プロフィール (表示名・自己紹介・お気に入りの曲など)、
+ほかに一緒に消えるもの: プロフィール (表示名・自己紹介・ユーザー画像・お気に入りの曲など)、
 ソーシャルログインの連携 (allauth の SocialAccount / EmailAddress)、チャンネルの参加情報、凍結記録。
 通報 (dashboard.Report) は報告者・投稿者が NULL になり、管理用の記録として残る。
 """
@@ -47,6 +47,8 @@ def _hand_over_channels(user):
 def user_files(user):
     """ユーザーがアップロードした画像・動画 (FieldFile) の一覧。"""
     files = _files_of_messages(Message.objects.filter(sender=user))
+    if user.avatar:
+        files.append(user.avatar)
     files += [post.cover_image for post in
               Post.objects.filter(author=user).exclude(cover_image='').exclude(cover_image__isnull=True)]
     files += [img.image for img in BlogImage.objects.filter(uploader=user)]

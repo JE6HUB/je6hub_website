@@ -48,6 +48,12 @@ class CustomUser(AbstractUser):
         default="",
         verbose_name=_("ウェブサイト")
     )
+    # 保存前に accounts.avatars.process_avatar で検証・メタデータ除去・正方形への切り抜きを行う
+    avatar = models.ImageField(
+        upload_to="avatars/%Y/%m/",
+        blank=True,
+        verbose_name=_("ユーザー画像"),
+    )
 
     # Favorite Track Fields
     favorite_track_title = models.CharField(
