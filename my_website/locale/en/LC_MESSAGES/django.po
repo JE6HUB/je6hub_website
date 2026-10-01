@@ -1960,3 +1960,93 @@ msgstr "WanderLens spots"
 
 msgid "WanderLens の写真"
 msgstr "WanderLens photos"
+
+msgid "HTML / CSS のプレビュー (変更前)"
+msgstr "HTML / CSS preview (before)"
+
+msgid "HTML / CSS のプレビュー (変更後)"
+msgstr "HTML / CSS preview (after)"
+
+msgid "変更前と変更後の境界 (ドラッグまたは ← → で動かす)"
+msgstr "Before / after divider (drag or use ← →)"
+
+msgid "デモを調整する"
+msgstr "Adjust the demo"
+
+msgid "触ってみる"
+msgstr "Try it"
+
+msgid "元の値に戻す"
+msgstr "Reset to original values"
+
+msgid "Before / After で比較"
+msgstr "Compare before / after"
+
+msgid "変更前"
+msgstr "Before"
+
+msgid "変更後"
+msgstr "After"
+
+msgid "空なら変更後と同じ HTML を使います"
+msgstr "Leave empty to reuse the after HTML"
+
+msgid "読者が触れるコントロール"
+msgstr "Reader controls"
+
+msgid "オンにした CSS 変数は、記事ページでスライダーや色の選択として読者が動かせます (最大 8 個)。"
+msgstr "CSS variables you turn on become sliders or color pickers readers can play with on the article (up to 8)."
+
+msgid "CSS に <code>--radius: 12px;</code> や <code>--brand: #0071e3;</code> のような CSS 変数を書くと、ここで読者向けのコントロールにできます。"
+msgstr "Write CSS variables such as <code>--radius: 12px;</code> or <code>--brand: #0071e3;</code> in the CSS to turn them into reader controls here."
+
+msgid "最小"
+msgstr "Min"
+
+msgid "最大"
+msgstr "Max"
+
+msgid "旅のはじまり"
+msgstr "Start of the journey"
+
+msgid "この場所"
+msgstr "This place"
+
+msgid "WanderLens で写真を見る"
+msgstr "See the photos on WanderLens"
+
+msgid "地図を表示できません。Mapbox のアクセストークンが設定されていません。"
+msgstr "The map is unavailable because no Mapbox access token is set."
+
+msgid "地図のシーン"
+msgstr "Map scene"
+
+msgid "スクロールで地図がこの場所へ飛ぶ (旅する記事)"
+msgstr "The map flies here as readers scroll (journey post)"
+
+msgid "WanderLens のピンから選ぶ…"
+msgstr "Pick a WanderLens pin…"
+
+msgid "地図をクリックして場所を指定"
+msgstr "Click the map to set the place"
+
+msgid "Mapbox のアクセストークンが未設定のため、地図は表示できません。緯度・経度を入力してください。"
+msgstr "No Mapbox access token is set, so the map cannot be shown. Enter the latitude and longitude instead."
+
+msgid "地図を読み込み中…"
+msgstr "Loading the map…"
+
+msgid "ひとこと (任意)"
+msgstr "A short note (optional)"
+
+msgid "ズーム"
+msgstr "Zoom"
+
+msgid "傾き"
+msgstr "Tilt"
+
+msgid "方位"
+msgstr "Bearing"
+
+msgid "地図をクリックして場所を決め、ドラッグや回転で見せたい角度に合わせると、その視点で記事の地図が飛んできます。"
+msgstr "Click the map to choose the place, then drag and rotate to the angle you want; the article map will fly in with that view."

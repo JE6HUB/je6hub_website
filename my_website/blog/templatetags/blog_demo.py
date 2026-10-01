@@ -12,5 +12,11 @@ def srcdoc(block):
 
 
 @register.filter
+def srcdoc_before(block):
+    """Before / After 比較の「前」の iframe 用 HTML。"""
+    return demo_srcdoc(block, before=True)
+
+
+@register.filter
 def demo_height(block):
     return DEMO_HEIGHTS.get(block.get('height'), DEMO_HEIGHTS['m'])

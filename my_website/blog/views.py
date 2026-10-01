@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
@@ -5,10 +6,13 @@ from django.core.paginator import Paginator
 from django.db.models import Q
 from django.http import Http404, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
 from django.utils.translation import gettext as _
 from django.views.decorators.http import require_POST
 
 from .forms import ImageUploadForm, PostForm
+from photraveler.models import MapPin
+
 from .models import BlogImage, Post
 
 POSTS_PER_PAGE = 12
@@ -59,7 +63,53 @@ def post_detail(request, pk):
         'post': post,
         'is_author': is_author,
         'more_posts': more_posts,
+        **_journey_context(post),
     })
+
+
+def _journey_context(post):
+    """旅する記事: 地図シーンの一覧 (JSON 用) と、シーン番号 → WanderLens の写真。
+
+    写真を出すのは著者自身のピンだけ (他人のピン ID を書かれても使わない)。
+    """
+    scenes = post.map_scenes
+    if not scenes:
+        return {}
+    pin_ids = {s['pin'] for s in scenes if s.get('pin')}
+    pins = {
+        pin.id: pin for pin in
+        MapPin.objects.filter(id__in=pin_ids, user=post.author).prefetch_related('photos')
+    } if pin_ids else {}
+    data, photos = [], {}
+    for i, scene in enumerate(scenes):
+        pin = pins.get(scene.get('pin'))
+        thumbs = [ph.thumb_url for ph in pin.photos.all()[:4]] if pin else []
+        photos[scene['id']] = {
+            'thumbs': thumbs,
+            'url': reverse('photraveler:user_map', args=[post.author.username]) + f'?pin={pin.id}' if pin else '',
+            'visited': pin.visited_on if pin else None,
+            'country': pin.country if pin else '',
+            'number': i + 1,
+        }
+        data.append({
+            'id': scene['id'], 'lat': scene['lat'], 'lng': scene['lng'], 'label': scene['label'],
+            'zoom': scene['zoom'], 'pitch': scene['pitch'], 'bearing': scene['bearing'],
+            'thumb': thumbs[0] if thumbs else '',
+        })
+    return {
+        'journey_scenes': data,
+        'journey_photos': photos,
+        'journey_js_config': {
+            'mapbox': {'token': settings.MAPBOX_ACCESS_TOKEN, 'style': settings.MAPBOX_STYLE},
+            # ルートの色: 記事のアクセント (なしなら白)
+            'accent': post.accent_color,
+            't': {
+                'start': _('旅のはじまり'),
+                'here': _('この場所'),
+                'unavailable': _('地図を表示できません。Mapbox のアクセストークンが設定されていません。'),
+            },
+        },
+    }
 
 
 # ─── 作成・編集 ──────────────────────────────────────────────
@@ -99,6 +149,22 @@ def _editor(request, form, post, cover_url=None, cover_pending=None, cover_clear
         'cover_url': cover_url,
         'cover_pending': cover_pending,
         'cover_cleared': cover_cleared,
+        'journey_config': {
+            # 地図のシーンで選べる、著者自身の WanderLens のピン (訪れた順)
+            'pins': [
+                {
+                    'id': pin.id, 'title': pin.title, 'place': pin.place_name, 'country': pin.country,
+                    'lat': float(pin.latitude), 'lng': float(pin.longitude),
+                    'thumb': pin.cover.thumb_url if pin.cover else '',
+                }
+                for pin in MapPin.objects.filter(user=request.user).prefetch_related('photos')
+                .order_by('visited_on', 'created_at')
+            ],
+            'mapbox': {
+                'token': settings.MAPBOX_ACCESS_TOKEN,
+                'style': settings.MAPBOX_STYLE,
+            },
+        },
     })
 
 

@@ -8,9 +8,12 @@
 <meta property="og:title" content="{{ post.title }}">
 <meta property="og:description" content="{{ post.excerpt }}">
 {% if post.cover_image %}<meta property="og:image" content="{{ request.scheme }}://{{ request.get_host }}{{ post.cover_image.url }}">{% endif %}
-<link href="{% static 'css/blog.css' %}?v=26" rel="stylesheet" />
+<link href="{% static 'css/blog.css' %}?v=28" rel="stylesheet" />
 {% if post.has_math %}
 <link href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" rel="stylesheet" />
+{% endif %}
+{% if journey_scenes %}
+<link href="https://api.mapbox.com/mapbox-gl-js/v3.32.0/mapbox-gl.css" rel="stylesheet" />
 {% endif %}
 {% if post.has_demo %}
 <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css" rel="stylesheet" />
@@ -43,7 +46,14 @@
 <script>
     window.BLOG_DEMO_I18N = { copy: "{% trans 'コピー' %}", copied: "{% trans 'コピーしました' %}" };
 </script>
-<script src="{% static 'js/blog-demo.js' %}?v=2"></script>
+<script src="{% static 'js/blog-demo-kit.js' %}?v=1"></script>
+<script src="{% static 'js/blog-demo.js' %}?v=3"></script>
+{% endif %}
+{% if journey_scenes %}
+{{ journey_scenes|json_script:"journey-scenes" }}
+{{ journey_js_config|json_script:"journey-config" }}
+<script src="https://api.mapbox.com/mapbox-gl-js/v3.32.0/mapbox-gl.js"></script>
+<script src="{% static 'js/blog-journey.js' %}?v=1"></script>
 {% endif %}
 {% if post.has_math %}
 <script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>

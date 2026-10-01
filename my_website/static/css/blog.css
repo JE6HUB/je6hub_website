@@ -2463,3 +2463,493 @@ button.bk-callout-icon:hover { background: rgba(255, 255, 255, 0.08); }
         linear-gradient(135deg, transparent calc(50% - 1px), #ff453a calc(50% - 1px), #ff453a calc(50% + 1px), transparent calc(50% + 1px)),
         #3a3a3c;
 }
+
+/* =========================================
+   いじれるデモ: Before / After 比較とコントロール (記事ページ・エディタ共通)
+   ========================================= */
+@property --split {
+    syntax: '<percentage>';
+    inherits: true;
+    initial-value: 50%;
+}
+/* 2 枚の iframe を同じマスに重ね、「変更後」を境界より右だけ見せる */
+.bk-demo-stage--compare {
+    display: grid;
+    grid-template: 100% / 100%;
+    justify-content: stretch;
+}
+.bk-demo-stage--compare > iframe,
+.bk-cmp-after { grid-area: 1 / 1; justify-self: center; }
+.bk-cmp-after {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    clip-path: inset(0 0 0 var(--split));
+}
+.bk-demo-stage--compare.is-dragging iframe { pointer-events: none; }
+.bk-cmp-label {
+    position: absolute;
+    bottom: 12px; /* 右上はメニューのボタンが出るので下に置く */
+    z-index: 2;
+    padding: 4px 10px;
+    border-radius: 980px;
+    background: rgba(28, 28, 30, 0.55);
+    -webkit-backdrop-filter: blur(16px) saturate(180%);
+    backdrop-filter: blur(16px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    color: #f5f5f7;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+}
+.bk-cmp-label--before { left: 12px; }
+.bk-cmp-label--after { right: 12px; }
+/* 境界が端に寄ったら、隠れた側のラベルを消す */
+.bk-demo-stage--compare[style*="--split: 0%"] .bk-cmp-label--before,
+.bk-demo-stage--compare[style*="--split: 100%"] .bk-cmp-label--after { opacity: 0; }
+.bk-cmp-handle {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: var(--split);
+    z-index: 3;
+    width: 44px;
+    margin-left: -22px;
+    cursor: ew-resize;
+    touch-action: none;
+    outline: none;
+}
+.bk-cmp-handle::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 50%;
+    width: 2px;
+    margin-left: -1px;
+    background: rgba(255, 255, 255, 0.9);
+    box-shadow: 0 0 12px rgba(0, 0, 0, 0.45);
+}
+.bk-cmp-knob {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    display: grid;
+    place-items: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(255, 255, 255, 0.22);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.45);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+    color: #fff;
+    transition: transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.bk-cmp-knob .material-symbols-outlined { font-size: 20px; }
+.bk-cmp-handle:hover .bk-cmp-knob,
+.is-dragging .bk-cmp-knob { transform: translate(-50%, -50%) scale(1.1); }
+.bk-cmp-handle:focus-visible .bk-cmp-knob { box-shadow: 0 0 0 3px var(--ap-accent), 0 8px 24px rgba(0, 0, 0, 0.35); }
+/* 初めて見えたときの「動かせます」の合図 */
+.bk-demo-stage--compare.is-hinting { animation: bk-cmp-hint 1.6s cubic-bezier(0.45, 0, 0.2, 1) 1; }
+@keyframes bk-cmp-hint {
+    0% { --split: 50%; }
+    35% { --split: 34%; }
+    70% { --split: 64%; }
+    100% { --split: 50%; }
+}
+
+/* コントロール: プレビューの下のすりガラスの帯 */
+.bk-ctl-bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px 22px;
+    padding: 14px 18px;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02));
+    font-size: 13px;
+}
+.bk-ctl-bar[hidden] { display: none; }
+.bk-ctl-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--blog-accent, #f5f5f7);
+    font-weight: 600;
+    font-size: 12px;
+    letter-spacing: 0.02em;
+}
+.bk-ctl-badge .material-symbols-outlined { font-size: 18px; }
+.bk-ctl {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0;
+    color: rgba(245, 245, 247, 0.72);
+    cursor: pointer;
+}
+.bk-ctl-name { white-space: nowrap; }
+.bk-ctl output {
+    min-width: 4.5em;
+    color: #f5f5f7;
+    font-family: "SF Mono", ui-monospace, Menlo, monospace;
+    font-size: 12px;
+    font-variant-numeric: tabular-nums;
+}
+.bk-ctl input[type="range"] {
+    --fill: 50%;
+    width: 128px;
+    height: 22px;
+    margin: 0;
+    background: transparent;
+    -webkit-appearance: none;
+    appearance: none;
+    cursor: pointer;
+}
+.bk-ctl input[type="range"]::-webkit-slider-runnable-track {
+    height: 4px;
+    border-radius: 2px;
+    background: linear-gradient(90deg, var(--blog-accent, #f5f5f7) var(--fill), rgba(255, 255, 255, 0.16) var(--fill));
+}
+.bk-ctl input[type="range"]::-moz-range-track { height: 4px; border-radius: 2px; background: rgba(255, 255, 255, 0.16); }
+.bk-ctl input[type="range"]::-moz-range-progress { height: 4px; border-radius: 2px; background: var(--blog-accent, #f5f5f7); }
+.bk-ctl input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 18px;
+    height: 18px;
+    margin-top: -7px;
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+    transition: transform 0.15s ease;
+}
+.bk-ctl input[type="range"]::-moz-range-thumb {
+    width: 18px;
+    height: 18px;
+    border: none;
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+}
+.bk-ctl input[type="range"]:active::-webkit-slider-thumb { transform: scale(1.15); }
+.bk-ctl input[type="range"]:focus-visible { outline: 2px solid var(--ap-accent); outline-offset: 4px; border-radius: 4px; }
+.bk-ctl input[type="color"] {
+    width: 26px;
+    height: 26px;
+    padding: 0;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    background: none;
+    cursor: pointer;
+    overflow: hidden;
+}
+.bk-ctl input[type="color"]::-webkit-color-swatch-wrapper { padding: 0; }
+.bk-ctl input[type="color"]::-webkit-color-swatch { border: none; border-radius: 50%; }
+.bk-ctl input[type="color"]::-moz-color-swatch { border: none; border-radius: 50%; }
+.bk-ctl-reset {
+    display: inline-grid;
+    place-items: center;
+    width: 32px;
+    height: 32px;
+    margin-left: auto;
+    border: none;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.08);
+    color: #f5f5f7;
+    cursor: pointer;
+    opacity: 0;
+    transform: rotate(-90deg) scale(0.8);
+    pointer-events: none;
+    transition: opacity 0.25s ease, transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1), background 0.2s ease;
+}
+.bk-ctl-bar.is-touched .bk-ctl-reset { opacity: 1; transform: none; pointer-events: auto; }
+.bk-ctl-reset:hover { background: rgba(255, 255, 255, 0.16); }
+.bk-ctl-reset .material-symbols-outlined { font-size: 18px; }
+@media (max-width: 640px) {
+    .bk-ctl-bar { gap: 12px; padding: 12px 14px; }
+    .bk-ctl { flex: 1 1 100%; }
+    .bk-ctl input[type="range"] { flex: 1; width: auto; }
+    .bk-ctl-reset { position: absolute; top: 8px; right: 12px; margin: 0; }
+    .bk-ctl-bar { position: relative; }
+}
+@media (prefers-reduced-motion: reduce) {
+    .bk-demo-stage--compare.is-hinting { animation: none; }
+    .bk-cmp-knob, .bk-ctl-reset { transition: none; }
+}
+
+/* エディタ: コントロールの設定 */
+.bk-ctl-setup {
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    font-size: 13px;
+}
+.bk-ctl-setup > summary {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px;
+    color: rgba(245, 245, 247, 0.72);
+    cursor: pointer;
+    list-style: none;
+}
+.bk-ctl-setup > summary::-webkit-details-marker { display: none; }
+.bk-ctl-setup > summary .material-symbols-outlined { font-size: 18px; }
+.bk-ctl-setup[open] > summary { color: #f5f5f7; }
+.bk-ctl-count { color: var(--ap-accent); }
+.bk-ctl-setup-body { display: grid; gap: 8px; padding: 0 16px 14px; }
+.bk-ctl-hint, .bk-ctl-empty { margin: 0 0 4px; color: rgba(245, 245, 247, 0.55); font-size: 12px; line-height: 1.6; }
+.bk-ctl-empty code, .bk-ctl-row code { font-family: "SF Mono", ui-monospace, Menlo, monospace; font-size: 12px; }
+.bk-ctl-row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 10px; min-height: 34px; }
+.bk-ctl-row .bk-switch { min-width: 150px; }
+.bk-ctl-row .bk-menu-input { width: auto; }
+.bk-ctl-label { flex: 1 1 140px; max-width: 220px; }
+.bk-ctl-num { width: 76px !important; }
+.bk-ctl-sample { display: inline-flex; align-items: center; gap: 6px; color: rgba(245, 245, 247, 0.5); font-family: "SF Mono", ui-monospace, Menlo, monospace; font-size: 12px; }
+.bk-ctl-sample i { width: 12px; height: 12px; border-radius: 50%; border: 1px solid rgba(255, 255, 255, 0.3); }
+
+/* =========================================
+   旅する記事: 地図のシーンと固定の地図 (blog-journey.js)
+   ========================================= */
+.journey {
+    position: relative;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    width: 100vw;
+    margin-left: calc(50% - 50vw);
+}
+.journey-map {
+    order: -1;
+    position: sticky;
+    top: 0;
+    z-index: 5;
+    height: 46svh;
+    padding: 8px 8px 0;
+    box-sizing: border-box;
+}
+.journey-map-canvas {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    border-radius: 22px;
+    overflow: hidden;
+    background: radial-gradient(120% 90% at 50% 40%, #1b2440 0%, #0b0b10 70%);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.45), inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+}
+.journey-map-canvas.is-unavailable {
+    display: grid;
+    place-items: center;
+    padding: 24px;
+    color: rgba(245, 245, 247, 0.6);
+    font-size: 14px;
+    text-align: center;
+}
+.journey .blog-blocks { min-width: 0; }
+.journey .blog-blocks .bk-w-full,
+.journey .blog-blocks .bk-w-wide { --bk-max: 100%; }
+.journey .blog-blocks .bk-w-full[class*="bk-bg-"]:not(.bk-bg-none) { padding-inline: 20px; border-radius: 24px; }
+
+@media (min-width: 960px) {
+    .journey { grid-template-columns: minmax(0, 1fr) minmax(0, 1.08fr); }
+    .journey-map {
+        order: 0;
+        grid-column: 2;
+        grid-row: 1;
+        align-self: start;
+        height: 100vh;
+        height: 100svh;
+        padding: 16px 16px 16px 8px;
+    }
+    .journey-map-canvas { border-radius: 28px; }
+    .journey .blog-blocks { grid-column: 1; grid-row: 1; --blog-measure: 640px; padding-inline: max(8px, calc((100vw - 1440px) / 4)); }
+}
+
+/* HUD: 地図の左下に今のシーン (上はサイトのナビが重なるので避ける。Mapbox のロゴの上) */
+.journey-hud {
+    position: absolute;
+    bottom: 36px;
+    left: 20px;
+    z-index: 2;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    align-items: baseline;
+    gap: 2px 10px;
+    min-width: 180px;
+    max-width: calc(100% - 96px);
+    padding: 12px 16px 14px;
+    border-radius: 18px;
+    background: rgba(28, 28, 30, 0.5);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+    color: #f5f5f7;
+    pointer-events: none;
+}
+@media (min-width: 960px) { .journey-hud { bottom: 48px; left: 28px; } }
+/* スマホではヘッダー (48px) が固定なので、その下に地図を留める */
+@media (max-width: 734px) {
+    .journey-map { top: 48px; height: calc(42svh + 8px); padding-bottom: 8px; background: var(--ap-bg, #000); }
+    .journey-hud { left: 12px; bottom: 30px; min-width: 0; padding: 10px 12px 12px; }
+}
+.journey-hud-num { font: 600 12px/1 "SF Mono", ui-monospace, Menlo, monospace; color: var(--blog-accent); letter-spacing: 0.04em; }
+.journey-hud-label { overflow: hidden; font-size: 15px; font-weight: 600; white-space: nowrap; text-overflow: ellipsis; }
+.journey-hud-progress {
+    grid-column: 1 / -1;
+    height: 3px;
+    margin-top: 8px;
+    border-radius: 2px;
+    background: rgba(255, 255, 255, 0.14);
+    overflow: hidden;
+}
+.journey-hud-progress i {
+    display: block;
+    height: 100%;
+    background: var(--blog-accent);
+    transform: scaleX(0);
+    transform-origin: left center;
+}
+
+/* マーカー: 写真の丸 + 番号 */
+.journey-marker {
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    border: 2px solid rgba(255, 255, 255, 0.85);
+    border-radius: 50% 50% 50% 4px;
+    transform: rotate(-45deg);
+    background: #2c2c2e;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.5);
+    cursor: pointer;
+    opacity: 0.75;
+    transition: transform 0.45s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+}
+.journey-marker img { width: 100%; height: 100%; object-fit: cover; border-radius: inherit; transform: rotate(45deg) scale(1.3); }
+.journey-marker-num {
+    position: absolute;
+    right: -6px;
+    bottom: -6px;
+    display: grid;
+    place-items: center;
+    min-width: 18px;
+    height: 18px;
+    padding: 0 4px;
+    border-radius: 9px;
+    background: #f5f5f7;
+    color: #1d1d1f;
+    font: 700 11px/1 -apple-system, BlinkMacSystemFont, sans-serif;
+    transform: rotate(45deg);
+}
+.journey-marker:not(:has(img)) .journey-marker-num { position: static; background: none; color: #f5f5f7; }
+.journey-marker.is-past { opacity: 0.9; }
+.journey-marker.is-active {
+    opacity: 1;
+    border-color: var(--blog-accent);
+    transform: rotate(-45deg) scale(1.35);
+    box-shadow: 0 0 0 6px color-mix(in srgb, var(--blog-accent) 30%, transparent), 0 10px 26px rgba(0, 0, 0, 0.55);
+}
+.journey-marker:focus-visible { outline: 2px solid var(--ap-accent); outline-offset: 4px; }
+
+/* 本文の中のシーンのカード */
+.blog-blocks .bk-scene { margin-block: 56px 28px; }
+.bk-scene-card {
+    position: relative;
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 6px 18px;
+    padding: 22px 24px;
+    border-radius: 24px;
+    background: var(--ap-card-bg);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    transition: border-color 0.4s ease, box-shadow 0.4s ease, transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.bk-scene.is-current .bk-scene-card {
+    border-color: color-mix(in srgb, var(--blog-accent) 55%, transparent);
+    box-shadow: 0 18px 50px rgba(0, 0, 0, 0.35), 0 0 0 1px color-mix(in srgb, var(--blog-accent) 25%, transparent);
+}
+.bk-scene-num {
+    font: 600 34px/1 var(--blog-serif, Georgia, serif);
+    color: var(--blog-accent);
+    font-variant-numeric: tabular-nums;
+}
+.bk-scene-text { min-width: 0; }
+.bk-scene-kicker { margin: 0 0 4px; color: rgba(245, 245, 247, 0.55); font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; }
+.blog-prose .bk-scene-title { display: flex; align-items: center; gap: 6px; margin: 0; font-size: 22px; line-height: 1.3; }
+.bk-scene-title .material-symbols-outlined { font-size: 20px; color: var(--blog-accent); }
+.blog-prose .bk-scene-note { margin: 6px 0 0; color: rgba(245, 245, 247, 0.7); font-size: 15px; line-height: 1.6; }
+.bk-scene-photos {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(0, 1fr);
+    gap: 6px;
+    margin-top: 12px;
+    border-radius: 14px;
+    overflow: hidden;
+}
+.blog-prose .bk-scene-photos img {
+    width: 100%;
+    height: 96px;
+    margin: 0;
+    object-fit: cover;
+    border-radius: 0;
+    transition: transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1), filter 0.3s ease;
+}
+.bk-scene-photos:hover img { filter: brightness(1.08); transform: scale(1.04); }
+@media (prefers-reduced-motion: reduce) {
+    .journey-marker, .bk-scene-card, .bk-scene-photos img { transition: none; }
+}
+
+/* エディタ: 地図のシーン */
+.bk-mapedit {
+    border-radius: 20px;
+    overflow: hidden;
+    background: var(--ap-card-bg);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    text-align: left;
+}
+.bk-mapedit-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px 14px;
+    padding: 12px 16px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    font-size: 13px;
+}
+.bk-mapedit-badge { display: inline-flex; align-items: center; gap: 6px; color: var(--blog-accent); font-weight: 600; }
+.bk-mapedit-badge .material-symbols-outlined { font-size: 18px; }
+.bk-mapedit-pin { flex: 1 1 220px; width: auto; max-width: 360px; }
+.bk-mapedit-nopins { color: rgba(245, 245, 247, 0.55); }
+.bk-mapedit-body { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); }
+.bk-mapedit-map { position: relative; min-height: 300px; background: radial-gradient(120% 90% at 50% 40%, #1b2440 0%, #0b0b10 70%); }
+.bk-mapedit-fallback { position: absolute; inset: 0; display: grid; place-items: center; margin: 0; padding: 24px; color: rgba(245, 245, 247, 0.55); font-size: 13px; text-align: center; }
+.bk-mapedit-fields { display: grid; align-content: start; gap: 10px; padding: 16px; font-size: 13px; }
+.bk-mapedit-fields .bk-menu-input { box-sizing: border-box; min-width: 0; }
+.bk-mapedit-coords { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.bk-mapedit-slider { display: grid; grid-template-columns: 4.5em minmax(0, 1fr) 3.2em; align-items: center; gap: 8px; margin: 0; color: rgba(245, 245, 247, 0.7); }
+.bk-mapedit-slider input { width: 100%; accent-color: var(--blog-accent); }
+.bk-mapedit-slider output { color: #f5f5f7; font: 12px "SF Mono", ui-monospace, Menlo, monospace; text-align: right; }
+.bk-mapedit-hint { margin: 2px 0 0; color: rgba(245, 245, 247, 0.5); font-size: 12px; line-height: 1.6; }
+.bk-mapedit-marker {
+    width: 26px;
+    height: 26px;
+    border: 3px solid #fff;
+    border-radius: 50% 50% 50% 0;
+    transform: rotate(-45deg);
+    background: var(--blog-accent, #2997ff);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.5);
+    cursor: grab;
+}
+@media (max-width: 720px) {
+    .bk-mapedit-body { grid-template-columns: minmax(0, 1fr); }
+    .bk-mapedit-map { min-height: 240px; }
+}

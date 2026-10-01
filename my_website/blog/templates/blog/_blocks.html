@@ -1,7 +1,19 @@
-{% load i18n blog_demo %}{% comment %}
+{% load i18n l10n blog_demo blog_journey %}{% comment %}
 ブロック形式の本文。body_blocks は保存時に blocks.normalize_blocks() で検証済み
 (style は列挙値のみ、セルの html は sanitize 済み、ボタンの URL は安全なスキームのみ)。
+地図のシーンがある記事 (旅する記事) は、本文の横 (狭い画面では上) に地図を固定する。
 {% endcomment %}
+{% if post.has_map %}
+<div class="journey" data-journey>
+    <aside class="journey-map" aria-label="{% trans '旅の地図' %}">
+        <div class="journey-map-canvas" id="journey-map"></div>
+        <div class="journey-hud" aria-hidden="true">
+            <span class="journey-hud-num" data-hud-num>—</span>
+            <span class="journey-hud-label" data-hud-label>{% trans "旅のはじまり" %}</span>
+            <span class="journey-hud-progress"><i data-hud-bar></i></span>
+        </div>
+    </aside>
+{% endif %}
 <div class="blog-prose blog-blocks{% if post.template == 'minimal' %} blog-prose--dropcap{% endif %}">
 {% for b in post.body_blocks.blocks %}
     {% with s=b.style %}
@@ -36,15 +48,70 @@
                     </div>
                 </div>
                 <div class="bk-demo-panel" data-panel="preview">
-                    <div class="bk-demo-stage" style="height: {{ b|demo_height }}px;">
-                        <iframe class="bk-demo-frame" sandbox referrerpolicy="no-referrer" loading="lazy"
+                    {# コントロールがあるときだけ、CSS 変数を受け取るページ側のスクリプトを許可する (CSP でそれ以外は不可) #}
+                    <div class="bk-demo-stage{% if b.compare %} bk-demo-stage--compare{% endif %}" style="height: {{ b|demo_height }}px;"{% if b.compare %} data-compare{% endif %}>
+                        {% if b.compare %}
+                        <iframe class="bk-demo-frame" sandbox{% if b.controls %}="allow-scripts"{% endif %} referrerpolicy="no-referrer" loading="lazy"
+                                title="{% trans 'HTML / CSS のプレビュー (変更前)' %}" srcdoc="{{ b|srcdoc_before }}"></iframe>
+                        <div class="bk-cmp-after">
+                            <iframe class="bk-demo-frame" sandbox{% if b.controls %}="allow-scripts"{% endif %} referrerpolicy="no-referrer" loading="lazy"
+                                    title="{% trans 'HTML / CSS のプレビュー (変更後)' %}" srcdoc="{{ b|srcdoc }}"></iframe>
+                        </div>
+                        <span class="bk-cmp-label bk-cmp-label--before" aria-hidden="true">{{ b.before_label|default:"Before" }}</span>
+                        <span class="bk-cmp-label bk-cmp-label--after" aria-hidden="true">{{ b.after_label|default:"After" }}</span>
+                        <div class="bk-cmp-handle" role="slider" tabindex="0" aria-valuemin="0" aria-valuemax="100" aria-valuenow="50"
+                             aria-label="{% trans '変更前と変更後の境界 (ドラッグまたは ← → で動かす)' %}">
+                            <span class="bk-cmp-knob" aria-hidden="true"><span class="material-symbols-outlined">code</span></span>
+                        </div>
+                        {% else %}
+                        <iframe class="bk-demo-frame" sandbox{% if b.controls %}="allow-scripts"{% endif %} referrerpolicy="no-referrer" loading="lazy"
                                 title="{% trans 'HTML / CSS のプレビュー' %}" srcdoc="{{ b|srcdoc }}"></iframe>
+                        {% endif %}
                     </div>
+                    {% if b.controls %}
+                    <div class="bk-ctl-bar" data-controls role="group" aria-label="{% trans 'デモを調整する' %}">
+                        <span class="bk-ctl-badge"><span class="material-symbols-outlined" aria-hidden="true">tune</span>{% trans "触ってみる" %}</span>
+                        {% for c in b.controls %}
+                        <label class="bk-ctl bk-ctl--{{ c.kind }}">
+                            <span class="bk-ctl-name">{{ c.label }}</span>
+                            {% if c.kind == 'color' %}
+                            <input type="color" value="{{ c.value }}" data-var="{{ c.name }}" data-default="{{ c.value }}">
+                            <output>{{ c.value }}</output>
+                            {% else %}
+                            <input type="range" min="{{ c.min|unlocalize }}" max="{{ c.max|unlocalize }}" step="{{ c.step|unlocalize }}" value="{{ c.value|unlocalize }}"
+                                   data-var="{{ c.name }}" data-unit="{{ c.unit }}" data-default="{{ c.value|unlocalize }}">
+                            <output>{{ c.value|unlocalize }}{{ c.unit }}</output>
+                            {% endif %}
+                        </label>
+                        {% endfor %}
+                        <button type="button" class="bk-ctl-reset" data-reset title="{% trans '元の値に戻す' %}" aria-label="{% trans '元の値に戻す' %}">
+                            <span class="material-symbols-outlined" aria-hidden="true">restart_alt</span>
+                        </button>
+                    </div>
+                    {% endif %}
                 </div>
                 <div class="bk-demo-panel" data-panel="html" hidden><pre class="bk-demo-code"><code class="language-html">{{ b.html }}</code></pre></div>
                 <div class="bk-demo-panel" data-panel="css" hidden><pre class="bk-demo-code"><code class="language-css">{{ b.css }}</code></pre></div>
             </div>
         </section>
+    {% elif b.type == 'map' %}
+        {% if b.lat is not None %}{% with info=journey_photos|scene_info:b.id %}
+        <section class="bk bk-scene bk-w-text bk-space-{{ s.space }}" data-scene="{{ b.id }}" id="scene-{{ b.id }}">
+            <div class="bk-scene-card">
+                <span class="bk-scene-num" aria-hidden="true">{{ info.number|stringformat:"02d" }}</span>
+                <div class="bk-scene-text">
+                    {% if info.country or info.visited %}<p class="bk-scene-kicker">{{ info.country }}{% if info.country and info.visited %} · {% endif %}{% if info.visited %}{{ info.visited|date:"Y.m.d" }}{% endif %}</p>{% endif %}
+                    <h3 class="bk-scene-title"><span class="material-symbols-outlined" aria-hidden="true">location_on</span>{{ b.label|default:_("この場所") }}</h3>
+                    {% if b.note %}<p class="bk-scene-note">{{ b.note }}</p>{% endif %}
+                </div>
+                {% if info.thumbs %}
+                <a class="bk-scene-photos" href="{{ info.url }}" title="{% trans 'WanderLens で写真を見る' %}">
+                    {% for t in info.thumbs %}<img src="{{ t }}" alt="" loading="lazy">{% endfor %}
+                </a>
+                {% endif %}
+            </div>
+        </section>
+        {% endwith %}{% endif %}
     {% elif b.type == 'button' %}
         {% if b.url and b.label %}
         <div class="bk bk-button bk-align-{{ b.align }} bk-w-{{ s.width }} bk-space-{{ s.space }}">
@@ -62,3 +129,6 @@
     {% endwith %}
 {% endfor %}
 </div>
+{% if post.has_map %}
+</div>
+{% endif %}

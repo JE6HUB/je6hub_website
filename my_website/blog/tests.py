@@ -230,6 +230,161 @@ class DemoBlockTests(TestCase):
         self.assertNotContains(self.client.get(post.get_absolute_url()), 'highlight.min.js')
 
 
+class PlayableDemoTests(TestCase):
+    """いじれるデモ: CSS 変数のコントロールと Before / After 比較。"""
+
+    def demo(self, **kw):
+        data = {'type': 'demo', 'html': '<button class="b">Hi</button>', 'css': ':root{--r:12px}.b{border-radius:var(--r)}', **kw}
+        return normalize_blocks({'blocks': [data]})['blocks'][0]
+
+    def test_controls_are_validated(self):
+        b = self.demo(controls=[
+            {'name': '--r', 'label': ' 角丸 ', 'kind': 'range', 'min': 0, 'max': 48, 'step': 1, 'value': 99, 'unit': 'px'},
+            {'name': '--brand', 'kind': 'color', 'value': '#0071E3'},
+            {'name': '--r', 'kind': 'range', 'min': 0, 'max': 1},          # 重複
+            {'name': 'r; color:red', 'kind': 'range', 'min': 0, 'max': 1},  # 変数名でない
+            {'name': '--bad', 'kind': 'range', 'min': 5, 'max': 1},         # 範囲が逆
+            {'name': '--evil', 'kind': 'color', 'value': 'red;}body{x'},
+            {'name': '--u', 'kind': 'range', 'min': 0, 'max': 2, 'step': 0, 'value': 1, 'unit': 'px;}'},
+        ])
+        self.assertEqual(b['controls'][0], {'name': '--r', 'label': '角丸', 'kind': 'range', 'min': 0, 'max': 48,
+                                            'step': 1, 'value': 48, 'unit': 'px'})
+        self.assertEqual(b['controls'][1], {'name': '--brand', 'label': 'brand', 'kind': 'color', 'value': '#0071e3'})
+        self.assertEqual(b['controls'][2]['value'], '#ffffff')
+        self.assertEqual((b['controls'][3]['step'], b['controls'][3]['unit']), (0.02, ''))
+        self.assertEqual(len(b['controls']), 4)
+
+    def test_controls_are_capped(self):
+        many = [{'name': f'--v{i}', 'kind': 'color', 'value': '#000000'} for i in range(20)]
+        self.assertEqual(len(self.demo(controls=many)['controls']), 8)
+
+    def test_compare_fields_kept_only_when_enabled(self):
+        b = self.demo(compare=True, before_css='.b{color:blue}', before_label='旧', after_label='新' * 40)
+        self.assertEqual((b['before_css'], b['before_label'], len(b['after_label'])), ('.b{color:blue}', '旧', 24))
+        b = self.demo(compare='yes', before_css='.b{color:blue}')
+        self.assertEqual((b['compare'], b['before_css']), (False, ''))
+        from django.core.exceptions import ValidationError
+        with self.assertRaises(ValidationError):
+            self.demo(compare=True, before_html='a' * 50_001)
+
+    def test_plain_demo_has_no_script(self):
+        from .blocks import demo_srcdoc
+        doc = demo_srcdoc(self.demo())
+        self.assertNotIn('<script', doc)
+        self.assertNotIn('script-src', doc)
+
+    def test_demo_with_controls_allows_only_the_vars_script(self):
+        from .blocks import DEMO_VARS_SCRIPT, DEMO_VARS_SCRIPT_HASH, demo_srcdoc
+        b = self.demo(html='<script>steal()</script><b onclick="x()">x</b>',
+                      controls=[{'name': '--r', 'kind': 'range', 'min': 0, 'max': 48}])
+        doc = demo_srcdoc(b)
+        self.assertIn(f"script-src '{DEMO_VARS_SCRIPT_HASH}'", doc)
+        self.assertNotIn('unsafe-inline\'; script', doc)
+        # CSP の meta はどのスクリプトよりも前にある
+        self.assertLess(doc.index('Content-Security-Policy'), doc.index(f'<script>{DEMO_VARS_SCRIPT}'))
+        self.assertLess(doc.index(DEMO_VARS_SCRIPT), doc.index('<script>steal()'))
+
+    def test_article_renders_controls_and_compare(self):
+        post = make_post(make_user('player'), body_blocks={'blocks': [{
+            'type': 'demo', 'html': '<b class="b">x</b>', 'css': '.b{color:var(--c)}', 'compare': True,
+            'before_css': '.b{color:gray}', 'before_label': 'Old',
+            'controls': [{'name': '--c', 'label': '色', 'kind': 'color', 'value': '#ff0000'}],
+        }]})
+        html = self.client.get(post.get_absolute_url()).content.decode()
+        self.assertEqual(html.count('sandbox="allow-scripts"'), 2)  # 変更前・変更後の 2 枚
+        self.assertNotIn('allow-same-origin', html)
+        self.assertIn('data-compare', html)
+        self.assertIn('>Old</span>', html)
+        self.assertIn('>After</span>', html)
+        self.assertIn('data-var="--c"', html)
+        self.assertIn('.b{color:gray}', html)
+        self.assertIn('blog-demo-kit.js', html)
+
+    def test_before_code_is_searchable(self):
+        b = {'type': 'demo', 'html': '<b>x</b>', 'css': '', 'compare': True, 'before_css': '.legacy{}'}
+        self.assertIn('.legacy{}', blocks_to_html(normalize_blocks({'blocks': [b]})))
+
+
+class JourneyTests(TestCase):
+    """旅する記事: 地図のシーン。"""
+
+    def scene(self, **kw):
+        data = {'type': 'map', 'lat': 35.0116, 'lng': 135.7681, 'label': ' 京都 ', **kw}
+        return normalize_blocks({'blocks': [data]})['blocks'][0]
+
+    def test_scene_is_validated(self):
+        b = self.scene(pin=3, note='朝の  鴨川', zoom=14.5, pitch=60, bearing=-30, extra='x')
+        self.assertEqual({k: b[k] for k in ('pin', 'lat', 'lng', 'label', 'note', 'zoom', 'pitch', 'bearing')},
+                         {'pin': 3, 'lat': 35.0116, 'lng': 135.7681, 'label': '京都', 'note': '朝の 鴨川',
+                          'zoom': 14.5, 'pitch': 60, 'bearing': -30})
+        self.assertNotIn('extra', b)
+        b = self.scene(pin=True, zoom=99, pitch='45', bearing=float('nan'))
+        self.assertEqual((b['pin'], b['zoom'], b['pitch'], b['bearing']), (None, 11, 50, 0))
+
+    def test_scene_without_valid_location_has_none(self):
+        for lat, lng in ((91, 0), (0, 181), ('35', 135), (35, None)):
+            b = self.scene(lat=lat, lng=lng)
+            self.assertEqual((b['lat'], b['lng']), (None, None), (lat, lng))
+
+    def test_article_shows_map_only_with_located_scenes(self):
+        user = make_user('traveler')
+        plain = make_post(user, body_blocks={'blocks': [{'type': 'map', 'label': 'どこか'}]})
+        self.assertFalse(plain.has_map)
+        html = self.client.get(plain.get_absolute_url()).content.decode()
+        self.assertNotIn('mapbox-gl.js', html)
+        self.assertNotIn('data-journey', html)
+
+        post = make_post(user, body_blocks={'blocks': [
+            {'type': 'text', 'cells': [{'html': '<p>旅のはじまり</p>'}]},
+            {'type': 'map', 'lat': 35.0, 'lng': 135.7, 'label': '京都', 'note': '<b>夜</b>'},
+            {'type': 'map', 'lat': 34.69, 'lng': 135.5, 'label': '大阪'},
+        ]})
+        self.assertTrue(post.has_map)
+        response = self.client.get(post.get_absolute_url())
+        html = response.content.decode()
+        self.assertIn('data-journey', html)
+        self.assertIn('mapbox-gl.js', html)
+        self.assertIn('id="journey-scenes"', html)
+        self.assertEqual(html.count('class="bk bk-scene'), 2)
+        self.assertIn('>02</span>', html)
+        self.assertIn('&lt;b&gt;夜&lt;/b&gt;', html)  # 本文に HTML としては入らない
+        scenes = response.context['journey_scenes']
+        self.assertEqual([s['label'] for s in scenes], ['京都', '大阪'])
+
+    def test_photos_come_only_from_the_authors_own_pins(self):
+        from photraveler.models import MapPin, PinPhoto
+        author, other = make_user('owner'), make_user('stranger')
+        mine = MapPin.objects.create(user=author, title='Kyoto', country='Japan', latitude=35, longitude=135.7)
+        theirs = MapPin.objects.create(user=other, title='Secret', latitude=1, longitude=1)
+        PinPhoto.objects.create(pin=mine, image='photraveler/a.jpg')
+        PinPhoto.objects.create(pin=theirs, image='photraveler/secret.jpg')
+        post = make_post(author, body_blocks={'blocks': [
+            {'type': 'map', 'id': 's1', 'pin': mine.id, 'lat': 35, 'lng': 135.7, 'label': 'Kyoto'},
+            {'type': 'map', 'id': 's2', 'pin': theirs.id, 'lat': 1, 'lng': 1, 'label': 'Elsewhere'},
+        ]})
+        response = self.client.get(post.get_absolute_url())
+        photos = response.context['journey_photos']
+        self.assertEqual(photos['s1']['thumbs'], ['/media/photraveler/a.jpg'])
+        self.assertIn(f'?pin={mine.id}', photos['s1']['url'])
+        self.assertEqual(photos['s2']['thumbs'], [])
+        self.assertNotContains(response, 'secret.jpg')
+        self.assertContains(response, 'Japan')
+
+    def test_editor_lists_only_own_pins(self):
+        from photraveler.models import MapPin
+        user = make_user('writer9')
+        MapPin.objects.create(user=user, title='Mine', latitude=10, longitude=20)
+        MapPin.objects.create(user=make_user('x9'), title='NotMine', latitude=1, longitude=1)
+        self.client.force_login(user)
+        response = self.client.get(reverse('blog:create'))
+        pins = response.context['journey_config']['pins']
+        self.assertEqual([p['title'] for p in pins], ['Mine'])
+        self.assertContains(response, 'id="blog-journey-config"')
+
+    def test_scene_label_is_searchable(self):
+        self.assertIn('京都', blocks_to_html(normalize_blocks({'blocks': [{'type': 'map', 'lat': 1, 'lng': 1, 'label': '京都'}]})))
+
+
 class PostModelTests(TestCase):
     def test_publishing_sets_published_at(self):
         post = make_post(make_user('a'), status=Post.STATUS_DRAFT)
