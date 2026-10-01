@@ -3,10 +3,10 @@
 
 {% block title %}JE6HUB.com — Blogs{% endblock %}{% block title_suffix %}{% endblock %}
 
-{% block glass_preload %}{% include "_liquid_glass_preload.html" with hero="img/hero/blogs-glass" %}{% endblock %}
+{% block glass_preload %}{% include "_liquid_glass_preload.html" with hero="img/hero/home-head" %}{% endblock %}
 
 {% block extra_head %}
-<link href="{% static 'css/blog.css' %}?v=25" rel="stylesheet" />
+<link href="{% static 'css/blog.css' %}?v=26" rel="stylesheet" />
 {% endblock %}
 
 {% block extra_js %}
@@ -19,7 +19,7 @@
 
     <!-- Hero — LiquidGlass root (背景と glass ボタンはすべて root の直接の子) -->
     <section id="hero-glass-root" class="ap-section liquid-glass-root landing-hero">
-        {% include "_hero_image.html" with hero="img/hero/blogs-glass" class="landing-hero-bg" %}
+        {% include "_hero_image.html" with hero="img/hero/home-head" class="landing-hero-bg" %}
         <div class="landing-hero-scrim"></div>
 
         <div class="landing-hero-text">
