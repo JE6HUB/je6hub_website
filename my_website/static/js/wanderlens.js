@@ -200,7 +200,7 @@
         track.replaceChildren(...(photos.length
             ? photos.map((ph) => h('figure', { class: 'wl-slide' },
                 // 縦横比が枠と合わない写真の余白を、同じ写真のぼかしで埋める
-                h('img', { class: 'wl-slide-bg', src: ph.thumb, alt: '', 'aria-hidden': 'true' }),
+                h('img', { class: 'wl-slide-bg', src: ph.thumb, alt: '', 'aria-hidden': 'true', onload: (e) => fitBlur(e.target.parentElement) }),
                 h('img', { class: 'wl-slide-img', src: ph.url, alt: p.title, loading: 'lazy' })))
             : [h('div', { class: 'wl-slide wl-slide--empty' }, icon('photo_camera'), h('span', { text: t.noPhoto }))]));
         dots.replaceChildren(...photos.map((_, i) => h('button', {
@@ -210,6 +210,21 @@
         track.scrollLeft = 0;
         updateDots();
     }
+    // ぼかしが写真の縁から枠の端に向かってなめらかに黒へ消えるよう、写真の外側の幅 (--edge) と向きを測る
+    function fitBlur(slide) {
+        const bg = slide.querySelector('.wl-slide-bg');
+        const w = slide.clientWidth;
+        const hgt = slide.clientHeight;
+        if (!bg || !bg.naturalWidth || !w || !hgt) return;
+        const ratio = bg.naturalWidth / bg.naturalHeight;
+        const tall = ratio < w / hgt;
+        const fill = tall ? (hgt * ratio) / w : (w / ratio) / hgt; // 写真が枠を占める割合
+        slide.dataset.fit = tall ? 'tall' : 'wide';
+        slide.style.setProperty('--edge', `${Math.max(0, (1 - fill) / 2) * 100}%`);
+    }
+    const fitAllBlur = () => document.querySelectorAll('#wl-gallery-track .wl-slide').forEach(fitBlur);
+    window.addEventListener('resize', fitAllBlur, { passive: true });
+
     function goSlide(i) {
         const track = $('#wl-gallery-track');
         const n = track.children.length;
@@ -250,6 +265,7 @@
         u.searchParams.set('pin', p.id);
         history.replaceState(null, '', u);
         if (!sheet.open) sheet.showModal();
+        requestAnimationFrame(fitAllBlur);
         if (photoIndex) requestAnimationFrame(() => goSlide(photoIndex));
     }
     sheet.addEventListener('close', () => {

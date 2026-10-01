@@ -342,17 +342,32 @@
 .wl-gallery-track::-webkit-scrollbar { display: none; }
 .wl-slide { position: relative; flex: 0 0 100%; margin: 0; overflow: hidden; scroll-snap-align: center; display: flex; align-items: center; justify-content: center; }
 .wl-slide-img { position: relative; width: 100%; height: 100%; max-height: calc(100vh - 48px); object-fit: contain; }
-/* 枠と縦横比が違う写真の左右・上下の余白を、同じ写真のぼかしで埋める */
+/* 枠と縦横比が違う写真の左右・上下の余白を、同じ写真のぼかしで埋め、
+   写真の縁から枠の端へ向かってなめらかに黒へ溶かす (--edge = 写真の外側の幅, JS で計測) */
 .wl-slide-bg {
+    --fade: linear-gradient(var(--fade-dir, to right),
+        transparent 0,
+        rgba(0, 0, 0, 0.12) calc(var(--edge, 0%) * 0.3),
+        rgba(0, 0, 0, 0.45) calc(var(--edge, 0%) * 0.6),
+        rgba(0, 0, 0, 0.85) calc(var(--edge, 0%) * 0.88),
+        #000 var(--edge, 0%),
+        #000 calc(100% - var(--edge, 0%)),
+        rgba(0, 0, 0, 0.85) calc(100% - var(--edge, 0%) * 0.88),
+        rgba(0, 0, 0, 0.45) calc(100% - var(--edge, 0%) * 0.6),
+        rgba(0, 0, 0, 0.12) calc(100% - var(--edge, 0%) * 0.3),
+        transparent 100%);
     position: absolute;
     inset: 0;
     width: 100%;
     height: 100%;
     object-fit: cover;
-    filter: blur(28px) saturate(1.4) brightness(0.55);
-    transform: scale(1.2);
+    filter: blur(32px) saturate(1.3) brightness(0.7);
     pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.3s ease;
 }
+.wl-slide[data-fit] .wl-slide-bg { opacity: 1; -webkit-mask-image: var(--fade); mask-image: var(--fade); }
+.wl-slide[data-fit="wide"] .wl-slide-bg { --fade-dir: to bottom; }
 .wl-slide--empty { flex-direction: column; gap: 8px; color: var(--ap-text-muted); }
 .wl-slide--empty .material-symbols-outlined { font-size: 48px; }
 .wl-gallery-nav {
