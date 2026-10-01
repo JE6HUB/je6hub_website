@@ -15,10 +15,10 @@
 
     <header class="blog-index-header">
         <div>
-            <h1 class="ap-section-title mb-2" style="font-size: 40px;">{% trans "マイブログ" %}</h1>
+            <h1 class="jh-section-title mb-2" style="font-size: 40px;">{% trans "マイブログ" %}</h1>
             <p class="blog-index-lead">{% trans "あなたの記事と下書き" %}</p>
         </div>
-        <a href="{% url 'blog:create' %}" class="ap-btn ap-btn-primary blog-btn-sm">
+        <a href="{% url 'blog:create' %}" class="jh-btn jh-btn-primary blog-btn-sm">
             {% trans "新しい記事" %}
         </a>
     </header>
@@ -56,10 +56,10 @@
         {% endfor %}
     </ul>
     {% else %}
-    <div class="blog-empty ap-glass-panel">
+    <div class="blog-empty jh-glass-panel">
         <span class="material-symbols-outlined" aria-hidden="true">edit_note</span>
         <p>{% trans "まだ記事がありません。テンプレートを選んで、すぐに書き始められます。" %}</p>
-        <a href="{% url 'blog:create' %}" class="ap-btn ap-btn-primary blog-btn-sm">{% trans "最初の記事を書く" %}</a>
+        <a href="{% url 'blog:create' %}" class="jh-btn jh-btn-primary blog-btn-sm">{% trans "最初の記事を書く" %}</a>
     </div>
     {% endif %}
 </div>

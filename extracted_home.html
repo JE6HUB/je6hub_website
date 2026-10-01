@@ -9,28 +9,28 @@
 
     {% if q %}
     <!-- Search Results View -->
-    <div class="ap-section" style="padding-top: 100px;">
-        <h2 class="ap-section-title">{% blocktrans with q=q %}"{{ q }}" の検索結果{% endblocktrans %}</h2>
-        <a href="{% url 'core:home' %}" class="ap-btn ap-btn-outline mt-3">{% trans "クリア" %}</a>
+    <div class="jh-section" style="padding-top: 100px;">
+        <h2 class="jh-section-title">{% blocktrans with q=q %}"{{ q }}" の検索結果{% endblocktrans %}</h2>
+        <a href="{% url 'core:home' %}" class="jh-btn jh-btn-outline mt-3">{% trans "クリア" %}</a>
         
         <!-- Render search results dynamically based on layout -->
-        <div class="ap-bento-container mt-5">
+        <div class="jh-bento-container mt-5">
             {% for pin in pin_results %}
-            <div class="ap-bento-card">
+            <div class="jh-bento-card">
                 <div>
-                    <h3 class="ap-subhead text-light mb-2">{{ pin.title }}</h3>
+                    <h3 class="jh-subhead text-light mb-2">{{ pin.title }}</h3>
                     <p class="text-muted">{{ pin.description|truncatechars:72 }}</p>
                 </div>
-                <a href="{% url 'photraveler:map' %}" class="ap-btn ap-btn-primary mt-4">View Map</a>
+                <a href="{% url 'photraveler:map' %}" class="jh-btn jh-btn-primary mt-4">View Map</a>
             </div>
             {% endfor %}
             {% for channel in channel_results %}
-            <div class="ap-bento-card">
+            <div class="jh-bento-card">
                 <div>
-                    <span class="ap-eyebrow">{{ channel.channel_type }}</span>
-                    <h3 class="ap-subhead text-light mb-2">{{ channel.name }}</h3>
+                    <span class="jh-eyebrow">{{ channel.channel_type }}</span>
+                    <h3 class="jh-subhead text-light mb-2">{{ channel.name }}</h3>
                 </div>
-                <a href="{% if user.is_authenticated %}{% url 'community:thread' channel.id %}{% else %}{% url 'login' %}{% endif %}" class="ap-btn ap-btn-primary mt-4">Join Lounge</a>
+                <a href="{% if user.is_authenticated %}{% url 'community:thread' channel.id %}{% else %}{% url 'login' %}{% endif %}" class="jh-btn jh-btn-primary mt-4">Join Lounge</a>
             </div>
             {% endfor %}
         </div>
@@ -38,16 +38,16 @@
     {% else %}
 
     <!-- Apple-style Hero Section -->
-    <section class="ap-section ap-reveal" style="padding-top: 100px; padding-bottom: 60px;">
-        <span class="ap-eyebrow" style="color: var(--ap-accent);">Tokyo · AI Architect & Photographer</span>
-        <h1 class="ap-hero-title">Yuta Kumadaki</h1>
-        <p class="ap-hero-subtitle mx-auto" style="max-width: 600px;">
+    <section class="jh-section jh-reveal" style="padding-top: 100px; padding-bottom: 60px;">
+        <span class="jh-eyebrow" style="color: var(--jh-accent);">Tokyo · AI Architect & Photographer</span>
+        <h1 class="jh-hero-title">Yuta Kumadaki</h1>
+        <p class="jh-hero-subtitle mx-auto" style="max-width: 600px;">
             LLMの内部構造を探求しながら、<br>
             Leica Q3 で世界の瞬間を記録する。
         </p>
         <div class="d-flex gap-3 justify-content-center mt-4">
-            <a href="#work" class="ap-btn ap-btn-primary">View My Work</a>
-            <a href="{% url 'core:contact' %}" class="ap-btn ap-btn-outline">Get In Touch <span class="material-symbols-outlined ms-2" style="font-size:18px;">arrow_forward</span></a>
+            <a href="#work" class="jh-btn jh-btn-primary">View My Work</a>
+            <a href="{% url 'core:contact' %}" class="jh-btn jh-btn-outline">Get In Touch <span class="material-symbols-outlined ms-2" style="font-size:18px;">arrow_forward</span></a>
         </div>
         
         <!-- Hero Image (Using Apple's camera system image) -->
@@ -57,28 +57,28 @@
     </section>
 
     <!-- Expertise Section -->
-    <section class="ap-section ap-reveal" style="background: #000;">
-        <h2 class="ap-section-title">What I bring to the table.</h2>
-        <p class="ap-subhead mx-auto mb-5" style="max-width: 700px;">
+    <section class="jh-section jh-reveal" style="background: #000;">
+        <h2 class="jh-section-title">What I bring to the table.</h2>
+        <p class="jh-subhead mx-auto mb-5" style="max-width: 700px;">
             AI アーキテクチャ、写真、コミュニティ構築の3つの軸で活動。技術と創造性の交差点に立つ。
         </p>
 
-        <div class="ap-bento-container">
-            <div class="ap-bento-card ap-reveal text-start">
+        <div class="jh-bento-container">
+            <div class="jh-bento-card jh-reveal text-start">
                 <div>
-                    <span class="material-symbols-outlined mb-3" style="font-size: 48px; color: var(--ap-accent);">psychology</span>
+                    <span class="material-symbols-outlined mb-3" style="font-size: 48px; color: var(--jh-accent);">psychology</span>
                     <h3 class="text-light fs-4 fw-bold mb-3">AI Architecture</h3>
                     <p class="text-muted">大規模言語モデルの社会実装とシステム設計。Mechanistic Interpretability の研究を通じて LLM の内部構造を解明する。</p>
                 </div>
             </div>
-            <div class="ap-bento-card ap-reveal text-start">
+            <div class="jh-bento-card jh-reveal text-start">
                 <div>
                     <span class="material-symbols-outlined mb-3" style="font-size: 48px; color: #ff9f0a;">photo_camera</span>
                     <h3 class="text-light fs-4 fw-bold mb-3">Photography</h3>
                     <p class="text-muted">Leica Q3 による都市・旅・自然のスナップショット。世界中の記憶を地図にピン留めして共有する WanderLens を開発。</p>
                 </div>
             </div>
-            <div class="ap-bento-card ap-reveal text-start">
+            <div class="jh-bento-card jh-reveal text-start">
                 <div>
                     <span class="material-symbols-outlined mb-3" style="font-size: 48px; color: #32d74b;">groups</span>
                     <h3 class="text-light fs-4 fw-bold mb-3">Community</h3>
@@ -89,42 +89,42 @@
     </section>
 
     <!-- Work Section -->
-    <section class="ap-section" id="work" style="background: #111;">
-        <div class="ap-reveal">
-            <h2 class="ap-section-title">Projects I'm proud of.</h2>
-            <p class="ap-subhead mb-5">Built with modern design and precision.</p>
+    <section class="jh-section" id="work" style="background: #111;">
+        <div class="jh-reveal">
+            <h2 class="jh-section-title">Projects I'm proud of.</h2>
+            <p class="jh-subhead mb-5">Built with modern design and precision.</p>
         </div>
 
-        <div class="ap-bento-container">
+        <div class="jh-bento-container">
             <!-- WanderLens -->
             <a href="{% url 'photraveler:map' %}" class="text-decoration-none">
-                <div class="ap-bento-card ap-reveal" style="min-height: 400px; border: 1px solid rgba(255,255,255,0.05);">
+                <div class="jh-bento-card jh-reveal" style="min-height: 400px; border: 1px solid rgba(255,255,255,0.05);">
                     <div class="text-start">
-                        <span class="ap-eyebrow" style="color: #64d2ff;">Photography · Maps</span>
+                        <span class="jh-eyebrow" style="color: #64d2ff;">Photography · Maps</span>
                         <h3 class="text-light fs-3 fw-bold mb-2">WanderLens</h3>
                         <p class="text-muted mb-0">旅の記憶を世界地図にピン留めするフォトトラベルジャーナル。</p>
                     </div>
-                    <img src="{% static 'img/apple/image_playground__do3eby1zbe82_large.jpg' %}" alt="WanderLens" class="ap-bento-card-image">
+                    <img src="{% static 'img/apple/image_playground__do3eby1zbe82_large.jpg' %}" alt="WanderLens" class="jh-bento-card-image">
                 </div>
             </a>
 
             <!-- Community Lounge -->
             <a href="{% if user.is_authenticated %}{% url 'community:list' %}{% else %}{% url 'login' %}{% endif %}" class="text-decoration-none">
-                <div class="ap-bento-card ap-reveal" style="min-height: 400px; border: 1px solid rgba(255,255,255,0.05);">
+                <div class="jh-bento-card jh-reveal" style="min-height: 400px; border: 1px solid rgba(255,255,255,0.05);">
                     <div class="text-start">
-                        <span class="ap-eyebrow" style="color: #ff375f;">Community</span>
+                        <span class="jh-eyebrow" style="color: #ff375f;">Community</span>
                         <h3 class="text-light fs-3 fw-bold mb-2">Community Lounge</h3>
                         <p class="text-muted mb-0">AI・写真・クラフトビールをテーマにしたディスカッション。</p>
                     </div>
-                    <img src="{% static 'img/apple/messages__e05v4dplbdea_large.jpg' %}" alt="Lounge" class="ap-bento-card-image">
+                    <img src="{% static 'img/apple/messages__e05v4dplbdea_large.jpg' %}" alt="Lounge" class="jh-bento-card-image">
                 </div>
             </a>
             
             <!-- Resume/Profile -->
             <a href="{% url 'core:resume' %}" class="text-decoration-none" style="grid-column: 1 / -1;">
-                <div class="ap-bento-card ap-reveal d-flex flex-md-row align-items-center" style="min-height: 300px; border: 1px solid rgba(255,255,255,0.05);">
+                <div class="jh-bento-card jh-reveal d-flex flex-md-row align-items-center" style="min-height: 300px; border: 1px solid rgba(255,255,255,0.05);">
                     <div class="text-start flex-grow-1 pe-4">
-                        <span class="ap-eyebrow" style="color: #bf5af2;">Profile</span>
+                        <span class="jh-eyebrow" style="color: #bf5af2;">Profile</span>
                         <h3 class="text-light fs-2 fw-bold mb-3">Y.K. Nexus Resume</h3>
                         <p class="text-muted mb-0" style="max-width: 400px;">このポートフォリオサイト本体。Apple デザインシステムを Django で実装。</p>
                     </div>
@@ -136,9 +136,9 @@
 
     <!-- Now Playing -->
     {% if user.is_authenticated and user.favorite_track_title %}
-    <section class="ap-section ap-reveal">
-        <h2 class="ap-section-title">Now Listening</h2>
-        <div class="ap-glass-panel mx-auto mt-5 text-start d-flex align-items-center gap-4" style="max-width: 600px;">
+    <section class="jh-section jh-reveal">
+        <h2 class="jh-section-title">Now Listening</h2>
+        <div class="jh-glass-panel mx-auto mt-5 text-start d-flex align-items-center gap-4" style="max-width: 600px;">
             {% if user.favorite_track_image_url %}
             <img src="{{ user.favorite_track_image_url }}" alt="{{ user.favorite_track_title }}" style="width: 96px; height: 96px; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
             {% endif %}
@@ -146,9 +146,9 @@
                 <h3 class="text-light fw-bold mb-1 fs-4">{{ user.favorite_track_title }}</h3>
                 <p class="text-muted mb-3">{{ user.favorite_track_artist }}</p>
                 <div class="d-flex gap-2">
-                    <button class="ap-btn ap-btn-primary" style="padding: 8px 16px; font-size: 14px;" data-playbar-open="1" data-playbar-autoplay="1">Play</button>
+                    <button class="jh-btn jh-btn-primary" style="padding: 8px 16px; font-size: 14px;" data-playbar-open="1" data-playbar-autoplay="1">Play</button>
                     {% if user.favorite_track_apple_music_url %}
-                    <a href="{{ user.favorite_track_apple_music_url }}" class="ap-btn ap-btn-outline" style="padding: 8px 16px; font-size: 14px;" target="_blank">Apple Music</a>
+                    <a href="{{ user.favorite_track_apple_music_url }}" class="jh-btn jh-btn-outline" style="padding: 8px 16px; font-size: 14px;" target="_blank">Apple Music</a>
                     {% endif %}
                 </div>
             </div>
@@ -157,11 +157,11 @@
     {% endif %}
 
     <!-- CTA -->
-    <section class="ap-section ap-reveal" style="padding-bottom: 150px;">
-        <h2 class="ap-hero-title">Let's build<br>something together.</h2>
-        <p class="ap-subhead mt-3 mb-5">プロジェクト相談、コラボレーション、または単純に話したいことがあれば。</p>
+    <section class="jh-section jh-reveal" style="padding-bottom: 150px;">
+        <h2 class="jh-hero-title">Let's build<br>something together.</h2>
+        <p class="jh-subhead mt-3 mb-5">プロジェクト相談、コラボレーション、または単純に話したいことがあれば。</p>
         <div class="d-flex gap-3 justify-content-center">
-            <a href="{% url 'core:contact' %}" class="ap-btn ap-btn-primary">Start a Conversation</a>
+            <a href="{% url 'core:contact' %}" class="jh-btn jh-btn-primary">Start a Conversation</a>
         </div>
     </section>
 

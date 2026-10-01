@@ -122,11 +122,11 @@
     {% elif b.type == 'button' %}
         {% if b.url and b.label %}
         <div class="bk bk-button bk-align-{{ b.align }} bk-w-{{ s.width }} bk-space-{{ s.space }}">
-            <a href="{{ b.url }}" class="ap-btn {% if b.variant == 'secondary' %}ap-btn-outline{% else %}ap-btn-primary{% endif %}"{% if '://' in b.url %} target="_blank" rel="noopener noreferrer"{% endif %}>{{ b.label }}</a>
+            <a href="{{ b.url }}" class="jh-btn {% if b.variant == 'secondary' %}jh-btn-outline{% else %}jh-btn-primary{% endif %}"{% if '://' in b.url %} target="_blank" rel="noopener noreferrer"{% endif %}>{{ b.label }}</a>
         </div>
         {% endif %}
     {% else %}
-        <section class="bk bk-{{ b.type }} bk-cols-{{ b.columns }} bk-ratio-{{ b.ratio }} bk-bg-{{ s.bg }} bk-w-{{ s.width }} bk-space-{{ s.space }} bk-valign-{{ s.valign }} bk-size-{{ s.size }}{% if s.rule %} bk-rule{% endif %}{% if s.animate %} ap-reveal{% endif %}">
+        <section class="bk bk-{{ b.type }} bk-cols-{{ b.columns }} bk-ratio-{{ b.ratio }} bk-bg-{{ s.bg }} bk-w-{{ s.width }} bk-space-{{ s.space }} bk-valign-{{ s.valign }} bk-size-{{ s.size }}{% if s.rule %} bk-rule{% endif %}{% if s.animate %} jh-reveal{% endif %}">
             {% if b.type == 'callout' %}<span class="bk-callout-icon" aria-hidden="true">{{ b.icon }}</span>{% endif %}
             <div class="bk-grid">
                 {% for cell in b.cells %}<div class="bk-cell">{{ cell.html|safe }}</div>{% endfor %}

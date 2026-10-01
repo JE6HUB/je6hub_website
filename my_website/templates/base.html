@@ -34,35 +34,35 @@
          from the real page — tried this, looked wrong) or re-capturing the
          whole document on every scroll frame (too expensive, and capturing
          <body> as root hung indefinitely — a real bug in the library). -->
-    <nav class="ap-glass-navbar" id="ap-glass-navbar" aria-label="{% trans 'Global (condensed)' %}">
-        <a class="ap-glass-navbar-link ap-logo-link" href="/">
+    <nav class="jh-glass-navbar" id="jh-glass-navbar" aria-label="{% trans 'Global (condensed)' %}">
+        <a class="jh-glass-navbar-link jh-logo-link" href="/">
             {% include "_logo.html" with logo_id="condensed" %}
         </a>
-        <a class="ap-glass-navbar-link" href="/">{% trans "Home" %}</a>
-        <a class="ap-glass-navbar-link" href="{% url 'photraveler:map' %}">{% trans "WanderLens" %}</a>
-        <a class="ap-glass-navbar-link" href="{% if user.is_authenticated %}{% url 'community:list' %}{% else %}{% url 'login' %}?next={% url 'community:list' %}{% endif %}">{% trans "Lounge" %}</a>
-        <a class="ap-glass-navbar-link" href="{% url 'blog:list' %}">{% trans "Blogs" %}</a>
-        <a class="ap-glass-navbar-link" href="{% url 'core:resume' %}">{% trans "Resume" %}</a>
-        <a class="ap-glass-navbar-link" href="{% url 'core:contact' %}">{% trans "Contact" %}</a>
+        <a class="jh-glass-navbar-link" href="/">{% trans "Home" %}</a>
+        <a class="jh-glass-navbar-link" href="{% url 'photraveler:map' %}">{% trans "WanderLens" %}</a>
+        <a class="jh-glass-navbar-link" href="{% if user.is_authenticated %}{% url 'community:list' %}{% else %}{% url 'login' %}?next={% url 'community:list' %}{% endif %}">{% trans "Lounge" %}</a>
+        <a class="jh-glass-navbar-link" href="{% url 'blog:list' %}">{% trans "Blogs" %}</a>
+        <a class="jh-glass-navbar-link" href="{% url 'core:resume' %}">{% trans "Resume" %}</a>
+        <a class="jh-glass-navbar-link" href="{% url 'core:contact' %}">{% trans "Contact" %}</a>
     </nav>
 
-    <!-- Apple-style Global Nav -->
-    <nav class="ap-globalnav" id="ap-globalnav" aria-label="Global">
-        <ul class="ap-globalnav-list">
-            <li class="ap-globalnav-item">
-                <a class="ap-globalnav-link ap-logo-link" href="/">
+    <!-- Global Nav -->
+    <nav class="jh-globalnav" id="jh-globalnav" aria-label="Global">
+        <ul class="jh-globalnav-list">
+            <li class="jh-globalnav-item">
+                <a class="jh-globalnav-link jh-logo-link" href="/">
                     {% include "_logo.html" with logo_id="global" %}
                 </a>
             </li>
-            <li class="ap-globalnav-item"><a class="ap-globalnav-link" href="/">{% trans "Home" %}</a></li>
-            <li class="ap-globalnav-item"><a class="ap-globalnav-link" href="{% url 'photraveler:map' %}">{% trans "WanderLens" %}</a></li>
-            <li class="ap-globalnav-item"><a class="ap-globalnav-link" href="{% if user.is_authenticated %}{% url 'community:list' %}{% else %}{% url 'login' %}?next={% url 'community:list' %}{% endif %}">{% trans "Lounge" %}</a></li>
-            <li class="ap-globalnav-item"><a class="ap-globalnav-link" href="{% url 'blog:list' %}">{% trans "Blogs" %}</a></li>
-            <li class="ap-globalnav-item"><a class="ap-globalnav-link" href="{% url 'core:resume' %}">{% trans "Resume" %}</a></li>
-            <li class="ap-globalnav-item"><a class="ap-globalnav-link" href="{% url 'core:contact' %}">{% trans "Contact" %}</a></li>
+            <li class="jh-globalnav-item"><a class="jh-globalnav-link" href="/">{% trans "Home" %}</a></li>
+            <li class="jh-globalnav-item"><a class="jh-globalnav-link" href="{% url 'photraveler:map' %}">{% trans "WanderLens" %}</a></li>
+            <li class="jh-globalnav-item"><a class="jh-globalnav-link" href="{% if user.is_authenticated %}{% url 'community:list' %}{% else %}{% url 'login' %}?next={% url 'community:list' %}{% endif %}">{% trans "Lounge" %}</a></li>
+            <li class="jh-globalnav-item"><a class="jh-globalnav-link" href="{% url 'blog:list' %}">{% trans "Blogs" %}</a></li>
+            <li class="jh-globalnav-item"><a class="jh-globalnav-link" href="{% url 'core:resume' %}">{% trans "Resume" %}</a></li>
+            <li class="jh-globalnav-item"><a class="jh-globalnav-link" href="{% url 'core:contact' %}">{% trans "Contact" %}</a></li>
             
             <!-- Auth & Language -->
-            <li class="ap-globalnav-item ms-auto d-flex align-items-center gap-3">
+            <li class="jh-globalnav-item ms-auto d-flex align-items-center gap-3">
                 <form action="{% url 'set_language' %}" method="post" class="m-0">
                     {% csrf_token %}
                     <input name="next" type="hidden" value="{{ redirect_to }}">
@@ -78,55 +78,55 @@
                 </form>
 
                 {% if user.is_authenticated %}
-                    <a href="{{ user.get_absolute_url }}" class="ap-globalnav-link" data-profile="{{ user.username }}" aria-haspopup="dialog" aria-label="{{ user.public_name }}" title="{{ user.public_name }}">
+                    <a href="{{ user.get_absolute_url }}" class="jh-globalnav-link" data-profile="{{ user.username }}" aria-haspopup="dialog" aria-label="{{ user.public_name }}" title="{{ user.public_name }}">
                         <i class="fas fa-user"></i>
                     </a>
                     {% if user.is_superuser %}
                         {% with open_reports=dashboard_open_reports %}
-                        <a href="{% url 'dashboard:index' %}" class="ap-globalnav-link ap-dashboard-link" aria-label="{% trans '管理者ダッシュボード' %}{% if open_reports %} ({% blocktrans count counter=open_reports %}未対応の通報 {{ counter }} 件{% plural %}未対応の通報 {{ counter }} 件{% endblocktrans %}){% endif %}" title="{% trans '管理者ダッシュボード' %}">
-                            <i class="fas fa-gauge-high"></i>{% if open_reports %}<span class="ap-dashboard-badge" aria-hidden="true">{{ open_reports }}</span>{% endif %}
+                        <a href="{% url 'dashboard:index' %}" class="jh-globalnav-link jh-dashboard-link" aria-label="{% trans '管理者ダッシュボード' %}{% if open_reports %} ({% blocktrans count counter=open_reports %}未対応の通報 {{ counter }} 件{% plural %}未対応の通報 {{ counter }} 件{% endblocktrans %}){% endif %}" title="{% trans '管理者ダッシュボード' %}">
+                            <i class="fas fa-gauge-high"></i>{% if open_reports %}<span class="jh-dashboard-badge" aria-hidden="true">{{ open_reports }}</span>{% endif %}
                         </a>
                         {% endwith %}
                     {% endif %}
                     {% if user.is_staff %}
-                        <a href="{% url 'admin:index' %}" class="ap-globalnav-link" aria-label="{% trans 'Admin' %}">
+                        <a href="{% url 'admin:index' %}" class="jh-globalnav-link" aria-label="{% trans 'Admin' %}">
                             <i class="fas fa-cog"></i>
                         </a>
                     {% endif %}
                     <form action="{% url 'logout' %}" method="post" class="m-0 p-0">
                         {% csrf_token %}
-                        <button type="submit" class="ap-globalnav-link bg-transparent border-0 p-0 m-0"><i class="fas fa-sign-out-alt"></i></button>
+                        <button type="submit" class="jh-globalnav-link bg-transparent border-0 p-0 m-0"><i class="fas fa-sign-out-alt"></i></button>
                     </form>
                 {% else %}
-                    <a href="{% url 'login' %}" class="ap-globalnav-link"><i class="fas fa-user-circle"></i></a>
+                    <a href="{% url 'login' %}" class="jh-globalnav-link"><i class="fas fa-user-circle"></i></a>
                 {% endif %}
             </li>
 
             <!-- スマートフォン用: アカウントとメニューボタン (734px 以下でのみ表示) -->
-            <li class="ap-globalnav-item ap-globalnav-mobile-actions">
+            <li class="jh-globalnav-item jh-globalnav-mobile-actions">
                 <a href="{% if user.is_authenticated %}{{ user.get_absolute_url }}{% else %}{% url 'login' %}{% endif %}"
-                   class="ap-globalnav-link ap-nav-icon-btn"
+                   class="jh-globalnav-link jh-nav-icon-btn"
                    {% if user.is_authenticated %}data-profile="{{ user.username }}" aria-haspopup="dialog"{% endif %}
                    aria-label="{% if user.is_authenticated %}{{ user.public_name }}{% else %}{% trans 'サインイン' %}{% endif %}">
                     <i class="fas {% if user.is_authenticated %}fa-user{% else %}fa-user-circle{% endif %}"></i>
                 </a>
                 {% if user.is_superuser %}
-                <a href="{% url 'dashboard:index' %}" class="ap-globalnav-link ap-nav-icon-btn ap-dashboard-link" aria-label="{% trans '管理者ダッシュボード' %}">
-                    <i class="fas fa-gauge-high"></i>{% with open_reports=dashboard_open_reports %}{% if open_reports %}<span class="ap-dashboard-badge" aria-hidden="true">{{ open_reports }}</span>{% endif %}{% endwith %}
+                <a href="{% url 'dashboard:index' %}" class="jh-globalnav-link jh-nav-icon-btn jh-dashboard-link" aria-label="{% trans '管理者ダッシュボード' %}">
+                    <i class="fas fa-gauge-high"></i>{% with open_reports=dashboard_open_reports %}{% if open_reports %}<span class="jh-dashboard-badge" aria-hidden="true">{{ open_reports }}</span>{% endif %}{% endwith %}
                 </a>
                 {% endif %}
-                <button type="button" class="ap-nav-icon-btn ap-menu-btn" id="ap-menu-btn"
-                        aria-controls="ap-mobile-menu" aria-expanded="false" aria-label="{% trans 'メニュー' %}">
-                    <span class="ap-menu-btn-bar"></span>
-                    <span class="ap-menu-btn-bar"></span>
+                <button type="button" class="jh-nav-icon-btn jh-menu-btn" id="jh-menu-btn"
+                        aria-controls="jh-mobile-menu" aria-expanded="false" aria-label="{% trans 'メニュー' %}">
+                    <span class="jh-menu-btn-bar"></span>
+                    <span class="jh-menu-btn-bar"></span>
                 </button>
             </li>
         </ul>
     </nav>
 
-    <div class="ap-mobile-menu" id="ap-mobile-menu" hidden>
+    <div class="jh-mobile-menu" id="jh-mobile-menu" hidden>
         <nav aria-label="{% trans 'メニュー' %}">
-            <ul class="ap-mobile-menu-list">
+            <ul class="jh-mobile-menu-list">
                 <li><a href="/">{% trans "Home" %}</a></li>
                 <li><a href="{% url 'photraveler:map' %}">{% trans "WanderLens" %}</a></li>
                 <li><a href="{% if user.is_authenticated %}{% url 'community:list' %}{% else %}{% url 'login' %}?next={% url 'community:list' %}{% endif %}">{% trans "Lounge" %}</a></li>
@@ -136,26 +136,26 @@
             </ul>
         </nav>
 
-        <div class="ap-mobile-menu-footer">
+        <div class="jh-mobile-menu-footer">
             {% if user.is_authenticated %}
-                <a href="{{ user.get_absolute_url }}" class="ap-mobile-menu-sub"><i class="fas fa-user"></i>{{ user.public_name }}</a>
-                <a href="{% url 'profile' %}" class="ap-mobile-menu-sub"><i class="fas fa-pen"></i>{% trans "プロフィールを編集" %}</a>
+                <a href="{{ user.get_absolute_url }}" class="jh-mobile-menu-sub"><i class="fas fa-user"></i>{{ user.public_name }}</a>
+                <a href="{% url 'profile' %}" class="jh-mobile-menu-sub"><i class="fas fa-pen"></i>{% trans "プロフィールを編集" %}</a>
                 {% if user.is_superuser %}
-                    <a href="{% url 'dashboard:index' %}" class="ap-mobile-menu-sub"><i class="fas fa-gauge-high"></i>{% trans "管理者ダッシュボード" %}</a>
+                    <a href="{% url 'dashboard:index' %}" class="jh-mobile-menu-sub"><i class="fas fa-gauge-high"></i>{% trans "管理者ダッシュボード" %}</a>
                 {% endif %}
                 {% if user.is_staff %}
-                    <a href="{% url 'admin:index' %}" class="ap-mobile-menu-sub"><i class="fas fa-cog"></i>{% trans "Admin" %}</a>
+                    <a href="{% url 'admin:index' %}" class="jh-mobile-menu-sub"><i class="fas fa-cog"></i>{% trans "Admin" %}</a>
                 {% endif %}
                 <form action="{% url 'logout' %}" method="post" class="m-0">
                     {% csrf_token %}
-                    <button type="submit" class="ap-mobile-menu-sub"><i class="fas fa-sign-out-alt"></i>{% trans "サインアウト" %}</button>
+                    <button type="submit" class="jh-mobile-menu-sub"><i class="fas fa-sign-out-alt"></i>{% trans "サインアウト" %}</button>
                 </form>
             {% else %}
-                <a href="{% url 'login' %}" class="ap-mobile-menu-sub"><i class="fas fa-user-circle"></i>{% trans "サインイン" %}</a>
-                <a href="{% url 'signup' %}" class="ap-mobile-menu-sub"><i class="fas fa-user-plus"></i>{% trans "アカウントを作成" %}</a>
+                <a href="{% url 'login' %}" class="jh-mobile-menu-sub"><i class="fas fa-user-circle"></i>{% trans "サインイン" %}</a>
+                <a href="{% url 'signup' %}" class="jh-mobile-menu-sub"><i class="fas fa-user-plus"></i>{% trans "アカウントを作成" %}</a>
             {% endif %}
 
-            <form action="{% url 'set_language' %}" method="post" class="ap-mobile-menu-lang">
+            <form action="{% url 'set_language' %}" method="post" class="jh-mobile-menu-lang">
                 {% csrf_token %}
                 <input name="next" type="hidden" value="{{ redirect_to }}">
                 <i class="fas fa-globe" aria-hidden="true"></i>
@@ -178,7 +178,7 @@
     {% endblock %}
 
     <!-- Footer -->
-    <footer class="ap-section" style="padding: 40px 20px; border-top: 1px solid rgba(255,255,255,0.1); font-size: 12px; color: var(--ap-text-muted);">
+    <footer class="jh-section" style="padding: 40px 20px; border-top: 1px solid rgba(255,255,255,0.1); font-size: 12px; color: var(--jh-text-muted);">
         <div style="max-width: 980px; margin: 0 auto;">
             <div class="d-flex flex-column flex-md-row justify-content-between align-items-center gap-3">
                 <div>
@@ -186,11 +186,11 @@
                     <span class="ms-3">© 2026 Yuta Kumadaki. All rights reserved.</span>
                 </div>
                 <div class="d-flex gap-4">
-                    <a href="{% url 'core:resume' %}" class="text-decoration-none" style="color: var(--ap-text-muted);">Resume</a>
-                    <a href="{% url 'photraveler:map' %}" class="text-decoration-none" style="color: var(--ap-text-muted);">WanderLens</a>
-                    <a href="{% url 'community:list' %}" class="text-decoration-none" style="color: var(--ap-text-muted);">Lounge</a>
-                    <a href="{% url 'blog:list' %}" class="text-decoration-none" style="color: var(--ap-text-muted);">Blogs</a>
-                    <a href="{% url 'core:contact' %}" class="text-decoration-none" style="color: var(--ap-text-muted);">Contact</a>
+                    <a href="{% url 'core:resume' %}" class="text-decoration-none" style="color: var(--jh-text-muted);">Resume</a>
+                    <a href="{% url 'photraveler:map' %}" class="text-decoration-none" style="color: var(--jh-text-muted);">WanderLens</a>
+                    <a href="{% url 'community:list' %}" class="text-decoration-none" style="color: var(--jh-text-muted);">Lounge</a>
+                    <a href="{% url 'blog:list' %}" class="text-decoration-none" style="color: var(--jh-text-muted);">Blogs</a>
+                    <a href="{% url 'core:contact' %}" class="text-decoration-none" style="color: var(--jh-text-muted);">Contact</a>
                 </div>
             </div>
         </div>

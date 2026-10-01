@@ -20,7 +20,7 @@
     <form method="post" class="db-card">
         {% csrf_token %}
         <fieldset>
-            <legend class="ap-label">{{ form.reason.label }}</legend>
+            <legend class="jh-label">{{ form.reason.label }}</legend>
             <ul class="db-report-reasons">
                 {% for radio in form.reason %}
                 <li><label>{{ radio.tag }} {{ radio.choice_label }}</label></li>

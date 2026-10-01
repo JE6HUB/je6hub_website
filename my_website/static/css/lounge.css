@@ -23,12 +23,12 @@
 /* ── Ambient light field ─────────────────
    静的なグラデーション 1 枚で描く。filter: blur() やアニメーションを使うと、
    その上の全ガラス面が毎フレーム再合成され、LiquidGlass の初期化まで遅くなるため。 */
-.lounge-ambient { display: none; } /* Apple と同様、背景は装飾しない */
+.lounge-ambient { display: none; } /* 背景は装飾しない */
 
 /* ── Glass surfaces (CSS) ────────────────── */
 /* 背景が滑らかなグラデーションのため backdrop-filter は使わず、半透明の面 +
    影で「すりガラス」を表現する。枠線・縁のハイライトは付けない (ぼかしの毎フレーム再計算も避ける) */
-.lounge-glass { background: var(--ap-card-bg); }
+.lounge-glass { background: var(--jh-card-bg); }
 
 .lounge-page {
     max-width: 1200px;
@@ -42,7 +42,7 @@
     display: inline-flex;
     align-items: center;
     gap: 4px;
-    color: var(--ap-accent);
+    color: var(--jh-accent);
     font-size: 15px;
     font-weight: 500;
     text-decoration: none;
@@ -68,15 +68,15 @@
 }
 .lounge-btn:active { transform: scale(0.97); }
 .lounge-btn .material-symbols-outlined { font-size: 19px; }
-.lounge-btn--primary { background: var(--ap-button); color: #fff; }
-.lounge-btn--primary:hover { background: var(--ap-button-hover); color: #fff; }
+.lounge-btn--primary { background: var(--jh-button); color: #fff; }
+.lounge-btn--primary:hover { background: var(--jh-button-hover); color: #fff; }
 .lounge-btn--glass {
     background: rgba(255, 255, 255, 0.08);
     border-color: var(--lounge-glass-border);
-    color: var(--ap-text);
+    color: var(--jh-text);
     box-shadow: var(--lounge-glass-highlight);
 }
-.lounge-btn--glass:hover { background: rgba(255, 255, 255, 0.14); color: var(--ap-text); }
+.lounge-btn--glass:hover { background: rgba(255, 255, 255, 0.14); color: var(--jh-text); }
 .lounge-btn--tint {
     background: color-mix(in srgb, var(--tint) 18%, transparent);
     border-color: color-mix(in srgb, var(--tint) 40%, transparent);
@@ -208,7 +208,7 @@
     padding: 2px 10px;
     border-radius: 980px;
     background: rgba(255, 255, 255, 0.08);
-    color: var(--ap-text-muted);
+    color: var(--jh-text-muted);
 }
 .lounge-section-head .material-symbols-outlined { font-size: 24px; color: var(--tint); }
 
@@ -255,7 +255,7 @@
     margin: 0;
     overflow-wrap: anywhere;
 }
-.lounge-card-meta { font-size: 13px; color: var(--ap-text-muted); margin: 2px 0 0; }
+.lounge-card-meta { font-size: 13px; color: var(--jh-text-muted); margin: 2px 0 0; }
 .lounge-card-desc {
     font-size: 14px;
     color: rgba(245, 245, 247, 0.7);
@@ -285,9 +285,9 @@
     padding: 48px 24px;
     border-radius: 28px;
     text-align: center;
-    color: var(--ap-text-muted);
+    color: var(--jh-text-muted);
 }
-.lounge-empty .material-symbols-outlined { display: block; font-size: 40px; margin-bottom: 8px; color: var(--tint, var(--ap-accent)); }
+.lounge-empty .material-symbols-outlined { display: block; font-size: 40px; margin-bottom: 8px; color: var(--tint, var(--jh-accent)); }
 
 /* =========================================
    Create channel / invite
@@ -297,20 +297,20 @@
     border-radius: 32px;
 }
 .lounge-form-title { font-size: 30px; font-weight: 700; letter-spacing: -0.03em; margin: 0 0 6px; }
-.lounge-form-lead { color: var(--ap-text-muted); font-size: 15px; margin: 0 0 32px; }
+.lounge-form-lead { color: var(--jh-text-muted); font-size: 15px; margin: 0 0 32px; }
 .lounge-label { display: block; font-size: 14px; font-weight: 600; margin-bottom: 8px; }
-.lounge-label small { color: var(--ap-text-muted); font-weight: 400; }
+.lounge-label small { color: var(--jh-text-muted); font-weight: 400; }
 .lounge-input {
     width: 100%;
     padding: 14px 16px;
     border-radius: 14px;
     border: 1px solid var(--lounge-glass-border);
     background: rgba(0, 0, 0, 0.25);
-    color: var(--ap-text);
+    color: var(--jh-text);
     font-size: 16px;
     transition: border-color 0.2s ease, background 0.2s ease;
 }
-.lounge-input:focus { outline: none; border-color: var(--ap-accent); background: rgba(0, 0, 0, 0.35); }
+.lounge-input:focus { outline: none; border-color: var(--jh-accent); background: rgba(0, 0, 0, 0.35); }
 .lounge-input::placeholder { color: rgba(134, 134, 139, 0.8); }
 .lounge-field { margin-bottom: 24px; }
 
@@ -337,7 +337,7 @@
 .lounge-type-option:has(input:focus-visible) { outline: 2px solid var(--tint); outline-offset: 2px; }
 .lounge-type-option .material-symbols-outlined { font-size: 26px; color: var(--tint); }
 .lounge-type-name { font-weight: 600; font-size: 16px; }
-.lounge-type-desc { font-size: 13px; color: var(--ap-text-muted); line-height: 1.4; }
+.lounge-type-desc { font-size: 13px; color: var(--jh-text-muted); line-height: 1.4; }
 .lounge-form-actions { display: flex; gap: 12px; margin-top: 32px; flex-wrap: wrap; }
 
 /* Invite (Liquid Glass root) */
@@ -417,12 +417,12 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    color: var(--ap-text);
+    color: var(--jh-text);
     background: rgba(255, 255, 255, 0.06);
     text-decoration: none;
     transition: background 0.2s ease;
 }
-.lounge-chat-back:hover { background: rgba(255, 255, 255, 0.14); color: var(--ap-text); }
+.lounge-chat-back:hover { background: rgba(255, 255, 255, 0.14); color: var(--jh-text); }
 .lounge-chat-title { flex: 1; min-width: 0; }
 .lounge-chat-title h1 {
     font-size: 18px;
@@ -435,7 +435,7 @@
 }
 .lounge-chat-title p {
     font-size: 13px;
-    color: var(--ap-text-muted);
+    color: var(--jh-text-muted);
     margin: 2px 0 0;
     white-space: nowrap;
     overflow: hidden;
@@ -490,7 +490,7 @@
 }
 .msg-bubble-other {
     border-radius: 22px 22px 22px 6px;
-    color: var(--ap-text);
+    color: var(--jh-text);
     background: #3a3a3c;
 }
 .msg-time { font-size: 11px; color: rgba(255, 255, 255, 0.35); margin: 4px 8px 0; }
@@ -506,7 +506,7 @@
 .lounge-chat-empty {
     margin: auto;
     text-align: center;
-    color: var(--ap-text-muted);
+    color: var(--jh-text-muted);
 }
 .lounge-chat-empty .material-symbols-outlined { font-size: 56px; color: color-mix(in srgb, var(--tint) 60%, transparent); }
 
@@ -570,7 +570,7 @@
     outline: none;
     resize: none;
     background: none;
-    color: var(--ap-text);
+    color: var(--jh-text);
     font-family: inherit;
     font-size: 15px;
     line-height: 1.45;
@@ -594,7 +594,7 @@
 #sendBtn:active { transform: scale(0.9); }
 #sendBtn:disabled { background: rgba(255, 255, 255, 0.1); color: rgba(255, 255, 255, 0.3); box-shadow: none; cursor: default; }
 #sendBtn .material-symbols-outlined { font-size: 20px; }
-.lounge-composer-hint { font-size: 11px; color: var(--ap-text-muted); margin: 6px 12px 0; text-align: right; }
+.lounge-composer-hint { font-size: 11px; color: var(--jh-text-muted); margin: 6px 12px 0; text-align: right; }
 
 /* Owner panel */
 .lounge-panel {
@@ -616,7 +616,7 @@
     gap: 6px;
     font-size: 14px;
     font-weight: 600;
-    color: var(--label-color, var(--ap-text-muted));
+    color: var(--label-color, var(--jh-text-muted));
     margin: 0 0 10px;
 }
 .lounge-panel-label .material-symbols-outlined { font-size: 16px; }
@@ -652,7 +652,7 @@
     align-items: center;
     justify-content: center;
     background: rgba(255, 255, 255, 0.06);
-    color: var(--ap-text-muted);
+    color: var(--jh-text-muted);
     cursor: pointer;
     transition: background 0.2s ease, color 0.2s ease;
 }

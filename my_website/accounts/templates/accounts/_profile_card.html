@@ -26,9 +26,9 @@
     {% if u.has_favorite_track %}{% include "accounts/_track_player.html" %}{% endif %}
 
     <div class="pf-card-actions">
-        <a href="{{ u.get_absolute_url }}" class="ap-btn ap-btn-primary">{% trans "詳細を見る" %}</a>
+        <a href="{{ u.get_absolute_url }}" class="jh-btn jh-btn-primary">{% trans "詳細を見る" %}</a>
         {% if is_self %}
-            <a href="{% url 'profile' %}" class="ap-btn ap-btn-outline">{% trans "プロフィールを編集" %}</a>
+            <a href="{% url 'profile' %}" class="jh-btn jh-btn-outline">{% trans "プロフィールを編集" %}</a>
         {% endif %}
     </div>
 </div>

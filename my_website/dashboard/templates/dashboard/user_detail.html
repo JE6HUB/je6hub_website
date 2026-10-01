@@ -6,7 +6,7 @@
 {% block db_content %}
 <header class="db-head">
     <div>
-        <a href="{% url 'dashboard:users' %}" class="ap-link" style="font-size: 14px;">{% trans "ユーザー一覧" %}</a>
+        <a href="{% url 'dashboard:users' %}" class="jh-link" style="font-size: 14px;">{% trans "ユーザー一覧" %}</a>
         <h1 class="db-title">{{ target.username }}</h1>
         <p class="db-lead">{% with u=target %}{% include 'dashboard/_user_state.html' %}{% endwith %}</p>
     </div>
