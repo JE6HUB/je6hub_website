@@ -96,7 +96,7 @@ docker compose -f docker-compose.prod.yml exec web python manage.py createsuperu
   - Domains: `je6hub.com`
   - Return URLs: `https://je6hub.com/ja/accounts/apple/login/callback/` と `https://je6hub.com/en/accounts/apple/login/callback/`
   - `.env` の `APPLE_CLIENT_ID` / `APPLE_TEAM_ID` / `APPLE_KEY_ID` / `APPLE_SECRET_KEY` を設定して `up -d` し直す
-- **WanderLens の地図 (Mapbox)**: [account.mapbox.com](https://account.mapbox.com/) で公開トークン (pk.) を作り、URL 制限に `https://je6hub.com/*` と `https://www.je6hub.com/*` を登録する。`.env` の `MAPBOX_ACCESS_TOKEN` に設定して `up -d` し直す。無料枠は月 50,000 マップロード（Account → Statistics で使用量を確認でき、請求アラートも設定できる）。Mapbox Studio で作ったスタイルを使うときは `MAPBOX_STYLE` にその URL を入れる
+- **WanderLens の地図 (Mapbox)**: [account.mapbox.com/access-tokens](https://account.mapbox.com/access-tokens/) の Create a token で新しい公開トークン (pk.) を作り、URL restrictions に `https://je6hub.com` を登録する（ワイルドカードは使えない。この 1 件ですべてのパスと `www.` などのサブドメインが許可される。Default public token には制限をかけられない。制限付きトークンは localhost では動かないので、手元の開発用には別のトークンを作る）。`.env` の `MAPBOX_ACCESS_TOKEN` に設定して `up -d` し直す。無料枠は月 50,000 マップロード（Account → Statistics で使用量を確認でき、請求アラートも設定できる）。Mapbox Studio で作ったスタイルを使うときは `MAPBOX_STYLE` にその URL を入れる
 - **お問い合わせ通知**: `EMAIL_*` と `CONTACT_NOTIFY_EMAIL` を設定し、フォームから送って届くことを確認する
 - **HSTS**: `Caddyfile` がすべての応答に `Strict-Transport-Security: max-age=31536000; includeSubDomains` を付ける（設定不要）。ブラウザが 1 年間 HTTPS でしか接続しなくなるため、`je6hub.com` とそのサブドメインは HTTPS で配信し続けること。Cloudflare のプロキシを使う場合は SSL/TLS → Edge 証明書 → **HSTS を有効化** でも同じ値（最大有効期間 12 か月、サブドメインを含める: オン、プリロード: オフ、No-Sniff: オン）を設定すると、Cloudflare の Security Insights の「Domains without HSTS」が解消される
 
