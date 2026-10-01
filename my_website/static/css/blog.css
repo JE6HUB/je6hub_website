@@ -1602,10 +1602,12 @@ button.bk-callout-icon:hover { background: rgba(255, 255, 255, 0.08); }
     gap: 2px;
     padding-top: calc(var(--bk-gutter-top, 0px));
     opacity: 0;
-    transition: opacity 0.15s ease;
+    /* 見えていないときは押せないようにする (スマホで前のブロックの下端を触ったときに誤って開かないように) */
+    visibility: hidden;
+    transition: opacity 0.15s ease, visibility 0.15s;
 }
 .blog-blocks-editor .bk-edit:hover > .bk-gutter,
-.blog-blocks-editor .bk-edit:focus-within > .bk-gutter { opacity: 1; }
+.blog-blocks-editor .bk-edit:focus-within > .bk-gutter { opacity: 1; visibility: visible; }
 .bk-gutter button {
     width: 26px;
     height: 28px;
@@ -1666,8 +1668,10 @@ button.bk-callout-icon:hover { background: rgba(255, 255, 255, 0.08); }
     position: fixed;
     z-index: 10050;
     width: 320px;
+    max-width: calc(100vw - 24px);
     max-height: min(560px, calc(100vh - 24px));
     overflow-y: auto;
+    overscroll-behavior: contain; /* 中をスクロールしきっても後ろのページを動かさない */
     padding: 10px;
     border-radius: 16px;
     background: #1c1c1e;
@@ -1695,7 +1699,10 @@ button.bk-callout-icon:hover { background: rgba(255, 255, 255, 0.08); }
     border-radius: 10px;
     cursor: pointer;
 }
-.bk-inserter-item.is-active, .bk-inserter-item:hover { background: rgba(255, 255, 255, 0.08); }
+.bk-inserter-item.is-active { background: rgba(255, 255, 255, 0.08); }
+@media (hover: hover) {
+    .bk-inserter-item:hover { background: rgba(255, 255, 255, 0.08); }
+}
 .bk-inserter-item .material-symbols-outlined {
     width: 36px;
     height: 36px;
@@ -1806,6 +1813,73 @@ button.bk-callout-icon:hover { background: rgba(255, 255, 255, 0.08); }
 @media (max-width: 1180px) {
     /* ガター (＋ ⋮⋮) が画面外に出ないよう内側へ */
     .bk-gutter { left: -4px; top: -30px; }
+}
+
+/* =========================================
+   スマホ・タッチ端末向けの調整 (エディタ)
+   ========================================= */
+/* シート (狭い画面ではメニューを画面下から出す) */
+.bk-sheet-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 10040;
+    background: rgba(0, 0, 0, 0.5);
+    -webkit-tap-highlight-color: transparent;
+}
+.bk-sheet-backdrop[hidden] { display: none; }
+.bk-popover.is-sheet {
+    left: 0;
+    right: 0;
+    top: auto;
+    bottom: 0;
+    width: auto;
+    max-width: none;
+    max-height: min(75vh, 560px);
+    padding: 22px 12px calc(12px + env(safe-area-inset-bottom));
+    border-radius: 20px 20px 0 0;
+    box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.06);
+}
+/* つまみ (シートであることを示す飾り) */
+.bk-popover.is-sheet::before {
+    content: "";
+    position: absolute;
+    top: 8px;
+    left: 50%;
+    width: 36px;
+    height: 5px;
+    border-radius: 3px;
+    background: rgba(255, 255, 255, 0.2);
+    transform: translateX(-50%);
+}
+.bk-popover.is-sheet .bk-inserter-item { padding: 10px; }
+.bk-popover.is-sheet .bk-seg span { padding-block: 8px; }
+.bk-popover.is-sheet .bk-swatches { gap: 10px; flex-wrap: wrap; }
+.bk-popover.is-sheet .bk-menu-actions button { padding-block: 12px; }
+
+@media (pointer: coarse) {
+    /* 16px 未満の入力欄は iOS がフォーカス時に画面を拡大してしまい、レイアウトが崩れて見える */
+    .bk-inserter-search, .bk-menu-input, .bk-demo-field textarea { font-size: 16px; }
+    /* ＋ と ⋮⋮ を指で押しやすい大きさに */
+    .bk-gutter button { width: 32px; height: 32px; }
+    .bk-inserter-item, .bk-menu-actions button { -webkit-tap-highlight-color: transparent; }
+}
+@media (max-width: 1180px) and (pointer: coarse) {
+    .bk-gutter { top: -34px; }
+}
+
+@media (max-width: 640px) {
+    /* ツールバーは 1 行にして横スクロール (折り返すと画面の上部を大きく覆ってしまう) */
+    .blog-toolbar {
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        overscroll-behavior-x: contain;
+        scrollbar-width: none;
+        padding: 4px 6px;
+        border-radius: 14px;
+    }
+    .blog-toolbar::-webkit-scrollbar { display: none; }
+    .blog-toolbar .tb-group { flex-shrink: 0; }
+    .blog-toolbar button { flex-shrink: 0; min-width: 36px; height: 36px; }
 }
 .blog-blocks .bk-button a { text-decoration: none; }
 .blog-blocks .bk-button .ap-btn-primary { color: #fff; }
@@ -2196,6 +2270,8 @@ button.bk-callout-icon:hover { background: rgba(255, 255, 255, 0.08); }
 
 @media (max-width: 734px) {
     .bk-demo--edit .bk-demo-editors { grid-template-columns: 1fr; }
+    /* 狭い画面では幅の変更は使わない。左右の端のつまみが縦スクロールの邪魔になるので隠す */
+    .bk-demo-resize { display: none; }
     .bk-demo-menu-panel > .bk-demo-seg { display: none; } /* 狭い画面では幅の切り替えを省く */
     /* コピーはアイコンだけにして 1 行に収める (文言は読み上げ用に残す) */
     .bk-demo-copy { padding: 0 10px; }

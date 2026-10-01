@@ -11,6 +11,10 @@ window.BlogBlocks = (() => {
     const STYLE_DEFAULTS = { bg: 'none', width: 'text', space: 'm', valign: 'top', size: 'm', rule: false, animate: false };
     const RICH = new Set(['text', 'callout', 'quote']);
     const uid = () => Math.random().toString(36).slice(2, 10);
+    // スマホなど狭い画面では、メニューをアンカーの近くではなく画面下からのシートとして出す
+    const SHEET_MQ = window.matchMedia('(max-width: 640px)');
+    // 指で操作する端末 (タッチ) か。検索欄への自動フォーカスでキーボードが出るのを避ける
+    const COARSE_MQ = window.matchMedia('(pointer: coarse)');
     const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 
     // ── HTML / CSS デモ ─────────────────────────────────
@@ -91,15 +95,29 @@ window.BlogBlocks = (() => {
             this.dropLine.className = 'bk-drop-line';
             this.dropLine.hidden = true;
             document.body.append(this.dropLine);
+            // シート表示のときの背景。タップで閉じる (pointerdown ではなく click で閉じ、下の要素が押されないようにする)
+            this.backdrop = document.createElement('div');
+            this.backdrop.className = 'bk-sheet-backdrop';
+            this.backdrop.hidden = true;
+            this.backdrop.addEventListener('click', () => { this.closePopover(this.menu); this.closePopover(this.inserter); });
+            document.body.append(this.backdrop);
+            // ソフトウェアキーボードが出たら、シートをキーボードの上に載せる
+            if (window.visualViewport) {
+                const fit = () => this.fitSheets();
+                window.visualViewport.addEventListener('resize', fit);
+                window.visualViewport.addEventListener('scroll', fit);
+            }
             // 外側を押したら閉じる。ただしメニュー内の操作 (項目の選択で別のメニューを開く場合を含む) は除く
             document.addEventListener('pointerdown', (e) => {
+                if (e.target.closest('.bk-sheet-backdrop')) return;
                 if (!e.target.closest('.bk-popover, .bk-handle, .bk-callout-icon, .bk-button button')) this.closePopover(this.menu);
                 if (!e.target.closest('.bk-popover, .bk-add, .blog-add-block')) this.closePopover(this.inserter);
             });
             document.addEventListener('keydown', (e) => {
                 if (e.key === 'Escape') { this.closePopover(this.menu); this.closePopover(this.inserter); }
             });
-            window.addEventListener('scroll', () => { this.closePopover(this.menu); }, { passive: true });
+            // シートは画面に固定なので、スクロール (キーボード表示に伴うものを含む) では閉じない
+            window.addEventListener('scroll', () => { if (!this.menu.classList.contains('is-sheet')) this.closePopover(this.menu); }, { passive: true });
         }
 
         // ── 読み込み / 保存 ───────────────────────────────
@@ -543,10 +561,12 @@ window.BlogBlocks = (() => {
                 if (e.button !== 0) return;
                 e.preventDefault();
                 const startY = e.clientY;
+                // 指は押しただけでも少し動くので、タッチではしきい値を大きめにする
+                const threshold = e.pointerType === 'mouse' ? 4 : 10;
                 let dragging = false;
                 let target = -1;
                 const onMove = (ev) => {
-                    if (!dragging && Math.abs(ev.clientY - startY) < 4) return;
+                    if (!dragging && Math.abs(ev.clientY - startY) < threshold) return;
                     if (!dragging) {
                         dragging = true;
                         block.el.classList.add('is-dragging');
@@ -563,16 +583,19 @@ window.BlogBlocks = (() => {
                     Object.assign(this.dropLine.style, { top: `${y + window.scrollY}px`, left: `${rootRect.left + window.scrollX}px`, width: `${rootRect.width}px` });
                     this.dropLine.hidden = false;
                 };
-                const onUp = () => {
+                const onUp = (ev) => {
                     document.removeEventListener('pointermove', onMove);
                     document.removeEventListener('pointerup', onUp);
+                    document.removeEventListener('pointercancel', onUp);
                     this.dropLine.hidden = true;
                     block.el.classList.remove('is-dragging');
+                    if (ev.type === 'pointercancel') return;
                     if (dragging) this.moveBlock(block, target);
                     else this.openMenu(block, handle);
                 };
                 document.addEventListener('pointermove', onMove);
                 document.addEventListener('pointerup', onUp);
+                document.addEventListener('pointercancel', onUp);
             });
         }
 
@@ -588,6 +611,14 @@ window.BlogBlocks = (() => {
 
         placePopover(pop, anchor) {
             pop.hidden = false;
+            const sheet = SHEET_MQ.matches;
+            pop.classList.toggle('is-sheet', sheet);
+            if (sheet) {
+                Object.assign(pop.style, { left: '', top: '' });
+                this.backdrop.hidden = false;
+                this.fitSheets();
+                return;
+            }
             const r = anchor.getBoundingClientRect();
             const w = pop.offsetWidth;
             const h = pop.offsetHeight;
@@ -598,7 +629,20 @@ window.BlogBlocks = (() => {
             Object.assign(pop.style, { left: `${Math.max(12, left)}px`, top: `${top}px` });
         }
 
-        closePopover(pop) { pop.hidden = true; }
+        closePopover(pop) {
+            pop.hidden = true;
+            if (this.menu.hidden && this.inserter.hidden) this.backdrop.hidden = true;
+        }
+
+        /** シートの下端をキーボードの上に合わせる (iOS は fixed 要素がキーボードの裏に隠れるため) */
+        fitSheets() {
+            const vv = window.visualViewport;
+            const covered = vv ? Math.max(0, window.innerHeight - vv.height - vv.offsetTop) : 0;
+            [this.menu, this.inserter].forEach((pop) => {
+                pop.style.bottom = pop.classList.contains('is-sheet') && covered ? `${covered}px` : '';
+                pop.style.maxHeight = pop.classList.contains('is-sheet') && vv ? `${Math.round(Math.min(vv.height * 0.75, 560))}px` : '';
+            });
+        }
 
         /** 追加メニュー (＋ボタン / 「/」) */
         openInserter(anchor, index, replace = null, returnTo = null) {
@@ -635,14 +679,23 @@ window.BlogBlocks = (() => {
                 // 日本語入力の確定の Enter では選ばない (Safari は isComposing = false、keyCode 229 で届く)
                 if (e.key === 'Enter' && !e.isComposing && e.keyCode !== 229) { e.preventDefault(); choose(cursor); }
             });
+            // 押した瞬間ではなく、指を離して「タップ」が確定したときに選ぶ。
+            // (pointerdown で選ぶと、スマホでリストをスクロールしようと触れた項目が選ばれてしまう)
             list.addEventListener('pointerdown', (e) => {
+                // マウスでは検索欄のフォーカスを保つ。タッチでは既定の動作 (スクロール) を妨げない
+                if (e.pointerType === 'mouse' && e.target.closest('[data-i]')) e.preventDefault();
+            });
+            list.addEventListener('click', (e) => {
                 const li = e.target.closest('[data-i]');
-                if (li) { e.preventDefault(); choose(Number(li.dataset.i)); }
+                if (li) choose(Number(li.dataset.i));
             });
             render();
             this.closePopover(this.menu);
             this.placePopover(pop, anchor);
-            search.focus();
+            pop.scrollTop = 0;
+            // タッチ端末ではキーボードがリストを隠してしまうので、検索欄には自動でフォーカスしない
+            // (「/」で開いたときは文字入力の続きなのでフォーカスする)
+            if (!COARSE_MQ.matches || returnTo) search.focus();
         }
 
         /** ブロックの設定メニュー (⋮⋮) */
@@ -711,8 +764,10 @@ window.BlogBlocks = (() => {
                 const key = el.closest('[data-set]') && el.closest('[data-set]').dataset.set;
                 if (!key) return;
                 const value = el.type === 'checkbox' ? el.checked : el.value;
-                if (key === 'type') { this.convert(block, value); this.openMenu(block, anchor); return; }
-                if (key === 'columns') { this.setColumns(block, Number(value)); this.openMenu(block, anchor); return; }
+                // 作り直しても読んでいた位置がずれないよう、メニューのスクロール位置を引き継ぐ
+                const reopen = () => { const top = pop.scrollTop; this.openMenu(block, anchor); pop.scrollTop = top; };
+                if (key === 'type') { this.convert(block, value); reopen(); return; }
+                if (key === 'columns') { this.setColumns(block, Number(value)); reopen(); return; }
                 if (block.type === 'demo' && key === 'bg') {
                     block.bg = value; // デモの背景 (ブロックの見た目の背景 style.bg とは別)
                 } else if (['ratio', 'variant', 'height', 'align', 'label', 'url', 'icon', 'layout'].includes(key)) {
