@@ -1,5 +1,6 @@
 {% comment %}
-JE6HUB ロゴ (マーク + ワードマーク)。色は currentColor に追従する。
+JE6HUB ロゴ (JH モノグラム + ワードマーク)。ワードマークの色は currentColor に追従する。
+モノグラムは J の縦線が下でループし、そのまま H の横棒になって P 形の右側へ一筆でつながる。
 使い方: include "_logo.html" with logo_id="nav"  (logo_id はページ内で一意に)
 {% endcomment %}
 <svg class="je6hub-logo" viewBox="0 0 146 32" fill="none" role="img" aria-labelledby="je6hub-logo-title-{{ logo_id }}">
@@ -9,15 +10,8 @@ JE6HUB ロゴ (マーク + ワードマーク)。色は currentColor に追従�
             <stop offset="0" stop-color="#2997ff"/><stop offset="1" stop-color="#bf5af2"/>
         </linearGradient>
     </defs>
-    <g transform="translate(16 16)" stroke="currentColor" stroke-linecap="round">
-        <circle r="12" stroke-width="1.5" opacity=".45"/>
-        <path d="M0 -5.2 V-9.4 M4.5 2.6 L8.14 4.7 M-4.5 2.6 L-8.14 4.7" stroke-width="1.8"/>
-        <g fill="currentColor" stroke="none">
-            <circle cy="-12" r="2.6"/><circle cx="10.39" cy="6" r="2.6"/><circle cx="-10.39" cy="6" r="2.6"/>
-        </g>
-        <circle r="4" fill="url(#je6hub-logo-core-{{ logo_id }})" stroke="none"/>
-    </g>
-    <g transform="translate(38 7)" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M11 4.8 V18 C11 22.6 9 25.8 6.4 25.8 C4.6 25.8 3.6 24.4 3.6 22.6 C3.6 19.4 6.4 17.6 11 17.6 H21 C25.8 17.6 28.4 14.2 28.4 10.2 C28.4 6.8 26.6 4.8 24.2 4.8 C22.2 4.8 21 6.3 21 8.4 V27.2" stroke="url(#je6hub-logo-core-{{ logo_id }})" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"/>
+    <g transform="translate(38 7)" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
         <path d="M9 0 V12.5 A4.5 4.5 0 0 1 0 12.5"/>
         <path transform="translate(15 0)" d="M9 0 H0 V18 H9 M0 9 H7.5"/>
         <path transform="translate(29 0)" d="M9.5 1.2 C4 -0.8 0.6 4 0.6 12 M0.6 12.5 A5 5 0 1 0 10.6 12.5 A5 5 0 1 0 0.6 12.5"/>
