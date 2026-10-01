@@ -98,3 +98,27 @@ class UserProfileForm(forms.ModelForm):
         if email and CustomUser.objects.filter(email__iexact=email).exclude(pk=self.instance.pk).exists():
             raise forms.ValidationError(_("このメールアドレスは既に登録されています。"))
         return email
+
+class AccountDeleteForm(forms.Form):
+    """退会の確認。パスワードでログインする人はパスワード、ソーシャルログインだけの人はユーザー名を入力する。"""
+    confirm = forms.CharField(strip=False, widget=forms.PasswordInput)
+    agree = forms.BooleanField(label=_('投稿や写真も含め、すべて削除されることを理解しました'))
+
+    def __init__(self, user, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.user = user
+        self.uses_password = user.has_usable_password()
+        if self.uses_password:
+            self.fields['confirm'].label = _('パスワード')
+        else:
+            self.fields['confirm'].label = _('ユーザー名')
+            self.fields['confirm'].widget = forms.TextInput(attrs={'autocomplete': 'off'})
+
+    def clean_confirm(self):
+        value = self.cleaned_data['confirm']
+        if self.uses_password:
+            if not self.user.check_password(value):
+                raise forms.ValidationError(_('パスワードが正しくありません。'))
+        elif value.strip() != self.user.username:
+            raise forms.ValidationError(_('ユーザー名が一致しません。'))
+        return value

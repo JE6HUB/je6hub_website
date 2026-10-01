@@ -145,6 +145,7 @@ class ModerationLog(models.Model):
         'user_suspend': _('アカウントを凍結'),
         'user_unsuspend': _('凍結を解除'),
         'user_delete': _('アカウントを削除'),
+        'user_withdraw': _('退会 (本人による削除)'),
         'user_private_on': _('Private 参加を承認'),
         'user_private_off': _('Private 参加の承認を取り消し'),
         'contact_delete': _('お問い合わせを削除'),

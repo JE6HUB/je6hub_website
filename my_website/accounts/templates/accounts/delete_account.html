@@ -1,0 +1,79 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block title %}{% trans "退会" %}{% endblock %}
+
+{% block content %}
+<div class="ap-section d-flex align-items-center justify-content-center" style="min-height: 80vh;">
+    <div class="ap-glass-panel ap-reveal" style="width: 100%; max-width: 560px;">
+        <div class="text-center mb-4">
+            <h1 class="ap-hero-title" style="font-size: 40px;">{% trans "退会" %}</h1>
+            <p class="ap-subhead mt-2 mb-0" style="font-size: 17px;">{% trans "アカウントを削除すると、元に戻すことはできません。" %}</p>
+        </div>
+
+        <h2 class="text-light fw-semibold mb-2" style="font-size: 19px;">{% trans "削除されるもの" %}</h2>
+        <ul class="small text-muted mb-4 ps-3" style="line-height: 1.8;">
+            <li>{% trans "プロフィール (ユーザー名・表示名・自己紹介・メールアドレス・氏名・お気に入りの曲)" %}</li>
+            {% for label, count in counts %}
+            <li>{{ label }}: {{ count }}</li>
+            {% endfor %}
+            <li>{% trans "アップロードした画像・動画のファイル" %}</li>
+            <li>{% trans "チャンネルへの参加情報" %}</li>
+            {% if social_accounts %}
+            <li>{% trans "連携しているソーシャルログイン" %}: {% for sa in social_accounts %}{{ sa.get_provider.name }}{% if not forloop.last %}, {% endif %}{% endfor %}</li>
+            {% endif %}
+        </ul>
+
+        {% if handed_over_channels or deleted_channels %}
+        <h2 class="text-light fw-semibold mb-2" style="font-size: 19px;">{% trans "作成したチャンネル" %}</h2>
+        <ul class="small text-muted mb-4 ps-3" style="line-height: 1.8;">
+            {% for channel in handed_over_channels %}
+            <li>{% blocktrans with name=channel.name %}「{{ name }}」はほかのメンバーに引き継がれます (あなたのメッセージは削除されます)。{% endblocktrans %}</li>
+            {% endfor %}
+            {% for channel in deleted_channels %}
+            <li>{% blocktrans with name=channel.name %}「{{ name }}」はほかにメンバーがいないため削除されます。{% endblocktrans %}</li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+
+        <form method="post" action="{% url 'account_delete' %}">
+            {% csrf_token %}
+            {% if form.non_field_errors %}
+                <div class="text-danger small mb-2" style="color: #ff453a!important;">{{ form.non_field_errors|striptags }}</div>
+            {% endif %}
+
+            <div class="mb-3 text-start">
+                <label class="ap-label" for="id_confirm">
+                    {% if form.uses_password %}
+                        {% trans "確認のため、パスワードを入力してください" %}
+                    {% else %}
+                        {% blocktrans with username=user.username %}確認のため、ユーザー名「{{ username }}」を入力してください{% endblocktrans %}
+                    {% endif %}
+                </label>
+                {% if form.confirm.errors %}
+                    <div class="text-danger small mb-1" style="color: #ff453a!important;">{{ form.confirm.errors|striptags }}</div>
+                {% endif %}
+                <input type="{% if form.uses_password %}password{% else %}text{% endif %}" name="confirm" id="id_confirm"
+                       class="ap-input {% if form.confirm.errors %}border-danger{% endif %}"
+                       autocomplete="{% if form.uses_password %}current-password{% else %}off{% endif %}" required>
+            </div>
+
+            <div class="form-check mb-4 text-start">
+                <input class="form-check-input" type="checkbox" name="agree" id="id_agree" required>
+                <label class="form-check-label small text-light" for="id_agree">{{ form.agree.label }}</label>
+                {% if form.agree.errors %}
+                    <div class="text-danger small mt-1" style="color: #ff453a!important;">{{ form.agree.errors|striptags }}</div>
+                {% endif %}
+            </div>
+
+            <button class="ap-btn w-100" type="submit" style="font-size: 17px; background: #ff3b30; color: #fff; border: none;">
+                {% trans "退会する" %}
+            </button>
+        </form>
+
+        <div class="text-center mt-4">
+            <a href="{% url 'profile' %}" class="ap-link" style="font-size: 17px;">{% trans "キャンセル" %}</a>
+        </div>
+    </div>
+</div>
+{% endblock %}
