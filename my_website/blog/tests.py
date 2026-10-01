@@ -230,6 +230,81 @@ class DemoBlockTests(TestCase):
         self.assertNotContains(self.client.get(post.get_absolute_url()), 'highlight.min.js')
 
 
+class PlayableDemoTests(TestCase):
+    """いじれるデモ: CSS 変数のコントロールと Before / After 比較。"""
+
+    def demo(self, **kw):
+        data = {'type': 'demo', 'html': '<button class="b">Hi</button>', 'css': ':root{--r:12px}.b{border-radius:var(--r)}', **kw}
+        return normalize_blocks({'blocks': [data]})['blocks'][0]
+
+    def test_controls_are_validated(self):
+        b = self.demo(controls=[
+            {'name': '--r', 'label': ' 角丸 ', 'kind': 'range', 'min': 0, 'max': 48, 'step': 1, 'value': 99, 'unit': 'px'},
+            {'name': '--brand', 'kind': 'color', 'value': '#0071E3'},
+            {'name': '--r', 'kind': 'range', 'min': 0, 'max': 1},          # 重複
+            {'name': 'r; color:red', 'kind': 'range', 'min': 0, 'max': 1},  # 変数名でない
+            {'name': '--bad', 'kind': 'range', 'min': 5, 'max': 1},         # 範囲が逆
+            {'name': '--evil', 'kind': 'color', 'value': 'red;}body{x'},
+            {'name': '--u', 'kind': 'range', 'min': 0, 'max': 2, 'step': 0, 'value': 1, 'unit': 'px;}'},
+        ])
+        self.assertEqual(b['controls'][0], {'name': '--r', 'label': '角丸', 'kind': 'range', 'min': 0, 'max': 48,
+                                            'step': 1, 'value': 48, 'unit': 'px'})
+        self.assertEqual(b['controls'][1], {'name': '--brand', 'label': 'brand', 'kind': 'color', 'value': '#0071e3'})
+        self.assertEqual(b['controls'][2]['value'], '#ffffff')
+        self.assertEqual((b['controls'][3]['step'], b['controls'][3]['unit']), (0.02, ''))
+        self.assertEqual(len(b['controls']), 4)
+
+    def test_controls_are_capped(self):
+        many = [{'name': f'--v{i}', 'kind': 'color', 'value': '#000000'} for i in range(20)]
+        self.assertEqual(len(self.demo(controls=many)['controls']), 8)
+
+    def test_compare_fields_kept_only_when_enabled(self):
+        b = self.demo(compare=True, before_css='.b{color:blue}', before_label='旧', after_label='新' * 40)
+        self.assertEqual((b['before_css'], b['before_label'], len(b['after_label'])), ('.b{color:blue}', '旧', 24))
+        b = self.demo(compare='yes', before_css='.b{color:blue}')
+        self.assertEqual((b['compare'], b['before_css']), (False, ''))
+        from django.core.exceptions import ValidationError
+        with self.assertRaises(ValidationError):
+            self.demo(compare=True, before_html='a' * 50_001)
+
+    def test_plain_demo_has_no_script(self):
+        from .blocks import demo_srcdoc
+        doc = demo_srcdoc(self.demo())
+        self.assertNotIn('<script', doc)
+        self.assertNotIn('script-src', doc)
+
+    def test_demo_with_controls_allows_only_the_vars_script(self):
+        from .blocks import DEMO_VARS_SCRIPT, DEMO_VARS_SCRIPT_HASH, demo_srcdoc
+        b = self.demo(html='<script>steal()</script><b onclick="x()">x</b>',
+                      controls=[{'name': '--r', 'kind': 'range', 'min': 0, 'max': 48}])
+        doc = demo_srcdoc(b)
+        self.assertIn(f"script-src '{DEMO_VARS_SCRIPT_HASH}'", doc)
+        self.assertNotIn('unsafe-inline\'; script', doc)
+        # CSP の meta はどのスクリプトよりも前にある
+        self.assertLess(doc.index('Content-Security-Policy'), doc.index(f'<script>{DEMO_VARS_SCRIPT}'))
+        self.assertLess(doc.index(DEMO_VARS_SCRIPT), doc.index('<script>steal()'))
+
+    def test_article_renders_controls_and_compare(self):
+        post = make_post(make_user('player'), body_blocks={'blocks': [{
+            'type': 'demo', 'html': '<b class="b">x</b>', 'css': '.b{color:var(--c)}', 'compare': True,
+            'before_css': '.b{color:gray}', 'before_label': 'Old',
+            'controls': [{'name': '--c', 'label': '色', 'kind': 'color', 'value': '#ff0000'}],
+        }]})
+        html = self.client.get(post.get_absolute_url()).content.decode()
+        self.assertEqual(html.count('sandbox="allow-scripts"'), 2)  # 変更前・変更後の 2 枚
+        self.assertNotIn('allow-same-origin', html)
+        self.assertIn('data-compare', html)
+        self.assertIn('>Old</span>', html)
+        self.assertIn('>After</span>', html)
+        self.assertIn('data-var="--c"', html)
+        self.assertIn('.b{color:gray}', html)
+        self.assertIn('blog-demo-kit.js', html)
+
+    def test_before_code_is_searchable(self):
+        b = {'type': 'demo', 'html': '<b>x</b>', 'css': '', 'compare': True, 'before_css': '.legacy{}'}
+        self.assertIn('.legacy{}', blocks_to_html(normalize_blocks({'blocks': [b]})))
+
+
 class PostModelTests(TestCase):
     def test_publishing_sets_published_at(self):
         post = make_post(make_user('a'), status=Post.STATUS_DRAFT)

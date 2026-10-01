@@ -15,7 +15,10 @@
 保存前に normalize_blocks() で許可リストに沿って作り直すので、テンプレートは
 この構造をそのまま信頼してよい (各セルの html は sanitize 済み、style は列挙値のみ)。
 """
+import base64
+import hashlib
 import json
+import math
 import re
 
 from django.core.exceptions import ValidationError
@@ -58,6 +61,29 @@ DEMO_BG_COLORS = {'dark': ('#1c1c1e', '#f5f5f7'), 'light': ('#ffffff', '#1d1d1f'
 DEMO_CSP = ("default-src 'none'; style-src 'unsafe-inline' https://fonts.googleapis.com; "
             "font-src https://fonts.gstatic.com data:; img-src https: data:")
 
+# 読者が触れるコントロール: CSS 変数 (--name) をスライダー / カラーピッカーで動かす
+DEMO_MAX_CONTROLS = 8
+DEMO_CONTROL_KINDS = ('range', 'color')
+DEMO_UNITS = ('', 'px', '%', 'rem', 'em', 'deg', 's', 'ms', 'vw', 'vh')
+DEMO_LABEL_MAX = 40
+DEMO_COMPARE_LABEL_MAX = 24
+_VAR_RE = re.compile(r'^--[A-Za-z][A-Za-z0-9_-]{0,39}$')
+_HEX_RE = re.compile(r'^#[0-9a-fA-F]{6}$')
+# コントロールがあるデモの iframe でだけ動かす、ページ側が用意した唯一のスクリプト。
+# 親ページから postMessage で届いた CSS 変数を、全要素に !important で上書きするだけ
+# (書き手が .btn { --radius: … } のように要素側で宣言していても効くように)。
+# CSP はこのスクリプトのハッシュだけを許可するので、書き手の HTML に含まれる <script> や
+# onclick などは動かない。iframe は allow-same-origin を付けないので、ページ本体とも分離される。
+# エディタのプレビュー (blog-demo-kit.js) は同じ内容を持たない: エディタは iframe に直接書き込む。
+DEMO_VARS_SCRIPT = (
+    'var st=document.createElement("style");document.head.appendChild(st);'
+    'addEventListener("message",function(e){var d=e.data;if(!d||d.t!=="bk-vars"||typeof d.v!=="object")return;'
+    'var c="";for(var k in d.v){var v=String(d.v[k]);'
+    'if(/^--[A-Za-z][A-Za-z0-9_-]{0,39}$/.test(k)&&/^[#0-9A-Za-z.%-]{1,40}$/.test(v))c+=k+":"+v+"!important;"}'
+    'st.textContent=":root,*,::before,::after{"+c+"}"});'
+)
+DEMO_VARS_SCRIPT_HASH = 'sha256-' + base64.b64encode(hashlib.sha256(DEMO_VARS_SCRIPT.encode()).digest()).decode()
+
 _ID_RE = re.compile(r'^[A-Za-z0-9_-]{1,32}$')
 _SAFE_URL_RE = re.compile(r'^(https?://|mailto:|/(?!/))', re.IGNORECASE)
 
@@ -78,6 +104,56 @@ def _clean_style(raw):
     style['rule'] = raw.get('rule') is True
     style['animate'] = raw.get('animate') is True
     return style
+
+
+def _number(value):
+    if isinstance(value, bool) or not isinstance(value, (int, float)) or not math.isfinite(value):
+        return None
+    value = round(float(value), 4)
+    return int(value) if value.is_integer() else value
+
+
+def _clean_controls(raw):
+    """デモのコントロール (CSS 変数のスライダー / 色) を許可された形だけに作り直す。"""
+    controls, seen = [], set()
+    for item in raw if isinstance(raw, list) else []:
+        if len(controls) >= DEMO_MAX_CONTROLS:
+            break
+        if not isinstance(item, dict):
+            continue
+        name = item.get('name')
+        if not isinstance(name, str) or not _VAR_RE.match(name) or name in seen:
+            continue
+        label = item.get('label') if isinstance(item.get('label'), str) else ''
+        label = label.strip()[:DEMO_LABEL_MAX] or name[2:]
+        kind = _choice(item.get('kind'), DEMO_CONTROL_KINDS)
+        control = {'name': name, 'label': label, 'kind': kind}
+        if kind == 'color':
+            value = item.get('value')
+            control['value'] = value.lower() if isinstance(value, str) and _HEX_RE.match(value) else '#ffffff'
+        else:
+            lo, hi, step, value = (_number(item.get(k)) for k in ('min', 'max', 'step', 'value'))
+            if lo is None or hi is None or lo >= hi:
+                continue
+            if step is None or step <= 0 or step > hi - lo:
+                step = round((hi - lo) / 100, 4) or 1
+            value = lo if value is None else min(hi, max(lo, value))
+            control.update(min=lo, max=hi, step=step, value=value, unit=_choice(item.get('unit'), DEMO_UNITS))
+        seen.add(name)
+        controls.append(control)
+    return controls
+
+
+def _clean_code(raw, key):
+    value = raw.get(key) if isinstance(raw.get(key), str) else ''
+    if len(value) > DEMO_MAX_CHARS:
+        raise ValidationError(_('HTML / CSS はそれぞれ 50,000 文字までです。'))
+    return value
+
+
+def _clean_label(raw, key):
+    value = raw.get(key) if isinstance(raw.get(key), str) else ''
+    return value.strip()[:DEMO_COMPARE_LABEL_MAX]
 
 
 def _clean_cell(raw):
@@ -111,17 +187,21 @@ def _clean_block(raw, index):
     elif block_type == 'spacer':
         block['height'] = _choice(raw.get('height'), SPACER_HEIGHTS, 'm')
     elif block_type == 'demo':
-        html = raw.get('html') if isinstance(raw.get('html'), str) else ''
-        css = raw.get('css') if isinstance(raw.get('css'), str) else ''
-        if len(html) > DEMO_MAX_CHARS or len(css) > DEMO_MAX_CHARS:
-            raise ValidationError(_('HTML / CSS はそれぞれ 50,000 文字までです。'))
+        compare = raw.get('compare') is True
         block.update(
-            html=html,
-            css=css,
+            html=_clean_code(raw, 'html'),
+            css=_clean_code(raw, 'css'),
             bg=_choice(raw.get('bg'), DEMO_BACKGROUNDS),
             height=_choice(raw.get('height'), tuple(DEMO_HEIGHTS), 'm'),
             layout=_choice(raw.get('layout'), DEMO_LAYOUTS),
             card_width=_card_width(raw.get('card_width')),
+            controls=_clean_controls(raw.get('controls')),
+            # Before / After 比較: before_* が「前」、html / css が「後」。before_html が空なら html を使う
+            compare=compare,
+            before_html=_clean_code(raw, 'before_html') if compare else '',
+            before_css=_clean_code(raw, 'before_css') if compare else '',
+            before_label=_clean_label(raw, 'before_label') if compare else '',
+            after_label=_clean_label(raw, 'after_label') if compare else '',
         )
     elif block_type == 'button':
         url = raw.get('url') if isinstance(raw.get('url'), str) else ''
@@ -164,18 +244,32 @@ def blocks_to_html(data):
         elif block['type'] == 'demo' and (block['html'] or block['css']):
             # 検索できるようコードも本文に含める (表示は iframe とコードタブで行う)
             parts.append(f'<pre>{escape(block["html"])}</pre><pre>{escape(block["css"])}</pre>')
+            if block.get('compare') and (block['before_html'] or block['before_css']):
+                parts.append(f'<pre>{escape(block["before_html"])}</pre><pre>{escape(block["before_css"])}</pre>')
         elif block['type'] == 'button' and block.get('label') and block.get('url'):
             parts.append(f'<p><a href="{escape(block["url"])}">{escape(block["label"])}</a></p>')
     return sanitize_html(''.join(parts))
 
 
-def demo_srcdoc(block):
+def demo_srcdoc(block, before=False):
     """HTML / CSS デモを表示する iframe の srcdoc。テンプレートで属性値としてエスケープして使う。
 
     書き手のコードはそのまま入れるが、iframe には sandbox (スクリプト・フォーム・
     画面遷移・同一オリジン扱いをすべて禁止) を付けるので、ページ本体には影響しない。
-    エディタのプレビュー (blog-blocks.js の demoSrcdoc) と同じ内容を組み立てること。
+    エディタのプレビュー (blog-demo-kit.js の srcdoc) と同じ内容を組み立てること。
+
+    before=True なら Before / After 比較の「前」(before_html が空なら html を共用)。
+    コントロールがあるときだけ、CSS 変数を受け取るスクリプト (DEMO_VARS_SCRIPT) を入れる。
     """
+    html = block.get('html', '')
+    css = block.get('css', '')
+    if before:
+        html = block.get('before_html') or html
+        css = block.get('before_css', '')
+    csp, script = DEMO_CSP, ''
+    if block.get('controls'):
+        csp += f"; script-src '{DEMO_VARS_SCRIPT_HASH}'"
+        script = f'<script>{DEMO_VARS_SCRIPT}</script>'
     bg, fg = DEMO_BG_COLORS.get(block.get('bg'), DEMO_BG_COLORS['dark'])
     checker = (
         'background-image:conic-gradient(#3a3a3c 25%,transparent 0 50%,#3a3a3c 0 75%,transparent 0);'
@@ -185,9 +279,9 @@ def demo_srcdoc(block):
     return (
         '<!DOCTYPE html><html><head><meta charset="utf-8">'
         '<meta name="viewport" content="width=device-width,initial-scale=1">'
-        f'<meta http-equiv="Content-Security-Policy" content="{DEMO_CSP}">'
+        f'<meta http-equiv="Content-Security-Policy" content="{csp}">{script}'
         '<style>html,body{margin:0;min-height:100%;}'
         f'body{{box-sizing:border-box;min-height:100vh;padding:24px;background:{bg};color:{fg};{checker}{center}'
         'font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Helvetica Neue",Arial,sans-serif;}</style>'
-        f'<style>{block.get("css", "")}</style></head><body>{block.get("html", "")}</body></html>'
+        f'<style>{css}</style></head><body>{html}</body></html>'
     )

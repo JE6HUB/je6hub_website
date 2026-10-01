@@ -18,45 +18,36 @@ window.BlogBlocks = (() => {
     const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 
     // ── HTML / CSS デモ ─────────────────────────────────
-    // 記事ページと同じ srcdoc (blog/blocks.py の demo_srcdoc と対応) を組み立てて、
+    // 記事ページと同じ srcdoc (blog-demo-kit.js / blog/blocks.py の demo_srcdoc と対応) を組み立てて、
     // sandbox 付き iframe でプレビューする。スクリプトは動かず、ページ本体からも分離される。
+    const Kit = window.BlogDemoKit;
     const DEMO_HEIGHTS = { s: 240, m: 380, l: 560 };
     // カード幅の下限: プレビューの中身が収まる幅と、この値の大きい方 (エディタが使える幅)
     const DEMO_MIN_WIDTH = 320;
-    const DEMO_BG = { dark: ['#1c1c1e', '#f5f5f7'], light: ['#ffffff', '#1d1d1f'], checker: ['#2c2c2e', '#f5f5f7'] };
-    const DEMO_CSP = "default-src 'none'; style-src 'unsafe-inline' https://fonts.googleapis.com; "
-        + "font-src https://fonts.gstatic.com data:; img-src https: data:";
+    // 最初の見本。CSS 変数 (--radius など) を使うと、読者が触れるコントロールにできる
     const DEMO_STARTER = {
         html: '<button class="btn">Get started</button>',
         css: [
-            '.btn {',
-            '  padding: 12px 24px;',
-            '  border: none;',
-            '  border-radius: 980px;',
-            '  background: #0071e3;',
-            '  color: #fff;',
-            '  font: 600 17px/1 -apple-system, BlinkMacSystemFont, sans-serif;',
-            '  cursor: pointer;',
-            '  transition: transform 0.2s ease, background 0.2s ease;',
+            ':root {',
+            '  --brand: #0071e3;',
+            '  --radius: 980px;',
+            '  --size: 17px;',
             '}',
-            '.btn:hover { background: #0077ed; transform: scale(1.04); }',
+            '',
+            '.btn {',
+            '  padding: calc(var(--size) * 0.7) calc(var(--size) * 1.4);',
+            '  border: none;',
+            '  border-radius: var(--radius);',
+            '  background: var(--brand);',
+            '  color: #fff;',
+            '  font: 600 var(--size)/1 -apple-system, BlinkMacSystemFont, sans-serif;',
+            '  cursor: pointer;',
+            '  transition: transform 0.2s ease, filter 0.2s ease;',
+            '}',
+            '.btn:hover { filter: brightness(1.1); transform: scale(1.04); }',
             '.btn:active { transform: scale(0.97); }',
         ].join('\n'),
     };
-    function demoSrcdoc(b) {
-        const [bg, fg] = DEMO_BG[b.bg] || DEMO_BG.dark;
-        const checker = b.bg === 'checker'
-            ? 'background-image:conic-gradient(#3a3a3c 25%,transparent 0 50%,#3a3a3c 0 75%,transparent 0);background-size:20px 20px;'
-            : '';
-        const center = b.layout === 'top' ? '' : 'display:flex;align-items:center;justify-content:center;';
-        return '<!DOCTYPE html><html><head><meta charset="utf-8">'
-            + '<meta name="viewport" content="width=device-width,initial-scale=1">'
-            + `<meta http-equiv="Content-Security-Policy" content="${DEMO_CSP}">`
-            + '<style>html,body{margin:0;min-height:100%;}'
-            + `body{box-sizing:border-box;min-height:100vh;padding:24px;background:${bg};color:${fg};${checker}${center}`
-            + 'font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Helvetica Neue",Arial,sans-serif;}</style>'
-            + `<style>${b.css}</style></head><body>${b.html}</body></html>`;
-    }
 
     /** 追加メニューの項目。apply(editor, block) で作成直後の中身を整える */
     const INSERT_ITEMS = [
@@ -154,6 +145,8 @@ window.BlogBlocks = (() => {
                     else if (b.type === 'button') Object.assign(out, { label: b.label, url: b.url, variant: b.variant, align: b.align });
                     else if (b.type === 'demo') Object.assign(out, {
                         html: b.html, css: b.css, bg: b.bg, height: b.height, layout: b.layout, card_width: b.cardWidth,
+                        controls: b.controls, compare: b.compare, before_html: b.beforeHtml, before_css: b.beforeCss,
+                        before_label: b.beforeLabel, after_label: b.afterLabel,
                     });
                     return out;
                 }),
@@ -187,6 +180,12 @@ window.BlogBlocks = (() => {
                 bg: data.bg || 'dark',
                 layout: data.layout || 'center',
                 cardWidth: Number.isFinite(data.card_width) ? data.card_width : null,
+                controls: Array.isArray(data.controls) ? data.controls.map((c) => ({ ...c })) : [],
+                compare: data.compare === true,
+                beforeHtml: data.before_html || '',
+                beforeCss: data.before_css || '',
+                beforeLabel: data.before_label || '',
+                afterLabel: data.after_label || '',
                 cells: [],
             };
             block.el = this.renderShell(block);
@@ -272,29 +271,162 @@ window.BlogBlocks = (() => {
         }
 
         /** HTML / CSS デモ: 左右 (狭い画面では上下) に HTML と CSS、下にライブプレビュー。
-         *  カードの左右の端をドラッグして幅を変えられる (下限はプレビューの中身が収まる幅) */
+         *  カードの左右の端をドラッグして幅を変えられる (下限はプレビューの中身が収まる幅)。
+         *  比較をオンにすると「変更前」のコード欄と、境界をドラッグできる 2 枚重ねのプレビューになる。
+         *  CSS 変数 (--name) は「読者が触れるコントロール」として公開できる */
         renderDemo(block, bk) {
+            const t = this.t;
             bk.classList.add('bk-demo-block');
             const grip = (edge) => `<span class="bk-demo-resize bk-demo-resize--${edge}" data-edge="${edge}" role="separator"
-                aria-orientation="vertical" tabindex="0" aria-label="${esc(this.t.demoResizeLabel)}" title="${esc(this.t.demoResize)}"></span>`;
-            // iframe は allow-same-origin (スクリプトは不可のまま) にして、中身の幅を測れるようにする
+                aria-orientation="vertical" tabindex="0" aria-label="${esc(t.demoResizeLabel)}" title="${esc(t.demoResize)}"></span>`;
+            const field = (lang, label, placeholder = '') => `<label class="bk-demo-field"><span>${esc(label)}</span>`
+                + `<textarea spellcheck="false" autocapitalize="off" data-lang="${lang}" rows="9" placeholder="${esc(placeholder)}"></textarea></label>`;
+            // iframe は allow-same-origin (スクリプトは不可のまま) にして、中身の幅を測ったり変数を書き込んだりできるようにする
+            const iframe = (title) => `<iframe class="bk-demo-frame" sandbox="allow-same-origin" referrerpolicy="no-referrer" title="${esc(title)}"></iframe>`;
+            const stage = block.compare
+                ? `<div class="bk-demo-stage bk-demo-stage--compare" data-compare style="height: ${DEMO_HEIGHTS[block.height] || DEMO_HEIGHTS.m}px">
+                        ${iframe(t.demoBefore)}
+                        <div class="bk-cmp-after">${iframe(t.demoPreview)}</div>
+                        <span class="bk-cmp-label bk-cmp-label--before" aria-hidden="true">${esc(block.beforeLabel || 'Before')}</span>
+                        <span class="bk-cmp-label bk-cmp-label--after" aria-hidden="true">${esc(block.afterLabel || 'After')}</span>
+                        <div class="bk-cmp-handle" role="slider" tabindex="0" aria-valuemin="0" aria-valuemax="100" aria-label="${esc(t.demoSplit)}">
+                            <span class="bk-cmp-knob" aria-hidden="true"><span class="material-symbols-outlined">code</span></span>
+                        </div>
+                   </div>`
+                : `<div class="bk-demo-stage" style="height: ${DEMO_HEIGHTS[block.height] || DEMO_HEIGHTS.m}px">${iframe(t.demoPreview)}</div>`;
             bk.innerHTML = `
                 <div class="bk-demo-sizer">
                     <div class="bk-demo bk-demo--edit">
                         <div class="bk-demo-editors">
-                            <label class="bk-demo-field"><span>HTML</span><textarea spellcheck="false" autocapitalize="off" data-lang="html" rows="9"></textarea></label>
-                            <label class="bk-demo-field"><span>CSS</span><textarea spellcheck="false" autocapitalize="off" data-lang="css" rows="9"></textarea></label>
+                            ${field('html', block.compare ? `HTML · ${t.demoAfterShort}` : 'HTML')}
+                            ${field('css', block.compare ? `CSS · ${t.demoAfterShort}` : 'CSS')}
+                            ${block.compare ? field('beforeHtml', `HTML · ${t.demoBeforeShort}`, t.demoBeforeHtmlHint) + field('beforeCss', `CSS · ${t.demoBeforeShort}`) : ''}
                         </div>
-                        <div class="bk-demo-stage" style="height: ${DEMO_HEIGHTS[block.height] || DEMO_HEIGHTS.m}px">
-                            <iframe class="bk-demo-frame" sandbox="allow-same-origin" referrerpolicy="no-referrer" title="${esc(this.t.demoPreview)}"></iframe>
-                        </div>
+                        ${stage}
+                        <div class="bk-ctl-bar" data-controls hidden></div>
+                        <details class="bk-ctl-setup">
+                            <summary><span class="material-symbols-outlined" aria-hidden="true">tune</span>${esc(t.demoControls)}<span class="bk-ctl-count"></span></summary>
+                            <div class="bk-ctl-setup-body"></div>
+                        </details>
                     </div>
                     ${grip('left')}${grip('right')}
                     <span class="bk-demo-size" aria-hidden="true"></span>
                 </div>`;
-            const frame = bk.querySelector('iframe');
-            frame.srcdoc = demoSrcdoc(block);
-            this.bindDemoResize(block, bk, frame);
+            const frames = [...bk.querySelectorAll('iframe')];
+            const [beforeFrame, afterFrame] = block.compare ? frames : [null, frames[0]];
+            const bar = bk.querySelector('[data-controls]');
+            const setup = bk.querySelector('.bk-ctl-setup');
+            let vars = null; // 試しに動かした値 (保存はしない)
+
+            // 変数を iframe に直接書き込む (記事ページでは iframe 内のスクリプトが同じことをする)
+            const applyVars = () => frames.forEach((f) => {
+                try {
+                    const doc = f.contentDocument;
+                    if (!doc || !doc.head) return;
+                    let st = doc.getElementById('bk-vars');
+                    if (!st) { st = doc.createElement('style'); st.id = 'bk-vars'; doc.head.append(st); }
+                    st.textContent = vars ? Kit.varsCss(vars) : '';
+                } catch (e) { /* 読み込み途中 */ }
+            });
+            frames.forEach((f) => f.addEventListener('load', applyVars));
+            const reload = () => {
+                afterFrame.srcdoc = Kit.srcdoc(block);
+                if (beforeFrame) beforeFrame.srcdoc = Kit.srcdoc(block, true);
+            };
+            reload();
+            this.bindDemoResize(block, bk, afterFrame);
+            if (block.compare) Kit.bindCompare(bk.querySelector('[data-compare]'), { hint: false });
+
+            // 読者に見えるコントロールの見た目 (記事ページと同じ) を描き、試しに動かせるようにする
+            const renderBar = () => {
+                bar.hidden = !block.controls.length;
+                vars = null;
+                bar.innerHTML = block.controls.length ? `
+                    <span class="bk-ctl-badge"><span class="material-symbols-outlined" aria-hidden="true">tune</span>${esc(t.demoTry)}</span>
+                    ${block.controls.map((c) => `<label class="bk-ctl bk-ctl--${c.kind}"><span class="bk-ctl-name">${esc(c.label)}</span>${c.kind === 'color'
+                        ? `<input type="color" value="${esc(c.value)}" data-var="${esc(c.name)}" data-default="${esc(c.value)}"><output></output>`
+                        : `<input type="range" min="${c.min}" max="${c.max}" step="${c.step}" value="${c.value}" data-var="${esc(c.name)}" data-unit="${esc(c.unit)}" data-default="${c.value}"><output></output>`}</label>`).join('')}
+                    <button type="button" class="bk-ctl-reset" data-reset title="${esc(t.demoReset)}" aria-label="${esc(t.demoReset)}">
+                        <span class="material-symbols-outlined" aria-hidden="true">restart_alt</span></button>` : '';
+                if (block.controls.length) Kit.bindControls(bar, (v) => { vars = v; applyVars(); });
+                applyVars();
+            };
+
+            // コントロールの設定: CSS の変数を一覧にして、公開するものを選ぶ
+            const renderSetup = () => {
+                const found = Kit.detectVars(`${block.css}\n${block.compare ? block.beforeCss : ''}`);
+                // CSS 側の値が変わったら、公開中のコントロールの初期値も追従させる (範囲は必要なら広げる)
+                let touched = false;
+                block.controls = block.controls.filter((c) => {
+                    const v = found.find((x) => x.name === c.name);
+                    if (!v || v.kind !== c.kind) { touched = true; return false; }
+                    if (c.value !== v.value) {
+                        touched = true;
+                        c.value = v.value;
+                        if (c.kind === 'range') { c.unit = v.unit; c.min = Math.min(c.min, v.value); c.max = Math.max(c.max, v.value); }
+                    }
+                    return true;
+                });
+                bk.querySelector('.bk-ctl-count').textContent = block.controls.length ? ` · ${block.controls.length}` : '';
+                const body = setup.querySelector('.bk-ctl-setup-body');
+                if (!found.length) {
+                    body.innerHTML = `<p class="bk-ctl-empty">${t.demoControlsEmpty}</p>`;
+                } else {
+                    body.innerHTML = `<p class="bk-ctl-hint">${esc(t.demoControlsHint)}</p>` + found.map((v) => {
+                        const c = block.controls.find((x) => x.name === v.name);
+                        const full = !c && block.controls.length >= Kit.MAX_CONTROLS;
+                        const range = c && c.kind === 'range' ? `
+                            <input type="number" class="bk-menu-input bk-ctl-num" data-f="min" value="${c.min}" step="any" aria-label="${esc(t.demoMin)}" title="${esc(t.demoMin)}">
+                            <span aria-hidden="true">–</span>
+                            <input type="number" class="bk-menu-input bk-ctl-num" data-f="max" value="${c.max}" step="any" aria-label="${esc(t.demoMax)}" title="${esc(t.demoMax)}">` : '';
+                        return `<div class="bk-ctl-row${c ? ' is-on' : ''}" data-name="${esc(v.name)}">
+                            <label class="bk-switch"><input type="checkbox" data-f="on"${c ? ' checked' : ''}${full ? ' disabled' : ''}><span class="bk-switch-track"></span>
+                                <code>${esc(v.name)}</code></label>
+                            ${c ? `<input type="text" class="bk-menu-input bk-ctl-label" data-f="label" value="${esc(c.label)}" maxlength="40" aria-label="${esc(t.demoLabel)}" placeholder="${esc(t.demoLabel)}">${range}`
+                                : `<span class="bk-ctl-sample">${v.kind === 'color' ? `<i style="background:${esc(v.value)}"></i>` : ''}${esc(String(v.value))}${esc(v.unit || '')}</span>`}
+                        </div>`;
+                    }).join('');
+                }
+                return touched;
+            };
+            setup.addEventListener('change', (e) => {
+                const row = e.target.closest('[data-name]');
+                if (!row) return;
+                const name = row.dataset.name;
+                const f = e.target.dataset.f;
+                const c = block.controls.find((x) => x.name === name);
+                if (f === 'on') {
+                    if (e.target.checked && !c) {
+                        const v = Kit.detectVars(`${block.css}\n${block.compare ? block.beforeCss : ''}`).find((x) => x.name === name);
+                        if (v && block.controls.length < Kit.MAX_CONTROLS) block.controls.push(Kit.controlFromVar(v));
+                    } else if (!e.target.checked) {
+                        block.controls = block.controls.filter((x) => x.name !== name);
+                    }
+                    renderSetup();
+                } else if (c && (f === 'min' || f === 'max')) {
+                    const n = Number(e.target.value);
+                    if (Number.isFinite(n)) c[f] = n;
+                    if (c.min >= c.max) { c.min = Math.min(c.min, c.value); c.max = Math.max(c.min + c.step, c.max, c.value); }
+                    c.value = Math.min(c.max, Math.max(c.min, c.value));
+                    renderSetup();
+                } else if (c && f === 'label') {
+                    c.label = e.target.value.trim() || name.slice(2);
+                }
+                renderBar();
+                this.changed();
+            });
+            setup.addEventListener('input', (e) => {
+                if (e.target.dataset.f !== 'label') return;
+                const c = block.controls.find((x) => x.name === e.target.closest('[data-name]').dataset.name);
+                if (!c) return;
+                c.label = e.target.value.trim() || c.name.slice(2);
+                const name = [...bar.querySelectorAll('[data-var]')].find((i) => i.dataset.var === c.name);
+                if (name) name.parentElement.querySelector('.bk-ctl-name').textContent = c.label;
+                this.changed();
+            });
+            renderSetup();
+            renderBar();
+
             let timer = null;
             bk.querySelectorAll('textarea').forEach((area) => {
                 const lang = area.dataset.lang;
@@ -302,7 +434,10 @@ window.BlogBlocks = (() => {
                 area.addEventListener('input', () => {
                     block[lang] = area.value;
                     clearTimeout(timer);
-                    timer = setTimeout(() => { frame.srcdoc = demoSrcdoc(block); }, 250);
+                    timer = setTimeout(() => {
+                        reload();
+                        if (/css/i.test(lang) && renderSetup()) renderBar();
+                    }, 250);
                     this.changed();
                 });
                 // Tab キーでインデント (フォーカス移動ではなく 2 スペースを入れる)
@@ -741,6 +876,11 @@ window.BlogBlocks = (() => {
                 parts.push(row(t.background, seg('bg', block.bg, [['dark', t.demoBg.dark], ['light', t.demoBg.light], ['checker', t.demoBg.checker]])));
                 parts.push(row(t.height, seg('height', block.height, [['s', 'S'], ['m', 'M'], ['l', 'L']])));
                 parts.push(row(t.align, seg('layout', block.layout, [['center', t.aligns.center], ['top', t.demoTop]])));
+                parts.push(`<div class="bk-menu-toggles">${toggle('compare', block.compare, t.demoCompare)}</div>`);
+                if (block.compare) {
+                    parts.push(row(t.demoBeforeShort, `<input type="text" class="bk-menu-input" data-set="beforeLabel" value="${esc(block.beforeLabel)}" maxlength="24" placeholder="Before">`));
+                    parts.push(row(t.demoAfterShort, `<input type="text" class="bk-menu-input" data-set="afterLabel" value="${esc(block.afterLabel)}" maxlength="24" placeholder="After">`));
+                }
                 parts.push(row(t.width, seg('width', s.width, [['text', t.widths.text], ['wide', t.widths.wide], ['full', t.widths.full]])));
                 parts.push(row(t.spacing, seg('space', s.space, [['none', t.none], ['s', 'S'], ['m', 'M'], ['l', 'L']])));
             } else if (block.type === 'button') {
@@ -770,6 +910,20 @@ window.BlogBlocks = (() => {
                 if (key === 'columns') { this.setColumns(block, Number(value)); reopen(); return; }
                 if (block.type === 'demo' && key === 'bg') {
                     block.bg = value; // デモの背景 (ブロックの見た目の背景 style.bg とは別)
+                } else if (block.type === 'demo' && key === 'compare') {
+                    // 比較をオンにしたとき「変更前」が空なら、今の CSS を写して出発点にする
+                    block.compare = value;
+                    if (value && !block.beforeCss) block.beforeCss = block.css;
+                    this.renderBody(block);
+                    this.changed();
+                    reopen();
+                    return;
+                } else if (block.type === 'demo' && (key === 'beforeLabel' || key === 'afterLabel')) {
+                    block[key] = value.trim();
+                    const el = block.el.querySelector(`.bk-cmp-label--${key === 'beforeLabel' ? 'before' : 'after'}`);
+                    if (el) el.textContent = block[key] || (key === 'beforeLabel' ? 'Before' : 'After');
+                    this.changed();
+                    return;
                 } else if (['ratio', 'variant', 'height', 'align', 'label', 'url', 'icon', 'layout'].includes(key)) {
                     block[key] = key === 'icon' ? (value.trim() || '💡') : value.trim();
                 } else {

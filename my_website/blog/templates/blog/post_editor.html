@@ -314,6 +314,20 @@
             demoResize: "{% trans 'ドラッグで幅を変更 (ダブルクリックで元の幅に戻す)' %}",
             demoResizeLabel: "{% trans 'カードの幅' %}",
             demoFullWidth: "{% trans '全幅' %}",
+            demoCompare: "{% trans 'Before / After で比較' %}",
+            demoBefore: "{% trans 'HTML / CSS のプレビュー (変更前)' %}",
+            demoBeforeShort: "{% trans '変更前' %}",
+            demoAfterShort: "{% trans '変更後' %}",
+            demoBeforeHtmlHint: "{% trans '空なら変更後と同じ HTML を使います' %}",
+            demoSplit: "{% trans '変更前と変更後の境界 (ドラッグまたは ← → で動かす)' %}",
+            demoControls: "{% trans '読者が触れるコントロール' %}",
+            demoControlsHint: "{% trans 'オンにした CSS 変数は、記事ページでスライダーや色の選択として読者が動かせます (最大 8 個)。' %}",
+            demoControlsEmpty: "{% trans 'CSS に <code>--radius: 12px;</code> や <code>--brand: #0071e3;</code> のような CSS 変数を書くと、ここで読者向けのコントロールにできます。' %}",
+            demoLabel: "{% trans '表示名' %}",
+            demoMin: "{% trans '最小' %}",
+            demoMax: "{% trans '最大' %}",
+            demoTry: "{% trans '触ってみる' %}",
+            demoReset: "{% trans '元の値に戻す' %}",
             moveUp: "{% trans '上へ' %}", moveDown: "{% trans '下へ' %}", duplicate: "{% trans '複製' %}", remove: "{% trans '削除' %}",
         },
     };
@@ -321,6 +335,7 @@
 <script src="{% static 'js/blog-editor-math.js' %}?v=2"></script>
 <script src="{% static 'js/blog-editor-markdown.js' %}?v=3"></script>
 <script src="{% static 'js/blog-editor-images.js' %}?v=3"></script>
-<script src="{% static 'js/blog-blocks.js' %}?v=8"></script>
+<script src="{% static 'js/blog-demo-kit.js' %}?v=1"></script>
+<script src="{% static 'js/blog-blocks.js' %}?v=9"></script>
 <script src="{% static 'js/blog-editor.js' %}?v=10"></script>
 {% endblock %}
