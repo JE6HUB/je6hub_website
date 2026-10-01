@@ -1,4 +1,4 @@
-{% load static i18n %}
+{% load static i18n profiles %}
 <!DOCTYPE html>
 <html lang="{{ LANGUAGE_CODE }}">
 <head>
@@ -15,7 +15,7 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/6.4.0/mdb.min.css" rel="stylesheet" />
 
     <link href="{% static 'css/style.css' %}?v=21" rel="stylesheet" />
-    <link href="{% static 'css/profile.css' %}?v=1" rel="stylesheet" />
+    <link href="{% static 'css/profile.css' %}?v=2" rel="stylesheet" />
 
     {% block extra_head %}{% endblock %}
     {# ガラス (LiquidGlass) を使うページは templates/_liquid_glass_preload.html を入れる #}
@@ -205,6 +205,8 @@
         </button>
         <div class="pf-modal-body" id="pf-modal-body" aria-live="polite"></div>
     </dialog>
+
+    {% profile_onboarding_modal %}
 
     <!-- Toast notifications -->
     <div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 10000;">

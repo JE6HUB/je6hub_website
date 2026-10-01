@@ -1,0 +1,58 @@
+{% load i18n %}
+{% if show %}
+{# サインアップ直後に一度だけ出すプロフィール作成のモーダル (main.js が開いて、切り替えと送信を行う) #}
+<dialog class="ob-modal" id="ob-modal" aria-labelledby="ob-intro-title">
+    <div class="ob-panel" id="ob-panel">
+        <section class="ob-step ob-step--intro" data-ob-step="intro">
+            <span class="ob-icon material-symbols-outlined" aria-hidden="true">waving_hand</span>
+            <h2 class="ob-title" id="ob-intro-title">{% trans "プロフィールを作成しましょう！" %}</h2>
+            <p class="ob-lead">{% trans "表示名や自己紹介を設定すると、ほかのユーザーにあなたのことが伝わります。あとからいつでも変更できます。" %}</p>
+            <div class="ob-actions">
+                <button type="button" class="ap-btn ob-btn-skip" data-ob-skip>{% trans "スキップ" %}</button>
+                <button type="button" class="ap-btn ap-btn-primary" data-ob-continue>{% trans "続ける" %}</button>
+            </div>
+        </section>
+
+        <section class="ob-step ob-step--form" data-ob-step="form" hidden>
+            <h2 class="ob-title" id="ob-form-title">{% trans "プロフィールを設定" %}</h2>
+            <p class="ob-lead">{% trans "ここに入力した内容は、ほかのユーザーにも表示されます。" %}</p>
+            <form class="ob-form" id="ob-form" method="post" action="{% url 'profile_onboarding' %}" novalidate
+                  data-error="{% trans 'プロフィールを保存できませんでした。時間をおいてもう一度お試しください。' %}">
+                {% csrf_token %}
+                <div class="ob-field">
+                    <label class="ap-label" for="obDisplayName">{% trans "表示名" %}</label>
+                    <input type="text" class="form-control ap-input" id="obDisplayName" name="display_name" maxlength="50"
+                           value="{{ user.display_name }}" placeholder="{{ user.username }}" autocomplete="nickname">
+                    <div class="ob-hint">{% trans "未入力の場合はユーザー名が表示されます。" %}</div>
+                    <div class="ob-error" data-ob-error="display_name"></div>
+                </div>
+                <div class="ob-field">
+                    <label class="ap-label" for="obBio">{% trans "自己紹介" %}</label>
+                    <textarea class="form-control ap-input" id="obBio" name="bio" rows="3" maxlength="300"
+                              placeholder="{% trans '好きなこと、書いていること、旅したい場所など' %}">{{ user.bio }}</textarea>
+                    <div class="ob-error" data-ob-error="bio"></div>
+                </div>
+                <div class="ob-row">
+                    <div class="ob-field">
+                        <label class="ap-label" for="obLocation">{% trans "拠点" %}</label>
+                        <input type="text" class="form-control ap-input" id="obLocation" name="location" maxlength="60"
+                               value="{{ user.location }}" placeholder="{% trans '例: 東京' %}">
+                        <div class="ob-error" data-ob-error="location"></div>
+                    </div>
+                    <div class="ob-field">
+                        <label class="ap-label" for="obWebsite">{% trans "ウェブサイト" %}</label>
+                        <input type="url" class="form-control ap-input" id="obWebsite" name="website"
+                               value="{{ user.website }}" placeholder="https://" autocomplete="url">
+                        <div class="ob-error" data-ob-error="website"></div>
+                    </div>
+                </div>
+                <div class="ob-error ob-error--form" data-ob-error="__all__" role="alert"></div>
+                <div class="ob-actions">
+                    <button type="button" class="ap-btn ob-btn-skip" data-ob-skip>{% trans "スキップ" %}</button>
+                    <button type="submit" class="ap-btn ap-btn-primary">{% trans "保存する" %}</button>
+                </div>
+            </form>
+        </section>
+    </div>
+</dialog>
+{% endif %}

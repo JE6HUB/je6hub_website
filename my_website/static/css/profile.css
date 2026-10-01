@@ -332,3 +332,115 @@ strong[data-profile][role="button"]:hover { color: var(--ap-accent); }
     .pf-track--lg .pf-track-title { font-size: 22px; }
     .pf-track--lg .pf-track-artist { font-size: 16px; }
 }
+
+/* =========================================
+   サインアップ直後のプロフィール作成モーダル
+   ========================================= */
+.ob-modal {
+    max-width: none;
+    max-height: none;
+    padding: 0;
+    border: none;
+    background: transparent;
+    color: var(--ap-text);
+    overflow: visible;
+    opacity: 0;
+    transform: translateY(16px) scale(0.96);
+    transition: opacity 0.3s ease, transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.ob-modal.is-open { opacity: 1; transform: none; }
+/* スキップ時は少し縮みながら消える */
+.ob-modal.is-leaving { opacity: 0; transform: scale(0.94); }
+.ob-modal::backdrop {
+    background: rgba(0, 0, 0, 0.55);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+.ob-modal.is-open::backdrop { opacity: 1; }
+.ob-modal.is-leaving::backdrop { opacity: 0; }
+
+/* 枠。切り替え時は JS が width / height を px で指定し、ここのトランジションで大きさを変える */
+.ob-panel {
+    position: relative;
+    overflow: hidden;
+    border-radius: 28px;
+    background: rgba(28, 28, 30, 0.92);
+    backdrop-filter: saturate(180%) blur(30px);
+    -webkit-backdrop-filter: saturate(180%) blur(30px);
+    box-shadow: 0 30px 80px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.08);
+    transition: width 0.5s cubic-bezier(0.32, 0.72, 0, 1), height 0.5s cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+/* 各画面は自分の幅を持つ (枠の幅に引きずられないので、切り替え先の大きさを測れる) */
+.ob-step {
+    box-sizing: border-box;
+    max-height: calc(100dvh - 32px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding: 40px 32px 28px;
+    transition: opacity 0.3s ease, transform 0.45s cubic-bezier(0.2, 0.8, 0.2, 1), filter 0.3s ease;
+}
+.ob-step[hidden] { display: none; }
+.ob-step--intro { width: min(440px, calc(100vw - 32px)); text-align: center; }
+.ob-step--form { width: min(560px, calc(100vw - 32px)); }
+/* 切り替え中: 出ていく画面は枠の左上に重ねて残し、文字だけをフェードさせる */
+.ob-step.is-exiting {
+    position: absolute;
+    top: 0;
+    left: 0;
+    opacity: 0;
+    transform: translateY(-12px);
+    filter: blur(4px);
+    pointer-events: none;
+}
+.ob-step.is-entering { opacity: 0; transform: translateY(12px); filter: blur(4px); }
+
+.ob-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 64px;
+    height: 64px;
+    margin-bottom: 20px;
+    border-radius: 50%;
+    background: linear-gradient(145deg, #48484a, #2c2c2e);
+    font-size: 32px;
+}
+.ob-title {
+    margin: 0 0 10px;
+    font-family: var(--ap-font-display);
+    font-size: 28px;
+    font-weight: 600;
+    letter-spacing: 0.004em;
+    color: var(--ap-text);
+}
+.ob-lead { margin: 0 0 24px; font-size: 15px; line-height: 1.6; color: var(--ap-text-muted); }
+
+.ob-field { min-width: 0; margin-bottom: 18px; }
+.ob-field .ap-input { box-sizing: border-box; padding: 12px 14px; font-size: 16px; }
+.ob-field textarea.ap-input { resize: vertical; min-height: 88px; }
+.ob-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0 16px; }
+.ob-hint { margin-top: 6px; font-size: 12px; color: var(--ap-text-muted); }
+.ob-error { font-size: 13px; color: #ff453a; }
+.ob-error:not(:empty) { margin-top: 6px; }
+.ob-field.has-error .ap-input { border-color: #ff453a; }
+
+.ob-actions { display: flex; justify-content: center; gap: 12px; margin-top: 8px; }
+.ob-actions .ap-btn { min-width: 128px; }
+.ob-step--form .ob-actions { justify-content: flex-end; }
+.ob-btn-skip { background: rgba(255, 255, 255, 0.1); color: var(--ap-text); }
+.ob-btn-skip:hover { background: rgba(255, 255, 255, 0.18); color: var(--ap-text); }
+.ob-actions .ap-btn:disabled { opacity: 0.6; cursor: default; }
+
+@media (max-width: 734px) {
+    .ob-step { padding: 32px 20px 20px; }
+    .ob-row { grid-template-columns: 1fr; }
+    .ob-actions .ap-btn { flex: 1; min-width: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .ob-modal, .ob-modal::backdrop, .ob-panel, .ob-step { transition-duration: 0.01s; }
+    .ob-modal, .ob-step.is-exiting, .ob-step.is-entering { transform: none; filter: none; }
+}

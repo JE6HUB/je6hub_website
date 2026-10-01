@@ -10,6 +10,7 @@ from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required
 from django.core.mail import send_mail
 from django.http import JsonResponse
+from django.views.decorators.http import require_POST
 from django.shortcuts import get_object_or_404, redirect, render
 from django.conf import settings
 from django.template.loader import render_to_string
@@ -24,8 +25,9 @@ from dashboard.models import ModerationLog
 from photraveler.models import MapPin, PinPhoto
 
 from .deletion import delete_account
-from .forms import AccountDeleteForm, CustomUserCreationForm, ResendVerificationForm, UserProfileForm
+from .forms import AccountDeleteForm, CustomUserCreationForm, OnboardingProfileForm, ResendVerificationForm, UserProfileForm
 from .models import CustomUser
+from .onboarding import request_profile_onboarding
 from .ratelimit import ratelimit
 from .tokens import email_verification_token
 
@@ -136,6 +138,22 @@ def profile_view(request):
     }
     return render(request, 'accounts/profile.html', context)
 
+@require_POST
+def profile_onboarding_view(request):
+    """サインアップ直後のプロフィール作成モーダルの送信先。main.js が fetch で送り、JSON を受け取る。"""
+    if not request.user.is_authenticated:
+        return JsonResponse({"detail": "Authentication required"}, status=401)
+
+    form = OnboardingProfileForm(request.POST, instance=request.user)
+    if not form.is_valid():
+        return JsonResponse({"errors": {name: [str(e) for e in errs] for name, errs in form.errors.items()}}, status=400)
+    user = form.save()
+    return JsonResponse({
+        "message": str(_('プロフィールを作成しました。')),
+        "public_name": user.public_name,
+    })
+
+
 def _public_profile_context(request, username):
     """公開プロフィール (モーダル・詳細ページ共通) の表示データ。メールアドレスや氏名は含めない。"""
     # 未認証 (is_active=False) のアカウントは存在しないものとして扱う
@@ -225,6 +243,7 @@ def verify_email_view(request, uidb64, token):
     user.save(update_fields=['is_active'])
     # allauth と併用して認証バックエンドが複数あるため、明示的に指定する
     login(request, user, backend='django.contrib.auth.backends.ModelBackend')
+    request_profile_onboarding(request)
     messages.success(request, _('メールアドレスの確認が完了しました。Loungeへようこそ！'))
     return redirect('community:list')
 
