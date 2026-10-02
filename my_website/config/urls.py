@@ -28,6 +28,7 @@ urlpatterns += i18n_patterns(
     path('signup/resend/', accounts_views.resend_verification_view, name='resend_verification'),
     path('profile/', accounts_views.profile_view, name='profile'),
     path('profile/onboarding/', accounts_views.profile_onboarding_view, name='profile_onboarding'),
+    path('settings/', accounts_views.account_settings_view, name='account_settings'),
     path('profile/notifications/', accounts_views.notification_settings_view, name='notification_settings'),
     path('profile/color-scheme/', accounts_views.color_scheme_settings_view, name='color_scheme_settings'),
     path('profile/delete/', accounts_views.account_delete_view, name='account_delete'),

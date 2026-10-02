@@ -127,7 +127,7 @@ class OnboardingProfileForm(AvatarFormMixin, forms.ModelForm):
 
 
 class UserProfileForm(AvatarFormMixin, forms.ModelForm):
-    """User profile edit form including favorite track information."""
+    """プロフィール設定 (ほかのユーザーにも表示される情報とお気に入りの曲)。"""
 
     class Meta:
         model = CustomUser
@@ -136,9 +136,6 @@ class UserProfileForm(AvatarFormMixin, forms.ModelForm):
             "bio",
             "location",
             "website",
-            "email",
-            "first_name",
-            "last_name",
             "favorite_track_title",
             "favorite_track_artist",
             "favorite_track_image_url",
@@ -170,6 +167,13 @@ class UserProfileForm(AvatarFormMixin, forms.ModelForm):
     def clean_favorite_track_preview_url(self):
         return self._clean_apple_url("favorite_track_preview_url")
 
+class AccountInfoForm(forms.ModelForm):
+    """個人設定の「アカウント」。公開されないメールアドレスと氏名。"""
+
+    class Meta:
+        model = CustomUser
+        fields = ("email", "first_name", "last_name")
+
     def clean_email(self):
         email = (self.cleaned_data.get("email") or "").strip()
         # 他の人のメールアドレスを登録して、本人の会員登録を妨げることができないようにする
@@ -177,8 +181,9 @@ class UserProfileForm(AvatarFormMixin, forms.ModelForm):
             raise forms.ValidationError(_("このメールアドレスは既に登録されています。"))
         return email
 
+
 class NotificationSettingsForm(forms.ModelForm):
-    """通知設定 (プロフィール編集とは別に保存する)。"""
+    """通知設定 (個人設定のほかの項目とは別に保存する)。"""
 
     class Meta:
         model = CustomUser
@@ -186,7 +191,7 @@ class NotificationSettingsForm(forms.ModelForm):
 
 
 class ColorSchemeForm(forms.ModelForm):
-    """カラースキーム (プロフィール編集とは別に保存する)。"""
+    """カラースキーム (個人設定のほかの項目とは別に保存する)。"""
 
     class Meta:
         model = CustomUser

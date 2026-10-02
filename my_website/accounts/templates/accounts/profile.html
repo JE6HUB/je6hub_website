@@ -1,33 +1,20 @@
 {% extends 'base.html' %}
 {% load i18n profiles %}
 
-{% block title %}Profile — {{ user_obj.username }}{% endblock %}
+{% block title %}{% trans "プロフィール設定" %}{% endblock %}
 
 {% block content %}
 <div class="jh-section py-5">
     <div class="row justify-content-center">
         <div class="col-md-10">
-            <!-- Profile Info -->
-            <div class="jh-glass-panel text-center mb-4 jh-reveal">
-                <div class="mb-3">
-                    <span class="profile-monogram" aria-hidden="true">{% avatar user_obj %}</span>
-                    <h2 class="jh-hero-title mt-3" style="font-size: 40px;">{{ user_obj.public_name }}</h2>
-                    <p class="jh-subhead mb-1" style="font-size: 17px;">@{{ user_obj.username }}</p>
-                    <p class="jh-subhead mb-2" style="font-size: 17px;">{% if user_obj.email %}{{ user_obj.email }}{% else %}{% trans "No email provided" %}{% endif %}</p>
-                </div>
-
-                <div class="d-flex justify-content-center flex-wrap gap-3">
-                    <a href="{{ user_obj.get_absolute_url }}" class="jh-btn jh-btn-primary">{% trans "プロフィールを表示" %}</a>
-                    <form action="{% url 'logout' %}" method="post" class="m-0">
-                        {% csrf_token %}
-                        <button type="submit" class="jh-btn jh-btn-outline" style="border-color: rgba(255,59,48,0.5); color: #ff453a;">{% trans "サインアウト" %}</button>
-                    </form>
-                </div>
-            </div>
+            {% include "accounts/_settings_nav.html" with active="profile" %}
 
             <!-- Profile Edit Form -->
-            <div class="jh-glass-panel jh-reveal">
-                <h3 class="mb-4 text-light fw-semibold" style="font-size: 28px;">{% trans "プロフィール編集" %}</h3>
+            <div class="jh-glass-panel jh-reveal" style="text-align: left;">
+                <div class="d-flex align-items-center justify-content-between flex-wrap gap-3 mb-4">
+                    <h3 class="m-0 text-light fw-semibold" style="font-size: 28px;">{% trans "プロフィール設定" %}</h3>
+                    <a href="{{ user_obj.get_absolute_url }}" class="jh-link">{% trans "プロフィールを表示" %}</a>
+                </div>
                 <form method="post" class="needs-validation" enctype="multipart/form-data">
                     {% csrf_token %}
 
@@ -72,28 +59,7 @@
                         </div>
                     </div>
 
-                    <hr class="my-5" style="border-color: #424245; opacity: 1;">
-
-                    <h4 class="mb-2 text-light fw-semibold" style="font-size: 21px;">{% trans "アカウント" %}</h4>
-                    <p class="small text-muted mb-4">{% trans "メールアドレスと氏名は公開されません。" %}</p>
-
-                    <div class="mb-4">
-                        <label class="jh-label" for="profileEmail">{% trans "メールアドレス" %}</label>
-                        <input type="email" class="form-control jh-input" id="profileEmail" name="email" value="{{ form.email.value|default:'' }}">
-                    </div>
-
-                    <div class="row mb-4">
-                        <div class="col-md-6">
-                            <label class="jh-label" for="profileFirstName">{% trans "名" %}</label>
-                            <input type="text" class="form-control jh-input" id="profileFirstName" name="first_name" value="{{ form.first_name.value|default:'' }}">
-                        </div>
-                        <div class="col-md-6 mt-4 mt-md-0">
-                            <label class="jh-label" for="profileLastName">{% trans "姓" %}</label>
-                            <input type="text" class="form-control jh-input" id="profileLastName" name="last_name" value="{{ form.last_name.value|default:'' }}">
-                        </div>
-                    </div>
-
-                    <hr class="my-5" style="border-color: #424245; opacity: 1;">
+                    <hr class="my-5" style="border-color: var(--jh-line); opacity: 1;">
 
                     <h4 class="mb-4 text-light fw-semibold" style="font-size: 21px;">{% trans "お気に入りの曲" %}</h4>
 
@@ -136,72 +102,12 @@
                     </div>
                     {% endif %}
 
-                    <div class="mt-5 pt-3" style="border-top: 1px solid rgba(255,255,255,0.1);">
+                    <div class="mt-5 pt-3" style="border-top: 1px solid rgba(var(--jh-fg-rgb), 0.1);">
                         <button type="submit" class="jh-btn jh-btn-primary me-2">{% trans "保存" %}</button>
                         <a href="{% url 'core:home' %}" class="jh-btn jh-btn-outline" style="border:none;">{% trans "キャンセル" %}</a>
                     </div>
                 </form>
             </div>
-
-            <!-- カラースキーム -->
-            <div class="jh-glass-panel jh-reveal mt-4" id="appearance" style="text-align: left;">
-                <h3 class="mb-2 text-light fw-semibold" style="font-size: 21px;">{% trans "カラースキーム" %}</h3>
-                <p class="small text-muted mb-4">{% trans "サイト全体の配色を、ダークとライトから選べます。選ぶとすぐに切り替わり、アカウントに保存されます。" %}</p>
-                <form method="post" action="{% url 'color_scheme_settings' %}" class="m-0" id="jh-scheme-form"
-                      data-saved-text="{% trans 'カラースキームを保存しました。' %}"
-                      data-error-text="{% trans '保存できませんでした。もう一度お試しください。' %}">
-                    {% csrf_token %}
-                    {% for group in color_scheme_groups %}
-                    <fieldset class="jh-scheme-group">
-                        <legend class="jh-scheme-mode">{{ group.label }}</legend>
-                        <div class="jh-scheme-options">
-                            {% for option in group.options %}
-                            <label class="jh-scheme-option">
-                                <input type="radio" name="color_scheme" value="{{ option.value }}"{% if option.selected %} checked{% endif %}>
-                                <span class="jh-scheme-swatch" style="--sw-bg: {{ option.bg }}; --sw-card: {{ option.card }}; --sw-accent: {{ option.accent }};" aria-hidden="true">
-                                    <i></i><b></b>
-                                </span>
-                                <span class="jh-scheme-name">{{ option.label }}</span>
-                            </label>
-                            {% endfor %}
-                        </div>
-                    </fieldset>
-                    {% endfor %}
-                    <div class="jh-scheme-footer">
-                        <button type="submit" class="jh-btn jh-btn-primary">{% trans "カラースキームを保存" %}</button>
-                        <span class="jh-scheme-status small" role="status" aria-live="polite"></span>
-                    </div>
-                </form>
-            </div>
-
-            <!-- 通知 -->
-            <div class="jh-glass-panel jh-reveal mt-4" id="notifications" style="text-align: left;">
-                <h3 class="mb-2 text-light fw-semibold" style="font-size: 21px;">{% trans "通知" %}</h3>
-                <p class="small text-muted mb-4">{% trans "ブログのコメントや Lounge のメッセージなどで @ユーザー名 と書かれたときの通知です。" %}</p>
-                <form method="post" action="{% url 'notification_settings' %}" class="m-0">
-                    {% csrf_token %}
-                    <div class="form-check form-switch mb-2">
-                        <input class="form-check-input" type="checkbox" role="switch" id="notifyMentionsByEmail" name="notify_mentions_by_email"
-                               {% if notification_form.notify_mentions_by_email.value %}checked{% endif %}>
-                        <label class="form-check-label text-light" for="notifyMentionsByEmail">{% trans "メンションされたらメールで知らせる" %}</label>
-                    </div>
-                    {% if not user_obj.email %}
-                    <p class="small mb-3" style="color: #ff9f0a;">{% trans "メールアドレスが登録されていないため、メールは届きません。" %}</p>
-                    {% else %}
-                    <p class="small text-muted mb-3">{% blocktrans with email=user_obj.email %}送信先: {{ email }}{% endblocktrans %}</p>
-                    {% endif %}
-                    <button type="submit" class="jh-btn jh-btn-primary">{% trans "通知設定を保存" %}</button>
-                </form>
-            </div>
-
-            {% if not user_obj.is_staff and not user_obj.is_superuser %}
-            <!-- 退会 -->
-            <div class="jh-glass-panel jh-reveal mt-4">
-                <h3 class="mb-2 fw-semibold" style="font-size: 21px; color: #ff453a;">{% trans "退会" %}</h3>
-                <p class="small text-muted mb-3">{% trans "アカウントと、投稿・写真などのデータをすべて削除します。" %}</p>
-                <a href="{% url 'account_delete' %}" class="jh-btn jh-btn-outline" style="border-color: rgba(255,59,48,0.5); color: #ff453a;">{% trans "退会手続きへ" %}</a>
-            </div>
-            {% endif %}
         </div>
     </div>
 </div>
@@ -228,11 +134,6 @@
 </div>
 
 <style>
-.profile-monogram {
-    width: 88px; height: 88px; border-radius: 50%;
-    display: inline-flex; align-items: center; justify-content: center;
-    font-size: 40px; font-weight: 600; color: #fff; background: #3a3a3c;
-}
 /* 検索結果のアイテムのスタイル */
 .am-result-item {
     background: rgba(255,255,255,0.06);

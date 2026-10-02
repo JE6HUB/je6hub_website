@@ -2173,3 +2173,21 @@ msgstr "Blossom"
 
 msgid "ラベンダー"
 msgstr "Lavender"
+
+msgid "プロフィール設定"
+msgstr "Profile settings"
+
+msgid "個人設定"
+msgstr "Settings"
+
+msgid "プロフィール"
+msgstr "Profile"
+
+msgid "アカウント情報を保存しました。"
+msgstr "Your account details have been saved."
+
+msgid "アカウント情報を保存"
+msgstr "Save account details"
+
+msgid "この端末からサインアウトします。"
+msgstr "Sign out on this device."

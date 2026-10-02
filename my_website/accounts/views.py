@@ -28,7 +28,7 @@ from photraveler.models import MapPin, PinPhoto
 from . import color_schemes
 from .deletion import delete_account
 from .forms import (
-    AccountDeleteForm, ColorSchemeForm, CustomUserCreationForm, NotificationSettingsForm, OnboardingProfileForm,
+    AccountDeleteForm, AccountInfoForm, ColorSchemeForm, CustomUserCreationForm, NotificationSettingsForm, OnboardingProfileForm,
     ResendVerificationForm, UserProfileForm,
 )
 from .models import CustomUser
@@ -121,7 +121,7 @@ def apple_music_token(request):
     return JsonResponse({"developer_token": token})
 
 def profile_view(request):
-    """Profile view: shows and allows editing user profile including favorite track."""
+    """プロフィール設定: ユーザー画像・表示名・自己紹介など、ほかのユーザーにも表示される情報。"""
     if not request.user.is_authenticated:
         return redirect('login')
 
@@ -137,33 +137,49 @@ def profile_view(request):
     else:
         form = UserProfileForm(instance=user)
     
-    context = {
+    return render(request, 'accounts/profile.html', {'user_obj': user, 'form': form})
+
+
+@login_required
+def account_settings_view(request):
+    """個人設定: アカウント (メールアドレス・氏名)・カラースキーム・通知・退会。"""
+    user = request.user
+    if request.method == 'POST':
+        form = AccountInfoForm(request.POST, instance=user)
+        if form.is_valid():
+            form.save()
+            messages.success(request, _('アカウント情報を保存しました。'))
+            return redirect(reverse('account_settings') + '#account')
+        messages.error(request, _('入力内容を確認してください。'))
+    else:
+        form = AccountInfoForm(instance=user)
+
+    return render(request, 'accounts/settings.html', {
         'user_obj': user,
         'form': form,
         'notification_form': NotificationSettingsForm(instance=user),
         'color_scheme_groups': color_schemes.scheme_groups(user.color_scheme),
-    }
-    return render(request, 'accounts/profile.html', context)
+    })
 
 
 @login_required
 @require_POST
 def notification_settings_view(request):
-    """プロフィール編集の「通知」から送られる。チェックが外れていれば (送信されなければ) オフになる。"""
+    """個人設定の「通知」から送られる。チェックが外れていれば (送信されなければ) オフになる。"""
     form = NotificationSettingsForm(request.POST, instance=request.user)
     if form.is_valid():
         form.save()
         messages.success(request, _('通知設定を保存しました。'))
-    return redirect(reverse('profile') + '#notifications')
+    return redirect(reverse('account_settings') + '#notifications')
 
 
 @login_required
 @require_POST
 def color_scheme_settings_view(request):
-    """プロフィール編集の「カラースキーム」から送られる。
+    """個人設定の「カラースキーム」から送られる。
 
     color-scheme.js は fetch で送って JSON を受け取り、ページを読み込み直さずに色を切り替える。
-    JavaScript が無効なときはフォーム送信になり、プロフィール編集へ戻る。
+    JavaScript が無効なときはフォーム送信になり、個人設定へ戻る。
     """
     form = ColorSchemeForm(request.POST, instance=request.user)
     wants_json = request.headers.get('Accept', '').startswith('application/json')
@@ -177,7 +193,7 @@ def color_scheme_settings_view(request):
             scheme = form.instance.color_scheme
             return JsonResponse({'scheme': scheme, 'theme_color': color_schemes.theme_color(scheme)})
         messages.success(request, _('カラースキームを保存しました。'))
-    return redirect(reverse('profile') + '#appearance')
+    return redirect(reverse('account_settings') + '#appearance')
 
 
 MENTION_SUGGESTIONS = 8
@@ -336,7 +352,7 @@ def account_delete_view(request):
     # 管理者が退会するとサイトを管理できなくなるおそれがあるため、権限を外してからにする
     if user.is_staff or user.is_superuser:
         messages.error(request, _('管理者のアカウントは退会できません。Django 管理画面で権限を外してから退会してください。'))
-        return redirect('profile')
+        return redirect('account_settings')
 
     if request.method == 'POST':
         form = AccountDeleteForm(user, request.POST)

@@ -123,15 +123,15 @@ class NotificationSettingsTests(TestCase):
     def test_default_is_on_and_toggle_saves(self):
         self.assertTrue(self.user.notify_mentions_by_email)
         res = self.client.post(reverse('notification_settings'), {})
-        self.assertRedirects(res, reverse('profile') + '#notifications', fetch_redirect_response=False)
+        self.assertRedirects(res, reverse('account_settings') + '#notifications', fetch_redirect_response=False)
         self.user.refresh_from_db()
         self.assertFalse(self.user.notify_mentions_by_email)
         self.client.post(reverse('notification_settings'), {'notify_mentions_by_email': 'on'})
         self.user.refresh_from_db()
         self.assertTrue(self.user.notify_mentions_by_email)
 
-    def test_profile_page_shows_toggle(self):
-        res = self.client.get(reverse('profile'))
+    def test_settings_page_shows_toggle(self):
+        res = self.client.get(reverse('account_settings'))
         self.assertContains(res, 'name="notify_mentions_by_email"')
         self.assertContains(res, 'checked')
 
