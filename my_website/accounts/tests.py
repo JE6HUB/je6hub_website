@@ -312,6 +312,19 @@ class SecurityHardeningTests(TestCase):
         user.refresh_from_db()
         self.assertTrue(user.favorite_track_image_url.startswith('https://is1-ssl.mzstatic.com/'))
 
+    def test_profile_hides_favorite_track_link_inputs(self):
+        """お気に入りの曲は Apple Music の検索から選ぶので、リンクを直接入力する欄は見せない。"""
+        user = User.objects.create_user(
+            username='u4', password='pass12345', favorite_track_title='x',
+            favorite_track_apple_music_url='https://music.apple.com/jp/album/x/1?i=2')
+        self.client.force_login(user)
+        html = self.client.get(reverse('profile')).content.decode()
+        self.assertIn('id="appleMusicSearchTerm"', html)
+        self.assertNotIn('for="favoriteTrackImageUrl"', html)
+        self.assertNotIn('for="favoriteTrackAppleMusicUrl"', html)
+        self.assertIn('type="hidden" id="favoriteTrackAppleMusicUrl"', html)
+        self.assertIn('value="https://music.apple.com/jp/album/x/1?i=2"', html)
+
     def test_profile_cannot_take_another_users_email(self):
         User.objects.create_user(username='owner', email='owner@example.com', password='pass12345')
         user = User.objects.create_user(username='u3', password='pass12345')

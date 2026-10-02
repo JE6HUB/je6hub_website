@@ -82,16 +82,9 @@
                         <input type="text" class="form-control jh-input" id="favoriteTrackArtist" name="favorite_track_artist" value="{{ form.favorite_track_artist.value|default:'' }}" placeholder="e.g., Nao">
                     </div>
 
-                    <div class="mb-4">
-                        <label class="jh-label" for="favoriteTrackImageUrl">{% trans "ジャケット画像URL" %}</label>
-                        <input type="url" class="form-control jh-input" id="favoriteTrackImageUrl" name="favorite_track_image_url" value="{{ form.favorite_track_image_url.value|default:'' }}" placeholder="https://...">
-                    </div>
-
-                    <div class="mb-4">
-                        <label class="jh-label" for="favoriteTrackAppleMusicUrl">{% trans "Apple Music リンク" %}</label>
-                        <input type="url" class="form-control jh-input" id="favoriteTrackAppleMusicUrl" name="favorite_track_apple_music_url" value="{{ form.favorite_track_apple_music_url.value|default:'' }}" placeholder="https://music.apple.com/...">
-                    </div>
-
+                    {# ジャケット画像と Apple Music のリンクは検索結果から選んだときに自動で入る #}
+                    <input type="hidden" id="favoriteTrackImageUrl" name="favorite_track_image_url" value="{{ form.favorite_track_image_url.value|default:'' }}">
+                    <input type="hidden" id="favoriteTrackAppleMusicUrl" name="favorite_track_apple_music_url" value="{{ form.favorite_track_apple_music_url.value|default:'' }}">
                     <input type="hidden" id="favoriteTrackAppleMusicId" name="favorite_track_apple_music_id" value="{{ form.favorite_track_apple_music_id.value|default:'' }}">
                     <input type="hidden" id="favoriteTrackPreviewUrl" name="favorite_track_preview_url" value="{{ form.favorite_track_preview_url.value|default:'' }}">
 
