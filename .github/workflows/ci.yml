@@ -44,6 +44,15 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
+      # 本番の起動時 (docker-entrypoint.sh) と同じく翻訳ファイルをコンパイルし、
+      # .po の重複定義などで web コンテナが起動できなくなる変更をマージ前に止める
+      - name: Compile translations
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends gettext
+          python manage.py compilemessages --ignore=.venv
+        working-directory: my_website
+
       - name: Django system check
         run: python manage.py check
         working-directory: my_website
