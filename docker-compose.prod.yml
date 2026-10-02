@@ -28,6 +28,8 @@ services:
       DB_PORT: 5432
       DJANGO_DEBUG: "False"
       DJANGO_BEHIND_PROXY: "True"
+      # Lounge の添付は Django が権限を確認し、ファイルの送信は Caddy が行う (Caddyfile の handle_response)
+      DJANGO_MEDIA_ACCEL_REDIRECT: "True"
       # Gunicorn のワーカー数。メモリ1GBのサーバーなら2、2GB以上なら3〜4
       WEB_CONCURRENCY: ${WEB_CONCURRENCY:-2}
     command: gunicorn config.wsgi:application --bind 0.0.0.0:8000 --access-logfile -

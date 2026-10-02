@@ -107,3 +107,9 @@ class Message(models.Model):
     @property
     def has_media(self):
         return bool(self.media)
+
+    @property
+    def media_url(self):
+        """添付の URL。権限を確認するビューを通す (media.url は直接配信されないので使わない)。"""
+        from django.urls import reverse
+        return reverse('community:media', args=[self.pk])
