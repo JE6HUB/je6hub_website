@@ -1,15 +1,21 @@
+import json
 import logging
 
 from django.conf import settings
 from django.core.mail import send_mail
+from django.http import Http404, JsonResponse
 from django.shortcuts import render, redirect
 from django.contrib import messages
+from django.utils import translation
 from django.utils.translation import gettext_lazy as _
+from django.views.decorators.http import require_POST
 
 from accounts.ratelimit import ratelimit
 from blog.models import Post
 
 from .forms import ContactForm
+from .models import Resume
+from .resume import HERO_IMAGES, ResumeError, apply_edit, localize
 
 logger = logging.getLogger(__name__)
 
@@ -27,7 +33,32 @@ def home_view(request):
 
 
 def resume_view(request):
-    return render(request, 'core/resume.html')
+    resume = Resume.load()
+    lang = translation.get_language() or 'ja'
+    return render(request, 'core/resume.html', {
+        'resume': localize(resume.data, lang),
+        'can_edit_resume': request.user.is_superuser,
+        'resume_lang': lang,
+        'hero_images': HERO_IMAGES,
+    })
+
+
+@require_POST
+def resume_save_view(request):
+    """Resume ページの編集モードからの保存 (superuser のみ)。表示中の言語の文字だけを書き換える。"""
+    if not request.user.is_superuser:
+        raise Http404
+    try:
+        payload = json.loads(request.body)
+        resume = Resume.load()
+        resume.data = apply_edit(resume.data, payload.get('data'), payload.get('lang'))
+    except (ValueError, AttributeError) as exc:
+        message = str(exc) if isinstance(exc, ResumeError) else str(_('送信内容が不正です。'))
+        return JsonResponse({'ok': False, 'error': message}, status=400)
+    resume.updated_by = request.user
+    resume.save()
+    messages.success(request, _('Resume を更新しました。'))
+    return JsonResponse({'ok': True})
 
 @ratelimit('contact', limit=5, period=3600, methods=('POST',))
 def contact_view(request):
