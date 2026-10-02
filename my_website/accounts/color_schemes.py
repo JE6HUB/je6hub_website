@@ -7,38 +7,56 @@ from django.utils.translation import gettext_lazy as _
 
 DEFAULT_SCHEME = "midnight"
 
-# (値, 表示名, 見本の色: 背景 / カード / アクセント / meta theme-color)
+DARK = "dark"
+LIGHT = "light"
+MODES = [(DARK, _("ダーク")), (LIGHT, _("ライト"))]
+
+# (値, 表示名, モード, 見本の色: 背景 / カード / アクセント)。背景は meta theme-color にも使う
 SCHEMES = [
-    ("midnight", _("ミッドナイト"), ("#000000", "#1c1c1e", "#2997ff")),
-    ("ocean", _("オーシャン"), ("#03101d", "#102338", "#4cc2ff")),
-    ("forest", _("フォレスト"), ("#050f0a", "#13241a", "#4fd18b")),
-    ("ember", _("エンバー"), ("#120a06", "#271912", "#ff9f5a")),
-    ("sakura", _("サクラ"), ("#12070d", "#28141f", "#ff85b8")),
-    ("amethyst", _("アメジスト"), ("#0a0718", "#1b1634", "#a58bff")),
+    ("midnight", _("ミッドナイト"), DARK, ("#000000", "#1c1c1e", "#2997ff")),
+    ("ocean", _("オーシャン"), DARK, ("#03101d", "#102338", "#4cc2ff")),
+    ("forest", _("フォレスト"), DARK, ("#050f0a", "#13241a", "#4fd18b")),
+    ("ember", _("エンバー"), DARK, ("#120a06", "#271912", "#ff9f5a")),
+    ("sakura", _("サクラ"), DARK, ("#12070d", "#28141f", "#ff85b8")),
+    ("amethyst", _("アメジスト"), DARK, ("#0a0718", "#1b1634", "#a58bff")),
+    ("daylight", _("デイライト"), LIGHT, ("#f5f5f7", "#ffffff", "#0066cc")),
+    ("sky", _("スカイ"), LIGHT, ("#eef5fb", "#ffffff", "#0070b8")),
+    ("mint", _("ミント"), LIGHT, ("#eff7f2", "#ffffff", "#12804a")),
+    ("sand", _("サンド"), LIGHT, ("#faf4ee", "#ffffff", "#b84a0a")),
+    ("blossom", _("ブロッサム"), LIGHT, ("#fbf1f5", "#ffffff", "#b82a66")),
+    ("lavender", _("ラベンダー"), LIGHT, ("#f3f1fb", "#ffffff", "#5f3dd6")),
 ]
 
-CHOICES = [(value, label) for value, label, _colors in SCHEMES]
-VALUES = {value for value, _label, _colors in SCHEMES}
+CHOICES = [(value, label) for value, label, _mode, _colors in SCHEMES]
+VALUES = {value for value, _label, _mode, _colors in SCHEMES}
 
 
-def scheme_options(current):
-    """設定ページの選択肢。テンプレートで色見本と選択状態を描くのに使う。"""
+def scheme_groups(current):
+    """設定ページの選択肢を、ダーク / ライトの見出しごとにまとめる。"""
     return [
         {
-            "value": value,
-            "label": label,
-            "bg": bg,
-            "card": card,
-            "accent": accent,
-            "selected": value == current,
+            "mode": mode,
+            "label": mode_label,
+            "options": [
+                {
+                    "value": value,
+                    "label": label,
+                    "bg": bg,
+                    "card": card,
+                    "accent": accent,
+                    "selected": value == current,
+                }
+                for value, label, scheme_mode, (bg, card, accent) in SCHEMES
+                if scheme_mode == mode
+            ],
         }
-        for value, label, (bg, card, accent) in SCHEMES
+        for mode, mode_label in MODES
     ]
 
 
 def theme_color(scheme):
     """<meta name="theme-color"> に入れる背景色。"""
-    for value, _label, (bg, _card, _accent) in SCHEMES:
+    for value, _label, _mode, (bg, _card, _accent) in SCHEMES:
         if value == scheme:
             return bg
-    return SCHEMES[0][2][0]
+    return SCHEMES[0][3][0]

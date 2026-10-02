@@ -39,8 +39,11 @@
     --jh-line: #424245;
     --jh-line-strong: #48484a;
     --jh-text: #f5f5f7;
+    --jh-text-rgb: 245, 245, 247;
+    --jh-text-body: #e8e8ed; /* 記事本文など長い文章の文字 */
     --jh-text-muted: #86868b;
-    --jh-card-border: rgba(255, 255, 255, 0.1);
+    --jh-fg-rgb: 255, 255, 255; /* rgba(var(--jh-fg-rgb), x): 背景に重ねる薄い線や面 (ダークでは白、ライトでは黒) */
+    --jh-card-border: rgba(var(--jh-fg-rgb), 0.1);
     --jh-accent: #2997ff; /* アクセント (リンク / ダーク背景) */
     --jh-accent-rgb: 41, 151, 255;
     --jh-button: #0071e3; /* ボタン */
@@ -48,11 +51,14 @@
     --jh-glass-rgb: 28, 28, 30; /* rgba(var(--jh-glass-rgb), x): 半透明のパネル */
     --jh-nav-bg: rgba(var(--jh-bg-rgb), 0.72);
     --jh-glass: rgba(var(--jh-glass-rgb), 0.6);
-    --jh-glass-border: rgba(255, 255, 255, 0.15);
+    --jh-glass-border: rgba(var(--jh-fg-rgb), 0.15);
+    color-scheme: dark; /* スクロールバーやフォーム部品もスキームに合わせる */
 }
 
 /* =========================================
    Color schemes (設定 → カラースキーム)
+   ダーク: midnight (既定) / ocean / forest / ember / sakura / amethyst
+   ライト: daylight / sky / mint / sand / blossom / lavender
    ========================================= */
 html[data-jh-scheme="ocean"] {
     --jh-bg: #03101d;
@@ -144,6 +150,134 @@ html[data-jh-scheme="amethyst"] {
     --jh-button-hover: #7754ec;
     --jh-glass-rgb: 27, 22, 52;
 }
+
+/* ライトの共通部分: 白いカードと濃い文字。写真や地図の上の文字は白のまま (各 CSS で変数を使っていない) */
+html:is([data-jh-scheme="daylight"], [data-jh-scheme="sky"], [data-jh-scheme="mint"],
+        [data-jh-scheme="sand"], [data-jh-scheme="blossom"], [data-jh-scheme="lavender"]) {
+    color-scheme: light;
+    --jh-card-bg: #ffffff;
+    --jh-fg-rgb: 0, 0, 0;
+    --jh-glass-rgb: 255, 255, 255;
+    --jh-nav-bg: rgba(var(--jh-bg-rgb), 0.78);
+}
+html[data-jh-scheme="daylight"] {
+    --jh-bg: #f5f5f7;
+    --jh-bg-rgb: 245, 245, 247;
+    --jh-surface-sunken: #e8e8ed;
+    --jh-surface: #efeff2;
+    --jh-card-hover: #f2f2f5;
+    --jh-card-bg-2: #e8e8ed;
+    --jh-card-bg-3: #dcdce1;
+    --jh-line: #d2d2d7;
+    --jh-line-strong: #c7c7cc;
+    --jh-text: #1d1d1f;
+    --jh-text-rgb: 29, 29, 31;
+    --jh-text-body: #333336;
+    --jh-text-muted: #6e6e73;
+    --jh-accent: #0066cc;
+    --jh-accent-rgb: 0, 102, 204;
+    --jh-button: #0071e3;
+    --jh-button-hover: #0077ed;
+}
+html[data-jh-scheme="sky"] {
+    --jh-bg: #eef5fb;
+    --jh-bg-rgb: 238, 245, 251;
+    --jh-surface-sunken: #dfeaf5;
+    --jh-surface: #e8f1f9;
+    --jh-card-hover: #f1f7fc;
+    --jh-card-bg-2: #e1ecf6;
+    --jh-card-bg-3: #d3e2f0;
+    --jh-line: #c3d5e6;
+    --jh-line-strong: #b5cadf;
+    --jh-text: #0d1b2a;
+    --jh-text-rgb: 13, 27, 42;
+    --jh-text-body: #22344a;
+    --jh-text-muted: #5b6b7d;
+    --jh-accent: #0070b8;
+    --jh-accent-rgb: 0, 112, 184;
+    --jh-button: #0a7fd0;
+    --jh-button-hover: #168ddf;
+}
+html[data-jh-scheme="mint"] {
+    --jh-bg: #eff7f2;
+    --jh-bg-rgb: 239, 247, 242;
+    --jh-surface-sunken: #deede4;
+    --jh-surface: #e8f3ec;
+    --jh-card-hover: #f2f9f4;
+    --jh-card-bg-2: #e1efe6;
+    --jh-card-bg-3: #d2e6d9;
+    --jh-line: #c2dacb;
+    --jh-line-strong: #b3cebd;
+    --jh-text: #0f2418;
+    --jh-text-rgb: 15, 36, 24;
+    --jh-text-body: #23392c;
+    --jh-text-muted: #5a6f62;
+    --jh-accent: #12804a;
+    --jh-accent-rgb: 18, 128, 74;
+    --jh-button: #188a50;
+    --jh-button-hover: #1f995a;
+}
+html[data-jh-scheme="sand"] {
+    --jh-bg: #faf4ee;
+    --jh-bg-rgb: 250, 244, 238;
+    --jh-surface-sunken: #f0e3d6;
+    --jh-surface: #f6ede4;
+    --jh-card-hover: #fbf6f1;
+    --jh-card-bg-2: #f2e6da;
+    --jh-card-bg-3: #e9d8c8;
+    --jh-line: #e0cdb9;
+    --jh-line-strong: #d5bfa9;
+    --jh-text: #2a1a10;
+    --jh-text-rgb: 42, 26, 16;
+    --jh-text-body: #3d2b1f;
+    --jh-text-muted: #7a6656;
+    --jh-accent: #b84a0a;
+    --jh-accent-rgb: 184, 74, 10;
+    --jh-button: #cc5512;
+    --jh-button-hover: #db611c;
+}
+html[data-jh-scheme="blossom"] {
+    --jh-bg: #fbf1f5;
+    --jh-bg-rgb: 251, 241, 245;
+    --jh-surface-sunken: #f2dfe8;
+    --jh-surface: #f8eaf0;
+    --jh-card-hover: #fcf4f8;
+    --jh-card-bg-2: #f4e2ea;
+    --jh-card-bg-3: #ecd2de;
+    --jh-line: #e4c3d2;
+    --jh-line-strong: #d9b2c4;
+    --jh-text: #2a0f1c;
+    --jh-text-rgb: 42, 15, 28;
+    --jh-text-body: #3d2230;
+    --jh-text-muted: #7d5f6c;
+    --jh-accent: #b82a66;
+    --jh-accent-rgb: 184, 42, 102;
+    --jh-button: #c93673;
+    --jh-button-hover: #d84481;
+}
+html[data-jh-scheme="lavender"] {
+    --jh-bg: #f3f1fb;
+    --jh-bg-rgb: 243, 241, 251;
+    --jh-surface-sunken: #e5e0f4;
+    --jh-surface: #eeebf8;
+    --jh-card-hover: #f6f4fc;
+    --jh-card-bg-2: #e7e3f6;
+    --jh-card-bg-3: #dad4f0;
+    --jh-line: #ccc4e8;
+    --jh-line-strong: #bdb3df;
+    --jh-text: #1a1433;
+    --jh-text-rgb: 26, 20, 51;
+    --jh-text-body: #2d2648;
+    --jh-text-muted: #66607f;
+    --jh-accent: #5f3dd6;
+    --jh-accent-rgb: 95, 61, 214;
+    --jh-button: #6a46e0;
+    --jh-button-hover: #7754ec;
+}
+
+/* Bootstrap の文字色クラスは暗い背景前提なので、スキームの文字色に合わせる */
+.text-light { color: var(--jh-text) !important; }
+.text-muted { color: var(--jh-text-muted) !important; }
 
 /* スキームを切り替えた瞬間の演出 (color-scheme.js)。
    View Transitions に対応したブラウザでは、切り替え前後のページ全体をゆっくりクロスフェードする。
@@ -270,7 +404,7 @@ html[lang="ja"] body { letter-spacing: 0; }
     z-index: 9999;
     display: flex;
     align-items: center;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    border-bottom: 1px solid rgba(var(--jh-fg-rgb), 0.1);
     transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.4s ease;
 }
 
@@ -319,7 +453,7 @@ html[lang="ja"] body { letter-spacing: 0; }
 }
 
 .jh-glass-navbar-link {
-    color: #fff;
+    color: var(--jh-text);
     font-size: 12px;
     font-weight: 600;
     letter-spacing: -0.01em;
@@ -334,7 +468,7 @@ html[lang="ja"] body { letter-spacing: 0; }
 
 .jh-glass-navbar-link:hover {
     opacity: 1;
-    background: rgba(255, 255, 255, 0.1);
+    background: rgba(var(--jh-fg-rgb), 0.1);
 }
 
 .jh-globalnav-list {
@@ -353,7 +487,7 @@ html[lang="ja"] body { letter-spacing: 0; }
 }
 
 .jh-globalnav-link {
-    color: #f5f5f7;
+    color: var(--jh-text);
     font-size: 12px;
     font-weight: 400;
     letter-spacing: -0.01em;
@@ -556,7 +690,7 @@ html[lang="ja"] body { letter-spacing: 0; }
     padding: 0;
     border: none;
     background: none;
-    color: #f5f5f7;
+    color: var(--jh-text);
     font-size: 16px;
     cursor: pointer;
 }
@@ -614,7 +748,7 @@ html[lang="ja"] body { letter-spacing: 0; }
     .jh-mobile-menu-list a {
         display: block;
         padding: 8px 0;
-        color: #f5f5f7;
+        color: var(--jh-text);
         font-family: var(--jh-font-display);
         font-size: 28px;
         font-weight: 600;
@@ -627,7 +761,7 @@ html[lang="ja"] body { letter-spacing: 0; }
         align-items: flex-start;
         gap: 4px;
         padding-top: 20px;
-        border-top: 1px solid rgba(255, 255, 255, 0.12);
+        border-top: 1px solid rgba(var(--jh-fg-rgb), 0.12);
     }
     .jh-mobile-menu-sub {
         display: inline-flex;
@@ -727,7 +861,7 @@ html[lang="ja"] body { letter-spacing: 0; }
     border-radius: 9px;
     cursor: pointer;
 }
-.jh-mention-menu li[aria-selected="true"] { background: rgba(255, 255, 255, 0.1); }
+.jh-mention-menu li[aria-selected="true"] { background: rgba(var(--jh-fg-rgb), 0.1); }
 .jh-mention-avatar {
     width: 28px;
     height: 28px;

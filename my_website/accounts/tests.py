@@ -652,6 +652,20 @@ class ColorSchemeTests(TestCase):
         self.user.refresh_from_db()
         self.assertEqual(self.user.color_scheme, 'forest')
 
+    def test_light_schemes_can_be_saved(self):
+        self.client.force_login(self.user)
+        response = self.client.post(self.url, {'color_scheme': 'daylight'}, HTTP_ACCEPT='application/json')
+        self.assertEqual(response.json(), {'scheme': 'daylight', 'theme_color': '#f5f5f7'})
+        response = self.client.get(reverse('profile'))
+        self.assertContains(response, 'data-jh-scheme="daylight"')
+        self.assertContains(response, 'value="daylight" checked')
+
+    def test_settings_list_dark_and_light_schemes(self):
+        from . import color_schemes
+        groups = color_schemes.scheme_groups('midnight')
+        self.assertEqual([g['mode'] for g in groups], ['dark', 'light'])
+        self.assertTrue(all(len(g['options']) == 6 for g in groups))
+
     def test_unknown_scheme_is_rejected(self):
         self.client.force_login(self.user)
         response = self.client.post(self.url, {'color_scheme': 'x" onload="alert(1)'}, HTTP_ACCEPT='application/json')

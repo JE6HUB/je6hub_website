@@ -141,7 +141,7 @@ def profile_view(request):
         'user_obj': user,
         'form': form,
         'notification_form': NotificationSettingsForm(instance=user),
-        'color_scheme_options': color_schemes.scheme_options(user.color_scheme),
+        'color_scheme_groups': color_schemes.scheme_groups(user.color_scheme),
     }
     return render(request, 'accounts/profile.html', context)
 

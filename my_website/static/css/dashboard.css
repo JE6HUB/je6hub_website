@@ -6,7 +6,7 @@
 
 .db-tabs { display: flex; gap: 6px; overflow-x: auto; margin: 0 0 28px; padding-bottom: 4px; border-bottom: 1px solid var(--jh-card-border); }
 .db-tab { display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; border-radius: 980px; color: var(--jh-text-muted); text-decoration: none; font-size: 14px; white-space: nowrap; }
-.db-tab:hover { color: var(--jh-text); background: rgba(255, 255, 255, 0.06); }
+.db-tab:hover { color: var(--jh-text); background: rgba(var(--jh-fg-rgb), 0.06); }
 .db-tab.is-active { color: #000; background: var(--jh-text); }
 .db-tab .material-symbols-outlined { font-size: 18px; }
 .db-count { display: inline-block; min-width: 20px; padding: 0 6px; border-radius: 10px; background: #ff453a; color: #fff; font-size: 12px; line-height: 20px; text-align: center; }
@@ -38,7 +38,7 @@
 /* 表 */
 .db-table { width: 100%; border-collapse: collapse; font-size: 14px; }
 .db-table th { color: var(--jh-text-muted); font-weight: 500; text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--jh-card-border); white-space: nowrap; }
-.db-table td { padding: 10px; border-bottom: 1px solid rgba(255, 255, 255, 0.05); vertical-align: top; }
+.db-table td { padding: 10px; border-bottom: 1px solid rgba(var(--jh-fg-rgb), 0.05); vertical-align: top; }
 .db-table tr:last-child td { border-bottom: none; }
 .db-table .num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
 .db-table a { color: var(--jh-accent); text-decoration: none; }
@@ -53,7 +53,7 @@
 .db-flag { font-size: 18px; margin-right: 6px; }
 
 /* バッジ */
-.db-badge { display: inline-block; padding: 2px 8px; border-radius: 6px; font-size: 12px; background: rgba(255, 255, 255, 0.1); color: var(--jh-text); white-space: nowrap; }
+.db-badge { display: inline-block; padding: 2px 8px; border-radius: 6px; font-size: 12px; background: rgba(var(--jh-fg-rgb), 0.1); color: var(--jh-text); white-space: nowrap; }
 .db-badge--red { background: rgba(255, 69, 58, 0.2); color: #ff6961; }
 .db-badge--orange { background: rgba(255, 159, 10, 0.2); color: #ffb340; }
 .db-badge--green { background: rgba(48, 209, 88, 0.2); color: #4cd964; }
@@ -64,7 +64,7 @@
 .db-filters .jh-input { width: auto; flex: 1 1 240px; padding: 10px 14px; font-size: 15px; }
 .db-select { background: var(--jh-bg); color: var(--jh-text); border: 1px solid var(--jh-line); border-radius: 12px; padding: 10px 12px; font-size: 15px; }
 .db-btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; border-radius: 980px; border: 1px solid var(--jh-line); background: transparent; color: var(--jh-text); font-size: 14px; text-decoration: none; cursor: pointer; }
-.db-btn:hover { background: rgba(255, 255, 255, 0.08); color: var(--jh-text); }
+.db-btn:hover { background: rgba(var(--jh-fg-rgb), 0.08); color: var(--jh-text); }
 .db-btn--primary { background: var(--jh-button); border-color: var(--jh-button); color: #fff; }
 .db-btn--primary:hover { background: var(--jh-button-hover); color: #fff; }
 .db-btn--danger { border-color: rgba(255, 69, 58, 0.6); color: #ff6961; }

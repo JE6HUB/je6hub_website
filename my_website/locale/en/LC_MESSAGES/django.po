@@ -2141,8 +2141,8 @@ msgstr "Amethyst"
 msgid "カラースキーム"
 msgstr "Color scheme"
 
-msgid "サイト全体の配色を選べます。選ぶとすぐに切り替わり、アカウントに保存されます。"
-msgstr "Choose the colors for the whole site. Your choice applies right away and is saved to your account."
+msgid "サイト全体の配色を、ダークとライトから選べます。選ぶとすぐに切り替わり、アカウントに保存されます。"
+msgstr "Choose dark or light colors for the whole site. Your choice applies right away and is saved to your account."
 
 msgid "カラースキームを保存しました。"
 msgstr "Color scheme saved."
@@ -2155,3 +2155,27 @@ msgstr "Save color scheme"
 
 msgid "カラースキームを保存できませんでした。"
 msgstr "Couldn't save the color scheme."
+
+msgid "ダーク"
+msgstr "Dark"
+
+msgid "ライト"
+msgstr "Light"
+
+msgid "デイライト"
+msgstr "Daylight"
+
+msgid "スカイ"
+msgstr "Sky"
+
+msgid "ミント"
+msgstr "Mint"
+
+msgid "サンド"
+msgstr "Sand"
+
+msgid "ブロッサム"
+msgstr "Blossom"
+
+msgid "ラベンダー"
+msgstr "Lavender"
