@@ -1,0 +1,60 @@
+{% load i18n %}{% comment %}
+Resume のページ内編集 (superuser のみ読み込む)。動きは static/js/resume-edit.js。
+template は「追加」ボタンで足す空の項目。
+{% endcomment %}
+{% get_current_language as LANG %}{% get_language_info for LANG as lang_info %}
+<div id="resume-editor" class="resume-editor" hidden
+     data-save-url="{% url 'core:resume_save' %}" data-lang="{{ resume_lang }}"
+     data-label-add="{% trans '追加' %}" data-label-up="{% trans '上へ移動' %}" data-label-down="{% trans '下へ移動' %}"
+     data-label-remove="{% trans '削除' %}" data-label-link="{% trans 'リンク' %}" data-label-image="{% trans '写真' %}"
+     data-label-no-image="{% trans 'なし' %}" data-label-saving="{% trans '保存中…' %}"
+     data-label-error="{% trans '保存できませんでした。' %}" data-label-discard="{% trans '編集中の内容を破棄しますか？' %}"
+     data-ph-name="{% trans '名前' %}" data-ph-tagline="{% trans '肩書き' %}" data-ph-summary="{% trans '自己紹介' %}"
+     data-ph-value="5+" data-ph-label="{% trans 'ラベル' %}" data-ph-title="{% trans 'タイトル' %}" data-ph-body="{% trans '説明' %}"
+     data-ph-period="{% trans '期間' %}" data-ph-org="{% trans '所属' %}" data-ph-items="{% trans 'スキル (カンマ区切り)' %}">
+    {% csrf_token %}
+    <button type="button" class="resume-editor-start" data-action="start">
+        <span class="material-symbols-outlined" aria-hidden="true">edit</span>{% trans "Resume を編集" %}
+    </button>
+    <div class="resume-editor-bar" role="toolbar" aria-label="{% trans 'Resume の編集' %}">
+        <p class="resume-editor-note">
+            <span class="resume-editor-lang">{{ lang_info.name_local }}</span>
+            <span class="resume-editor-status" aria-live="polite">{% trans "文字をクリックして編集できます。他の言語の文章は変わりません。" %}</span>
+        </p>
+        <div class="resume-editor-actions">
+            <button type="button" class="jh-btn resume-editor-cancel" data-action="cancel">{% trans "キャンセル" %}</button>
+            <button type="button" class="jh-btn jh-btn-accent" data-action="save">{% trans "保存" %}</button>
+        </div>
+    </div>
+    <select class="resume-edit-image-options" hidden>
+        <option value="">{% trans "なし" %}</option>
+        {% for image in hero_images %}<option value="{{ image }}">{{ image }}</option>{% endfor %}
+    </select>
+</div>
+
+<template data-template="stats">
+    <div class="resume-stat" data-item data-id=""><strong data-edit="value"></strong><span data-edit="label"></span></div>
+</template>
+<template data-template="focus">
+    <div class="resume-tile" data-item data-id=""><h3 data-edit="title"></h3><p data-edit="body"></p></div>
+</template>
+<template data-template="experience">
+    <div class="resume-row" data-item data-id="">
+        <div class="resume-row-period" data-edit="period"></div>
+        <div><h3 data-edit="title"></h3><p class="resume-row-org" data-edit="org"></p><ul data-edit-lines="bullets"></ul></div>
+    </div>
+</template>
+<template data-template="skills">
+    <div class="resume-tile" data-item data-id=""><h3 data-edit="title"></h3><p class="resume-skill-list" data-edit="items"></p></div>
+</template>
+<template data-template="projects">
+    <div class="resume-project-item" data-item data-id="" data-url="" data-image="">
+        <a href="#" class="resume-project">
+            <div class="resume-project-body">
+                <h3 data-edit="title"></h3>
+                <p data-edit="body"></p>
+                <span class="jh-link">{% trans "詳しく見る" %}</span>
+            </div>
+        </a>
+    </div>
+</template>

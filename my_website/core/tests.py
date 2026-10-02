@@ -231,3 +231,92 @@ class ScrubMediaCommandTests(TestCase):
         with Image.open(photo.media.path) as img:
             self.assertEqual(len(img.getexif()), 0)
         self.assertFalse(evil.media)
+
+
+class ResumeEditTests(TestCase):
+    def setUp(self):
+        from django.contrib.auth import get_user_model
+        User = get_user_model()
+        self.admin = User.objects.create_superuser(username='boss', email='boss@example.com', password='pass12345')
+        self.member = User.objects.create_user(username='member', password='pass12345')
+
+    def _payload(self, lang='ja', **changes):
+        from .models import Resume
+        from .resume import localize
+        data = localize(Resume.load().data, lang)
+        for item in data['projects']:
+            item.pop('href')
+        data.update(changes)
+        return {'lang': lang, 'data': data}
+
+    def _save(self, payload):
+        import json
+        return self.client.post(reverse('core:resume_save'), json.dumps(payload), content_type='application/json')
+
+    def test_existing_content_is_migrated(self):
+        response = self.client.get('/ja/resume/')
+        self.assertContains(response, 'Accenture Japan')
+        self.assertContains(response, 'システムDBのマイグレーションツール導入')
+        self.assertContains(response, 'href="/ja/blog/"')
+        en = self.client.get('/en/resume/')
+        self.assertContains(en, 'years of experience')
+        self.assertContains(en, 'href="/en/map/"')
+
+    def test_editor_only_for_superuser(self):
+        self.assertNotContains(self.client.get('/ja/resume/'), 'resume-editor')
+        self.client.force_login(self.member)
+        self.assertNotContains(self.client.get('/ja/resume/'), 'resume-editor')
+        self.assertEqual(self._save(self._payload()).status_code, 404)
+        self.client.force_login(self.admin)
+        self.assertContains(self.client.get('/ja/resume/'), 'id="resume-editor"')
+
+    def test_superuser_edits_current_language_only(self):
+        from .models import Resume
+        self.client.force_login(self.admin)
+        payload = self._payload(tagline='AI Architect. Osaka.')
+        payload['data']['experience'] = payload['data']['experience'][1:]  # 先頭を削除
+        payload['data']['experience'].insert(0, {
+            'id': '', 'period': '2027 – 現在', 'title': 'Lead', 'org': 'New Co', 'bullets': ['設計', ' '],
+        })
+        payload['data']['stats'].append({'id': '', 'value': '', 'label': ''})  # 空の行は捨てる
+        response = self._save(payload)
+        self.assertEqual(response.status_code, 200)
+        data = Resume.load().data
+        self.assertEqual(data['tagline'], {'ja': 'AI Architect. Osaka.', 'en': 'AI Architect & Photographer. Tokyo.'})
+        self.assertEqual([row['org']['ja'] for row in data['experience']][0], 'New Co')
+        self.assertEqual(data['experience'][0]['bullets'], {'ja': ['設計'], 'en': []})
+        self.assertEqual(len(data['experience']), 3)
+        self.assertEqual(len(data['stats']), 3)
+        # 残した項目の英語は id で引き継がれる
+        self.assertEqual(data['experience'][1]['org']['en'], data['experience'][1]['org']['ja'])
+        self.assertContains(self.client.get('/ja/resume/'), 'New Co')
+        # 英語ページでは未翻訳の新しい項目は日本語で表示される
+        self.assertContains(self.client.get('/en/resume/'), '2027 – 現在')
+
+    def test_untranslated_fallback_is_not_saved_as_translation(self):
+        from .models import Resume
+        self.client.force_login(self.admin)
+        self.assertEqual(self._save(self._payload('en')).status_code, 200)
+        focus = Resume.load().data['focus'][0]['body']
+        self.assertEqual(focus['en'], '')
+        self.assertTrue(focus['ja'])
+
+    def test_rejects_unsafe_links_and_unknown_images(self):
+        self.client.force_login(self.admin)
+        payload = self._payload()
+        payload['data']['projects'][0]['url'] = 'javascript:alert(1)'
+        response = self._save(payload)
+        self.assertEqual(response.status_code, 400)
+        self.assertFalse(response.json()['ok'])
+        payload = self._payload()
+        payload['data']['projects'][0]['image'] = '../../secret'
+        self.assertEqual(self._save(payload).status_code, 400)
+        self.assertEqual(self._save({'lang': 'fr', 'data': {}}).status_code, 400)
+        self.assertEqual(self.client.post(reverse('core:resume_save'), 'nope', content_type='application/json').status_code, 400)
+
+    def test_text_is_escaped(self):
+        self.client.force_login(self.admin)
+        self._save(self._payload(name='<script>x</script>'))
+        response = self.client.get('/ja/resume/')
+        self.assertNotContains(response, '<script>x</script>')
+        self.assertContains(response, '&lt;script&gt;x&lt;/script&gt;')

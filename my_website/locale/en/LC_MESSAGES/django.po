@@ -2191,3 +2191,67 @@ msgstr "Save account details"
 
 msgid "この端末からサインアウトします。"
 msgstr "Sign out on this device."
+
+#: core/templates/core/_resume_editor.html
+msgid "追加"
+msgstr "Add"
+
+#: core/templates/core/_resume_editor.html
+msgid "上へ移動"
+msgstr "Move up"
+
+#: core/templates/core/_resume_editor.html
+msgid "下へ移動"
+msgstr "Move down"
+
+#: core/templates/core/_resume_editor.html
+msgid "保存できませんでした。"
+msgstr "Could not save."
+
+#: core/templates/core/_resume_editor.html
+msgid "編集中の内容を破棄しますか？"
+msgstr "Discard your unsaved edits?"
+
+#: core/templates/core/_resume_editor.html
+msgid "肩書き"
+msgstr "Tagline"
+
+#: core/templates/core/_resume_editor.html
+msgid "ラベル"
+msgstr "Label"
+
+#: core/templates/core/_resume_editor.html
+msgid "期間"
+msgstr "Period"
+
+#: core/templates/core/_resume_editor.html
+msgid "所属"
+msgstr "Organization"
+
+#: core/templates/core/_resume_editor.html
+msgid "スキル (カンマ区切り)"
+msgstr "Skills (comma-separated)"
+
+#: core/templates/core/_resume_editor.html
+msgid "Resume を編集"
+msgstr "Edit resume"
+
+#: core/templates/core/_resume_editor.html
+msgid "Resume の編集"
+msgstr "Resume editing"
+
+#: core/templates/core/_resume_editor.html
+msgid "文字をクリックして編集できます。他の言語の文章は変わりません。"
+msgstr "Click any text to edit it. Text in other languages stays unchanged."
+
+#: core/templates/core/_resume_editor.html
+msgid "Resume を更新しました。"
+msgstr "Resume updated."
+
+#: core/templates/core/_resume_editor.html
+msgid "送信内容が不正です。"
+msgstr "The submitted content is invalid."
+
+#: core/templates/core/_resume_editor.html
+msgid "内容"
+msgstr "Content"

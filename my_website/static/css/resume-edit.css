@@ -1,0 +1,176 @@
+/* Resume のページ内編集 (superuser のみ読み込む)。色はカラースキームの変数だけを使う。 */
+.resume-editor[hidden] { display: none; }
+.resume-editor {
+    position: fixed;
+    left: 50%;
+    bottom: calc(20px + env(safe-area-inset-bottom));
+    transform: translateX(-50%);
+    z-index: 10001;
+    width: max-content;
+    max-width: calc(100vw - 32px);
+}
+.resume-editor-start {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 22px;
+    border-radius: 980px;
+    border: 1px solid var(--jh-glass-border);
+    background: var(--jh-glass);
+    backdrop-filter: saturate(180%) blur(20px);
+    -webkit-backdrop-filter: saturate(180%) blur(20px);
+    color: var(--jh-text);
+    font-size: 15px;
+    font-weight: 600;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    cursor: pointer;
+}
+.resume-editor-start:hover { color: var(--jh-accent); }
+.resume-editor-start .material-symbols-outlined { font-size: 20px; }
+
+.resume-editor-bar {
+    display: none;
+    align-items: center;
+    gap: 16px;
+    padding: 10px 10px 10px 20px;
+    border-radius: 28px;
+    border: 1px solid var(--jh-glass-border);
+    background: var(--jh-glass);
+    backdrop-filter: saturate(180%) blur(20px);
+    -webkit-backdrop-filter: saturate(180%) blur(20px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+}
+.resume-editing .resume-editor-start { display: none; }
+.resume-editing .resume-editor-bar { display: flex; }
+.resume-editor-note { margin: 0; color: var(--jh-text-muted); font-size: 14px; line-height: 1.4; max-width: 420px; }
+.resume-editor-lang {
+    display: inline-block;
+    margin-right: 6px;
+    padding: 1px 8px;
+    border-radius: 980px;
+    background: rgba(var(--jh-accent-rgb), 0.16);
+    color: var(--jh-accent);
+    font-weight: 600;
+}
+.resume-editor-status.is-error { color: var(--jh-text); font-weight: 600; }
+.resume-editor-actions { display: flex; gap: 8px; flex-shrink: 0; }
+.resume-editor-actions .jh-btn { padding: 9px 18px; font-size: 15px; }
+.resume-editor-cancel { background: rgba(var(--jh-fg-rgb), 0.08); color: var(--jh-text); }
+.resume-editor-cancel:hover { background: rgba(var(--jh-fg-rgb), 0.14); color: var(--jh-text); }
+.resume-editor-actions .jh-btn:disabled { opacity: 0.5; cursor: default; }
+
+/* 編集モード: 編集できる文字に点線の枠 */
+.resume-editing [data-edit],
+.resume-editing [data-edit-lines] {
+    outline: 1px dashed rgba(var(--jh-accent-rgb), 0.55);
+    outline-offset: 4px;
+    border-radius: 4px;
+    min-width: 2em;
+    cursor: text;
+    pointer-events: auto;
+}
+.resume-editing [data-edit]:hover,
+.resume-editing [data-edit-lines]:hover { outline-color: var(--jh-accent); }
+.resume-editing [data-edit]:focus,
+.resume-editing [data-edit-lines]:focus { outline: 2px solid var(--jh-accent); }
+.resume-editing [data-edit]:empty::before {
+    content: attr(data-placeholder);
+    color: var(--jh-text-muted);
+    opacity: 0.6;
+}
+.resume-editing .resume-row ul:empty,
+.resume-editing .resume-row ul { display: block; min-height: 1.6em; }
+.resume-editing .resume-row-org:has(+ ul) { margin-bottom: 12px; }
+.resume-editing #resume { padding-bottom: 120px; }
+.resume-editing .resume-hero-text { pointer-events: auto !important; }
+.resume-editing #resume a { cursor: default; }
+.resume-editing .resume-feature-img { transform: none !important; }
+/* 写真の上の文字 (白) が編集枠で読めなくならないように */
+.resume-editing .resume-feature [data-edit],
+.resume-editing .resume-hero-text [data-edit] { outline-color: rgba(255, 255, 255, 0.6); }
+
+/* 項目ごとの並べ替え・削除 */
+.resume-editing [data-item] { position: relative; }
+.resume-edit-tools {
+    position: absolute;
+    top: -14px;
+    right: 12px;
+    z-index: 3;
+    display: flex;
+    gap: 2px;
+    padding: 3px;
+    border-radius: 980px;
+    background: var(--jh-surface);
+    border: 1px solid var(--jh-line);
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.2);
+}
+.resume-row > .resume-edit-tools { top: 8px; right: -20px; }
+.resume-edit-tools button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    border: 0;
+    border-radius: 50%;
+    background: transparent;
+    color: var(--jh-text-muted);
+    overflow: hidden;
+    cursor: pointer;
+}
+.resume-edit-tools button:hover { background: rgba(var(--jh-fg-rgb), 0.1); color: var(--jh-text); }
+.resume-edit-tools button[data-tool="remove"]:hover { color: var(--jh-accent); }
+.resume-edit-tools .material-symbols-outlined { font-size: 18px; }
+
+.resume-edit-add {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    width: 100%;
+    margin-top: 16px;
+    padding: 14px;
+    border: 1px dashed rgba(var(--jh-accent-rgb), 0.55);
+    border-radius: 20px;
+    background: transparent;
+    color: var(--jh-accent);
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+}
+.resume-edit-add:hover { background: rgba(var(--jh-accent-rgb), 0.08); }
+.resume-edit-add .material-symbols-outlined { font-size: 20px; }
+
+/* プロジェクトのリンク先と写真 */
+.resume-edit-project {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 8px 10px;
+    align-items: center;
+    margin-top: 10px;
+    padding: 12px 14px;
+    border-radius: 16px;
+    background: var(--jh-card-bg);
+    color: var(--jh-text-muted);
+    font-size: 14px;
+}
+.resume-edit-project input,
+.resume-edit-project select {
+    box-sizing: border-box;
+    width: 100%;
+    padding: 6px 10px;
+    border-radius: 10px;
+    border: 1px solid var(--jh-line);
+    background: var(--jh-surface-sunken);
+    color: var(--jh-text);
+    font-size: 14px;
+}
+
+@media (max-width: 600px) {
+    .resume-editor { left: 16px; right: 16px; transform: none; width: auto; }
+    .resume-editor-start { margin: 0 auto; display: flex; }
+    .resume-editor-bar { flex-direction: column; align-items: stretch; gap: 10px; padding: 14px; }
+    .resume-editor-note { max-width: none; }
+    .resume-editor-actions .jh-btn { flex: 1; }
+    .resume-row > .resume-edit-tools { top: -14px; right: 0; }
+}

@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% load static i18n %}
 
-{% block title %}Resume — Yuta Kumadaki{% endblock %}
+{% block title %}Resume — {{ resume.name }}{% endblock %}
 
 {% block glass_preload %}{% include "_liquid_glass_preload.html" with hero="img/hero/resume-marble" %}{% endblock %}
 
@@ -29,14 +29,19 @@
 
     .resume-rows { background: var(--jh-card-bg); border-radius: 28px; padding: 8px 32px; }
     .resume-row { display: grid; grid-template-columns: 180px minmax(0, 1fr); gap: 24px; padding: 28px 0; }
-    .resume-row + .resume-row { border-top: 1px solid #424245; }
+    .resume-row + .resume-row { border-top: 1px solid var(--jh-line); }
     .resume-row-period { color: var(--jh-text-muted); font-size: 17px; }
     .resume-row h3 { font-size: 21px; font-weight: 600; margin: 0; }
     .resume-row-org { color: var(--jh-text-muted); font-size: 17px; margin: 2px 0 12px; }
     .resume-row ul { margin: 0; padding-left: 1.1em; color: var(--jh-text); font-size: 17px; line-height: 1.6; }
+    .resume-row ul:empty { display: none; }
+    .resume-row-org:has(+ ul:empty) { margin-bottom: 0; }
+    .resume-lead { white-space: pre-line; }
 
     .resume-skill-list { margin: 0; color: var(--jh-text-muted); font-size: 17px; line-height: 1.6; }
 
+    .resume-project-item { display: flex; flex-direction: column; }
+    .resume-project-item > a { flex: 1; }
     .resume-projects { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
     .resume-project {
         display: flex;
@@ -91,6 +96,7 @@
     /* ヒーローは写真の上なのでどのスキームでも白文字 */
     #resume-glass-root .jh-hero-title { color: #fff; }
 </style>
+{% if can_edit_resume %}<link rel="stylesheet" href="{% static 'css/resume-edit.css' %}?v=1">{% endif %}
 {% endblock %}
 
 {% block content %}
@@ -100,11 +106,9 @@
     {% include "_hero_image.html" with hero="img/hero/resume-marble" style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; pointer-events: none; z-index: 0;" %}
     <div style="position: absolute; inset: 0; background: linear-gradient(180deg, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.25) 45%, rgba(0,0,0,0.75) 100%); pointer-events: none; z-index: 1;"></div>
 
-    <div style="position: relative; z-index: 2; pointer-events: none;">
-        <h1 class="jh-hero-title">Yuta Kumadaki</h1>
-        <p class="jh-hero-subtitle mx-auto" style="max-width: 600px; color: rgba(245,245,247,0.85);">
-            AI Architect &amp; Photographer. Tokyo.
-        </p>
+    <div class="resume-hero-text" style="position: relative; z-index: 2; pointer-events: none;">
+        <h1 class="jh-hero-title" data-edit="name">{{ resume.name }}</h1>
+        <p class="jh-hero-subtitle mx-auto" style="max-width: 600px; color: rgba(245,245,247,0.85);" data-edit="tagline">{{ resume.tagline }}</p>
     </div>
 
     <a href="{% url 'core:contact' %}" id="resume-glass-btn-1" class="liquid-glass-btn"
@@ -119,125 +123,88 @@
     </a>
 </section>
 
-<div class="resume">
+<div class="resume" id="resume">
 
     <!-- 概要 -->
     <section class="resume-section jh-reveal">
         <h2>{% trans "概要" %}</h2>
-        <p class="resume-lead">
-            {% trans "大規模言語モデル（LLM）のシステム設計・社会実装を専門とするAIアーキテクト。Transformer内部メカニズムの研究（Mechanistic Interpretability）に取り組みながら、Leica Q3によるフォトグラフィーも並行して続けている。" %}
-        </p>
-        <div class="resume-stats" style="margin-top: 40px;">
-            <div class="resume-stat"><strong>5+</strong><span>{% trans "年の経験" %}</span></div>
-            <div class="resume-stat"><strong>10+</strong><span>{% trans "件のプロジェクト" %}</span></div>
-            <div class="resume-stat"><strong>3</strong><span>{% trans "つの専門領域" %}</span></div>
+        <p class="resume-lead" data-edit="summary" data-multiline>{{ resume.summary }}</p>
+        <div class="resume-stats" style="margin-top: 40px;" data-list="stats">
+            {% for stat in resume.stats %}
+            <div class="resume-stat" data-item data-id="{{ stat.id }}"><strong data-edit="value">{{ stat.value }}</strong><span data-edit="label">{{ stat.label }}</span></div>
+            {% endfor %}
         </div>
     </section>
 
     <!-- 専門領域 -->
     <section class="resume-section jh-reveal">
         <h2>{% trans "専門領域" %}</h2>
-        <div class="resume-tiles">
-            <div class="resume-tile">
-                <h3>AI Engineering</h3>
-                <p>{% trans "大規模言語モデルの社会実装とシステム設計。Transformerデコーダモデルの内部機序研究を通じて LLM の内部構造を解明する。" %}</p>
+        <div class="resume-tiles" data-list="focus">
+            {% for tile in resume.focus %}
+            <div class="resume-tile" data-item data-id="{{ tile.id }}">
+                <h3 data-edit="title">{{ tile.title }}</h3>
+                <p data-edit="body">{{ tile.body }}</p>
             </div>
-            <div class="resume-tile">
-                <h3>Photography</h3>
-                <p>{% trans "都市・旅・自然のスナップショット。世界中の記憶を地図にピン留めして共有するサイト「WanderLens」を開発。" %}</p>
-            </div>
-            <div class="resume-tile">
-                <h3>Community</h3>
-                <p>{% trans "AI・クラフトビール・写真をテーマにしたコミュニティ Lounge と、誰でも書ける Blogs を運営。" %}</p>
-            </div>
+            {% endfor %}
         </div>
     </section>
 
     <!-- 経歴 -->
     <section class="resume-section jh-reveal">
         <h2>{% trans "経歴" %}</h2>
-        <div class="resume-rows">
-            <div class="resume-row">
-                <div class="resume-row-period">2026 – {% trans "現在" %}</div>
+        <div class="resume-rows" data-list="experience">
+            {% for row in resume.experience %}
+            <div class="resume-row" data-item data-id="{{ row.id }}">
+                <div class="resume-row-period" data-edit="period">{{ row.period }}</div>
                 <div>
-                    <h3>Application Engineer</h3>
-                    <p class="resume-row-org">Accenture Japan</p>
-                    <ul>
-                        <li>{% trans "システムDBのマイグレーションツール導入" %}</li>
-                        <li>{% trans "RAG / Agent ワークフローにおけるVDBロード高速化" %}</li>
-                    </ul>
+                    <h3 data-edit="title">{{ row.title }}</h3>
+                    <p class="resume-row-org" data-edit="org">{{ row.org }}</p>
+                    <ul data-edit-lines="bullets">{% for bullet in row.bullets %}<li>{{ bullet }}</li>{% endfor %}</ul>
                 </div>
             </div>
-            <div class="resume-row">
-                <div class="resume-row-period">2024 – 2026</div>
-                <div>
-                    <h3>Computer Science|Natural Language Processing</h3>
-                    <p class="resume-row-org">Yoshinaga Lab. @ Graduate School of Information Science and Technology, Tokyo University · Japan</p>
-                </div>
-            </div>
-            <div class="resume-row">
-                <div class="resume-row-period">2020 – 2024</div>
-                <div>
-                    <h3>{% trans "Computer Science|Data Science" %}</h3>
-                    <p class="resume-row-org" style="margin-bottom: 0;">Yukawa Lab. @Keio University · Japan</p>
-                </div>
-            </div>
+            {% endfor %}
         </div>
     </section>
 
     <!-- スキル -->
     <section class="resume-section jh-reveal">
         <h2>{% trans "スキル" %}</h2>
-        <div class="resume-tiles">
-            <div class="resume-tile">
-                <h3>AI / ML</h3>
-                <p class="resume-skill-list">LLM, Transformers, RAG, MCP, Mechanistic Interpretability, Agents</p>
+        <div class="resume-tiles" data-list="skills">
+            {% for skill in resume.skills %}
+            <div class="resume-tile" data-item data-id="{{ skill.id }}">
+                <h3 data-edit="title">{{ skill.title }}</h3>
+                <p class="resume-skill-list" data-edit="items">{{ skill.items }}</p>
             </div>
-            <div class="resume-tile">
-                <h3>{% trans "Engineering" %}</h3>
-                <p class="resume-skill-list">Python, Django, PostgreSQL, Docker, Git</p>
-            </div>
-            <div class="resume-tile">
-                <h3>{% trans "Creative" %}</h3>
-                <p class="resume-skill-list">Photography, UI Design</p>
-            </div>
+            {% endfor %}
         </div>
     </section>
 
     <!-- プロジェクト -->
     <section class="resume-section jh-reveal" id="work" style="scroll-margin-top: 60px;">
         <h2>{% trans "プロジェクト" %}</h2>
-        <div class="resume-projects">
-            <a href="{% url 'blog:list' %}" class="resume-feature">
-                {% include "_hero_image.html" with hero="img/hero/blogs-glass" class="resume-feature-img" sizes="(max-width: 833px) 100vw, 480px" lazy=True %}
-                <div class="resume-feature-text">
-                    <h3>Blogs</h3>
-                    <p>{% trans "テンプレートを選ぶだけで、洗練されたブログを。" %}</p>
-                    <span class="jh-link">{% trans "詳しく見る" %}</span>
-                </div>
-            </a>
-            <a href="{% if user.is_authenticated %}{% url 'community:list' %}{% else %}{% url 'login' %}?next={% url 'community:list' %}{% endif %}" class="resume-feature">
-                {% include "_hero_image.html" with hero="img/hero/lounge-fluid" class="resume-feature-img" sizes="(max-width: 833px) 100vw, 480px" lazy=True %}
-                <div class="resume-feature-text">
-                    <h3>Community Lounge</h3>
-                    <p>{% trans "AI・写真・クラフトビールを語り合う場所。" %}</p>
-                    <span class="jh-link">{% trans "詳しく見る" %}</span>
-                </div>
-            </a>
-            <a href="{% url 'photraveler:map' %}" class="resume-project">
-                <div class="resume-project-body">
-                    <h3>WanderLens</h3>
-                    <p>{% trans "旅の記憶を世界地図にピン留めするフォトトラベルジャーナル。" %}</p>
-                    <span class="jh-link">{% trans "詳しく見る" %}</span>
-                </div>
-            </a>
-            <a href="{% url 'core:home' %}" class="resume-project">
-                <div class="resume-project-body">
-                    <h3>JE6HUB.com</h3>
-                    <p>{% trans "このサイト。Django と PostgreSQL で構築。" %}</p>
-                    <span class="jh-link">{% trans "詳しく見る" %}</span>
-                </div>
-            </a>
+        <div class="resume-projects" data-list="projects">
+            {% for project in resume.projects %}
+            <div class="resume-project-item" data-item data-id="{{ project.id }}" data-url="{{ project.url }}" data-image="{{ project.image }}">
+                {% if project.image %}
+                <a href="{{ project.href }}" class="resume-feature">
+                    {% with "img/hero/"|add:project.image as hero %}{% include "_hero_image.html" with hero=hero class="resume-feature-img" sizes="(max-width: 833px) 100vw, 480px" lazy=True %}{% endwith %}
+                    <div class="resume-feature-text">
+                        <h3 data-edit="title">{{ project.title }}</h3>
+                        <p data-edit="body">{{ project.body }}</p>
+                        <span class="jh-link">{% trans "詳しく見る" %}</span>
+                    </div>
+                </a>
+                {% else %}
+                <a href="{{ project.href }}" class="resume-project">
+                    <div class="resume-project-body">
+                        <h3 data-edit="title">{{ project.title }}</h3>
+                        <p data-edit="body">{{ project.body }}</p>
+                        <span class="jh-link">{% trans "詳しく見る" %}</span>
+                    </div>
+                </a>
+                {% endif %}
+            </div>
+            {% endfor %}
         </div>
     </section>
 </div>
@@ -248,4 +215,10 @@
     <p class="jh-subhead mb-4">{% trans "プロジェクト相談、コラボレーション、または単純に話したいことがあれば。" %}</p>
     <a href="{% url 'core:contact' %}" class="jh-btn jh-btn-primary">{% trans "お問い合わせ" %}</a>
 </section>
+
+{% if can_edit_resume %}{% include "core/_resume_editor.html" %}{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+{% if can_edit_resume %}<script src="{% static 'js/resume-edit.js' %}?v=1" defer></script>{% endif %}
 {% endblock %}
