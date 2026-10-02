@@ -376,9 +376,9 @@ class GuideTourTests(TestCase):
 
     def test_tour_is_translated(self):
         from django.utils import translation
+        # リクエストが有効にした言語をテスト後に残さないよう、override の中で取得する
         with translation.override('en'):
-            url = reverse('core:guide_tour')
-        data = self.client.get(url).json()
+            data = self.client.get(reverse('core:guide_tour')).json()
         self.assertIn('Make it yours', [c['title'] for c in data['chapters']])
         self.assertEqual(data['labels']['skip_step'], 'Skip this step')
         start = next(c for c in data['chapters'] if c['id'] == 'start')
