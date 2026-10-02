@@ -1,0 +1,17 @@
+{% load i18n profiles %}
+{# プロフィール設定と個人設定の上に出す切り替え。active は "profile" か "settings" #}
+<div class="jh-settings-head jh-reveal">
+    <span class="jh-settings-avatar" aria-hidden="true">{% avatar user %}</span>
+    <div class="jh-settings-names">
+        <p class="jh-settings-name">{{ user.public_name }}</p>
+        <p class="jh-settings-handle">@{{ user.username }}</p>
+    </div>
+</div>
+<nav class="jh-settings-tabs jh-reveal" aria-label="{% trans '設定' %}">
+    <a href="{% url 'profile' %}" class="jh-settings-tab"{% if active == "profile" %} aria-current="page"{% endif %}>
+        <i class="fas fa-user-pen" aria-hidden="true"></i>{% trans "プロフィール" %}
+    </a>
+    <a href="{% url 'account_settings' %}" class="jh-settings-tab"{% if active == "settings" %} aria-current="page"{% endif %}>
+        <i class="fas fa-gear" aria-hidden="true"></i>{% trans "個人設定" %}
+    </a>
+</nav>

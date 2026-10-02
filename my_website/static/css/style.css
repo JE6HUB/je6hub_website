@@ -512,12 +512,30 @@ html[lang="ja"] body { letter-spacing: 0; }
 /* ヘッダーのアカウントアイコン */
 .jh-nav-avatar {
     display: inline-block;
-    width: 22px;
-    height: 22px;
+    width: 28px;
+    height: 28px;
     border-radius: 50%;
     object-fit: cover;
     vertical-align: middle;
 }
+
+/* ヘッダー右側のアイコン (アカウント・ダッシュボード・設定・サインアウト)。
+   文字リンクと同じ 12px だと小さすぎるため、押しやすい大きさの枠に入れる */
+.jh-nav-action {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    padding: 0;
+    border: none;
+    border-radius: 50%;
+    background: none;
+    font-size: 18px;
+    cursor: pointer;
+    transition: opacity 0.2s ease, background 0.2s ease;
+}
+.jh-nav-action:hover { background: rgba(var(--jh-fg-rgb), 0.1); }
 
 /* ── Logo ── */
 .jh-logo-link { display: inline-flex; align-items: center; }
@@ -691,7 +709,7 @@ html[lang="ja"] body { letter-spacing: 0; }
     border: none;
     background: none;
     color: var(--jh-text);
-    font-size: 16px;
+    font-size: 19px;
     cursor: pointer;
 }
 
@@ -833,7 +851,35 @@ html[lang="ja"] body { letter-spacing: 0; }
 
 /* ヘッダーのダッシュボードアイコン */
 .jh-dashboard-link { position: relative; }
-.jh-dashboard-badge { position: absolute; top: -6px; right: -10px; min-width: 16px; height: 16px; padding: 0 4px; border-radius: 8px; background: #ff453a; color: #fff; font-size: 10px; line-height: 16px; text-align: center; font-weight: 600; }
+.jh-dashboard-badge { position: absolute; top: -2px; right: -6px; min-width: 16px; height: 16px; padding: 0 4px; border-radius: 8px; background: #ff453a; color: #fff; font-size: 10px; line-height: 16px; text-align: center; font-weight: 600; }
+
+.jh-nav-icon-btn .jh-dashboard-badge { top: 4px; right: 2px; }
+
+/* ── プロフィール設定 / 個人設定の切り替え ── */
+.jh-settings-head { display: flex; align-items: center; justify-content: center; gap: 16px; margin-bottom: 20px; text-align: left; }
+.jh-settings-avatar {
+    flex-shrink: 0;
+    width: 64px; height: 64px; border-radius: 50%;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 28px; font-weight: 600; color: var(--jh-text); background: var(--jh-card-bg-2);
+    overflow: hidden;
+}
+.jh-settings-names { min-width: 0; }
+.jh-settings-name { margin: 0; font-size: 24px; font-weight: 600; color: var(--jh-text); overflow-wrap: anywhere; }
+.jh-settings-handle { margin: 0; font-size: 15px; color: var(--jh-text-muted); }
+.jh-settings-tabs {
+    display: inline-flex; gap: 4px; padding: 4px; margin-bottom: 24px;
+    border-radius: 999px; background: var(--jh-card-bg);
+}
+.jh-settings-tab {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 9px 18px; border-radius: 999px;
+    font-size: 15px; font-weight: 500; text-decoration: none;
+    color: var(--jh-text-muted);
+    transition: background 0.2s ease, color 0.2s ease;
+}
+.jh-settings-tab:hover { color: var(--jh-text); }
+.jh-settings-tab[aria-current="page"] { background: var(--jh-card-bg-3); color: var(--jh-text); }
 
 /* ── @メンション (本文中のリンクと入力補完) ── */
 .jh-mention { color: var(--jh-accent); font-weight: 500; text-decoration: none; }

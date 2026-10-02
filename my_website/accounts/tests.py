@@ -285,8 +285,8 @@ class SecurityHardeningTests(TestCase):
         self.assertEqual(self.client.post('/ja/admin/login/', {'username': 'admin', 'password': 'x'}).status_code, 429)
 
     def _profile_data(self, **overrides):
-        data = {'display_name': '', 'bio': '', 'location': '', 'website': '', 'email': '',
-                'first_name': '', 'last_name': '', 'favorite_track_title': '', 'favorite_track_artist': '',
+        data = {'display_name': '', 'bio': '', 'location': '', 'website': '',
+                'favorite_track_title': '', 'favorite_track_artist': '',
                 'favorite_track_image_url': '', 'favorite_track_apple_music_url': '',
                 'favorite_track_apple_music_id': '', 'favorite_track_preview_url': ''}
         data.update(overrides)
@@ -316,9 +316,44 @@ class SecurityHardeningTests(TestCase):
         User.objects.create_user(username='owner', email='owner@example.com', password='pass12345')
         user = User.objects.create_user(username='u3', password='pass12345')
         self.client.force_login(user)
-        self.client.post(reverse('profile'), self._profile_data(email='OWNER@example.com'))
+        self.client.post(reverse('account_settings'), {'email': 'OWNER@example.com', 'first_name': '', 'last_name': ''})
         user.refresh_from_db()
         self.assertEqual(user.email, '')
+
+    def test_settings_page_saves_email_and_name(self):
+        user = User.objects.create_user(username='u4', password='pass12345')
+        self.client.force_login(user)
+        response = self.client.post(reverse('account_settings'),
+                                    {'email': 'u4@example.com', 'first_name': 'Taro', 'last_name': 'Yamada'})
+        self.assertRedirects(response, reverse('account_settings') + '#account', fetch_redirect_response=False)
+        user.refresh_from_db()
+        self.assertEqual((user.email, user.first_name, user.last_name), ('u4@example.com', 'Taro', 'Yamada'))
+
+    def test_profile_and_settings_are_separate_pages(self):
+        user = User.objects.create_user(username='u5', email='u5@example.com', password='pass12345')
+        self.client.force_login(user)
+        profile = self.client.get(reverse('profile'))
+        self.assertContains(profile, 'name="bio"')
+        self.assertNotContains(profile, 'name="email"')
+        self.assertNotContains(profile, 'id="jh-scheme-form"')
+        settings_page = self.client.get(reverse('account_settings'))
+        self.assertContains(settings_page, 'name="email"')
+        self.assertContains(settings_page, 'id="jh-scheme-form"')
+        self.assertNotContains(settings_page, 'name="bio"')
+        # ヘッダーから個人設定へ行ける
+        self.assertContains(profile, f'href="{reverse("account_settings")}"')
+
+    def test_profile_post_keeps_email(self):
+        user = User.objects.create_user(username='u6', email='u6@example.com', password='pass12345')
+        self.client.force_login(user)
+        self.client.post(reverse('profile'), self._profile_data(bio='hi'))
+        user.refresh_from_db()
+        self.assertEqual((user.bio, user.email), ('hi', 'u6@example.com'))
+
+    def test_settings_requires_login(self):
+        response = self.client.get(reverse('account_settings'))
+        self.assertEqual(response.status_code, 302)
+        self.assertIn(reverse('login'), response['Location'])
 
     def test_apple_login_requires_post(self):
         response = self.client.get(reverse('apple_login'))
@@ -618,12 +653,12 @@ class AccountDeleteTests(TestCase):
         self.user.save()
         self.client.force_login(self.user)
         response = self.client.post(self.url, {'confirm': self.password, 'agree': 'on'})
-        self.assertRedirects(response, reverse('profile'), fetch_redirect_response=False)
+        self.assertRedirects(response, reverse('account_settings'), fetch_redirect_response=False)
         self.assertTrue(User.objects.filter(pk=self.user.pk).exists())
 
-    def test_profile_links_to_delete_page(self):
+    def test_settings_links_to_delete_page(self):
         self.client.force_login(self.user)
-        self.assertContains(self.client.get(reverse('profile')), self.url)
+        self.assertContains(self.client.get(reverse('account_settings')), self.url)
 
 
 class ColorSchemeTests(TestCase):
@@ -648,7 +683,7 @@ class ColorSchemeTests(TestCase):
     def test_form_post_without_javascript_redirects_to_settings(self):
         self.client.force_login(self.user)
         response = self.client.post(self.url, {'color_scheme': 'forest'})
-        self.assertRedirects(response, reverse('profile') + '#appearance', fetch_redirect_response=False)
+        self.assertRedirects(response, reverse('account_settings') + '#appearance', fetch_redirect_response=False)
         self.user.refresh_from_db()
         self.assertEqual(self.user.color_scheme, 'forest')
 
@@ -656,7 +691,7 @@ class ColorSchemeTests(TestCase):
         self.client.force_login(self.user)
         response = self.client.post(self.url, {'color_scheme': 'daylight'}, HTTP_ACCEPT='application/json')
         self.assertEqual(response.json(), {'scheme': 'daylight', 'theme_color': '#f5f5f7'})
-        response = self.client.get(reverse('profile'))
+        response = self.client.get(reverse('account_settings'))
         self.assertContains(response, 'data-jh-scheme="daylight"')
         self.assertContains(response, 'value="daylight" checked')
 
@@ -682,7 +717,7 @@ class ColorSchemeTests(TestCase):
         self.user.color_scheme = 'sakura'
         self.user.save(update_fields=['color_scheme'])
         self.client.force_login(self.user)
-        response = self.client.get(reverse('profile'))
+        response = self.client.get(reverse('account_settings'))
         self.assertContains(response, 'data-jh-scheme="sakura" data-jh-scheme-account')
         self.assertContains(response, '<meta name="theme-color" content="#12070d">', html=True)
         self.assertContains(response, 'id="jh-scheme-form"')

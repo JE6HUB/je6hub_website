@@ -16,7 +16,7 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
     <link href="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/6.4.0/mdb.min.css" rel="stylesheet" />
 
-    <link href="{% static 'css/style.css' %}?v=25" rel="stylesheet" />
+    <link href="{% static 'css/style.css' %}?v=26" rel="stylesheet" />
     <link href="{% static 'css/profile.css' %}?v=5" rel="stylesheet" />
 
     {% block extra_head %}{% endblock %}
@@ -64,7 +64,7 @@
             <li class="jh-globalnav-item"><a class="jh-globalnav-link" href="{% url 'core:contact' %}">{% trans "Contact" %}</a></li>
             
             <!-- Auth & Language -->
-            <li class="jh-globalnav-item ms-auto d-flex align-items-center gap-3">
+            <li class="jh-globalnav-item ms-auto d-flex align-items-center gap-2">
                 <form action="{% url 'set_language' %}" method="post" class="m-0">
                     {% csrf_token %}
                     <input name="next" type="hidden" value="{{ redirect_to }}">
@@ -80,27 +80,30 @@
                 </form>
 
                 {% if user.is_authenticated %}
-                    <a href="{{ user.get_absolute_url }}" class="jh-globalnav-link" data-nav-account data-profile="{{ user.username }}" aria-haspopup="dialog" aria-label="{{ user.public_name }}" title="{{ user.public_name }}">
+                    <a href="{{ user.get_absolute_url }}" class="jh-globalnav-link jh-nav-action" data-nav-account data-profile="{{ user.username }}" aria-haspopup="dialog" aria-label="{{ user.public_name }}" title="{{ user.public_name }}">
                         {% if user.avatar %}<img class="jh-nav-avatar" src="{{ user.avatar.url }}" alt="">{% else %}<i class="fas fa-user"></i>{% endif %}
                     </a>
                     {% if user.is_superuser %}
                         {% with open_reports=dashboard_open_reports %}
-                        <a href="{% url 'dashboard:index' %}" class="jh-globalnav-link jh-dashboard-link" aria-label="{% trans '管理者ダッシュボード' %}{% if open_reports %} ({% blocktrans count counter=open_reports %}未対応の通報 {{ counter }} 件{% plural %}未対応の通報 {{ counter }} 件{% endblocktrans %}){% endif %}" title="{% trans '管理者ダッシュボード' %}">
+                        <a href="{% url 'dashboard:index' %}" class="jh-globalnav-link jh-nav-action jh-dashboard-link" aria-label="{% trans '管理者ダッシュボード' %}{% if open_reports %} ({% blocktrans count counter=open_reports %}未対応の通報 {{ counter }} 件{% plural %}未対応の通報 {{ counter }} 件{% endblocktrans %}){% endif %}" title="{% trans '管理者ダッシュボード' %}">
                             <i class="fas fa-gauge-high"></i>{% if open_reports %}<span class="jh-dashboard-badge" aria-hidden="true">{{ open_reports }}</span>{% endif %}
                         </a>
                         {% endwith %}
                     {% endif %}
                     {% if user.is_staff %}
-                        <a href="{% url 'admin:index' %}" class="jh-globalnav-link" aria-label="{% trans 'Admin' %}">
-                            <i class="fas fa-cog"></i>
+                        <a href="{% url 'admin:index' %}" class="jh-globalnav-link jh-nav-action" aria-label="{% trans 'Admin' %}" title="{% trans 'Admin' %}">
+                            <i class="fas fa-screwdriver-wrench"></i>
                         </a>
                     {% endif %}
-                    <form action="{% url 'logout' %}" method="post" class="m-0 p-0">
+                    <a href="{% url 'account_settings' %}" class="jh-globalnav-link jh-nav-action" aria-label="{% trans '個人設定' %}" title="{% trans '個人設定' %}">
+                        <i class="fas fa-gear"></i>
+                    </a>
+                    <form action="{% url 'logout' %}" method="post" class="m-0 p-0 d-flex">
                         {% csrf_token %}
-                        <button type="submit" class="jh-globalnav-link bg-transparent border-0 p-0 m-0"><i class="fas fa-sign-out-alt"></i></button>
+                        <button type="submit" class="jh-globalnav-link jh-nav-action" aria-label="{% trans 'サインアウト' %}" title="{% trans 'サインアウト' %}"><i class="fas fa-right-from-bracket"></i></button>
                     </form>
                 {% else %}
-                    <a href="{% url 'login' %}" class="jh-globalnav-link"><i class="fas fa-user-circle"></i></a>
+                    <a href="{% url 'login' %}" class="jh-globalnav-link jh-nav-action" aria-label="{% trans 'サインイン' %}" title="{% trans 'サインイン' %}"><i class="fas fa-user-circle"></i></a>
                 {% endif %}
             </li>
 
@@ -141,16 +144,17 @@
         <div class="jh-mobile-menu-footer">
             {% if user.is_authenticated %}
                 <a href="{{ user.get_absolute_url }}" class="jh-mobile-menu-sub" data-nav-account>{% if user.avatar %}<img class="jh-nav-avatar" src="{{ user.avatar.url }}" alt="">{% else %}<i class="fas fa-user"></i>{% endif %}{{ user.public_name }}</a>
-                <a href="{% url 'profile' %}" class="jh-mobile-menu-sub"><i class="fas fa-pen"></i>{% trans "プロフィールを編集" %}</a>
+                <a href="{% url 'profile' %}" class="jh-mobile-menu-sub"><i class="fas fa-user-pen"></i>{% trans "プロフィール設定" %}</a>
+                <a href="{% url 'account_settings' %}" class="jh-mobile-menu-sub"><i class="fas fa-gear"></i>{% trans "個人設定" %}</a>
                 {% if user.is_superuser %}
                     <a href="{% url 'dashboard:index' %}" class="jh-mobile-menu-sub"><i class="fas fa-gauge-high"></i>{% trans "管理者ダッシュボード" %}</a>
                 {% endif %}
                 {% if user.is_staff %}
-                    <a href="{% url 'admin:index' %}" class="jh-mobile-menu-sub"><i class="fas fa-cog"></i>{% trans "Admin" %}</a>
+                    <a href="{% url 'admin:index' %}" class="jh-mobile-menu-sub"><i class="fas fa-screwdriver-wrench"></i>{% trans "Admin" %}</a>
                 {% endif %}
                 <form action="{% url 'logout' %}" method="post" class="m-0">
                     {% csrf_token %}
-                    <button type="submit" class="jh-mobile-menu-sub"><i class="fas fa-sign-out-alt"></i>{% trans "サインアウト" %}</button>
+                    <button type="submit" class="jh-mobile-menu-sub"><i class="fas fa-right-from-bracket"></i>{% trans "サインアウト" %}</button>
                 </form>
             {% else %}
                 <a href="{% url 'login' %}" class="jh-mobile-menu-sub"><i class="fas fa-user-circle"></i>{% trans "サインイン" %}</a>

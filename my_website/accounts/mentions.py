@@ -131,7 +131,7 @@ def notify_mentions(request, text, *, author, url, where, audience=None):
         'author': author,
         'excerpt': Truncator(text).chars(300),
         'url': request.build_absolute_uri(url),
-        'settings_url': request.build_absolute_uri(reverse('profile') + '#notifications'),
+        'settings_url': request.build_absolute_uri(reverse('account_settings') + '#notifications'),
     }
     # 文言はサイトの既定言語 (受け取る人の言語は分からないため)
     with override(settings.LANGUAGE_CODE):
