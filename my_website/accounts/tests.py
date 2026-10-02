@@ -624,3 +624,71 @@ class AccountDeleteTests(TestCase):
     def test_profile_links_to_delete_page(self):
         self.client.force_login(self.user)
         self.assertContains(self.client.get(reverse('profile')), self.url)
+
+
+class ColorSchemeTests(TestCase):
+    password = 'a-very-strong-pass-1'
+
+    def setUp(self):
+        cache.clear()
+        self.user = User.objects.create_user('painter', 'painter@example.com', self.password)
+        self.url = reverse('color_scheme_settings')
+
+    def test_new_users_get_the_default_scheme(self):
+        self.assertEqual(self.user.color_scheme, 'midnight')
+
+    def test_saving_with_fetch_returns_json_without_redirect(self):
+        self.client.force_login(self.user)
+        response = self.client.post(self.url, {'color_scheme': 'ocean'}, HTTP_ACCEPT='application/json')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json(), {'scheme': 'ocean', 'theme_color': '#03101d'})
+        self.user.refresh_from_db()
+        self.assertEqual(self.user.color_scheme, 'ocean')
+
+    def test_form_post_without_javascript_redirects_to_settings(self):
+        self.client.force_login(self.user)
+        response = self.client.post(self.url, {'color_scheme': 'forest'})
+        self.assertRedirects(response, reverse('profile') + '#appearance', fetch_redirect_response=False)
+        self.user.refresh_from_db()
+        self.assertEqual(self.user.color_scheme, 'forest')
+
+    def test_light_schemes_can_be_saved(self):
+        self.client.force_login(self.user)
+        response = self.client.post(self.url, {'color_scheme': 'daylight'}, HTTP_ACCEPT='application/json')
+        self.assertEqual(response.json(), {'scheme': 'daylight', 'theme_color': '#f5f5f7'})
+        response = self.client.get(reverse('profile'))
+        self.assertContains(response, 'data-jh-scheme="daylight"')
+        self.assertContains(response, 'value="daylight" checked')
+
+    def test_settings_list_dark_and_light_schemes(self):
+        from . import color_schemes
+        groups = color_schemes.scheme_groups('midnight')
+        self.assertEqual([g['mode'] for g in groups], ['dark', 'light'])
+        self.assertTrue(all(len(g['options']) == 6 for g in groups))
+
+    def test_unknown_scheme_is_rejected(self):
+        self.client.force_login(self.user)
+        response = self.client.post(self.url, {'color_scheme': 'x" onload="alert(1)'}, HTTP_ACCEPT='application/json')
+        self.assertEqual(response.status_code, 400)
+        self.user.refresh_from_db()
+        self.assertEqual(self.user.color_scheme, 'midnight')
+
+    def test_requires_login(self):
+        response = self.client.post(self.url, {'color_scheme': 'ocean'})
+        self.assertEqual(response.status_code, 302)
+        self.assertIn(reverse('login'), response['Location'])
+
+    def test_pages_render_with_the_saved_scheme(self):
+        self.user.color_scheme = 'sakura'
+        self.user.save(update_fields=['color_scheme'])
+        self.client.force_login(self.user)
+        response = self.client.get(reverse('profile'))
+        self.assertContains(response, 'data-jh-scheme="sakura" data-jh-scheme-account')
+        self.assertContains(response, '<meta name="theme-color" content="#12070d">', html=True)
+        self.assertContains(response, 'id="jh-scheme-form"')
+        self.assertContains(response, 'value="sakura" checked')
+
+    def test_logged_out_pages_use_the_default_scheme(self):
+        response = self.client.get(reverse('login'))
+        self.assertNotContains(response, 'data-jh-scheme="')
+        self.assertContains(response, '<meta name="theme-color" content="#000000">', html=True)

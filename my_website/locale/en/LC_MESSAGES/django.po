@@ -2119,3 +2119,63 @@ msgstr "Sent to: %(email)s"
 
 msgid "通知設定を保存"
 msgstr "Save notification settings"
+
+msgid "ミッドナイト"
+msgstr "Midnight"
+
+msgid "オーシャン"
+msgstr "Ocean"
+
+msgid "フォレスト"
+msgstr "Forest"
+
+msgid "エンバー"
+msgstr "Ember"
+
+msgid "サクラ"
+msgstr "Sakura"
+
+msgid "アメジスト"
+msgstr "Amethyst"
+
+msgid "カラースキーム"
+msgstr "Color scheme"
+
+msgid "サイト全体の配色を、ダークとライトから選べます。選ぶとすぐに切り替わり、アカウントに保存されます。"
+msgstr "Choose dark or light colors for the whole site. Your choice applies right away and is saved to your account."
+
+msgid "カラースキームを保存しました。"
+msgstr "Color scheme saved."
+
+msgid "保存できませんでした。もう一度お試しください。"
+msgstr "Couldn't save. Please try again."
+
+msgid "カラースキームを保存"
+msgstr "Save color scheme"
+
+msgid "カラースキームを保存できませんでした。"
+msgstr "Couldn't save the color scheme."
+
+msgid "ダーク"
+msgstr "Dark"
+
+msgid "ライト"
+msgstr "Light"
+
+msgid "デイライト"
+msgstr "Daylight"
+
+msgid "スカイ"
+msgstr "Sky"
+
+msgid "ミント"
+msgstr "Mint"
+
+msgid "サンド"
+msgstr "Sand"
+
+msgid "ブロッサム"
+msgstr "Blossom"
+
+msgid "ラベンダー"
+msgstr "Lavender"

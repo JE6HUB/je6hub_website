@@ -185,6 +185,14 @@ class NotificationSettingsForm(forms.ModelForm):
         fields = ("notify_mentions_by_email",)
 
 
+class ColorSchemeForm(forms.ModelForm):
+    """カラースキーム (プロフィール編集とは別に保存する)。"""
+
+    class Meta:
+        model = CustomUser
+        fields = ("color_scheme",)
+
+
 class AccountDeleteForm(forms.Form):
     """退会の確認。パスワードでログインする人はパスワード、ソーシャルログインだけの人はユーザー名を入力する。"""
     confirm = forms.CharField(strip=False, widget=forms.PasswordInput)

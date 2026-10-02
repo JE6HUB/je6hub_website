@@ -24,19 +24,279 @@
     --mdb-font-roboto: var(--jh-font-text);
     --mdb-font-monospace: var(--jh-font-mono);
 
-    /* Colors - Pure Dark Mode */
+    /* Colors — カラースキーム「ミッドナイト」(既定)。
+       ほかのスキームは下の html[data-jh-scheme="..."] で同じ変数を上書きする。
+       どのスキームも暗い背景なので、白の半透明 (rgba(255, 255, 255, x)) の線や面はそのまま使える。
+       スキームを足すときは accounts/color_schemes.py にも追加する。 */
     --jh-bg: #000000;
+    --jh-bg-rgb: 0, 0, 0; /* rgba(var(--jh-bg-rgb), x): 背景へ溶かすグラデーション用 */
+    --jh-surface-sunken: #0b0b0c;
+    --jh-surface: #111113;
+    --jh-card-bg: #1c1c1e; /* 枠線なしカード用: 背景から面の明度差で浮かせる */
+    --jh-card-hover: #242426;
+    --jh-card-bg-2: #2c2c2e;
+    --jh-card-bg-3: #3a3a3c;
+    --jh-line: #424245;
+    --jh-line-strong: #48484a;
     --jh-text: #f5f5f7;
+    --jh-text-rgb: 245, 245, 247;
+    --jh-text-body: #e8e8ed; /* 記事本文など長い文章の文字 */
     --jh-text-muted: #86868b;
-    --jh-card-bg: #1c1c1e; /* 枠線なしカード用: 黒背景から面の明度差で浮かせる */
-    --jh-card-border: rgba(255, 255, 255, 0.1);
-    --jh-accent: #2997ff; /* アクセントの青 (リンク / ダーク背景) */
-    --jh-button: #0071e3; /* ボタンの青 */
+    --jh-fg-rgb: 255, 255, 255; /* rgba(var(--jh-fg-rgb), x): 背景に重ねる薄い線や面 (ダークでは白、ライトでは黒) */
+    --jh-card-border: rgba(var(--jh-fg-rgb), 0.1);
+    --jh-accent: #2997ff; /* アクセント (リンク / ダーク背景) */
+    --jh-accent-rgb: 41, 151, 255;
+    --jh-button: #0071e3; /* ボタン */
     --jh-button-hover: #0077ed;
-    --jh-nav-bg: rgba(0, 0, 0, 0.72);
-    --jh-glass: rgba(28, 28, 30, 0.6);
-    --jh-glass-border: rgba(255, 255, 255, 0.15);
+    --jh-glass-rgb: 28, 28, 30; /* rgba(var(--jh-glass-rgb), x): 半透明のパネル */
+    --jh-nav-bg: rgba(var(--jh-bg-rgb), 0.72);
+    --jh-glass: rgba(var(--jh-glass-rgb), 0.6);
+    --jh-glass-border: rgba(var(--jh-fg-rgb), 0.15);
+    color-scheme: dark; /* スクロールバーやフォーム部品もスキームに合わせる */
 }
+
+/* =========================================
+   Color schemes (設定 → カラースキーム)
+   ダーク: midnight (既定) / ocean / forest / ember / sakura / amethyst
+   ライト: daylight / sky / mint / sand / blossom / lavender
+   ========================================= */
+html[data-jh-scheme="ocean"] {
+    --jh-bg: #03101d;
+    --jh-bg-rgb: 3, 16, 29;
+    --jh-surface-sunken: #061423;
+    --jh-surface: #0a1a2c;
+    --jh-card-bg: #102338;
+    --jh-card-hover: #162b43;
+    --jh-card-bg-2: #1b3250;
+    --jh-card-bg-3: #26405f;
+    --jh-line: #2f4a69;
+    --jh-line-strong: #3a5677;
+    --jh-text-muted: #8a9bb0;
+    --jh-accent: #4cc2ff;
+    --jh-accent-rgb: 76, 194, 255;
+    --jh-button: #0a7fd0;
+    --jh-button-hover: #168ddf;
+    --jh-glass-rgb: 16, 35, 56;
+}
+html[data-jh-scheme="forest"] {
+    --jh-bg: #050f0a;
+    --jh-bg-rgb: 5, 15, 10;
+    --jh-surface-sunken: #08140d;
+    --jh-surface: #0c1a12;
+    --jh-card-bg: #13241a;
+    --jh-card-hover: #182c20;
+    --jh-card-bg-2: #1e3527;
+    --jh-card-bg-3: #294433;
+    --jh-line: #314d3b;
+    --jh-line-strong: #3a5a45;
+    --jh-text-muted: #87a090;
+    --jh-accent: #4fd18b;
+    --jh-accent-rgb: 79, 209, 139;
+    --jh-button: #188a50;
+    --jh-button-hover: #1f995a;
+    --jh-glass-rgb: 19, 36, 26;
+}
+html[data-jh-scheme="ember"] {
+    --jh-bg: #120a06;
+    --jh-bg-rgb: 18, 10, 6;
+    --jh-surface-sunken: #170d08;
+    --jh-surface: #1d120c;
+    --jh-card-bg: #271912;
+    --jh-card-hover: #2f1f17;
+    --jh-card-bg-2: #38261c;
+    --jh-card-bg-3: #483226;
+    --jh-line: #523a2c;
+    --jh-line-strong: #5e4434;
+    --jh-text-muted: #a8968a;
+    --jh-accent: #ff9f5a;
+    --jh-accent-rgb: 255, 159, 90;
+    --jh-button: #cc5512;
+    --jh-button-hover: #db611c;
+    --jh-glass-rgb: 39, 25, 18;
+}
+html[data-jh-scheme="sakura"] {
+    --jh-bg: #12070d;
+    --jh-bg-rgb: 18, 7, 13;
+    --jh-surface-sunken: #170a11;
+    --jh-surface: #1e0e17;
+    --jh-card-bg: #28141f;
+    --jh-card-hover: #301a26;
+    --jh-card-bg-2: #3a202e;
+    --jh-card-bg-3: #4a2b3c;
+    --jh-line: #553245;
+    --jh-line-strong: #613a50;
+    --jh-text-muted: #ad91a0;
+    --jh-accent: #ff85b8;
+    --jh-accent-rgb: 255, 133, 184;
+    --jh-button: #c93673;
+    --jh-button-hover: #d84481;
+    --jh-glass-rgb: 40, 20, 31;
+}
+html[data-jh-scheme="amethyst"] {
+    --jh-bg: #0a0718;
+    --jh-bg-rgb: 10, 7, 24;
+    --jh-surface-sunken: #0e0a1f;
+    --jh-surface: #130f28;
+    --jh-card-bg: #1b1634;
+    --jh-card-hover: #221c3f;
+    --jh-card-bg-2: #2a2349;
+    --jh-card-bg-3: #362e5b;
+    --jh-line: #3e3566;
+    --jh-line-strong: #483e74;
+    --jh-text-muted: #9590b0;
+    --jh-accent: #a58bff;
+    --jh-accent-rgb: 165, 139, 255;
+    --jh-button: #6a46e0;
+    --jh-button-hover: #7754ec;
+    --jh-glass-rgb: 27, 22, 52;
+}
+
+/* ライトの共通部分: 白いカードと濃い文字。写真や地図の上の文字は白のまま (各 CSS で変数を使っていない) */
+html:is([data-jh-scheme="daylight"], [data-jh-scheme="sky"], [data-jh-scheme="mint"],
+        [data-jh-scheme="sand"], [data-jh-scheme="blossom"], [data-jh-scheme="lavender"]) {
+    color-scheme: light;
+    --jh-card-bg: #ffffff;
+    --jh-fg-rgb: 0, 0, 0;
+    --jh-glass-rgb: 255, 255, 255;
+    --jh-nav-bg: rgba(var(--jh-bg-rgb), 0.78);
+}
+html[data-jh-scheme="daylight"] {
+    --jh-bg: #f5f5f7;
+    --jh-bg-rgb: 245, 245, 247;
+    --jh-surface-sunken: #e8e8ed;
+    --jh-surface: #efeff2;
+    --jh-card-hover: #f2f2f5;
+    --jh-card-bg-2: #e8e8ed;
+    --jh-card-bg-3: #dcdce1;
+    --jh-line: #d2d2d7;
+    --jh-line-strong: #c7c7cc;
+    --jh-text: #1d1d1f;
+    --jh-text-rgb: 29, 29, 31;
+    --jh-text-body: #333336;
+    --jh-text-muted: #6e6e73;
+    --jh-accent: #0066cc;
+    --jh-accent-rgb: 0, 102, 204;
+    --jh-button: #0071e3;
+    --jh-button-hover: #0077ed;
+}
+html[data-jh-scheme="sky"] {
+    --jh-bg: #eef5fb;
+    --jh-bg-rgb: 238, 245, 251;
+    --jh-surface-sunken: #dfeaf5;
+    --jh-surface: #e8f1f9;
+    --jh-card-hover: #f1f7fc;
+    --jh-card-bg-2: #e1ecf6;
+    --jh-card-bg-3: #d3e2f0;
+    --jh-line: #c3d5e6;
+    --jh-line-strong: #b5cadf;
+    --jh-text: #0d1b2a;
+    --jh-text-rgb: 13, 27, 42;
+    --jh-text-body: #22344a;
+    --jh-text-muted: #5b6b7d;
+    --jh-accent: #0070b8;
+    --jh-accent-rgb: 0, 112, 184;
+    --jh-button: #0a7fd0;
+    --jh-button-hover: #168ddf;
+}
+html[data-jh-scheme="mint"] {
+    --jh-bg: #eff7f2;
+    --jh-bg-rgb: 239, 247, 242;
+    --jh-surface-sunken: #deede4;
+    --jh-surface: #e8f3ec;
+    --jh-card-hover: #f2f9f4;
+    --jh-card-bg-2: #e1efe6;
+    --jh-card-bg-3: #d2e6d9;
+    --jh-line: #c2dacb;
+    --jh-line-strong: #b3cebd;
+    --jh-text: #0f2418;
+    --jh-text-rgb: 15, 36, 24;
+    --jh-text-body: #23392c;
+    --jh-text-muted: #5a6f62;
+    --jh-accent: #12804a;
+    --jh-accent-rgb: 18, 128, 74;
+    --jh-button: #188a50;
+    --jh-button-hover: #1f995a;
+}
+html[data-jh-scheme="sand"] {
+    --jh-bg: #faf4ee;
+    --jh-bg-rgb: 250, 244, 238;
+    --jh-surface-sunken: #f0e3d6;
+    --jh-surface: #f6ede4;
+    --jh-card-hover: #fbf6f1;
+    --jh-card-bg-2: #f2e6da;
+    --jh-card-bg-3: #e9d8c8;
+    --jh-line: #e0cdb9;
+    --jh-line-strong: #d5bfa9;
+    --jh-text: #2a1a10;
+    --jh-text-rgb: 42, 26, 16;
+    --jh-text-body: #3d2b1f;
+    --jh-text-muted: #7a6656;
+    --jh-accent: #b84a0a;
+    --jh-accent-rgb: 184, 74, 10;
+    --jh-button: #cc5512;
+    --jh-button-hover: #db611c;
+}
+html[data-jh-scheme="blossom"] {
+    --jh-bg: #fbf1f5;
+    --jh-bg-rgb: 251, 241, 245;
+    --jh-surface-sunken: #f2dfe8;
+    --jh-surface: #f8eaf0;
+    --jh-card-hover: #fcf4f8;
+    --jh-card-bg-2: #f4e2ea;
+    --jh-card-bg-3: #ecd2de;
+    --jh-line: #e4c3d2;
+    --jh-line-strong: #d9b2c4;
+    --jh-text: #2a0f1c;
+    --jh-text-rgb: 42, 15, 28;
+    --jh-text-body: #3d2230;
+    --jh-text-muted: #7d5f6c;
+    --jh-accent: #b82a66;
+    --jh-accent-rgb: 184, 42, 102;
+    --jh-button: #c93673;
+    --jh-button-hover: #d84481;
+}
+html[data-jh-scheme="lavender"] {
+    --jh-bg: #f3f1fb;
+    --jh-bg-rgb: 243, 241, 251;
+    --jh-surface-sunken: #e5e0f4;
+    --jh-surface: #eeebf8;
+    --jh-card-hover: #f6f4fc;
+    --jh-card-bg-2: #e7e3f6;
+    --jh-card-bg-3: #dad4f0;
+    --jh-line: #ccc4e8;
+    --jh-line-strong: #bdb3df;
+    --jh-text: #1a1433;
+    --jh-text-rgb: 26, 20, 51;
+    --jh-text-body: #2d2648;
+    --jh-text-muted: #66607f;
+    --jh-accent: #5f3dd6;
+    --jh-accent-rgb: 95, 61, 214;
+    --jh-button: #6a46e0;
+    --jh-button-hover: #7754ec;
+}
+
+/* Bootstrap の文字色クラスは暗い背景前提なので、スキームの文字色に合わせる */
+.text-light { color: var(--jh-text) !important; }
+.text-muted { color: var(--jh-text-muted) !important; }
+
+/* スキームを切り替えた瞬間の演出 (color-scheme.js)。
+   View Transitions に対応したブラウザでは、切り替え前後のページ全体をゆっくりクロスフェードする。
+   グラデーションや画像の上の色まで一度に移り変わる。 */
+html.jh-scheme-changing::view-transition-old(root),
+html.jh-scheme-changing::view-transition-new(root) {
+    animation-duration: 0.9s;
+    animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+/* View Transitions のないブラウザでは、色のプロパティにだけ一時的にトランジションをかける */
+html.jh-scheme-fallback,
+html.jh-scheme-fallback *,
+html.jh-scheme-fallback *::before,
+html.jh-scheme-fallback *::after {
+    transition: background-color 0.9s ease, color 0.9s ease, border-color 0.9s ease,
+        fill 0.9s ease, stroke 0.9s ease, box-shadow 0.9s ease, outline-color 0.9s ease !important;
+}
+
+html { background-color: var(--jh-bg); } /* スクロールの引っ張り (オーバースクロール) 部分も同じ色に */
 
 body {
     background-color: var(--jh-bg);
@@ -144,7 +404,7 @@ html[lang="ja"] body { letter-spacing: 0; }
     z-index: 9999;
     display: flex;
     align-items: center;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    border-bottom: 1px solid rgba(var(--jh-fg-rgb), 0.1);
     transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.4s ease;
 }
 
@@ -193,7 +453,7 @@ html[lang="ja"] body { letter-spacing: 0; }
 }
 
 .jh-glass-navbar-link {
-    color: #fff;
+    color: var(--jh-text);
     font-size: 12px;
     font-weight: 600;
     letter-spacing: -0.01em;
@@ -208,7 +468,7 @@ html[lang="ja"] body { letter-spacing: 0; }
 
 .jh-glass-navbar-link:hover {
     opacity: 1;
-    background: rgba(255, 255, 255, 0.1);
+    background: rgba(var(--jh-fg-rgb), 0.1);
 }
 
 .jh-globalnav-list {
@@ -227,7 +487,7 @@ html[lang="ja"] body { letter-spacing: 0; }
 }
 
 .jh-globalnav-link {
-    color: #f5f5f7;
+    color: var(--jh-text);
     font-size: 12px;
     font-weight: 400;
     letter-spacing: -0.01em;
@@ -378,8 +638,8 @@ html[lang="ja"] body { letter-spacing: 0; }
 /* Form Elements */
 .jh-input {
     width: 100%;
-    background: #000;
-    border: 1px solid #424245;
+    background: var(--jh-bg);
+    border: 1px solid var(--jh-line);
     color: var(--jh-text);
     padding: 16px;
     border-radius: 12px;
@@ -389,7 +649,7 @@ html[lang="ja"] body { letter-spacing: 0; }
 .jh-input:focus {
     outline: none;
     border-color: var(--jh-accent);
-    box-shadow: 0 0 0 3px rgba(41, 151, 255, 0.35);
+    box-shadow: 0 0 0 3px rgba(var(--jh-accent-rgb), 0.35);
 }
 .jh-label {
     display: block;
@@ -430,7 +690,7 @@ html[lang="ja"] body { letter-spacing: 0; }
     padding: 0;
     border: none;
     background: none;
-    color: #f5f5f7;
+    color: var(--jh-text);
     font-size: 16px;
     cursor: pointer;
 }
@@ -488,7 +748,7 @@ html[lang="ja"] body { letter-spacing: 0; }
     .jh-mobile-menu-list a {
         display: block;
         padding: 8px 0;
-        color: #f5f5f7;
+        color: var(--jh-text);
         font-family: var(--jh-font-display);
         font-size: 28px;
         font-weight: 600;
@@ -501,7 +761,7 @@ html[lang="ja"] body { letter-spacing: 0; }
         align-items: flex-start;
         gap: 4px;
         padding-top: 20px;
-        border-top: 1px solid rgba(255, 255, 255, 0.12);
+        border-top: 1px solid rgba(var(--jh-fg-rgb), 0.12);
     }
     .jh-mobile-menu-sub {
         display: inline-flex;
@@ -555,7 +815,7 @@ html[lang="ja"] body { letter-spacing: 0; }
     align-self: flex-start;
     padding: 2px;
     border-radius: 9px;
-    background: #2c2c2e;
+    background: var(--jh-card-bg-2);
 }
 .blog-segmented label { position: relative; cursor: pointer; }
 .blog-segmented input { position: absolute; opacity: 0; pointer-events: none; }
@@ -588,7 +848,7 @@ html[lang="ja"] body { letter-spacing: 0; }
     max-height: 264px;
     overflow-y: auto;
     border-radius: 14px;
-    background: rgba(28, 28, 30, 0.96);
+    background: rgba(var(--jh-glass-rgb), 0.96);
     box-shadow: 0 0 0 1px var(--jh-glass-border), 0 18px 40px -12px rgba(0, 0, 0, 0.7);
     -webkit-backdrop-filter: blur(20px);
     backdrop-filter: blur(20px);
@@ -601,7 +861,7 @@ html[lang="ja"] body { letter-spacing: 0; }
     border-radius: 9px;
     cursor: pointer;
 }
-.jh-mention-menu li[aria-selected="true"] { background: rgba(255, 255, 255, 0.1); }
+.jh-mention-menu li[aria-selected="true"] { background: rgba(var(--jh-fg-rgb), 0.1); }
 .jh-mention-avatar {
     width: 28px;
     height: 28px;
@@ -611,7 +871,7 @@ html[lang="ja"] body { letter-spacing: 0; }
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    background: #3a3a3c;
+    background: var(--jh-card-bg-3);
     color: #fff;
     font-size: 13px;
     font-weight: 600;

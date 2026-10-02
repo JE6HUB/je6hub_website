@@ -143,6 +143,37 @@
                 </form>
             </div>
 
+            <!-- カラースキーム -->
+            <div class="jh-glass-panel jh-reveal mt-4" id="appearance" style="text-align: left;">
+                <h3 class="mb-2 text-light fw-semibold" style="font-size: 21px;">{% trans "カラースキーム" %}</h3>
+                <p class="small text-muted mb-4">{% trans "サイト全体の配色を、ダークとライトから選べます。選ぶとすぐに切り替わり、アカウントに保存されます。" %}</p>
+                <form method="post" action="{% url 'color_scheme_settings' %}" class="m-0" id="jh-scheme-form"
+                      data-saved-text="{% trans 'カラースキームを保存しました。' %}"
+                      data-error-text="{% trans '保存できませんでした。もう一度お試しください。' %}">
+                    {% csrf_token %}
+                    {% for group in color_scheme_groups %}
+                    <fieldset class="jh-scheme-group">
+                        <legend class="jh-scheme-mode">{{ group.label }}</legend>
+                        <div class="jh-scheme-options">
+                            {% for option in group.options %}
+                            <label class="jh-scheme-option">
+                                <input type="radio" name="color_scheme" value="{{ option.value }}"{% if option.selected %} checked{% endif %}>
+                                <span class="jh-scheme-swatch" style="--sw-bg: {{ option.bg }}; --sw-card: {{ option.card }}; --sw-accent: {{ option.accent }};" aria-hidden="true">
+                                    <i></i><b></b>
+                                </span>
+                                <span class="jh-scheme-name">{{ option.label }}</span>
+                            </label>
+                            {% endfor %}
+                        </div>
+                    </fieldset>
+                    {% endfor %}
+                    <div class="jh-scheme-footer">
+                        <button type="submit" class="jh-btn jh-btn-primary">{% trans "カラースキームを保存" %}</button>
+                        <span class="jh-scheme-status small" role="status" aria-live="polite"></span>
+                    </div>
+                </form>
+            </div>
+
             <!-- 通知 -->
             <div class="jh-glass-panel jh-reveal mt-4" id="notifications" style="text-align: left;">
                 <h3 class="mb-2 text-light fw-semibold" style="font-size: 21px;">{% trans "通知" %}</h3>

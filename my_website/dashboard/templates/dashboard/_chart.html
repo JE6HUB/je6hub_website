@@ -1,5 +1,5 @@
 {% load i18n %}
-<div class="db-legend"><span><i style="background:#2997ff"></i>{% trans "ページビュー" %}</span><span><i style="background:#64d2ff"></i>{% trans "訪問者" %}</span></div>
+<div class="db-legend"><span><i style="background:var(--jh-accent)"></i>{% trans "ページビュー" %}</span><span><i style="background:#64d2ff"></i>{% trans "訪問者" %}</span></div>
 <div class="db-chart" role="img" aria-label="{% trans '日別のページビュー' %}">
     {% for d in series %}
     <div class="db-chart-col" title="{{ d.date|date:'Y/m/d' }}  {% trans 'ページビュー' %} {{ d.views }} / {% trans '訪問者' %} {{ d.visitors }}">

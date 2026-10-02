@@ -63,10 +63,10 @@ strong[data-profile][role="button"]:hover { color: var(--jh-accent); }
     overflow-y: auto;
     overscroll-behavior: contain;
     border-radius: 28px;
-    background: rgba(28, 28, 30, 0.92);
+    background: rgba(var(--jh-glass-rgb), 0.92);
     backdrop-filter: saturate(180%) blur(30px);
     -webkit-backdrop-filter: saturate(180%) blur(30px);
-    box-shadow: 0 30px 80px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.08);
+    box-shadow: 0 30px 80px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(var(--jh-fg-rgb), 0.08);
 }
 .pf-modal-close {
     position: absolute;
@@ -80,12 +80,12 @@ strong[data-profile][role="button"]:hover { color: var(--jh-accent); }
     height: 36px;
     border: none;
     border-radius: 50%;
-    background: rgba(255, 255, 255, 0.1);
+    background: rgba(var(--jh-fg-rgb), 0.1);
     color: var(--jh-text);
     cursor: pointer;
     transition: background 0.2s ease;
 }
-.pf-modal-close:hover { background: rgba(255, 255, 255, 0.18); }
+.pf-modal-close:hover { background: rgba(var(--jh-fg-rgb), 0.18); }
 .pf-modal-close .material-symbols-outlined { font-size: 20px; }
 
 /* スマートフォンでは下から出るシートにする */
@@ -116,7 +116,7 @@ strong[data-profile][role="button"]:hover { color: var(--jh-accent); }
     width: 28px;
     height: 28px;
     border-radius: 50%;
-    border: 3px solid rgba(255, 255, 255, 0.15);
+    border: 3px solid rgba(var(--jh-fg-rgb), 0.15);
     border-top-color: var(--jh-text);
     animation: pf-spin 0.8s linear infinite;
 }
@@ -160,7 +160,7 @@ strong[data-profile][role="button"]:hover { color: var(--jh-accent); }
     gap: 8px;
     margin: 0;
 }
-.pf-stats > div { padding: 12px; border-radius: 16px; background: rgba(255, 255, 255, 0.06); text-align: center; }
+.pf-stats > div { padding: 12px; border-radius: 16px; background: rgba(var(--jh-fg-rgb), 0.06); text-align: center; }
 .pf-stats dt { color: var(--jh-text-muted); font-size: 12px; font-weight: 400; }
 .pf-stats dd { margin: 0; font-size: 22px; font-weight: 600; line-height: 1.2; }
 .pf-stats > div { display: flex; flex-direction: column-reverse; }
@@ -195,7 +195,7 @@ strong[data-profile][role="button"]:hover { color: var(--jh-accent); }
     height: 56px;
     border-radius: 10px;
     overflow: hidden;
-    background: #3a3a3c;
+    background: var(--jh-card-bg-3);
     color: var(--jh-text-muted);
     box-shadow: 0 6px 16px rgba(0, 0, 0, 0.35);
 }
@@ -209,7 +209,7 @@ strong[data-profile][role="button"]:hover { color: var(--jh-accent); }
 .pf-track-link::after { content: " ↗"; }
 .pf-track-link:hover { color: #fff; text-decoration: underline; }
 
-.pf-track--lg { gap: 28px; padding: 32px; border-radius: 28px; background: #1c1c1e; }
+.pf-track--lg { gap: 28px; padding: 32px; border-radius: 28px; background: var(--jh-card-bg); }
 .pf-track--lg .pf-track-art { width: 140px; height: 140px; border-radius: 16px; }
 .pf-track--lg .pf-track-title { font-size: 28px; white-space: normal; }
 .pf-track--lg .pf-track-artist { font-size: 19px; color: rgba(255, 255, 255, 0.75); white-space: normal; }
@@ -366,10 +366,10 @@ strong[data-profile][role="button"]:hover { color: var(--jh-accent); }
     position: relative;
     overflow: hidden;
     border-radius: 28px;
-    background: rgba(28, 28, 30, 0.92);
+    background: rgba(var(--jh-glass-rgb), 0.92);
     backdrop-filter: saturate(180%) blur(30px);
     -webkit-backdrop-filter: saturate(180%) blur(30px);
-    box-shadow: 0 30px 80px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.08);
+    box-shadow: 0 30px 80px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(var(--jh-fg-rgb), 0.08);
     transition: width 0.5s cubic-bezier(0.32, 0.72, 0, 1), height 0.5s cubic-bezier(0.32, 0.72, 0, 1);
 }
 
@@ -430,8 +430,8 @@ strong[data-profile][role="button"]:hover { color: var(--jh-accent); }
 .ob-actions { display: flex; justify-content: center; gap: 12px; margin-top: 8px; }
 .ob-actions .jh-btn { min-width: 128px; }
 .ob-step--form .ob-actions { justify-content: flex-end; }
-.ob-btn-skip { background: rgba(255, 255, 255, 0.1); color: var(--jh-text); }
-.ob-btn-skip:hover { background: rgba(255, 255, 255, 0.18); color: var(--jh-text); }
+.ob-btn-skip { background: rgba(var(--jh-fg-rgb), 0.1); color: var(--jh-text); }
+.ob-btn-skip:hover { background: rgba(var(--jh-fg-rgb), 0.18); color: var(--jh-text); }
 .ob-actions .jh-btn:disabled { opacity: 0.6; cursor: default; }
 
 @media (max-width: 734px) {
@@ -475,3 +475,101 @@ strong[data-profile][role="button"]:hover { color: var(--jh-accent); }
 .jh-avatar-picker-btn:focus-within { outline: 2px solid var(--jh-accent, #2997ff); outline-offset: 2px; }
 .jh-avatar-picker-remove { background: none; border: none; color: #ff453a; }
 .jh-avatar-picker-hint { font-size: 12px; color: var(--jh-text-muted); }
+
+/* =========================================
+   カラースキームの選択 (プロフィール編集)
+   ========================================= */
+.jh-scheme-group {
+    margin: 0;
+    padding: 0;
+    border: 0;
+}
+.jh-scheme-group + .jh-scheme-group { margin-top: 24px; }
+.jh-scheme-mode {
+    float: none;
+    width: auto;
+    margin: 0 0 12px;
+    padding: 0;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    color: var(--jh-text-muted);
+}
+.jh-scheme-options {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(124px, 1fr));
+    gap: 14px;
+}
+.jh-scheme-option {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    cursor: pointer;
+}
+.jh-scheme-option input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+}
+/* 見本: そのスキームの背景にカード面とアクセントの丸を置いた小さな画面 */
+.jh-scheme-swatch {
+    position: relative;
+    display: block;
+    aspect-ratio: 16 / 10;
+    border-radius: 14px;
+    background: var(--sw-bg);
+    box-shadow: inset 0 0 0 1px rgba(var(--jh-fg-rgb), 0.12);
+    overflow: hidden;
+    transition: box-shadow 0.25s ease, transform 0.25s ease;
+}
+.jh-scheme-swatch b {
+    position: absolute;
+    left: 12%;
+    right: 12%;
+    bottom: 14%;
+    height: 42%;
+    border-radius: 8px;
+    background: var(--sw-card);
+}
+.jh-scheme-swatch i {
+    position: absolute;
+    top: 14%;
+    left: 12%;
+    width: 18%;
+    aspect-ratio: 1;
+    border-radius: 50%;
+    background: var(--sw-accent);
+    box-shadow: 0 0 18px var(--sw-accent);
+}
+.jh-scheme-option:hover .jh-scheme-swatch { transform: translateY(-2px); }
+.jh-scheme-option input:checked + .jh-scheme-swatch {
+    box-shadow: inset 0 0 0 1px rgba(var(--jh-fg-rgb), 0.12), 0 0 0 2px var(--jh-bg), 0 0 0 4px var(--sw-accent);
+}
+.jh-scheme-option input:focus-visible + .jh-scheme-swatch {
+    outline: 2px solid var(--jh-text);
+    outline-offset: 5px;
+}
+.jh-scheme-name {
+    font-size: 14px;
+    color: var(--jh-text-muted);
+    text-align: center;
+    transition: color 0.25s ease;
+}
+.jh-scheme-option input:checked ~ .jh-scheme-name { color: var(--jh-text); font-weight: 600; }
+#jh-scheme-form [hidden] { display: none !important; }
+/* 保存の知らせが出入りしても下のパネルが動かないよう、行の高さを先に確保しておく */
+.jh-scheme-footer {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    min-height: 24px;
+    margin-top: 16px;
+}
+.jh-scheme-status {
+    color: var(--jh-text-muted);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+.jh-scheme-status.is-visible { opacity: 1; }
+.jh-scheme-status.is-error { color: #ff453a; }
