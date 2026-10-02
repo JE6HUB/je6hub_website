@@ -43,6 +43,13 @@
                 {% trans "記事を読む" %}
             </span>
         </a>
+        <a href="#jh-guide-picker" id="glass-btn-guide" class="liquid-glass-btn landing-hero-btn landing-hero-btn--guide" data-guide-open
+           role="button" aria-haspopup="dialog" aria-controls="jh-guide-picker"
+           data-config='{"button":true, "cornerRadius":28, "blurAmount":0.25, "brightness":-0.15}'>
+            <span class="label">
+                <span class="material-symbols-outlined" aria-hidden="true">school</span>{% trans "使い方ガイド" %}
+            </span>
+        </a>
 
         {% if post_count %}
         <p class="landing-hero-stats">
@@ -172,4 +179,6 @@
     </section>
 
 </main>
+
+{% include "core/_guide_picker.html" %}
 {% endblock %}

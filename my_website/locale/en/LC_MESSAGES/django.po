@@ -2255,3 +2255,346 @@ msgstr "The submitted content is invalid."
 #: core/templates/core/_resume_editor.html
 msgid "内容"
 msgstr "Content"
+
+#: core/guide_tour.py
+msgid "サイトの歩き方"
+msgstr "Getting around"
+
+#: core/guide_tour.py
+msgid "メニューの使い方と、各ページへの移動のしかた。"
+msgstr "How the menu works and how to move between pages."
+
+#: core/guide_tour.py
+msgid "上部のメニュー"
+msgstr "The top menu"
+
+#: core/guide_tour.py
+msgid "Blogs（記事）、WanderLens（写真と地図）、Lounge（メンバーのチャット）、Resume へは、ここからいつでも移動できます。"
+msgstr "Jump to Blogs (articles), WanderLens (photos on a map), Lounge (member chat) and Resume from here at any time."
+
+#: core/guide_tour.py
+msgid "メニューを開く"
+msgstr "Open the menu"
+
+#: core/guide_tour.py
+msgid "右上のボタンをタップすると、すべてのページへのリンクが表示されます。"
+msgstr "Tap the button at the top right to see links to every page."
+
+#: core/guide_tour.py
+msgid "タップしてみましょう"
+msgstr "Give it a tap"
+
+#: core/guide_tour.py
+msgid "各ページへ移動"
+msgstr "Go to any page"
+
+#: core/guide_tour.py
+msgid "Blogs（記事）、WanderLens（写真と地図）、Lounge（メンバーのチャット）、Resume へはここから。下ではアカウントと言語を切り替えられます。"
+msgstr "Blogs (articles), WanderLens (photos on a map), Lounge (member chat) and Resume are all here. Below, you can manage your account and switch languages."
+
+#: core/guide_tour.py
+msgid "あなたのアカウント"
+msgstr "Your account"
+
+#: core/guide_tour.py
+msgid "アイコンを押すと、あなたのプロフィールカードが開きます。プロフィールや設定もここから変更できます。"
+msgstr "Click your icon to open your profile card. You can also change your profile and settings from there."
+
+#: core/guide_tour.py
+msgid "記事を書いたり、いいねやコメントをしたりするには、ここからサインインします。アカウントの作成も無料です。"
+msgstr "Sign in here to write posts, like and comment. Creating an account is free."
+
+#: core/guide_tour.py
+msgid "ガイドはいつでもここから"
+msgstr "The guide is always here"
+
+#: core/guide_tour.py
+msgid "ほかの使い方も、このボタンからいつでも確かめられます。"
+msgstr "Come back to this button any time to learn more."
+
+#: core/guide_tour.py
+msgid "記事を読む・反応する"
+msgstr "Read and react"
+
+#: core/guide_tour.py
+msgid "記事を探して読み、いいねやコメントを送るまで。"
+msgstr "Find and read posts, then send likes and comments."
+
+#: core/guide_tour.py
+msgid "記事の一覧へ"
+msgstr "Go to the posts"
+
+#: core/guide_tour.py
+msgid "「記事を読む」を押すと、メンバーが書いた記事の一覧が開きます。"
+msgstr "Press “Read Posts” to open the list of posts written by members."
+
+#: core/guide_tour.py
+msgid "押してみましょう"
+msgstr "Give it a try"
+
+#: core/guide_tour.py
+msgid "記事を探す"
+msgstr "Find posts"
+
+#: core/guide_tour.py
+msgid "キーワードを入れて Enter を押すと、タイトルや本文から記事を検索できます。"
+msgstr "Type a keyword and press Enter to search titles and text."
+
+#: core/guide_tour.py
+msgid "記事を開く"
+msgstr "Open a post"
+
+#: core/guide_tour.py
+msgid "気になる記事を押すと、本文が開きます。"
+msgstr "Press any post that catches your eye to read it."
+
+#: core/guide_tour.py
+msgid "記事を押してみましょう"
+msgstr "Press a post"
+
+#: core/guide_tour.py
+msgid "まだ記事がありません。記事が投稿されたら、ここから読めるようになります。"
+msgstr "There are no posts yet. Once someone publishes one, you can read it here."
+
+#: core/guide_tour.py
+msgid "いいねを送る"
+msgstr "Send a like"
+
+#: core/guide_tour.py
+msgid "記事を気に入ったら、ハートを押して著者に伝えましょう。もう一度押すと取り消せます。"
+msgstr "Liked the post? Press the heart to let the author know. Press it again to undo."
+
+#: core/guide_tour.py
+msgid "ハートを押してみましょう"
+msgstr "Press the heart"
+
+#: core/guide_tour.py
+msgid "感想を書いてみましょう。@ に続けてユーザー名を入れるとメンションでき、相手にメールで知らせます。"
+msgstr "Write what you thought. Type @ followed by a username to mention someone; they will get an email."
+
+#: core/guide_tour.py
+msgid "入力してみましょう"
+msgstr "Start typing"
+
+#: core/guide_tour.py
+msgid "コメントを投稿"
+msgstr "Post your comment"
+
+#: core/guide_tour.py
+msgid "「コメントする」を押すと公開されます。今は投稿しない場合は「完了」でガイドを終えられます。"
+msgstr "Press “Comment” to publish it. If you'd rather not post now, press “Done” to finish the guide."
+
+#: core/guide_tour.py
+msgid "記事の下では、いいねやコメントで著者に感想を伝えられます。サインインすると使えるようになります。"
+msgstr "Below each post you can send the author likes and comments. Sign in to use them."
+
+#: core/guide_tour.py
+msgid "テンプレート選びから、書いて公開するまで。"
+msgstr "From picking a template to writing and publishing."
+
+#: core/guide_tour.py
+msgid "新しい記事を作る"
+msgstr "Start a new post"
+
+#: core/guide_tour.py
+msgid "「ブログを書く」を押すと、記事の作成画面が開きます。"
+msgstr "Press “Write a Post” to open the editor."
+
+#: core/guide_tour.py
+msgid "まずはサインイン"
+msgstr "Sign in first"
+
+#: core/guide_tour.py
+msgid "記事を書くにはサインインが必要です。「ブログを書く」を押すとサインイン画面へ進み、サインイン後はこのガイドの続きから再開します。"
+msgstr "You need to sign in to write. Press “Write a Post” to go to the sign-in page; the guide picks up where you left off after you sign in."
+
+#: core/guide_tour.py
+msgid "サインインする"
+msgstr "Sign in"
+
+#: core/guide_tour.py
+msgid "サインインすると、記事の作成画面へ進みます。アカウントがなければ、下の「アカウントを作成」から登録できます。"
+msgstr "After signing in you'll go straight to the editor. No account yet? Register with “Create Account” below."
+
+#: core/guide_tour.py
+msgid "記事の雰囲気に合うレイアウトを選びましょう。あとからいつでも変えられます。"
+msgstr "Choose a layout that suits your post. You can change it any time."
+
+#: core/guide_tour.py
+msgid "ひとつ選んでみましょう"
+msgstr "Pick one"
+
+#: core/guide_tour.py
+msgid "タイトルを付ける"
+msgstr "Add a title"
+
+#: core/guide_tour.py
+msgid "記事のタイトルを入力しましょう。"
+msgstr "Type a title for your post."
+
+#: core/guide_tour.py
+msgid "カバー画像（任意）"
+msgstr "Cover image (optional)"
+
+#: core/guide_tour.py
+msgid "押して選ぶか、画像をドラッグ＆ドロップすると、記事の顔になるカバー画像を設定できます。"
+msgstr "Click to choose, or drag and drop an image, to set the cover that represents your post."
+
+#: core/guide_tour.py
+msgid "本文を書いてみましょう。空の行で「/」を入力すると、画像や列などのブロックを追加できます。"
+msgstr "Write your text. Type “/” on an empty line to add blocks such as images or columns."
+
+#: core/guide_tour.py
+msgid "書式を整える"
+msgstr "Format your text"
+
+#: core/guide_tour.py
+msgid "見出し、太字、揃え、リスト、引用、画像、数式などはこのツールバーから。"
+msgstr "Headings, bold, alignment, lists, quotes, images, math and more live in this toolbar."
+
+#: core/guide_tour.py
+msgid "見出しの飾りやリンクに使う色を選びましょう。"
+msgstr "Choose the color used for heading accents and links."
+
+#: core/guide_tour.py
+msgid "色を選んでみましょう"
+msgstr "Pick a color"
+
+#: core/guide_tour.py
+msgid "保存して公開"
+msgstr "Save and publish"
+
+#: core/guide_tour.py
+msgid "「下書き保存」は自分だけに保存、「公開する」で一覧に載ります。⌘/Ctrl + S でも下書き保存できます。"
+msgstr "“Save draft” keeps it private to you; “Publish” adds it to the list. ⌘/Ctrl + S also saves a draft."
+
+#: core/guide_tour.py
+msgid "自分好みにする"
+msgstr "Make it yours"
+
+#: core/guide_tour.py
+msgid "カラースキーム、通知、プロフィールの設定。"
+msgstr "Color scheme, notifications and your profile."
+
+#: core/guide_tour.py
+msgid "個人設定を開く"
+msgstr "Open settings"
+
+#: core/guide_tour.py
+msgid "歯車のアイコンから、個人設定へ移動します。"
+msgstr "The gear icon takes you to your settings."
+
+#: core/guide_tour.py
+msgid "個人設定はメニューの中にあります。"
+msgstr "Settings are inside the menu."
+
+#: core/guide_tour.py
+msgid "「個人設定」をタップします。"
+msgstr "Tap “Settings”."
+
+#: core/guide_tour.py
+msgid "設定はアカウントごとに保存されます。サインインすると、このガイドの続きから再開します。"
+msgstr "Settings are saved to your account. After you sign in, the guide picks up where you left off."
+
+#: core/guide_tour.py
+msgid "サインインすると、個人設定の画面へ進みます。"
+msgstr "After signing in you'll go to your settings."
+
+#: core/guide_tour.py
+msgid "好きな配色を選ぶと、すぐにサイト全体が切り替わり、アカウントに保存されます。"
+msgstr "Pick a palette and the whole site switches right away. It's saved to your account."
+
+#: core/guide_tour.py
+msgid "コメントなどで @メンションされたとき、メールで知らせるかどうかを選べます。"
+msgstr "Choose whether to get an email when someone @mentions you, for example in a comment."
+
+#: core/guide_tour.py
+msgid "プロフィールへ"
+msgstr "Go to your profile"
+
+#: core/guide_tour.py
+msgid "名前やアイコンなど、ほかの人に見えるプロフィールはこちらで編集します。"
+msgstr "Edit what others see, such as your name and icon, here."
+
+#: core/guide_tour.py
+msgid "アイコンを設定"
+msgstr "Set your icon"
+
+#: core/guide_tour.py
+msgid "写真を選ぶと、記事やコメントにあなたのアイコンが表示されます。編集したら、下の「保存」を押しましょう。"
+msgstr "Choose a photo and it will appear next to your posts and comments. Press “Save” below when you're done."
+
+#: core/guide_tour.py
+msgid "戻る"
+msgstr "Back"
+
+#: core/guide_tour.py
+msgid "完了"
+msgstr "Done"
+
+#: core/guide_tour.py
+msgid "この手順を飛ばす"
+msgstr "Skip this step"
+
+#: core/guide_tour.py
+msgid "ガイドを終了"
+msgstr "End guide"
+
+#: core/guide_tour.py
+#, python-format
+msgid "%(current)s / %(total)s"
+msgstr "%(current)s / %(total)s"
+
+#: core/guide_tour.py
+msgid "この画面では見つかりませんでした。"
+msgstr "We couldn't find this on the current page."
+
+#: core/guide_tour.py
+msgid "できました！"
+msgstr "Nice!"
+
+#: core/guide_tour.py
+msgid "ガイドを続ける"
+msgstr "Continue guide"
+
+#: core/guide_tour.py
+#, python-format
+msgid "「%(chapter)s」の途中です"
+msgstr "You're partway through “%(chapter)s”"
+
+#: core/guide_tour.py
+#, python-format
+msgid "「%(chapter)s」のガイドが完了しました"
+msgstr "You finished “%(chapter)s”"
+
+#: core/guide_tour.py
+msgid "次は、こちらも試してみませんか？"
+msgstr "Want to try this one next?"
+
+#: core/guide_tour.py
+msgid "すべてのガイドを見終わりました。いつでもホームの「使い方ガイド」から見直せます。"
+msgstr "You've finished every guide. Revisit them any time from “Guide” on the home page."
+
+#: core/guide_tour.py
+msgid "始める"
+msgstr "Start"
+
+#: core/guide_tour.py
+msgid "ガイドはホームの「使い方ガイド」からいつでも再開できます。"
+msgstr "You can restart the guide any time from “Guide” on the home page."
+
+#: core/guide_tour.py
+msgid "使い方ガイド"
+msgstr "Guide"
+
+#: core/guide_tour.py
+msgid "やりたいことを選ぶと、実際の画面で一歩ずつ案内します。案内に沿って操作すると、次の手順へ進みます。"
+msgstr "Pick what you'd like to do and we'll walk you through it on the real screens. Follow each hint to move to the next step."
+
+#: core/guide_tour.py
+msgid "完了済み"
+msgstr "Completed"
+
+#: core/guide_tour.py
+msgid "サインインが必要な操作は、途中でサインインを案内します。サインイン後はガイドの続きから再開します。"
+msgstr "When a step needs an account, the guide asks you to sign in and then picks up where you left off."

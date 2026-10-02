@@ -320,3 +320,66 @@ class ResumeEditTests(TestCase):
         response = self.client.get('/ja/resume/')
         self.assertNotContains(response, '<script>x</script>')
         self.assertContains(response, '&lt;script&gt;x&lt;/script&gt;')
+
+
+class GuideTourTests(TestCase):
+    """ホームの「使い方ガイド」: ボタンと章の選択、/guide/tour.json の中身。"""
+
+    def tour(self):
+        response = self.client.get(reverse('core:guide_tour'))
+        self.assertEqual(response.status_code, 200)
+        return response.json()
+
+    def test_home_has_guide_button_and_chapter_picker(self):
+        response = self.client.get(reverse('core:home'))
+        self.assertContains(response, 'id="glass-btn-guide"')
+        self.assertContains(response, 'id="jh-guide-picker"')
+        for chapter in ('start', 'read', 'write', 'personalize'):
+            self.assertContains(response, f'data-guide-start="{chapter}"')
+
+    def test_guide_script_is_loaded_on_every_page(self):
+        response = self.client.get(reverse('blog:list'))
+        self.assertContains(response, 'js/guide-tour.js')
+        self.assertContains(response, reverse('core:guide_tour'))
+
+    def test_steps_are_well_formed(self):
+        import re
+        data = self.tour()
+        self.assertFalse(data['authenticated'])
+        actions = {None, 'click', 'input', 'change', 'wait'}
+        for chapter in data['chapters']:
+            self.assertTrue(chapter['steps'])
+            for step in chapter['steps']:
+                self.assertTrue(step['target'] and step['title'] and step['body'])
+                self.assertIn(step.get('action'), actions)
+                self.assertIn(step.get('device'), (None, 'mobile', 'desktop'))
+                self.assertIn(step.get('auth'), (None, 'user', 'guest'))
+                if 'page' in step:
+                    re.compile(step['page'])
+                if step.get('action') == 'wait':
+                    self.assertIn('url', step)  # ログイン画面から離れたときの「ガイドを続ける」の行き先
+
+    def test_pages_follow_the_language_prefix(self):
+        import re
+        data = self.tour()
+        write = next(c for c in data['chapters'] if c['id'] == 'write')
+        editor = next(s for s in write['steps'] if s['target'] == ['#id_title'])
+        self.assertTrue(re.search(editor['page'], reverse('blog:create')))
+        self.assertTrue(re.search(editor['page'], reverse('blog:edit', args=[3])))
+        self.assertIsNone(re.search(editor['page'], reverse('blog:list')))
+
+    def test_signed_in_user_gets_signed_in_flag(self):
+        from django.contrib.auth import get_user_model
+        user = get_user_model().objects.create_user(username='guide', password='pass12345')
+        self.client.force_login(user)
+        self.assertTrue(self.tour()['authenticated'])
+
+    def test_tour_is_translated(self):
+        from django.utils import translation
+        # リクエストが有効にした言語をテスト後に残さないよう、override の中で取得する
+        with translation.override('en'):
+            data = self.client.get(reverse('core:guide_tour')).json()
+        self.assertIn('Make it yours', [c['title'] for c in data['chapters']])
+        self.assertEqual(data['labels']['skip_step'], 'Skip this step')
+        start = next(c for c in data['chapters'] if c['id'] == 'start')
+        self.assertTrue(start['steps'][0]['page'].startswith('^/en/'))
