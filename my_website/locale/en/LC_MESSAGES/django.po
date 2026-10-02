@@ -2156,12 +2156,6 @@ msgstr "Save color scheme"
 msgid "カラースキームを保存できませんでした。"
 msgstr "Couldn't save the color scheme."
 
-msgid "ダーク"
-msgstr "Dark"
-
-msgid "ライト"
-msgstr "Light"
-
 msgid "デイライト"
 msgstr "Daylight"
 
