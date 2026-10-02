@@ -55,6 +55,13 @@ class CustomUser(AbstractUser):
         verbose_name=_("ユーザー画像"),
     )
 
+    # 通知設定 (プロフィール編集の「通知」から変更できる)
+    notify_mentions_by_email = models.BooleanField(
+        default=True,
+        verbose_name=_("メンションをメールで通知"),
+        help_text=_("コメントやメッセージで @ユーザー名 と書かれたときにメールを受け取ります。"),
+    )
+
     # Favorite Track Fields
     favorite_track_title = models.CharField(
         max_length=255, 

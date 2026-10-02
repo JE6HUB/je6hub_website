@@ -14,7 +14,7 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
     <link href="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/6.4.0/mdb.min.css" rel="stylesheet" />
 
-    <link href="{% static 'css/style.css' %}?v=22" rel="stylesheet" />
+    <link href="{% static 'css/style.css' %}?v=23" rel="stylesheet" />
     <link href="{% static 'css/profile.css' %}?v=3" rel="stylesheet" />
 
     {% block extra_head %}{% endblock %}
@@ -225,6 +225,7 @@
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/6.4.0/mdb.min.js"></script>
     <script src="https://js-cdn.music.apple.com/musickit/v1/musickit.js"></script>
     <script type="text/javascript" src="{% static 'js/main.js' %}"></script>
+    {% if user.is_authenticated %}<script src="{% static 'js/mentions.js' %}?v=1" data-url="{% url 'mention_search' %}"></script>{% endif %}
 
     {% block extra_js %}{% endblock %}
 

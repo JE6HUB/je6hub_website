@@ -2056,3 +2056,66 @@ msgstr "Close map"
 
 msgid "地図を開く"
 msgstr "Open map"
+
+msgid "メンションをメールで通知"
+msgstr "Email me when I'm mentioned"
+
+msgid "コメントやメッセージで @ユーザー名 と書かれたときにメールを受け取ります。"
+msgstr "Get an email when someone writes @username for you in a comment or message."
+
+msgid "いいね"
+msgstr "Like"
+
+msgid "通知設定を保存しました。"
+msgstr "Notification settings saved."
+
+msgid "コメントの送信回数が多すぎます。しばらくしてからお試しください。"
+msgstr "You're commenting too often. Please wait a moment and try again."
+
+msgid "コメントを入力してください。"
+msgstr "Please enter a comment."
+
+msgid "コメントを削除しました。"
+msgstr "Comment deleted."
+
+msgid "Blogs のコメント"
+msgstr "Blogs comment"
+
+msgid "いいねとコメント"
+msgstr "Likes and comments"
+
+msgid "%(count)s 件のいいね"
+msgstr "Likes: %(count)s"
+
+msgid "このコメントを削除しますか？"
+msgstr "Delete this comment?"
+
+msgid "通報"
+msgstr "Report"
+
+msgid "コメントを書く… @ユーザー名 でメンションできます"
+msgstr "Write a comment… mention someone with @username"
+
+msgid "コメントする"
+msgstr "Comment"
+
+msgid "ログインしてコメントする"
+msgstr "Sign in to comment"
+
+msgid "通知"
+msgstr "Notifications"
+
+msgid "ブログのコメントや Lounge のメッセージなどで @ユーザー名 と書かれたときの通知です。"
+msgstr "Notifications for when someone writes your @username in a blog comment, a Lounge message, and so on."
+
+msgid "メンションされたらメールで知らせる"
+msgstr "Email me when I'm mentioned"
+
+msgid "メールアドレスが登録されていないため、メールは届きません。"
+msgstr "You haven't added an email address, so no emails will be sent."
+
+msgid "送信先: %(email)s"
+msgstr "Sent to: %(email)s"
+
+msgid "通知設定を保存"
+msgstr "Save notification settings"

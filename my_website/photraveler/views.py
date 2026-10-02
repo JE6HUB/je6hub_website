@@ -7,11 +7,13 @@ from django.db import transaction
 from django.db.models import Count, Q
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
 from django.utils.translation import gettext as _
 from django.views.decorators.http import require_http_methods
 
 import json
 
+from accounts.mentions import mention_segments, notify_mentions
 from accounts.ratelimit import is_rate_limited
 
 from .forms import PinForm
@@ -220,6 +222,8 @@ def pin_comments(request, pin_id):
                 'id':          c.id,
                 'author_name': c.author_name,
                 'text':        c.text,
+                # @ユーザー名 をリンクにして表示するための分割 (wanderlens.js が描画する)
+                'segments':    mention_segments(c.text),
                 'created_at':  c.created_at.strftime('%Y-%m-%d %H:%M'),
             }
             for c in pin.comments.order_by('created_at')
@@ -247,9 +251,17 @@ def pin_comments(request, pin_id):
     )
 
     comment = PhotoComment.objects.create(pin=pin, author_name=author_name, text=text)
+    # 通知メールはログインしているユーザーのコメントだけ (ゲストの名前は誰でも名乗れるため)
+    if request.user.is_authenticated and pin.user_id:
+        notify_mentions(
+            request, text, author=request.user,
+            url=reverse('photraveler:user_map', args=[pin.user.username]) + f'?pin={pin.pk}',
+            where=lambda: _('WanderLens のスポット「%(title)s」のコメント') % {'title': pin.title},
+        )
     return JsonResponse({
         'id':          comment.id,
         'author_name': comment.author_name,
         'text':        comment.text,
+        'segments':    mention_segments(comment.text),
         'created_at':  comment.created_at.strftime('%Y-%m-%d %H:%M'),
     }, status=201)

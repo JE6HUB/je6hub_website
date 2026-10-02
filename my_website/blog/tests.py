@@ -749,3 +749,74 @@ class AccentColorTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertNotContains(response, 'evil.example);')
         self.assertContains(response, f'--blog-accent: {Post.ACCENT_NEUTRAL};')
+
+
+class ReactionTests(TestCase):
+    def setUp(self):
+        from django.core.cache import cache
+        cache.clear()
+        self.author = make_user('author')
+        self.reader = make_user('reader')
+        self.post = make_post(self.author)
+
+    def test_like_toggles_and_returns_json(self):
+        self.client.force_login(self.reader)
+        url = reverse('blog:like', args=[self.post.pk])
+        res = self.client.post(url, HTTP_ACCEPT='application/json')
+        self.assertEqual(res.json(), {'liked': True, 'count': 1})
+        res = self.client.post(url, HTTP_ACCEPT='application/json')
+        self.assertEqual(res.json(), {'liked': False, 'count': 0})
+        res = self.client.post(url)
+        self.assertRedirects(res, self.post.get_absolute_url() + '#reactions', fetch_redirect_response=False)
+        self.assertEqual(self.post.likes.count(), 1)
+
+    def test_like_and_comment_require_login_and_published_post(self):
+        self.assertEqual(self.client.post(reverse('blog:like', args=[self.post.pk])).status_code, 302)
+        self.assertEqual(self.client.post(reverse('blog:comment_create', args=[self.post.pk]), {'text': 'x'}).status_code, 302)
+        draft = make_post(self.author, status=Post.STATUS_DRAFT)
+        self.client.force_login(self.reader)
+        self.assertEqual(self.client.post(reverse('blog:like', args=[draft.pk])).status_code, 404)
+        self.assertEqual(self.client.post(reverse('blog:comment_create', args=[draft.pk]), {'text': 'x'}).status_code, 404)
+
+    def test_comment_is_shown_with_mentions_linked_and_escaped(self):
+        self.client.force_login(self.reader)
+        res = self.client.post(reverse('blog:comment_create', args=[self.post.pk]), {'text': '<script>x</script> @author'})
+        comment = self.post.comments.get()
+        self.assertRedirects(res, comment.get_absolute_url(), fetch_redirect_response=False)
+        page = self.client.get(self.post.get_absolute_url())
+        self.assertContains(page, '&lt;script&gt;x&lt;/script&gt;')
+        self.assertContains(page, 'class="jh-mention"')
+        self.assertContains(page, f'id="comment-{comment.pk}"')
+
+    def test_blank_comment_is_rejected(self):
+        self.client.force_login(self.reader)
+        self.client.post(reverse('blog:comment_create', args=[self.post.pk]), {'text': '   '})
+        self.assertFalse(self.post.comments.exists())
+
+    def test_comment_can_be_deleted_by_its_author_or_the_post_author_only(self):
+        from .models import Comment
+        other = make_user('other')
+        c1 = Comment.objects.create(post=self.post, author=self.reader, text='one')
+        c2 = Comment.objects.create(post=self.post, author=self.reader, text='two')
+        self.client.force_login(other)
+        self.assertEqual(self.client.post(reverse('blog:comment_delete', args=[c1.pk])).status_code, 403)
+        self.client.force_login(self.reader)
+        self.client.post(reverse('blog:comment_delete', args=[c1.pk]))
+        self.client.force_login(self.author)
+        self.client.post(reverse('blog:comment_delete', args=[c2.pk]))
+        self.assertFalse(Comment.objects.exists())
+
+    def test_anonymous_visitors_see_login_prompts(self):
+        res = self.client.get(self.post.get_absolute_url())
+        self.assertContains(res, 'id="comments"')
+        self.assertNotContains(res, reverse('blog:like', args=[self.post.pk]))
+        self.assertNotContains(res, 'mentions.js')
+
+    def test_blog_comment_can_be_reported(self):
+        from .models import Comment
+        comment = Comment.objects.create(post=self.post, author=self.reader, text='spam')
+        self.client.force_login(self.author)
+        res = self.client.post(reverse('dashboard:report', args=['blog_comment', comment.pk]), {'reason': 'spam', 'detail': ''})
+        self.assertEqual(res.status_code, 302)
+        from dashboard.models import Report
+        self.assertEqual(Report.objects.get().content_author, self.reader)

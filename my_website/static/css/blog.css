@@ -3074,3 +3074,64 @@ button.bk-callout-icon:hover { background: rgba(255, 255, 255, 0.08); }
     .bk-mapedit-body { grid-template-columns: minmax(0, 1fr); }
     .bk-mapedit-map { min-height: 240px; }
 }
+
+/* =========================================
+   いいね・コメント (記事フッター)
+   ========================================= */
+.blog-reactions { margin-bottom: 32px; }
+.blog-like-row { display: flex; align-items: center; gap: 14px; margin-bottom: 40px; }
+.blog-like-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 18px;
+    border: 0;
+    border-radius: 999px;
+    background: var(--jh-card-bg);
+    box-shadow: inset 0 0 0 1px var(--jh-card-border);
+    color: var(--jh-text);
+    font-size: 15px;
+    font-weight: 500;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background-color 0.2s ease, box-shadow 0.2s ease, transform 0.15s ease;
+}
+.blog-like-btn:hover { color: var(--jh-text); background: #2c2c2e; }
+.blog-like-btn:active { transform: scale(0.96); }
+.blog-like-btn svg { fill: none; stroke: currentColor; stroke-width: 1.8; transition: fill 0.2s ease, stroke 0.2s ease; }
+.blog-like-btn.is-liked { box-shadow: inset 0 0 0 1px rgba(255, 55, 95, 0.5); }
+.blog-like-btn.is-liked svg { fill: #ff375f; stroke: #ff375f; }
+.blog-like-btn:disabled { opacity: 0.7; }
+.blog-like-count { color: var(--jh-text-muted); font-size: 15px; }
+
+.blog-comments-title { font-size: 24px; font-weight: 600; letter-spacing: -0.01em; margin: 0 0 20px; }
+.blog-comments-title span { color: var(--jh-text-muted); font-weight: 500; margin-left: 4px; }
+.blog-comment, .blog-comment-form { display: flex; gap: 14px; align-items: flex-start; }
+.blog-comment { padding: 18px 0; border-top: 1px solid var(--jh-card-border); }
+.blog-comment .blog-avatar, .blog-comment-form .blog-avatar { overflow: hidden; }
+.blog-comment-body { flex: 1; min-width: 0; }
+.blog-comment-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; margin: 0 0 4px; font-size: 14px; }
+.blog-comment-name { color: var(--jh-text); font-weight: 600; text-decoration: none; }
+.blog-comment-head time { color: var(--jh-text-muted); font-size: 13px; }
+.blog-comment-badge {
+    padding: 1px 8px;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--blog-accent) 22%, transparent);
+    color: var(--jh-text);
+    font-size: 12px;
+}
+.blog-comment-text { margin: 0; font-size: 16px; line-height: 1.65; overflow-wrap: anywhere; }
+.blog-comment-actions { display: flex; gap: 14px; margin-top: 6px; font-size: 13px; }
+.blog-comment-actions form { margin: 0; }
+.blog-comment-actions button,
+.blog-comment-actions a { padding: 0; border: 0; background: none; color: var(--jh-text-muted); font-size: 13px; text-decoration: none; cursor: pointer; }
+.blog-comment-actions button:hover,
+.blog-comment-actions a:hover { color: var(--jh-text); }
+.blog-comment:target { animation: blog-comment-flash 2s ease; }
+@keyframes blog-comment-flash { from { background: color-mix(in srgb, var(--blog-accent) 14%, transparent); } }
+.blog-comments-empty, .blog-comments-login { color: var(--jh-text-muted); padding: 18px 0; border-top: 1px solid var(--jh-card-border); margin: 0; }
+.blog-comments-login a { color: var(--blog-accent); }
+.blog-comment-form { padding-top: 20px; border-top: 1px solid var(--jh-card-border); }
+.blog-comment-field { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 10px; }
+.blog-comment-field textarea { box-sizing: border-box; width: 100%; max-width: 100%; resize: vertical; min-height: 88px; }
+.blog-comment-field button { align-self: flex-end; }

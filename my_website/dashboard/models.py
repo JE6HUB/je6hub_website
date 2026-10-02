@@ -81,7 +81,7 @@ class Report(models.Model):
         (STATUS_DISMISSED, _('問題なし')),
     ]
 
-    # 通報対象: dashboard.content.KINDS のキー (message / post / pin / comment) と、その主キー
+    # 通報対象: dashboard.content.KINDS のキー (message / post / blog_comment / pin / comment) と、その主キー
     kind = models.CharField(max_length=20)
     object_id = models.PositiveBigIntegerField()
     # 対象が削除・編集されたあとも何が通報されたか分かるよう、通報時点の内容を残す

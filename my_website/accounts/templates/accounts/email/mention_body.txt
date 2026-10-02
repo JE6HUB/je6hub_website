@@ -1,0 +1,15 @@
+{% load i18n %}{% autoescape off %}{% blocktrans with username=user.public_name name=author.public_name %}{{ username }} さん
+
+{{ name }} さんが{{ where }}であなたをメンションしました。{% endblocktrans %}
+
+----
+{{ excerpt }}
+----
+
+{{ url }}
+
+{% blocktrans %}このメールの受け取りは、プロフィール編集の「通知」でいつでも停止できます。{% endblocktrans %}
+{{ settings_url }}
+
+JE6HUB.com
+{% endautoescape %}

@@ -201,3 +201,43 @@ class BlogImage(models.Model):
 
     def __str__(self):
         return self.image.name
+
+
+class PostLike(models.Model):
+    """記事への「いいね」。1 人 1 記事に 1 つ。"""
+    post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='likes')
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='blog_likes')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        constraints = [models.UniqueConstraint(fields=['post', 'user'], name='blog_like_unique_post_user')]
+        verbose_name = _("いいね")
+        verbose_name_plural = _("いいね")
+
+    def __str__(self):
+        return f'{self.user} ♥ {self.post}'
+
+
+class Comment(models.Model):
+    """記事へのコメント。本文の @ユーザー名 はメンションとしてリンク・通知される。"""
+    MAX_LENGTH = 1000
+
+    post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='comments')
+    author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='blog_comments')
+    text = models.TextField(max_length=MAX_LENGTH, verbose_name=_("コメント"))
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['created_at']
+        verbose_name = _("コメント")
+        verbose_name_plural = _("コメント")
+
+    def __str__(self):
+        return Truncator(self.text).chars(40)
+
+    def get_absolute_url(self):
+        return f'{self.post.get_absolute_url()}#comment-{self.pk}'
+
+    def can_delete(self, user):
+        """書いた本人と記事の著者が削除できる (管理者は通報から)。"""
+        return user.is_authenticated and user.id in (self.author_id, self.post.author_id)

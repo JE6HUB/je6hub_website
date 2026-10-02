@@ -3,8 +3,10 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied, ValidationError
 from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 
+from accounts.mentions import notify_mentions
 from core.uploads import sanitize_image, sanitize_video
 
 from .models import Channel, ChannelMembership, Message
@@ -128,6 +130,14 @@ def thread_view(request, channel_id):
         if media_file:
             msg.media = media_file
         msg.save()
+        if text:
+            notify_mentions(
+                request, text, author=request.user,
+                url=reverse('community:thread', args=[channel.id]),
+                where=lambda: _('Lounge のチャンネル「%(name)s」') % {'name': channel.name},
+                # 非公開チャンネルでは、メンバー以外にメッセージの内容を送らない
+                audience=None if channel.channel_type == 'public' else channel.is_member,
+            )
         return redirect('community:thread', channel_id=channel.id)
 
     is_owner         = membership and membership.role == ChannelMembership.ROLE_OWNER

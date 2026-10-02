@@ -373,7 +373,9 @@
                 h('div', {},
                     h('p', { class: 'wl-comment-head' }, h('strong', { text: c.author_name }), h('span', { text: c.created_at }),
                         c.id ? h('a', { class: 'wl-comment-report', href: url(cfg.urls.reportComment, c.id), text: t.report }) : null),
-                    h('p', { class: 'wl-comment-text', text: c.text })))) : [h('p', { class: 'wl-muted', text: t.noComments })]));
+                    h('p', { class: 'wl-comment-text' }, ...(c.segments || [{ text: c.text }]).map((seg) => (seg.username
+                        ? h('a', { class: 'jh-mention', href: seg.url, 'data-profile': seg.username, 'aria-haspopup': 'dialog', text: seg.text })
+                        : seg.text)))))) : [h('p', { class: 'wl-muted', text: t.noComments })]));
         } catch (e) {
             box.replaceChildren(h('p', { class: 'wl-error', text: t.loadFailed }));
         }

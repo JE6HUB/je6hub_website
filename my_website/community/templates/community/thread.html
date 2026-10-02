@@ -60,7 +60,7 @@
                         {% endif %}
 
                         {% if msg.text %}
-                        <div class="msg-bubble {% if msg.sender == request.user %}msg-bubble-self{% else %}msg-bubble-other{% endif %}"><p>{{ msg.text }}</p></div>
+                        <div class="msg-bubble {% if msg.sender == request.user %}msg-bubble-self{% else %}msg-bubble-other{% endif %}"><p>{{ msg.text|mentions }}</p></div>
                         {% endif %}
 
                         <time class="msg-time" datetime="{{ msg.created_at|date:'c' }}">{{ msg.created_at|date:"m/d H:i" }}</time>
@@ -93,7 +93,7 @@
                     <button type="button" class="attach-btn" id="attachVideoBtn" title="{% trans '動画を添付' %}" aria-label="{% trans '動画を添付' %}">
                         <span class="material-symbols-outlined" aria-hidden="true">videocam</span>
                     </button>
-                    <textarea id="chatTextInput" name="message" rows="1"
+                    <textarea id="chatTextInput" name="message" rows="1" data-mention-input
                               placeholder="{% trans 'メッセージを入力…' %}"
                               aria-label="{% trans 'メッセージを入力' %}"></textarea>
                     <button type="submit" id="sendBtn" disabled aria-label="{% trans '送信' %}">

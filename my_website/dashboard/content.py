@@ -7,7 +7,7 @@ from django.urls import reverse
 from django.utils.text import Truncator
 from django.utils.translation import gettext_lazy as _
 
-from blog.models import Post
+from blog.models import Comment, Post
 from community.models import Message
 from photraveler.models import MapPin, PhotoComment
 
@@ -57,6 +57,14 @@ KINDS = {
         text=lambda p: f'{p.title}\n{p.subtitle}\n{Truncator(p.plain_text).chars(2000)}'.strip(),
         url=lambda p: p.get_absolute_url(),
         editable=('title', 'subtitle'),
+    ),
+    'blog_comment': Kind(
+        key='blog_comment', label=_('Blogs のコメント'), model=Comment,
+        can_view=lambda user, c: c.post.is_published or c.post.author_id == user.id,
+        author=lambda c: c.author,
+        text=lambda c: f'{c.author.username}: {c.text}',
+        url=lambda c: c.get_absolute_url(),
+        editable=('text',),
     ),
     'pin': Kind(
         key='pin', label=_('WanderLens のスポット'), model=MapPin,

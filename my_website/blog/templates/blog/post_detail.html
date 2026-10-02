@@ -8,7 +8,7 @@
 <meta property="og:title" content="{{ post.title }}">
 <meta property="og:description" content="{{ post.excerpt }}">
 {% if post.cover_image %}<meta property="og:image" content="{{ request.scheme }}://{{ request.get_host }}{{ post.cover_image.url }}">{% endif %}
-<link href="{% static 'css/blog.css' %}?v=29" rel="stylesheet" />
+<link href="{% static 'css/blog.css' %}?v=30" rel="stylesheet" />
 {% if post.has_math %}
 <link href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" rel="stylesheet" />
 {% endif %}
@@ -39,6 +39,32 @@
     window.addEventListener('scroll', onScroll, { passive: true });
     window.addEventListener('resize', onScroll);
     update();
+})();
+</script>
+<script>
+// いいね: ページを再読み込みせずに切り替える (JS が無効ならフォーム送信で同じことをする)
+(() => {
+    const form = document.querySelector('[data-like-form]');
+    if (!form) return;
+    const btn = form.querySelector('button');
+    const count = document.querySelector('[data-like-count]');
+    const label = (n) => "{% trans '%(count)s 件のいいね' %}".replace('%(count)s', n);
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        btn.disabled = true;
+        try {
+            const res = await fetch(form.action, { method: 'POST', body: new FormData(form), headers: { Accept: 'application/json' } });
+            if (!res.ok) throw new Error(res.status);
+            const data = await res.json();
+            btn.classList.toggle('is-liked', data.liked);
+            btn.setAttribute('aria-pressed', String(data.liked));
+            count.textContent = label(data.count);
+        } catch (err) {
+            form.submit();
+        } finally {
+            btn.disabled = false;
+        }
+    });
 })();
 </script>
 {% if post.has_demo %}
@@ -150,6 +176,8 @@
     {% endif %}
 
     <footer class="blog-article-footer">
+        {% include "blog/_reactions.html" %}
+
         <div class="blog-author-card jh-glass-panel">
             <span class="blog-avatar blog-avatar--lg" data-profile="{{ post.author.username }}" aria-hidden="true">{% avatar post.author %}</span>
             <div>

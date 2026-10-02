@@ -177,6 +177,14 @@ class UserProfileForm(AvatarFormMixin, forms.ModelForm):
             raise forms.ValidationError(_("このメールアドレスは既に登録されています。"))
         return email
 
+class NotificationSettingsForm(forms.ModelForm):
+    """通知設定 (プロフィール編集とは別に保存する)。"""
+
+    class Meta:
+        model = CustomUser
+        fields = ("notify_mentions_by_email",)
+
+
 class AccountDeleteForm(forms.Form):
     """退会の確認。パスワードでログインする人はパスワード、ソーシャルログインだけの人はユーザー名を入力する。"""
     confirm = forms.CharField(strip=False, widget=forms.PasswordInput)
