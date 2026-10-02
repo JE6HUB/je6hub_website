@@ -13,6 +13,7 @@ from django.views.decorators.http import require_POST
 from accounts.ratelimit import ratelimit
 from blog.models import Post
 
+from . import guide_tour
 from .forms import ContactForm
 from .models import Resume
 from .resume import HERO_IMAGES, ResumeError, apply_edit, localize
@@ -29,7 +30,15 @@ def home_view(request):
         'latest': list(published.select_related('author')[:LATEST_POSTS]),
         'post_count': published.count(),
         'writer_count': published.values('author').distinct().count(),
+        'guide_chapters': guide_tour.chapter_summaries(),
     })
+
+
+def guide_tour_view(request):
+    """使い方ガイドの手順 (static/js/guide-tour.js が、ガイドを始めたときと再開するときだけ読む)。"""
+    response = JsonResponse(guide_tour.tour_data(request.user))
+    response['Cache-Control'] = 'private, no-cache'
+    return response
 
 
 def resume_view(request):

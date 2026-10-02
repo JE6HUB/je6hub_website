@@ -1,0 +1,536 @@
+/* =========================================
+   使い方ガイド (static/js/guide-tour.js)
+   - スポットライト: 対象の周りだけ明るく残し、ほかを暗くする
+   - 吹き出し: PC は対象の横に矢印付きで、スマートフォンは画面の上下に固定したシート
+   - 色はカラースキームの変数と、章ごとの色 (--guide-color) だけを使う
+   ========================================= */
+.jh-guide {
+    --guide-color: var(--jh-accent);
+    --guide-ease: cubic-bezier(0.22, 1, 0.36, 1);
+    position: fixed;
+    inset: 0;
+    z-index: 10050;
+    pointer-events: none;
+}
+.jh-guide[hidden] { display: none; }
+
+/* 対象が見つからないとき・完了画面では、全体を暗くする */
+.jh-guide-dim {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+.jh-guide.is-visible.is-missing .jh-guide-dim { opacity: 1; }
+
+.jh-guide-spot {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 0;
+    height: 0;
+    border-radius: 12px;
+    box-shadow: 0 0 0 200vmax rgba(0, 0, 0, 0.5);
+    opacity: 0;
+    transition:
+        transform 0.45s var(--guide-ease),
+        width 0.45s var(--guide-ease),
+        height 0.45s var(--guide-ease),
+        border-radius 0.45s var(--guide-ease),
+        opacity 0.3s ease;
+}
+.jh-guide.is-visible:not(.is-missing) .jh-guide-spot { opacity: 1; }
+/* 枠の光: 操作を待つ手順ではゆっくり脈打たせて「ここを触る」と伝える */
+.jh-guide-spot::before,
+.jh-guide-spot::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    border: 2px solid var(--guide-color);
+}
+.jh-guide-spot::after {
+    border-width: 2px;
+    opacity: 0;
+}
+.jh-guide:has(.jh-guide-card:not([data-action="info"])) .jh-guide-spot::after {
+    animation: jh-guide-pulse 1.8s var(--guide-ease) infinite;
+}
+@keyframes jh-guide-pulse {
+    0% { opacity: 0.9; transform: scale(1); }
+    100% { opacity: 0; transform: scale(1.12); }
+}
+/* 操作できたときのチェック */
+.jh-guide-spot > .material-symbols-outlined {
+    position: absolute;
+    top: -14px;
+    right: -14px;
+    display: grid;
+    place-items: center;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: var(--guide-color);
+    color: var(--jh-bg);
+    font-size: 20px;
+    font-variation-settings: "wght" 700;
+    transform: scale(0);
+    transition: transform 0.35s var(--guide-ease);
+}
+.jh-guide.is-done .jh-guide-spot > .material-symbols-outlined { transform: scale(1); }
+.jh-guide.is-done .jh-guide-spot::after { animation: none; }
+
+/* ── 吹き出し ─────────────────────────── */
+.jh-guide-card {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: min(360px, calc(100vw - 24px));
+    padding: 16px 18px 14px;
+    border-radius: 20px;
+    background: rgba(var(--jh-glass-rgb), 0.92);
+    -webkit-backdrop-filter: saturate(180%) blur(24px);
+    backdrop-filter: saturate(180%) blur(24px);
+    border: 1px solid var(--jh-glass-border);
+    box-shadow: 0 18px 48px rgba(0, 0, 0, 0.35), 0 2px 8px rgba(0, 0, 0, 0.2);
+    color: var(--jh-text);
+    pointer-events: auto;
+    opacity: 0;
+    transition: transform 0.45s var(--guide-ease), opacity 0.25s ease;
+}
+.jh-guide.is-visible .jh-guide-card { opacity: 1; }
+.jh-guide.is-visible .jh-guide-card.is-switching { opacity: 0; transition: opacity 0.12s ease; }
+
+.jh-guide-arrow {
+    position: absolute;
+    width: 14px;
+    height: 14px;
+    background: inherit;
+    border: 1px solid var(--jh-glass-border);
+    border-radius: 3px;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+    display: none;
+}
+.jh-guide-card[data-placement="bottom"] .jh-guide-arrow {
+    display: block; top: -8px; left: calc(var(--arrow-x, 50%) - 7px);
+    transform: rotate(45deg); border-right: 0; border-bottom: 0;
+}
+.jh-guide-card[data-placement="top"] .jh-guide-arrow {
+    display: block; bottom: -8px; left: calc(var(--arrow-x, 50%) - 7px);
+    transform: rotate(45deg); border-left: 0; border-top: 0;
+}
+.jh-guide-card[data-placement="right"] .jh-guide-arrow {
+    display: block; left: -8px; top: calc(var(--arrow-y, 50%) - 7px);
+    transform: rotate(45deg); border-right: 0; border-top: 0;
+}
+.jh-guide-card[data-placement="left"] .jh-guide-arrow {
+    display: block; right: -8px; top: calc(var(--arrow-y, 50%) - 7px);
+    transform: rotate(45deg); border-left: 0; border-bottom: 0;
+}
+
+.jh-guide-head {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 10px;
+    font-size: 12px;
+    color: var(--jh-text-muted);
+}
+.jh-guide-chapter-name {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-width: 0;
+    font-weight: 600;
+    color: var(--guide-color);
+}
+.jh-guide-chapter-name span:last-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.jh-guide-chapter-name .material-symbols-outlined { font-size: 18px; }
+.jh-guide-count { margin-left: auto; font-variant-numeric: tabular-nums; }
+.jh-guide-x {
+    display: grid;
+    place-items: center;
+    width: 32px;
+    height: 32px;
+    margin: -6px -8px -6px 0;
+    border: 0;
+    border-radius: 50%;
+    background: none;
+    color: var(--jh-text-muted);
+    cursor: pointer;
+}
+.jh-guide-x:hover { background: rgba(var(--jh-fg-rgb), 0.08); color: var(--jh-text); }
+.jh-guide-x .material-symbols-outlined { font-size: 20px; }
+
+.jh-guide-progress {
+    height: 3px;
+    margin-bottom: 14px;
+    border-radius: 3px;
+    background: rgba(var(--jh-fg-rgb), 0.1);
+    overflow: hidden;
+}
+.jh-guide-progress i {
+    display: block;
+    height: 100%;
+    border-radius: inherit;
+    background: var(--guide-color);
+    transition: width 0.5s var(--guide-ease);
+}
+
+.jh-guide-title {
+    margin: 0 0 6px;
+    font-family: var(--jh-font-display);
+    font-size: 19px;
+    font-weight: 700;
+    line-height: 1.3;
+    letter-spacing: 0.005em;
+    color: var(--jh-text);
+}
+.jh-guide-body {
+    margin: 0;
+    font-size: 14.5px;
+    line-height: 1.65;
+    color: var(--jh-text-body, var(--jh-text));
+}
+
+/* 「押してみましょう」などの操作のヒント */
+.jh-guide-hint {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 12px 0 0;
+    padding: 9px 12px;
+    border-radius: 12px;
+    background: color-mix(in srgb, var(--guide-color) 14%, transparent);
+    color: var(--jh-text);
+    font-size: 13.5px;
+    font-weight: 600;
+}
+.jh-guide-hint[hidden] { display: none; }
+.jh-guide-hint .material-symbols-outlined {
+    font-size: 20px;
+    color: var(--guide-next-color, var(--guide-color));
+    animation: jh-guide-nudge 1.6s ease-in-out infinite;
+}
+.jh-guide.is-done .jh-guide-hint .material-symbols-outlined,
+.jh-guide.is-finished .jh-guide-hint .material-symbols-outlined { animation: none; }
+@keyframes jh-guide-nudge {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-3px); }
+}
+
+.jh-guide-actions {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 14px;
+}
+.jh-guide-spacer { flex: 1; }
+.jh-guide-btn {
+    min-height: 36px;
+    padding: 0 14px;
+    border: 0;
+    border-radius: 999px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.15s ease, transform 0.15s ease;
+}
+.jh-guide-btn[hidden] { display: none; }
+.jh-guide-btn:active { transform: scale(0.97); }
+.jh-guide-btn--primary {
+    padding: 0 18px;
+    background: var(--jh-button);
+    color: #fff; /* .jh-btn-primary と同じく、どのスキームでも濃いボタン色の上の白 */
+}
+.jh-guide-btn--primary:hover { background: var(--jh-button-hover); }
+.jh-guide-btn--ghost {
+    background: rgba(var(--jh-fg-rgb), 0.08);
+    color: var(--jh-text);
+}
+.jh-guide-btn--ghost:hover { background: rgba(var(--jh-fg-rgb), 0.14); }
+.jh-guide-btn--text {
+    padding: 0 8px;
+    background: none;
+    color: var(--jh-text-muted);
+    font-weight: 500;
+}
+.jh-guide-btn--text:hover { color: var(--jh-text); }
+.jh-guide-btn:focus-visible,
+.jh-guide-x:focus-visible {
+    outline: 2px solid var(--jh-accent);
+    outline-offset: 2px;
+}
+
+/* 完了画面 */
+.jh-guide.is-finished .jh-guide-card {
+    width: min(400px, calc(100vw - 24px));
+    padding: 28px 22px 18px;
+    text-align: center;
+}
+.jh-guide.is-finished .jh-guide-head { justify-content: center; margin-bottom: 14px; }
+.jh-guide.is-finished .jh-guide-x { position: absolute; top: 14px; right: 14px; margin: 0; }
+.jh-guide.is-finished .jh-guide-count,
+.jh-guide.is-finished .jh-guide-progress { display: none; }
+.jh-guide.is-finished .jh-guide-chapter-name {
+    display: grid;
+    place-items: center;
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: color-mix(in srgb, var(--guide-color) 18%, transparent);
+}
+.jh-guide.is-finished .jh-guide-chapter-name .material-symbols-outlined {
+    font-size: 34px;
+    animation: jh-guide-pop 0.6s var(--guide-ease);
+}
+.jh-guide.is-finished .jh-guide-title { font-size: 20px; margin-bottom: 8px; }
+.jh-guide.is-finished .jh-guide-hint {
+    justify-content: center;
+    padding: 12px;
+    background: rgba(var(--jh-fg-rgb), 0.06);
+    font-size: 15px;
+}
+.jh-guide.is-finished .jh-guide-actions { justify-content: center; }
+.jh-guide.is-finished .jh-guide-spacer { display: none; }
+@keyframes jh-guide-pop {
+    0% { transform: scale(0.3) rotate(-20deg); opacity: 0; }
+    60% { transform: scale(1.15) rotate(6deg); opacity: 1; }
+    100% { transform: scale(1) rotate(0); }
+}
+
+/* スマートフォン: 画面の上下に固定するシート */
+@media (max-width: 734px) {
+    .jh-guide-card {
+        width: min(520px, calc(100vw - 24px));
+        padding: 16px 18px calc(14px + env(safe-area-inset-bottom) * 0.5);
+        border-radius: 22px;
+    }
+    .jh-guide-title { font-size: 18px; }
+    .jh-guide-btn { min-height: 44px; }
+    .jh-guide-x { width: 40px; height: 40px; }
+}
+
+/* ── 別のページにいるときの「ガイドを続ける」 ── */
+.jh-guide-pill,
+.jh-guide-toast {
+    position: fixed;
+    left: 50%;
+    bottom: calc(20px + env(safe-area-inset-bottom));
+    z-index: 10050;
+    transform: translateX(-50%);
+    max-width: calc(100vw - 24px);
+    border-radius: 999px;
+    background: rgba(var(--jh-glass-rgb), 0.92);
+    -webkit-backdrop-filter: saturate(180%) blur(24px);
+    backdrop-filter: saturate(180%) blur(24px);
+    border: 1px solid var(--jh-glass-border);
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.3);
+    color: var(--jh-text);
+}
+.jh-guide-pill[hidden],
+.jh-guide-toast[hidden] { display: none; }
+.jh-guide-pill {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 6px 6px 6px 14px;
+    font-size: 13.5px;
+    animation: jh-guide-rise 0.4s var(--guide-ease, ease);
+}
+.jh-guide-pill-icon { display: grid; color: var(--jh-accent); }
+.jh-guide-pill-text { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--jh-text-muted); }
+.jh-guide-pill-go {
+    flex-shrink: 0;
+    padding: 8px 14px;
+    border-radius: 999px;
+    background: var(--jh-button);
+    color: #fff; /* .jh-btn-primary と同じ */
+    font-weight: 600;
+    text-decoration: none;
+}
+.jh-guide-pill-go:hover { background: var(--jh-button-hover); color: #fff; }
+.jh-guide-pill-x {
+    display: grid;
+    place-items: center;
+    width: 34px;
+    height: 34px;
+    border: 0;
+    border-radius: 50%;
+    background: none;
+    color: var(--jh-text-muted);
+    cursor: pointer;
+}
+.jh-guide-pill-x .material-symbols-outlined { font-size: 20px; }
+.jh-guide-toast {
+    padding: 12px 18px;
+    border-radius: 16px;
+    font-size: 13.5px;
+    text-align: center;
+    opacity: 0;
+    transform: translate(-50%, 12px);
+    transition: opacity 0.3s ease, transform 0.3s var(--guide-ease, ease);
+}
+.jh-guide-toast.is-visible { opacity: 1; transform: translate(-50%, 0); }
+@keyframes jh-guide-rise {
+    from { opacity: 0; transform: translate(-50%, 16px); }
+    to { opacity: 1; transform: translate(-50%, 0); }
+}
+
+/* ── ホーム: ガイドの章を選ぶダイアログ ── */
+.landing-hero-btn--guide .material-symbols-outlined { font-size: 20px; margin-left: -4px; }
+
+.jh-guide-picker {
+    width: min(560px, calc(100vw - 32px));
+    max-width: none;
+    max-height: min(720px, calc(100dvh - 48px));
+    padding: 0;
+    border: 1px solid var(--jh-glass-border);
+    border-radius: 28px;
+    background: var(--jh-surface);
+    color: var(--jh-text);
+    box-shadow: 0 30px 80px rgba(0, 0, 0, 0.45);
+    opacity: 0;
+    transform: translateY(12px) scale(0.97);
+    transition: opacity 0.22s ease, transform 0.32s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.jh-guide-picker.is-open { opacity: 1; transform: none; }
+.jh-guide-picker::backdrop {
+    background: rgba(0, 0, 0, 0.5);
+    -webkit-backdrop-filter: blur(6px);
+    backdrop-filter: blur(6px);
+}
+.jh-guide-picker-inner { position: relative; padding: 32px 28px 24px; }
+.jh-guide-picker-grabber { display: none; }
+.jh-guide-picker-close {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    display: grid;
+    place-items: center;
+    width: 40px;
+    height: 40px;
+    border: 0;
+    border-radius: 50%;
+    background: rgba(var(--jh-fg-rgb), 0.08);
+    color: var(--jh-text);
+    cursor: pointer;
+}
+.jh-guide-picker-close:hover { background: rgba(var(--jh-fg-rgb), 0.14); }
+.jh-guide-picker-head { margin-bottom: 22px; padding-right: 40px; }
+.jh-guide-picker-badge {
+    display: inline-grid;
+    place-items: center;
+    width: 52px;
+    height: 52px;
+    margin-bottom: 14px;
+    border-radius: 16px;
+    background: rgba(var(--jh-accent-rgb), 0.16);
+    color: var(--jh-accent);
+}
+.jh-guide-picker-badge .material-symbols-outlined { font-size: 30px; }
+.jh-guide-picker-head h2 {
+    margin: 0 0 8px;
+    font-family: var(--jh-font-display);
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--jh-text);
+}
+.jh-guide-picker-head p { margin: 0; font-size: 15px; line-height: 1.6; color: var(--jh-text-muted); }
+
+.jh-guide-chapters {
+    display: grid;
+    gap: 10px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+.jh-guide-chapter {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    width: 100%;
+    padding: 14px 16px;
+    border: 1px solid var(--jh-card-border);
+    border-radius: 18px;
+    background: var(--jh-card-bg);
+    color: var(--jh-text);
+    text-align: left;
+    cursor: pointer;
+    transition: background-color 0.15s ease, transform 0.15s ease, border-color 0.15s ease;
+}
+.jh-guide-chapter:hover { background: var(--jh-card-hover); border-color: color-mix(in srgb, var(--chapter-color) 45%, transparent); }
+.jh-guide-chapter:active { transform: scale(0.99); }
+.jh-guide-chapter:focus-visible { outline: 2px solid var(--jh-accent); outline-offset: 2px; }
+.jh-guide-chapter-icon {
+    flex-shrink: 0;
+    display: grid;
+    place-items: center;
+    width: 48px;
+    height: 48px;
+    border-radius: 14px;
+    background: color-mix(in srgb, var(--chapter-color) 18%, transparent);
+    color: var(--chapter-color);
+}
+.jh-guide-chapter-icon .material-symbols-outlined { font-size: 26px; }
+.jh-guide-chapter-text { display: grid; gap: 2px; min-width: 0; flex: 1; }
+.jh-guide-chapter-title { font-size: 16.5px; font-weight: 600; color: var(--jh-text); }
+.jh-guide-chapter-desc { font-size: 13.5px; line-height: 1.5; color: var(--jh-text-muted); }
+.jh-guide-chapter-done { display: grid; color: var(--chapter-color); }
+.jh-guide-chapter-done[hidden] { display: none; }
+.jh-guide-chapter-go { color: var(--jh-text-muted); transition: transform 0.2s ease, color 0.2s ease; }
+.jh-guide-chapter:hover .jh-guide-chapter-go { transform: translateX(3px); color: var(--chapter-color); }
+.jh-guide-picker-note {
+    display: flex;
+    gap: 8px;
+    margin: 16px 0 0;
+    font-size: 13px;
+    line-height: 1.55;
+    color: var(--jh-text-muted);
+}
+.jh-guide-picker-note .material-symbols-outlined { font-size: 18px; }
+
+/* スマートフォン: 下から出るシート */
+@media (max-width: 734px) {
+    .jh-guide-picker {
+        width: 100%;
+        max-height: calc(100dvh - 56px);
+        margin: auto 0 0;
+        border-radius: 26px 26px 0 0;
+        border-bottom: 0;
+        transform: translateY(100%);
+        transition: opacity 0.2s ease, transform 0.36s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    .jh-guide-picker-inner { padding: 12px 18px calc(20px + env(safe-area-inset-bottom)); }
+    .jh-guide-picker-grabber {
+        display: block;
+        width: 40px;
+        height: 5px;
+        margin: 0 auto 14px;
+        border-radius: 3px;
+        background: rgba(var(--jh-fg-rgb), 0.2);
+    }
+    .jh-guide-picker-close { top: 14px; right: 12px; }
+    .jh-guide-picker-head { margin-bottom: 18px; }
+    .jh-guide-picker-badge { width: 44px; height: 44px; border-radius: 14px; margin-bottom: 10px; }
+    .jh-guide-picker-head h2 { font-size: 24px; }
+    .jh-guide-picker-head p { font-size: 14px; }
+    .jh-guide-chapter { padding: 12px 14px; gap: 14px; }
+    .jh-guide-chapter-icon { width: 44px; height: 44px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .jh-guide-spot,
+    .jh-guide-card,
+    .jh-guide-progress i,
+    .jh-guide-picker { transition: none; }
+    .jh-guide-spot::after,
+    .jh-guide-hint .material-symbols-outlined,
+    .jh-guide-pill { animation: none !important; }
+}
+
+@media print {
+    .jh-guide, .jh-guide-pill, .jh-guide-toast { display: none !important; }
+}

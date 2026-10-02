@@ -1,0 +1,43 @@
+{% load i18n %}
+{# 使い方ガイドの章を選ぶダイアログ (ホームの「使い方ガイド」ボタンで開く。開閉と開始は guide-tour.js) #}
+<dialog class="jh-guide-picker" id="jh-guide-picker" aria-labelledby="jh-guide-picker-title">
+    <div class="jh-guide-picker-inner">
+        <span class="jh-guide-picker-grabber" aria-hidden="true"></span>
+        <button type="button" class="jh-guide-picker-close" data-guide-picker-close aria-label="{% trans '閉じる' %}">
+            <span class="material-symbols-outlined" aria-hidden="true">close</span>
+        </button>
+        <header class="jh-guide-picker-head">
+            <span class="jh-guide-picker-badge" aria-hidden="true">
+                <span class="material-symbols-outlined">school</span>
+            </span>
+            <h2 id="jh-guide-picker-title">{% trans "使い方ガイド" %}</h2>
+            <p>{% trans "やりたいことを選ぶと、実際の画面で一歩ずつ案内します。案内に沿って操作すると、次の手順へ進みます。" %}</p>
+        </header>
+        <ul class="jh-guide-chapters">
+            {% for chapter in guide_chapters %}
+            <li>
+                <button type="button" class="jh-guide-chapter" data-guide-start="{{ chapter.id }}" style="--chapter-color: {{ chapter.color }};">
+                    <span class="jh-guide-chapter-icon" aria-hidden="true">
+                        <span class="material-symbols-outlined">{{ chapter.icon }}</span>
+                    </span>
+                    <span class="jh-guide-chapter-text">
+                        <span class="jh-guide-chapter-title">{{ chapter.title }}</span>
+                        <span class="jh-guide-chapter-desc">{{ chapter.description }}</span>
+                    </span>
+                    <span class="jh-guide-chapter-done" data-guide-done hidden>
+                        <span class="material-symbols-outlined" aria-hidden="true">check_circle</span>
+                        <span class="visually-hidden">{% trans "完了済み" %}</span>
+                    </span>
+                    <span class="material-symbols-outlined jh-guide-chapter-go" aria-hidden="true">arrow_forward</span>
+                </button>
+            </li>
+            {% endfor %}
+        </ul>
+        {% if not user.is_authenticated %}
+        <p class="jh-guide-picker-note">
+            <span class="material-symbols-outlined" aria-hidden="true">info</span>
+            {% trans "サインインが必要な操作は、途中でサインインを案内します。サインイン後はガイドの続きから再開します。" %}
+        </p>
+        {% endif %}
+    </div>
+</dialog>
