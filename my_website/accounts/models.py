@@ -2,6 +2,8 @@ from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
+from . import color_schemes
+
 class CustomUser(AbstractUser):
     """
     プロジェクト全体で使用するカスタムユーザーモデル。
@@ -60,6 +62,14 @@ class CustomUser(AbstractUser):
         default=True,
         verbose_name=_("メンションをメールで通知"),
         help_text=_("コメントやメッセージで @ユーザー名 と書かれたときにメールを受け取ります。"),
+    )
+
+    # サイト全体の配色 (プロフィール編集の「カラースキーム」から変更できる)
+    color_scheme = models.CharField(
+        max_length=20,
+        choices=color_schemes.CHOICES,
+        default=color_schemes.DEFAULT_SCHEME,
+        verbose_name=_("カラースキーム"),
     )
 
     # Favorite Track Fields

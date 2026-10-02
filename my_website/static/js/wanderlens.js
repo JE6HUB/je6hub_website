@@ -89,9 +89,22 @@
     };
     let routeOn = false;
 
+    // 地球の外側 (宇宙と大気) とルートの線は、サイトのカラースキームに合わせる
+    function schemeColor(name, fallback) {
+        return getComputedStyle(document.documentElement).getPropertyValue(name).trim() || fallback;
+    }
+    function schemeFog() {
+        return {
+            color: schemeColor('--jh-card-bg', '#1c1c1e'),
+            'high-color': '#0b1a33',
+            'space-color': schemeColor('--jh-bg', '#000'),
+            'star-intensity': 0.25,
+        };
+    }
+
     // スタイルを切り替えるとソースとレイヤーが消えるので、読み込むたびに追加し直す
     map.on('style.load', () => {
-        if (!map.getFog()) map.setFog({ color: '#1c1c1e', 'high-color': '#0b1a33', 'space-color': '#000', 'star-intensity': 0.25 });
+        if (!map.getFog()) map.setFog(schemeFog());
         map.addSource('wl-pins', {
             type: 'geojson',
             data: pinsGeoJSON,
@@ -108,7 +121,7 @@
             type: 'line',
             source: 'wl-route',
             layout: { 'line-cap': 'round', 'line-join': 'round', visibility: routeOn ? 'visible' : 'none' },
-            paint: { 'line-color': '#2997ff', 'line-width': 3, 'line-opacity': 0.85, 'line-dasharray': [0.1, 2.6] },
+            paint: { 'line-color': schemeColor('--jh-accent', '#2997ff'), 'line-width': 3, 'line-opacity': 0.85, 'line-dasharray': [0.1, 2.6] },
         });
     });
 

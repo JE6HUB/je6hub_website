@@ -24,19 +24,145 @@
     --mdb-font-roboto: var(--jh-font-text);
     --mdb-font-monospace: var(--jh-font-mono);
 
-    /* Colors - Pure Dark Mode */
+    /* Colors — カラースキーム「ミッドナイト」(既定)。
+       ほかのスキームは下の html[data-jh-scheme="..."] で同じ変数を上書きする。
+       どのスキームも暗い背景なので、白の半透明 (rgba(255, 255, 255, x)) の線や面はそのまま使える。
+       スキームを足すときは accounts/color_schemes.py にも追加する。 */
     --jh-bg: #000000;
+    --jh-bg-rgb: 0, 0, 0; /* rgba(var(--jh-bg-rgb), x): 背景へ溶かすグラデーション用 */
+    --jh-surface-sunken: #0b0b0c;
+    --jh-surface: #111113;
+    --jh-card-bg: #1c1c1e; /* 枠線なしカード用: 背景から面の明度差で浮かせる */
+    --jh-card-hover: #242426;
+    --jh-card-bg-2: #2c2c2e;
+    --jh-card-bg-3: #3a3a3c;
+    --jh-line: #424245;
+    --jh-line-strong: #48484a;
     --jh-text: #f5f5f7;
     --jh-text-muted: #86868b;
-    --jh-card-bg: #1c1c1e; /* 枠線なしカード用: 黒背景から面の明度差で浮かせる */
     --jh-card-border: rgba(255, 255, 255, 0.1);
-    --jh-accent: #2997ff; /* アクセントの青 (リンク / ダーク背景) */
-    --jh-button: #0071e3; /* ボタンの青 */
+    --jh-accent: #2997ff; /* アクセント (リンク / ダーク背景) */
+    --jh-accent-rgb: 41, 151, 255;
+    --jh-button: #0071e3; /* ボタン */
     --jh-button-hover: #0077ed;
-    --jh-nav-bg: rgba(0, 0, 0, 0.72);
-    --jh-glass: rgba(28, 28, 30, 0.6);
+    --jh-glass-rgb: 28, 28, 30; /* rgba(var(--jh-glass-rgb), x): 半透明のパネル */
+    --jh-nav-bg: rgba(var(--jh-bg-rgb), 0.72);
+    --jh-glass: rgba(var(--jh-glass-rgb), 0.6);
     --jh-glass-border: rgba(255, 255, 255, 0.15);
 }
+
+/* =========================================
+   Color schemes (設定 → カラースキーム)
+   ========================================= */
+html[data-jh-scheme="ocean"] {
+    --jh-bg: #03101d;
+    --jh-bg-rgb: 3, 16, 29;
+    --jh-surface-sunken: #061423;
+    --jh-surface: #0a1a2c;
+    --jh-card-bg: #102338;
+    --jh-card-hover: #162b43;
+    --jh-card-bg-2: #1b3250;
+    --jh-card-bg-3: #26405f;
+    --jh-line: #2f4a69;
+    --jh-line-strong: #3a5677;
+    --jh-text-muted: #8a9bb0;
+    --jh-accent: #4cc2ff;
+    --jh-accent-rgb: 76, 194, 255;
+    --jh-button: #0a7fd0;
+    --jh-button-hover: #168ddf;
+    --jh-glass-rgb: 16, 35, 56;
+}
+html[data-jh-scheme="forest"] {
+    --jh-bg: #050f0a;
+    --jh-bg-rgb: 5, 15, 10;
+    --jh-surface-sunken: #08140d;
+    --jh-surface: #0c1a12;
+    --jh-card-bg: #13241a;
+    --jh-card-hover: #182c20;
+    --jh-card-bg-2: #1e3527;
+    --jh-card-bg-3: #294433;
+    --jh-line: #314d3b;
+    --jh-line-strong: #3a5a45;
+    --jh-text-muted: #87a090;
+    --jh-accent: #4fd18b;
+    --jh-accent-rgb: 79, 209, 139;
+    --jh-button: #188a50;
+    --jh-button-hover: #1f995a;
+    --jh-glass-rgb: 19, 36, 26;
+}
+html[data-jh-scheme="ember"] {
+    --jh-bg: #120a06;
+    --jh-bg-rgb: 18, 10, 6;
+    --jh-surface-sunken: #170d08;
+    --jh-surface: #1d120c;
+    --jh-card-bg: #271912;
+    --jh-card-hover: #2f1f17;
+    --jh-card-bg-2: #38261c;
+    --jh-card-bg-3: #483226;
+    --jh-line: #523a2c;
+    --jh-line-strong: #5e4434;
+    --jh-text-muted: #a8968a;
+    --jh-accent: #ff9f5a;
+    --jh-accent-rgb: 255, 159, 90;
+    --jh-button: #cc5512;
+    --jh-button-hover: #db611c;
+    --jh-glass-rgb: 39, 25, 18;
+}
+html[data-jh-scheme="sakura"] {
+    --jh-bg: #12070d;
+    --jh-bg-rgb: 18, 7, 13;
+    --jh-surface-sunken: #170a11;
+    --jh-surface: #1e0e17;
+    --jh-card-bg: #28141f;
+    --jh-card-hover: #301a26;
+    --jh-card-bg-2: #3a202e;
+    --jh-card-bg-3: #4a2b3c;
+    --jh-line: #553245;
+    --jh-line-strong: #613a50;
+    --jh-text-muted: #ad91a0;
+    --jh-accent: #ff85b8;
+    --jh-accent-rgb: 255, 133, 184;
+    --jh-button: #c93673;
+    --jh-button-hover: #d84481;
+    --jh-glass-rgb: 40, 20, 31;
+}
+html[data-jh-scheme="amethyst"] {
+    --jh-bg: #0a0718;
+    --jh-bg-rgb: 10, 7, 24;
+    --jh-surface-sunken: #0e0a1f;
+    --jh-surface: #130f28;
+    --jh-card-bg: #1b1634;
+    --jh-card-hover: #221c3f;
+    --jh-card-bg-2: #2a2349;
+    --jh-card-bg-3: #362e5b;
+    --jh-line: #3e3566;
+    --jh-line-strong: #483e74;
+    --jh-text-muted: #9590b0;
+    --jh-accent: #a58bff;
+    --jh-accent-rgb: 165, 139, 255;
+    --jh-button: #6a46e0;
+    --jh-button-hover: #7754ec;
+    --jh-glass-rgb: 27, 22, 52;
+}
+
+/* スキームを切り替えた瞬間の演出 (color-scheme.js)。
+   View Transitions に対応したブラウザでは、切り替え前後のページ全体をゆっくりクロスフェードする。
+   グラデーションや画像の上の色まで一度に移り変わる。 */
+html.jh-scheme-changing::view-transition-old(root),
+html.jh-scheme-changing::view-transition-new(root) {
+    animation-duration: 0.9s;
+    animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+/* View Transitions のないブラウザでは、色のプロパティにだけ一時的にトランジションをかける */
+html.jh-scheme-fallback,
+html.jh-scheme-fallback *,
+html.jh-scheme-fallback *::before,
+html.jh-scheme-fallback *::after {
+    transition: background-color 0.9s ease, color 0.9s ease, border-color 0.9s ease,
+        fill 0.9s ease, stroke 0.9s ease, box-shadow 0.9s ease, outline-color 0.9s ease !important;
+}
+
+html { background-color: var(--jh-bg); } /* スクロールの引っ張り (オーバースクロール) 部分も同じ色に */
 
 body {
     background-color: var(--jh-bg);
@@ -378,8 +504,8 @@ html[lang="ja"] body { letter-spacing: 0; }
 /* Form Elements */
 .jh-input {
     width: 100%;
-    background: #000;
-    border: 1px solid #424245;
+    background: var(--jh-bg);
+    border: 1px solid var(--jh-line);
     color: var(--jh-text);
     padding: 16px;
     border-radius: 12px;
@@ -389,7 +515,7 @@ html[lang="ja"] body { letter-spacing: 0; }
 .jh-input:focus {
     outline: none;
     border-color: var(--jh-accent);
-    box-shadow: 0 0 0 3px rgba(41, 151, 255, 0.35);
+    box-shadow: 0 0 0 3px rgba(var(--jh-accent-rgb), 0.35);
 }
 .jh-label {
     display: block;
@@ -555,7 +681,7 @@ html[lang="ja"] body { letter-spacing: 0; }
     align-self: flex-start;
     padding: 2px;
     border-radius: 9px;
-    background: #2c2c2e;
+    background: var(--jh-card-bg-2);
 }
 .blog-segmented label { position: relative; cursor: pointer; }
 .blog-segmented input { position: absolute; opacity: 0; pointer-events: none; }
@@ -588,7 +714,7 @@ html[lang="ja"] body { letter-spacing: 0; }
     max-height: 264px;
     overflow-y: auto;
     border-radius: 14px;
-    background: rgba(28, 28, 30, 0.96);
+    background: rgba(var(--jh-glass-rgb), 0.96);
     box-shadow: 0 0 0 1px var(--jh-glass-border), 0 18px 40px -12px rgba(0, 0, 0, 0.7);
     -webkit-backdrop-filter: blur(20px);
     backdrop-filter: blur(20px);
@@ -611,7 +737,7 @@ html[lang="ja"] body { letter-spacing: 0; }
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    background: #3a3a3c;
+    background: var(--jh-card-bg-3);
     color: #fff;
     font-size: 13px;
     font-weight: 600;

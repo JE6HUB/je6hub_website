@@ -25,9 +25,10 @@ from community.models import Channel, ChannelMembership, Message
 from dashboard.models import ModerationLog
 from photraveler.models import MapPin, PinPhoto
 
+from . import color_schemes
 from .deletion import delete_account
 from .forms import (
-    AccountDeleteForm, CustomUserCreationForm, NotificationSettingsForm, OnboardingProfileForm,
+    AccountDeleteForm, ColorSchemeForm, CustomUserCreationForm, NotificationSettingsForm, OnboardingProfileForm,
     ResendVerificationForm, UserProfileForm,
 )
 from .models import CustomUser
@@ -140,6 +141,7 @@ def profile_view(request):
         'user_obj': user,
         'form': form,
         'notification_form': NotificationSettingsForm(instance=user),
+        'color_scheme_options': color_schemes.scheme_options(user.color_scheme),
     }
     return render(request, 'accounts/profile.html', context)
 
@@ -153,6 +155,29 @@ def notification_settings_view(request):
         form.save()
         messages.success(request, _('通知設定を保存しました。'))
     return redirect(reverse('profile') + '#notifications')
+
+
+@login_required
+@require_POST
+def color_scheme_settings_view(request):
+    """プロフィール編集の「カラースキーム」から送られる。
+
+    color-scheme.js は fetch で送って JSON を受け取り、ページを読み込み直さずに色を切り替える。
+    JavaScript が無効なときはフォーム送信になり、プロフィール編集へ戻る。
+    """
+    form = ColorSchemeForm(request.POST, instance=request.user)
+    wants_json = request.headers.get('Accept', '').startswith('application/json')
+    if not form.is_valid():
+        if wants_json:
+            return JsonResponse({'errors': form.errors.get_json_data()}, status=400)
+        messages.error(request, _('カラースキームを保存できませんでした。'))
+    else:
+        form.save()
+        if wants_json:
+            scheme = form.instance.color_scheme
+            return JsonResponse({'scheme': scheme, 'theme_color': color_schemes.theme_color(scheme)})
+        messages.success(request, _('カラースキームを保存しました。'))
+    return redirect(reverse('profile') + '#appearance')
 
 
 MENTION_SUGGESTIONS = 8

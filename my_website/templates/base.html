@@ -1,6 +1,6 @@
 {% load static i18n profiles %}
 <!DOCTYPE html>
-<html lang="{{ LANGUAGE_CODE }}">
+<html lang="{{ LANGUAGE_CODE }}"{% color_scheme_attrs %}>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,14 +8,16 @@
     <meta property="og:site_name" content="JE6HUB.com">
     <link rel="icon" href="{% static 'img/favicon.svg' %}" type="image/svg+xml">
     <link rel="apple-touch-icon" href="{% static 'img/apple-touch-icon.png' %}">
-    <meta name="theme-color" content="#000000">
+    <meta name="theme-color" content="{% color_scheme_theme_color %}">
+    {# 未ログインでも、この端末で選んだカラースキームを描画前に当てる (ちらつき防止)。color-scheme.js と同じキー #}
+    <script>(function(d){if(d.hasAttribute('data-jh-scheme-account'))return;try{var s=localStorage.getItem('jh-color-scheme');if(s&&/^[a-z]{1,20}$/.test(s))d.setAttribute('data-jh-scheme',s);}catch(e){}})(document.documentElement);</script>
 
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,400,0,0" rel="stylesheet" />
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
     <link href="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/6.4.0/mdb.min.css" rel="stylesheet" />
 
-    <link href="{% static 'css/style.css' %}?v=23" rel="stylesheet" />
-    <link href="{% static 'css/profile.css' %}?v=3" rel="stylesheet" />
+    <link href="{% static 'css/style.css' %}?v=24" rel="stylesheet" />
+    <link href="{% static 'css/profile.css' %}?v=4" rel="stylesheet" />
 
     {% block extra_head %}{% endblock %}
     {# ガラス (LiquidGlass) を使うページは templates/_liquid_glass_preload.html を入れる #}
@@ -212,7 +214,7 @@
     <div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 10000;">
         {% if messages %}
             {% for message in messages %}
-            <div class="toast align-items-center text-bg-dark border-0 mb-2" role="alert" aria-live="assertive" aria-atomic="true" style="background: rgba(28,28,30,0.8)!important; backdrop-filter: blur(20px); border-radius: 12px;">
+            <div class="toast align-items-center text-bg-dark border-0 mb-2" role="alert" aria-live="assertive" aria-atomic="true" style="background: rgba(var(--jh-glass-rgb), 0.8)!important; backdrop-filter: blur(20px); border-radius: 12px;">
                 <div class="d-flex">
                     <div class="toast-body fw-bold text-light">{{ message }}</div>
                     <button type="button" class="btn-close btn-close-white me-2 m-auto" data-mdb-dismiss="toast" aria-label="Close"></button>
@@ -225,6 +227,7 @@
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/6.4.0/mdb.min.js"></script>
     <script src="https://js-cdn.music.apple.com/musickit/v1/musickit.js"></script>
     <script type="text/javascript" src="{% static 'js/main.js' %}"></script>
+    <script src="{% static 'js/color-scheme.js' %}?v=1"></script>
     {% if user.is_authenticated %}<script src="{% static 'js/mentions.js' %}?v=1" data-url="{% url 'mention_search' %}"></script>{% endif %}
 
     {% block extra_js %}{% endblock %}

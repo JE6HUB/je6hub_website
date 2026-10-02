@@ -29,6 +29,7 @@ urlpatterns += i18n_patterns(
     path('profile/', accounts_views.profile_view, name='profile'),
     path('profile/onboarding/', accounts_views.profile_onboarding_view, name='profile_onboarding'),
     path('profile/notifications/', accounts_views.notification_settings_view, name='notification_settings'),
+    path('profile/color-scheme/', accounts_views.color_scheme_settings_view, name='color_scheme_settings'),
     path('profile/delete/', accounts_views.account_delete_view, name='account_delete'),
     path('api/mentions/', accounts_views.mention_search_view, name='mention_search'),
     path('users/<str:username>/', accounts_views.user_profile_view, name='user_profile'),

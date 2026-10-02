@@ -2,6 +2,7 @@ from django import template
 from django.utils.html import format_html
 from django.utils.translation import gettext as _
 
+from .. import color_schemes
 from ..mentions import link_mentions
 from ..onboarding import pop_profile_onboarding
 
@@ -14,6 +15,29 @@ def profile_onboarding_modal(context):
     request = context.get('request')
     show = bool(request and request.user.is_authenticated and pop_profile_onboarding(request))
     return {'show': show, 'user': request.user if show else None, 'csrf_token': context.get('csrf_token')}
+
+
+@register.simple_tag(takes_context=True)
+def color_scheme_attrs(context):
+    """<html> に付ける配色の属性。ログイン中はアカウントの設定を使う。
+
+    未ログインなら何も付けず、base.html の <head> のスクリプトが端末に残った選択 (localStorage) を当てる。
+    """
+    request = context.get('request')
+    user = getattr(request, 'user', None)
+    if not (user and user.is_authenticated):
+        return ''
+    scheme = user.color_scheme if user.color_scheme in color_schemes.VALUES else color_schemes.DEFAULT_SCHEME
+    return format_html(' data-jh-scheme="{}" data-jh-scheme-account', scheme)
+
+
+@register.simple_tag(takes_context=True)
+def color_scheme_theme_color(context):
+    """<meta name="theme-color"> の色 (ブラウザの UI をページの背景に合わせる)。"""
+    request = context.get('request')
+    user = getattr(request, 'user', None)
+    scheme = user.color_scheme if user and user.is_authenticated else color_schemes.DEFAULT_SCHEME
+    return color_schemes.theme_color(scheme)
 
 
 @register.simple_tag

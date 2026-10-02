@@ -8,7 +8,7 @@
    ========================================= */
 
 :root {
-    --lounge-public: #2997ff;
+    --lounge-public: var(--jh-accent);
     --lounge-private: #bf5af2;
     --lounge-success: #30d158;
     --lounge-warning: #ff9f0a;
@@ -232,7 +232,7 @@
 .lounge-card--private { --tint: var(--lounge-private); }
 .lounge-card:hover {
     transform: translateY(-4px);
-    background-color: #242426;
+    background-color: var(--jh-card-hover);
 }
 .lounge-card-head { display: flex; align-items: center; gap: 14px; }
 .lounge-card-icon {
@@ -491,7 +491,7 @@
 .msg-bubble-other {
     border-radius: 22px 22px 22px 6px;
     color: var(--jh-text);
-    background: #3a3a3c;
+    background: var(--jh-card-bg-3);
 }
 .msg-time { font-size: 11px; color: rgba(255, 255, 255, 0.35); margin: 4px 8px 0; }
 .msg-report { font-size: 11px; color: rgba(255, 255, 255, 0.35); margin: 0 8px; text-decoration: none; opacity: 0; transition: opacity 0.2s ease; }
