@@ -46,7 +46,7 @@
                     {% endif %}
                     <div class="msg-body">
                         {% if msg.sender != request.user %}
-                        <p class="msg-sender"><span {% profile_trigger msg.sender %}>{{ msg.sender.public_name }}</span></p>
+                        <p class="msg-sender"><span {% profile_trigger msg.sender %}>{{ msg.sender.public_name }}{% admin_badge msg.sender %}</span></p>
                         {% endif %}
 
                         {% if msg.has_media %}
@@ -128,7 +128,7 @@
                 {% for m in pending_requests %}
                 <div class="lounge-member lounge-member--pending">
                     <span class="msg-avatar" data-profile="{{ m.user.username }}" aria-hidden="true">{% avatar m.user %}</span>
-                    <span class="lounge-member-name" {% profile_trigger m.user %}>{{ m.user.public_name }}</span>
+                    <span class="lounge-member-name" {% profile_trigger m.user %}>{{ m.user.public_name }}{% admin_badge m.user %}</span>
                     <form method="post" action="{% url 'community:approve' channel.id m.user.id %}">{% csrf_token %}
                         <button type="submit" class="lounge-icon-btn lounge-icon-btn--ok" title="{% trans '承認' %}" aria-label="{% trans '承認' %}">
                             <span class="material-symbols-outlined" aria-hidden="true">check</span>
@@ -152,7 +152,7 @@
                 {% for m in invited %}
                 <div class="lounge-member">
                     <span class="msg-avatar" data-profile="{{ m.user.username }}" aria-hidden="true">{% avatar m.user %}</span>
-                    <span class="lounge-member-name" {% profile_trigger m.user %}>{{ m.user.public_name }}</span>
+                    <span class="lounge-member-name" {% profile_trigger m.user %}>{{ m.user.public_name }}{% admin_badge m.user %}</span>
                     <form method="post" action="{% url 'community:decline' channel.id m.user.id %}">{% csrf_token %}
                         <button type="submit" class="lounge-icon-btn lounge-icon-btn--danger" title="{% trans '招待を取り消す' %}" aria-label="{% trans '招待を取り消す' %}">
                             <span class="material-symbols-outlined" aria-hidden="true">close</span>
@@ -171,7 +171,7 @@
                 {% for m in members %}
                 <div class="lounge-member">
                     <span class="msg-avatar" data-profile="{{ m.user.username }}" aria-hidden="true">{% avatar m.user %}</span>
-                    <span class="lounge-member-name" {% profile_trigger m.user %}>{{ m.user.public_name }}</span>
+                    <span class="lounge-member-name" {% profile_trigger m.user %}>{{ m.user.public_name }}{% admin_badge m.user %}</span>
                     {% if m.role == 'owner' %}
                     <span class="lounge-role">Owner</span>
                     {% else %}

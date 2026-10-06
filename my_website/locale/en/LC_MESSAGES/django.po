@@ -2707,3 +2707,7 @@ msgstr "Body (blocks, English)"
 
 msgid "英訳日時"
 msgstr "Translated at"
+
+#: accounts/templatetags/profiles.py
+msgid "管理者"
+msgstr "Admin"

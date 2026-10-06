@@ -215,7 +215,7 @@
             <span class="blog-avatar blog-avatar--lg" data-profile="{{ post.author.username }}" aria-hidden="true">{% avatar post.author %}</span>
             <div>
                 <span class="blog-kicker">{% trans "Written by" %}</span>
-                <p class="blog-author-name"><a href="{{ post.author.get_absolute_url }}" {% profile_trigger post.author link=True %}>{{ post.author.public_name }}</a></p>
+                <p class="blog-author-name"><a href="{{ post.author.get_absolute_url }}" {% profile_trigger post.author link=True %}>{{ post.author.public_name }}{% admin_badge post.author %}</a></p>
                 <a href="{% url 'blog:list' %}?author={{ post.author.username|urlencode }}">{% trans "この著者の記事をすべて見る" %} →</a>
             </div>
         </div>

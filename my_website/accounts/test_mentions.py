@@ -153,6 +153,6 @@ class MentionSearchTests(TestCase):
         res = self.client.get(reverse('mention_search'), {'q': '@ali'})
         users = res.json()['users']
         self.assertEqual([u['username'] for u in users], ['alice', 'alicia'])
-        self.assertEqual(set(users[0]), {'username', 'name', 'avatar'})
+        self.assertEqual(set(users[0]), {'username', 'name', 'avatar', 'admin'})
         res = self.client.get(reverse('mention_search'), {'q': 'アリ'})
         self.assertEqual([u['username'] for u in res.json()['users']], ['alicia'])

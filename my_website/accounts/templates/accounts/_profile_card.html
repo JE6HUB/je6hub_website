@@ -5,7 +5,7 @@
     <div class="pf-card-head">
         <span class="pf-avatar" aria-hidden="true">{% avatar u %}</span>
         <div class="pf-card-names">
-            <h2 class="pf-card-name" id="pf-modal-title">{{ u.public_name }}</h2>
+            <h2 class="pf-card-name" id="pf-modal-title">{{ u.public_name }}{% admin_badge u %}</h2>
             <p class="pf-card-handle">@{{ u.username }}</p>
         </div>
     </div>

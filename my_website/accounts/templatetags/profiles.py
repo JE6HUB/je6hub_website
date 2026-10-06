@@ -81,6 +81,24 @@ def avatar(user):
     return name[:1].upper()
 
 
+@register.simple_tag
+def admin_badge(user):
+    """管理者 (superuser) の名前やアイコンに添える金色のバッジ。それ以外のユーザーには何も出力しない。
+
+        <a …>{{ post.author.public_name }}</a>{% admin_badge post.author %}
+
+    図形は base.html の <symbol id="jh-admin-badge"> を参照する。
+    """
+    if not getattr(user, 'is_superuser', False):
+        return ''
+    label = _('管理者')
+    return format_html(
+        '<svg class="jh-admin-badge" viewBox="0 0 24 24" role="img" aria-label="{}"><title>{}</title>'
+        '<use href="#jh-admin-badge"></use></svg>',
+        label, label,
+    )
+
+
 @register.filter
 def mentions(text):
     """テキストをエスケープし、@ユーザー名 をプロフィールへのリンクにする。改行は |linebreaksbr と組み合わせる。

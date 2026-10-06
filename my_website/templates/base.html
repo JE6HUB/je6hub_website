@@ -25,6 +25,20 @@
     {% block glass_preload %}{% endblock %}
 </head>
 <body>
+    <!-- 管理者バッジの図形 (admin_badge タグが参照する)。display:none だと Firefox でグラデーションが消えるため、大きさ 0 で置く -->
+    <svg class="jh-svg-defs" width="0" height="0" aria-hidden="true" focusable="false">
+        <defs>
+            <linearGradient id="jh-admin-badge-gold" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0" stop-color="#fbe38e"/>
+                <stop offset="0.45" stop-color="#e9b627"/>
+                <stop offset="1" stop-color="#b07d0e"/>
+            </linearGradient>
+        </defs>
+        <symbol id="jh-admin-badge" viewBox="0 0 24 24">
+            <path fill="url(#jh-admin-badge-gold)" d="M12.00 0.35 12.75 0.52 13.45 0.97 14.07 1.60 14.61 2.27 15.11 2.82 15.65 3.18 16.29 3.31 17.04 3.27 17.89 3.19 18.77 3.17 19.59 3.35 20.24 3.76 20.65 4.41 20.83 5.23 20.81 6.11 20.73 6.96 20.69 7.71 20.82 8.35 21.18 8.89 21.73 9.39 22.40 9.93 23.03 10.55 23.48 11.25 23.65 12.00 23.48 12.75 23.03 13.45 22.40 14.07 21.73 14.61 21.18 15.11 20.82 15.65 20.69 16.29 20.73 17.04 20.81 17.89 20.83 18.77 20.65 19.59 20.24 20.24 19.59 20.65 18.77 20.83 17.89 20.81 17.04 20.73 16.29 20.69 15.65 20.82 15.11 21.18 14.61 21.73 14.07 22.40 13.45 23.03 12.75 23.48 12.00 23.65 11.25 23.48 10.55 23.03 9.93 22.40 9.39 21.73 8.89 21.18 8.35 20.82 7.71 20.69 6.96 20.73 6.11 20.81 5.23 20.83 4.41 20.65 3.76 20.24 3.35 19.59 3.17 18.77 3.19 17.89 3.27 17.04 3.31 16.29 3.18 15.65 2.82 15.11 2.27 14.61 1.60 14.07 0.97 13.45 0.52 12.75 0.35 12.00 0.52 11.25 0.97 10.55 1.60 9.93 2.27 9.39 2.82 8.89 3.18 8.35 3.31 7.71 3.27 6.96 3.19 6.11 3.17 5.23 3.35 4.41 3.76 3.76 4.41 3.35 5.23 3.17 6.11 3.19 6.96 3.27 7.71 3.31 8.35 3.18 8.89 2.82 9.39 2.27 9.93 1.60 10.55 0.97 11.25 0.52Z"/>
+            <path fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" d="M7.6 12.3l3 3 5.9-6.4"/>
+        </symbol>
+    </svg>
 
     <a class="visually-hidden-focusable" href="#content">Skip to content</a>
 
@@ -83,7 +97,7 @@
                 {% if user.is_authenticated %}
                     {% include "accounts/_notification_button.html" with btn_class="jh-nav-action" %}
                     <a href="{{ user.get_absolute_url }}" class="jh-globalnav-link jh-nav-action" data-nav-account data-profile="{{ user.username }}" aria-haspopup="dialog" aria-label="{{ user.public_name }}" title="{{ user.public_name }}">
-                        {% if user.avatar %}<img class="jh-nav-avatar" src="{{ user.avatar.url }}" alt="">{% else %}<i class="fas fa-user"></i>{% endif %}
+                        {% if user.avatar %}<img class="jh-nav-avatar" src="{{ user.avatar.url }}" alt="">{% else %}<i class="fas fa-user"></i>{% endif %}{% admin_badge user %}
                     </a>
                     {% if user.is_superuser %}
                         {% with open_reports=dashboard_open_reports %}
@@ -116,7 +130,7 @@
                    class="jh-globalnav-link jh-nav-icon-btn" data-nav-account
                    {% if user.is_authenticated %}data-profile="{{ user.username }}" aria-haspopup="dialog"{% endif %}
                    aria-label="{% if user.is_authenticated %}{{ user.public_name }}{% else %}{% trans 'サインイン' %}{% endif %}">
-                    {% if user.is_authenticated and user.avatar %}<img class="jh-nav-avatar" src="{{ user.avatar.url }}" alt="">{% else %}<i class="fas {% if user.is_authenticated %}fa-user{% else %}fa-user-circle{% endif %}"></i>{% endif %}
+                    {% if user.is_authenticated and user.avatar %}<img class="jh-nav-avatar" src="{{ user.avatar.url }}" alt="">{% else %}<i class="fas {% if user.is_authenticated %}fa-user{% else %}fa-user-circle{% endif %}"></i>{% endif %}{% if user.is_authenticated %}{% admin_badge user %}{% endif %}
                 </a>
                 {% if user.is_superuser %}
                 <a href="{% url 'dashboard:index' %}" class="jh-globalnav-link jh-nav-icon-btn jh-dashboard-link" aria-label="{% trans '管理者ダッシュボード' %}">
@@ -160,7 +174,7 @@
 
         <div class="jh-mobile-menu-footer">
             {% if user.is_authenticated %}
-                <a href="{{ user.get_absolute_url }}" class="jh-mobile-menu-sub" data-nav-account>{% if user.avatar %}<img class="jh-nav-avatar" src="{{ user.avatar.url }}" alt="">{% else %}<i class="fas fa-user"></i>{% endif %}{{ user.public_name }}</a>
+                <a href="{{ user.get_absolute_url }}" class="jh-mobile-menu-sub" data-nav-account>{% if user.avatar %}<img class="jh-nav-avatar" src="{{ user.avatar.url }}" alt="">{% else %}<i class="fas fa-user"></i>{% endif %}{{ user.public_name }}{% admin_badge user %}</a>
                 <a href="{% url 'profile' %}" class="jh-mobile-menu-sub"><i class="fas fa-user-pen"></i>{% trans "プロフィール設定" %}</a>
                 <a href="{% url 'account_settings' %}" class="jh-mobile-menu-sub"><i class="fas fa-gear"></i>{% trans "個人設定" %}</a>
                 {% if user.is_superuser %}
