@@ -7,7 +7,7 @@
 .db-tabs { display: flex; gap: 6px; overflow-x: auto; margin: 0 0 28px; padding-bottom: 4px; border-bottom: 1px solid var(--jh-card-border); }
 .db-tab { display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; border-radius: 980px; color: var(--jh-text-muted); text-decoration: none; font-size: 14px; white-space: nowrap; }
 .db-tab:hover { color: var(--jh-text); background: rgba(var(--jh-fg-rgb), 0.06); }
-.db-tab.is-active { color: #000; background: var(--jh-text); }
+.db-tab.is-active { color: var(--jh-bg); background: var(--jh-text); }
 .db-tab .material-symbols-outlined { font-size: 18px; }
 .db-count { display: inline-block; min-width: 20px; padding: 0 6px; border-radius: 10px; background: #ff453a; color: #fff; font-size: 12px; line-height: 20px; text-align: center; }
 
@@ -21,7 +21,7 @@
 .db-stat-sub { color: var(--jh-text-muted); font-size: 12px; }
 .db-stat-link { color: inherit; text-decoration: none; display: block; }
 .db-stat-link:hover .db-stat-value { color: var(--jh-accent); }
-.db-alert { color: #ff453a; }
+.db-alert { color: var(--jh-red); }
 .db-cols { display: grid; gap: 16px; grid-template-columns: 1fr; }
 @media (min-width: 900px) { .db-cols { grid-template-columns: 1fr 1fr; } }
 
@@ -54,10 +54,10 @@
 
 /* バッジ */
 .db-badge { display: inline-block; padding: 2px 8px; border-radius: 6px; font-size: 12px; background: rgba(var(--jh-fg-rgb), 0.1); color: var(--jh-text); white-space: nowrap; }
-.db-badge--red { background: rgba(255, 69, 58, 0.2); color: #ff6961; }
-.db-badge--orange { background: rgba(255, 159, 10, 0.2); color: #ffb340; }
-.db-badge--green { background: rgba(48, 209, 88, 0.2); color: #4cd964; }
-.db-badge--blue { background: rgba(var(--jh-accent-rgb), 0.2); color: #5eb0ff; }
+.db-badge--red { background: rgba(255, 69, 58, 0.2); color: color-mix(in srgb, #ff6961, #000 var(--jh-accent-shade)); }
+.db-badge--orange { background: rgba(255, 159, 10, 0.2); color: color-mix(in srgb, #ffb340, #000 var(--jh-accent-shade)); }
+.db-badge--green { background: rgba(48, 209, 88, 0.2); color: color-mix(in srgb, #4cd964, #000 var(--jh-accent-shade)); }
+.db-badge--blue { background: rgba(var(--jh-accent-rgb), 0.2); color: color-mix(in srgb, #5eb0ff, #000 var(--jh-accent-shade)); }
 
 /* フォーム・ボタン */
 .db-filters { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 16px; }
@@ -67,14 +67,14 @@
 .db-btn:hover { background: rgba(var(--jh-fg-rgb), 0.08); color: var(--jh-text); }
 .db-btn--primary { background: var(--jh-button); border-color: var(--jh-button); color: #fff; }
 .db-btn--primary:hover { background: var(--jh-button-hover); color: #fff; }
-.db-btn--danger { border-color: rgba(255, 69, 58, 0.6); color: #ff6961; }
-.db-btn--danger:hover { background: rgba(255, 69, 58, 0.15); color: #ff6961; }
+.db-btn--danger { border-color: rgba(255, 69, 58, 0.6); color: color-mix(in srgb, #ff6961, #000 var(--jh-accent-shade)); }
+.db-btn--danger:hover { background: rgba(255, 69, 58, 0.15); color: color-mix(in srgb, #ff6961, #000 var(--jh-accent-shade)); }
 .db-btn .material-symbols-outlined { font-size: 18px; }
 .db-actions { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
 .db-form-row { margin-bottom: 14px; }
 .db-form-row label { display: block; font-size: 13px; color: var(--jh-text-muted); margin-bottom: 6px; }
 .db-form-row input[type=text], .db-form-row textarea { box-sizing: border-box; width: 100%; background: var(--jh-bg); border: 1px solid var(--jh-line); color: var(--jh-text); padding: 10px 12px; border-radius: 10px; font-size: 15px; }
-.db-form-row .errorlist { color: #ff6961; font-size: 13px; list-style: none; padding: 0; margin: 4px 0 0; }
+.db-form-row .errorlist { color: color-mix(in srgb, #ff6961, #000 var(--jh-accent-shade)); font-size: 13px; list-style: none; padding: 0; margin: 4px 0 0; }
 .db-note { box-sizing: border-box; width: 100%; background: var(--jh-bg); border: 1px solid var(--jh-line); color: var(--jh-text); padding: 8px 12px; border-radius: 10px; font-size: 14px; }
 .db-danger-zone { border: 1px solid rgba(255, 69, 58, 0.35); }
 

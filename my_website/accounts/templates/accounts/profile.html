@@ -19,7 +19,7 @@
                     {% csrf_token %}
 
                     {% if form.errors %}
-                    <div class="alert alert-danger" style="background: rgba(255,59,48,0.12); border: none; color: #ff453a; border-radius: 12px;">
+                    <div class="alert alert-danger" style="background: rgba(255,59,48,0.12); border: none; color: var(--jh-red); border-radius: 12px;">
                         {% trans "入力内容にエラーがあります。" %}
                         {{ form.errors }}
                     </div>

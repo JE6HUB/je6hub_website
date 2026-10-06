@@ -39,7 +39,7 @@
         <form method="post" action="{% url 'account_delete' %}">
             {% csrf_token %}
             {% if form.non_field_errors %}
-                <div class="text-danger small mb-2" style="color: #ff453a!important;">{{ form.non_field_errors|striptags }}</div>
+                <div class="text-danger small mb-2" style="color: var(--jh-red)!important;">{{ form.non_field_errors|striptags }}</div>
             {% endif %}
 
             <div class="mb-3 text-start">
@@ -51,7 +51,7 @@
                     {% endif %}
                 </label>
                 {% if form.confirm.errors %}
-                    <div class="text-danger small mb-1" style="color: #ff453a!important;">{{ form.confirm.errors|striptags }}</div>
+                    <div class="text-danger small mb-1" style="color: var(--jh-red)!important;">{{ form.confirm.errors|striptags }}</div>
                 {% endif %}
                 <input type="{% if form.uses_password %}password{% else %}text{% endif %}" name="confirm" id="id_confirm"
                        class="jh-input {% if form.confirm.errors %}border-danger{% endif %}"
@@ -62,7 +62,7 @@
                 <input class="form-check-input" type="checkbox" name="agree" id="id_agree" required>
                 <label class="form-check-label small text-light" for="id_agree">{{ form.agree.label }}</label>
                 {% if form.agree.errors %}
-                    <div class="text-danger small mt-1" style="color: #ff453a!important;">{{ form.agree.errors|striptags }}</div>
+                    <div class="text-danger small mt-1" style="color: var(--jh-red)!important;">{{ form.agree.errors|striptags }}</div>
                 {% endif %}
             </div>
 

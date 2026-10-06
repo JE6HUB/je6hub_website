@@ -423,7 +423,7 @@ strong[data-profile][role="button"]:hover { color: var(--jh-accent); }
 .ob-field textarea.jh-input { resize: vertical; min-height: 88px; }
 .ob-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0 16px; }
 .ob-hint { margin-top: 6px; font-size: 12px; color: var(--jh-text-muted); }
-.ob-error { font-size: 13px; color: #ff453a; }
+.ob-error { font-size: 13px; color: var(--jh-red); }
 .ob-error:not(:empty) { margin-top: 6px; }
 .ob-field.has-error .jh-input { border-color: #ff453a; }
 
@@ -473,7 +473,7 @@ strong[data-profile][role="button"]:hover { color: var(--jh-accent); }
     pointer-events: none;
 }
 .jh-avatar-picker-btn:focus-within { outline: 2px solid var(--jh-accent, #2997ff); outline-offset: 2px; }
-.jh-avatar-picker-remove { background: none; border: none; color: #ff453a; }
+.jh-avatar-picker-remove { background: none; border: none; color: var(--jh-red); }
 .jh-avatar-picker-hint { font-size: 12px; color: var(--jh-text-muted); }
 
 /* =========================================
@@ -572,4 +572,4 @@ strong[data-profile][role="button"]:hover { color: var(--jh-accent); }
     transition: opacity 0.3s ease;
 }
 .jh-scheme-status.is-visible { opacity: 1; }
-.jh-scheme-status.is-error { color: #ff453a; }
+.jh-scheme-status.is-error { color: var(--jh-red); }
