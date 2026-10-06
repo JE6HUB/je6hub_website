@@ -37,6 +37,21 @@ def get_client_ip(request):
     return xff.split(',')[0].strip() if xff else request.META.get('REMOTE_ADDR')
 
 
+def notify_message_mentions(request, msg):
+    """メッセージでメンションされた人に知らせる (アプリの API からも使う)。"""
+    if not msg.text:
+        return
+    channel = msg.channel
+    notify_mentions(
+        request, msg.text, author=msg.sender,
+        url=reverse('community:thread', args=[channel.id]),
+        where=lambda: _('Lounge のチャンネル「%(name)s」') % {'name': channel.name},
+        # 非公開チャンネルでは、メンバー以外にメッセージの内容を送らない
+        audience=None if channel.channel_type == 'public' else channel.is_member,
+        place=Notification.PLACE_LOUNGE, title=channel.name,
+    )
+
+
 # ─── チャンネル一覧 ────────────────────────────────────────
 
 @login_required
@@ -131,15 +146,7 @@ def thread_view(request, channel_id):
         if media_file:
             msg.media = media_file
         msg.save()
-        if text:
-            notify_mentions(
-                request, text, author=request.user,
-                url=reverse('community:thread', args=[channel.id]),
-                where=lambda: _('Lounge のチャンネル「%(name)s」') % {'name': channel.name},
-                # 非公開チャンネルでは、メンバー以外にメッセージの内容を送らない
-                audience=None if channel.channel_type == 'public' else channel.is_member,
-                place=Notification.PLACE_LOUNGE, title=channel.name,
-            )
+        notify_message_mentions(request, msg)
         return redirect('community:thread', channel_id=channel.id)
 
     is_owner         = membership and membership.role == ChannelMembership.ROLE_OWNER

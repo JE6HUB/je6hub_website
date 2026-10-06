@@ -134,20 +134,25 @@ def comment_create(request, pk):
     comment.post = post
     comment.author = request.user
     comment.save()
+    notify_comment(request, comment, reply_to)
+    return redirect(comment.get_absolute_url())
 
+
+def notify_comment(request, comment, reply_to=None):
+    """新しいコメントを、返信先・メンションされた人・記事の著者に知らせる (アプリの API からも使う)。"""
+    post, author = comment.post, comment.author
     url = comment.get_absolute_url()
     notified = set()
     if reply_to:
-        notify(reply_to.author, actor=request.user, kind=Notification.KIND_REPLY, place=Notification.PLACE_BLOG,
+        notify(reply_to.author, actor=author, kind=Notification.KIND_REPLY, place=Notification.PLACE_BLOG,
                title=post.title, text=comment.text, url=url, notified=notified)
     notify_mentions(
-        request, comment.text, author=request.user, url=url,
+        request, comment.text, author=author, url=url,
         where=lambda: _('ブログ記事「%(title)s」のコメント') % {'title': post.title},
         place=Notification.PLACE_BLOG, title=post.title, notified=notified,
     )
-    notify(post.author, actor=request.user, kind=Notification.KIND_COMMENT, place=Notification.PLACE_BLOG,
+    notify(post.author, actor=author, kind=Notification.KIND_COMMENT, place=Notification.PLACE_BLOG,
            title=post.title, text=comment.text, url=url, notified=notified)
-    return redirect(comment.get_absolute_url())
 
 
 @login_required
