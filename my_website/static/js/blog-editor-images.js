@@ -1,16 +1,20 @@
 /**
  * Blogs エディタ — 本文画像のサイズ変更・移動
  * - 画像をクリック: 選択枠と四隅のハンドルを表示 (配置ボタンはその行に効く)
- * - ハンドルをドラッグ: 幅を変更 (縦横比は維持。保存時は <img width="…">)
- * - 画像本体をドラッグ: 段落の間に挿入位置の線を表示し、離した位置へ移動 (画像は常に独立した行)
+ * - ハンドルをドラッグ: 幅を変更 (縦横比は維持。列幅の 25 / 33 / 50 / 66 / 75 / 100% に吸い付く。保存時は <img width="…">)
+ * - 画像本体 (タッチでは選択枠の上の移動つまみ) をドラッグ: 段落の間に挿入位置の線を表示し、離した位置へ移動。
+ *   別のブロックや列にも移せ、ブロックの間に落とすと新しいブロックになる (落とし先の判定は blog-editor-dnd.js)
  * - ダブルクリック: 元のサイズに戻す / Delete・Backspace: 削除
  * 選択枠は .ql-editor の外 (エディタのコンテナ) に置くので本文には混ざらない。
  */
 window.BlogEditorImages = (() => {
     const MIN_WIDTH = 48;
     const DRAG_THRESHOLD = 5;
+    const SNAPS = [0.25, 1 / 3, 0.5, 2 / 3, 0.75, 1];
+    const SNAP_RANGE = 0.018;
 
-    function setup(quill, Quill) {
+    /** @param dnd blog-editor-dnd.js の create() の戻り値 (落とし先の判定・挿入・自動スクロール) */
+    function setup(quill, Quill, dnd) {
         const USER = Quill.sources.USER;
         const container = quill.container;
         const overlay = document.createElement('div');
@@ -21,12 +25,11 @@ window.BlogEditorImages = (() => {
             <span class="blog-img-handle" data-corner="ne"></span>
             <span class="blog-img-handle" data-corner="sw"></span>
             <span class="blog-img-handle" data-corner="se"></span>
+            <button type="button" class="blog-img-move" aria-label="${(dnd.t && dnd.t.moveImage) || ''}" title="${(dnd.t && dnd.t.moveImage) || ''}">
+                <span class="material-symbols-outlined" aria-hidden="true">open_with</span></button>
             <span class="blog-img-size"></span>`;
         const sizeLabel = overlay.querySelector('.blog-img-size');
-        const caret = document.createElement('div');
-        caret.className = 'blog-img-drop-caret';
-        caret.hidden = true;
-        container.append(overlay, caret);
+        container.append(overlay);
 
         let selected = null;
 
@@ -132,17 +135,34 @@ window.BlogEditorImages = (() => {
 
             // ドラッグ中は本文の DOM を触らず (Quill が変更として記録するため)、
             // 監視対象外のコンテナに置いた CSS 変数で見た目だけ変える。確定は離したときの 1 回。
-            const onMove = (ev) => {
+            const ratio = img.naturalWidth ? img.naturalHeight / img.naturalWidth : startWidth ? img.getBoundingClientRect().height / startWidth : 1;
+            let frame = 0;
+            let lastEv = null;
+            const update = () => {
+                frame = 0;
+                const ev = lastEv;
                 const dx = (ev.clientX - startX) * (corner.includes('w') ? -1 : 1);
-                width = Math.round(Math.min(maxWidth, Math.max(MIN_WIDTH, startWidth + dx)));
+                let w = Math.min(maxWidth, Math.max(MIN_WIDTH, startWidth + dx));
+                // 列幅のきりのよい割合に吸い付く (Alt / Option を押している間は吸い付かない)
+                const snap = ev.altKey ? null : SNAPS.find((p) => Math.abs(w / maxWidth - p) < SNAP_RANGE);
+                if (snap) w = maxWidth * snap;
+                width = Math.round(w);
                 container.style.setProperty('--blog-resize-w', `${width}px`);
                 container.classList.add('blog-img-resizing');
+                overlay.classList.toggle('is-snapped', !!snap);
                 position();
+                sizeLabel.textContent = `${width} × ${Math.round(width * ratio)} · ${Math.round((width / maxWidth) * 100)}%`;
+            };
+            const onMove = (ev) => {
+                lastEv = ev;
+                if (!frame) frame = requestAnimationFrame(update);
             };
             const onUp = () => {
+                if (frame) { cancelAnimationFrame(frame); update(); }
                 handle.removeEventListener('pointermove', onMove);
                 handle.removeEventListener('pointerup', onUp);
-                overlay.classList.remove('is-resizing');
+                handle.removeEventListener('pointercancel', onUp);
+                overlay.classList.remove('is-resizing', 'is-snapped');
                 container.classList.remove('blog-img-resizing');
                 const index = indexOf(img);
                 if (index >= 0 && width !== Math.round(startWidth)) {
@@ -152,83 +172,101 @@ window.BlogEditorImages = (() => {
             };
             handle.addEventListener('pointermove', onMove);
             handle.addEventListener('pointerup', onUp);
+            handle.addEventListener('pointercancel', onUp);
         });
 
-        // ── 移動 (画像本体をドラッグ) ──────────────
+        // ── 移動 (画像本体、またはタッチでは移動つまみをドラッグ) ──────
         // 画像は段落の「間」に独立した行として置く。文字の途中に入ると読みにくいため。
-        const topBlock = (node) => {
-            let el = node && node.nodeType === Node.TEXT_NODE ? node.parentElement : node;
-            while (el && el.parentElement !== quill.root) el = el.parentElement;
-            return el && el.parentElement === quill.root ? el : null;
-        };
-
-        quill.root.addEventListener('pointerdown', (e) => {
-            if (e.target.tagName !== 'IMG' || e.button !== 0) return;
-            const img = e.target;
+        // 落とし先は同じ列に限らず、別のブロック・別の列・ブロックの間 (新しいブロック) でもよい。
+        function startMove(img, e, immediate) {
             const startX = e.clientX;
             const startY = e.clientY;
+            const scroller = dnd.autoScroller();
             let dragging = false;
-            let drop = null; // { block, after }
+            let drop = null;
+            let ghost = null;
+            let last = e;
+            let frame = 0;
 
+            const begin = () => {
+                dragging = true;
+                select(img);
+                overlay.classList.add('is-moving');
+                document.body.classList.add('blog-img-dragging');
+                // 指 (マウス) についてくる小さな画像
+                const r = img.getBoundingClientRect();
+                const w = Math.min(160, r.width);
+                ghost = document.createElement('div');
+                ghost.className = 'blog-img-ghost';
+                ghost.style.width = `${w}px`;
+                ghost.style.height = `${r.height * (w / r.width)}px`;
+                ghost.style.backgroundImage = `url("${img.src.replace(/"/g, '%22')}")`;
+                (container.closest('form') || document.body).append(ghost);
+                requestAnimationFrame(() => ghost && ghost.classList.add('is-lifted'));
+            };
+            const track = () => {
+                frame = 0;
+                if (!dragging) return;
+                if (ghost) {
+                    // 指で操作しているときは指に隠れないよう、指の上に出す
+                    const touch = last.pointerType === 'touch';
+                    const gx = touch ? last.clientX - ghost.offsetWidth / 2 : last.clientX + 14;
+                    const gy = touch ? last.clientY - ghost.offsetHeight - 28 : last.clientY + 14;
+                    ghost.style.transform = `translate3d(${gx}px, ${gy}px, 0)`;
+                }
+                drop = dnd.resolve(last.clientX, last.clientY, { exclude: img });
+                dnd.show(drop);
+            };
             const onMove = (ev) => {
                 if (!dragging) {
                     if (Math.hypot(ev.clientX - startX, ev.clientY - startY) < DRAG_THRESHOLD) return;
-                    dragging = true;
-                    select(img);
-                    overlay.classList.add('is-moving');
-                    document.body.classList.add('blog-img-dragging');
+                    begin();
                 }
                 ev.preventDefault();
-                const r0 = quill.root.getBoundingClientRect();
-                const x = Math.min(Math.max(ev.clientX, r0.left + 1), r0.right - 1);
-                const block = topBlock(document.elementFromPoint(x, ev.clientY));
-                if (!block || block.contains(img)) { drop = null; caret.hidden = true; return; }
-                const rect = block.getBoundingClientRect();
-                const after = ev.clientY > rect.top + rect.height / 2;
-                drop = { block, after };
-                const c = container.getBoundingClientRect();
-                Object.assign(caret.style, {
-                    left: `${rect.left - c.left}px`,
-                    top: `${(after ? rect.bottom : rect.top) - c.top - 1}px`,
-                    width: `${rect.width}px`,
-                });
-                caret.hidden = false;
+                last = ev;
+                if (!frame) frame = requestAnimationFrame(track);
+                scroller.update(ev.clientY, track);
             };
-            const onUp = () => {
+            const onUp = (ev) => {
                 document.removeEventListener('pointermove', onMove);
                 document.removeEventListener('pointerup', onUp);
-                caret.hidden = true;
+                document.removeEventListener('pointercancel', onUp);
+                if (frame) cancelAnimationFrame(frame);
+                scroller.stop();
+                dnd.hide();
                 overlay.classList.remove('is-moving');
                 document.body.classList.remove('blog-img-dragging');
-                if (!dragging || !drop) return;
-
-                const from = indexOf(img);
-                if (from < 0) return;
-                const [op] = quill.getContents(from, 1).ops;
-                removeImageAt(from);
-
-                const blot = Quill.find(drop.block);
-                if (!blot || !quill.root.contains(drop.block)) return;
-                let at = quill.getIndex(blot) + (drop.after ? blot.length() : 0);
-                if (at >= quill.getLength()) {
-                    // 末尾の段落の後ろ: 改行を足してから画像の行を作る
-                    at = quill.getLength() - 1;
-                    quill.insertText(at, '\n', USER);
-                    at += 1;
-                    quill.insertEmbed(at, 'image', op.insert.image, USER);
-                } else {
-                    quill.insertEmbed(at, 'image', op.insert.image, USER);
-                    quill.insertText(at + 1, '\n', USER);
+                if (ghost) {
+                    const g = ghost;
+                    ghost = null;
+                    g.classList.remove('is-lifted');
+                    g.classList.add('is-dropped');
+                    setTimeout(() => g.remove(), 200);
                 }
-                if (op.attributes) quill.formatText(at, 1, op.attributes, USER);
-                const moved = quill.getLeaf(at + 1)[0];
-                if (moved && moved.domNode && moved.domNode.tagName === 'IMG') select(moved.domNode);
+                if (!dragging || ev.type === 'pointercancel' || !drop) return;
+                deselect();
+                const moved = dnd.moveImage(quill, img, drop);
+                if (moved && moved.quill.__images) moved.quill.__images.select(moved.img);
             };
             document.addEventListener('pointermove', onMove);
             document.addEventListener('pointerup', onUp);
+            document.addEventListener('pointercancel', onUp);
+            if (immediate) begin();
+        }
+
+        quill.root.addEventListener('pointerdown', (e) => {
+            // タッチでは画像に触れてもスクロールできるように、移動は選択枠の移動つまみから
+            if (e.target.tagName !== 'IMG' || e.button !== 0 || e.pointerType === 'touch') return;
+            startMove(e.target, e, false);
+        });
+        overlay.querySelector('.blog-img-move').addEventListener('pointerdown', (e) => {
+            if (!selected || e.button !== 0) return;
+            e.preventDefault();
+            e.stopPropagation();
+            startMove(selected, e, true);
         });
 
-        return { deselect };
+        return { select, deselect };
     }
 
     return { setup };

@@ -1,6 +1,6 @@
 from django import template
 
-from ..blocks import DEMO_HEIGHTS, demo_srcdoc
+from ..blocks import DEMO_HEIGHTS, block_inline_style, demo_srcdoc
 
 register = template.Library()
 
@@ -19,4 +19,10 @@ def srcdoc_before(block):
 
 @register.filter
 def demo_height(block):
-    return DEMO_HEIGHTS.get(block.get('height'), DEMO_HEIGHTS['m'])
+    return block.get('stage_height') or DEMO_HEIGHTS.get(block.get('height'), DEMO_HEIGHTS['m'])
+
+
+@register.filter
+def bk_style(block):
+    """ドラッグで決めた幅・列の比率の style 属性値 (なければ空)。"""
+    return block_inline_style(block)

@@ -106,6 +106,30 @@ class BlockNormalizeTests(TestCase):
         self.assertEqual(len(block['cells']), 3)
         self.assertEqual(block['ratio'], 'equal')
 
+    def test_free_sizes_from_dragging(self):
+        data = normalize_blocks({'blocks': [
+            {'type': 'text', 'columns': 2, 'widths': [3, 1], 'style': {'maxw': 640.4}, 'cells': []},
+            {'type': 'text', 'columns': 3, 'widths': [0.5, 0.45, 0.05], 'cells': []},   # 細すぎる列 → 捨てる
+            {'type': 'text', 'columns': 2, 'widths': [1, 'x'], 'style': {'maxw': 50}, 'cells': []},
+            {'type': 'text', 'style': {'width': 'full', 'maxw': 800}, 'widths': [1], 'cells': []},
+            {'type': 'spacer', 'px': 140},
+            {'type': 'spacer', 'px': 5000},
+            {'type': 'demo', 'stage_height': 700},
+            {'type': 'demo', 'stage_height': '700'},
+        ]})
+        ratio, thin, bad, full, spacer, huge, demo, demo_bad = data['blocks']
+        self.assertEqual(ratio['widths'], [0.75, 0.25])  # 合計 1 に正規化
+        self.assertEqual(ratio['style']['maxw'], 640)
+        self.assertNotIn('widths', thin)
+        self.assertNotIn('widths', bad)
+        self.assertNotIn('maxw', bad['style'])            # 範囲外
+        self.assertNotIn('maxw', full['style'])           # 全幅には自由な幅を持たせない
+        self.assertNotIn('widths', full)                  # 1 列
+        self.assertEqual(spacer['px'], 140)
+        self.assertNotIn('px', huge)
+        self.assertEqual(demo['stage_height'], 700)
+        self.assertIsNone(demo_bad['stage_height'])
+
     def test_rejects_malformed_json(self):
         from django.core.exceptions import ValidationError
         with self.assertRaises(ValidationError):
@@ -464,6 +488,20 @@ class ListAndDetailTests(TestCase):
         self.assertContains(response, '🔥')
         self.assertContains(response, 'href="https://je6hub.com"')
         self.assertNotContains(response, '<p>本文です</p>')  # 旧形式の本文は使わない
+
+    def test_detail_renders_free_sizes(self):
+        self.published.body_blocks = {'blocks': [
+            {'type': 'text', 'columns': 2, 'widths': [2, 1], 'style': {'maxw': 720},
+             'cells': [{'html': '<p>左</p>'}, {'html': '<p>右</p>'}]},
+            {'type': 'spacer', 'px': 90},
+            {'type': 'demo', 'html': '<b>x</b>', 'stage_height': 500},
+        ]}
+        self.published.save()
+        response = self.client.get(self.published.get_absolute_url())
+        self.assertContains(response, 'bk-custom-cols')
+        self.assertContains(response, 'style="--bk-max: 720px; --bk-cols: minmax(0, 0.6667fr) minmax(0, 0.3333fr)"')
+        self.assertContains(response, 'style="height: 90px;"')
+        self.assertContains(response, 'style="height: 500px;"')
 
     def test_detail_uses_display_width(self):
         self.assertEqual(self.published.display_width, Post.WIDTH_STANDARD)  # 既定は標準

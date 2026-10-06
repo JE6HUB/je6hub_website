@@ -6,7 +6,7 @@
 {% block extra_head %}
 <link href="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.snow.css" rel="stylesheet" />
 <link href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" rel="stylesheet" />
-<link href="{% static 'css/blog.css' %}?v=34" rel="stylesheet" />
+<link href="{% static 'css/blog.css' %}?v=35" rel="stylesheet" />
 {% endblock %}
 
 {% block content %}
@@ -166,9 +166,10 @@
             <section class="blog-settings-card blog-settings-tips">
                 <h2 class="blog-settings-title">{% trans "ヒント" %}</h2>
                 <ul>
-                    <li>{% trans "画像はツールバーのボタン、ドラッグ＆ドロップ、貼り付けで挿入できます。" %}</li>
+                    <li>{% trans "画像はツールバーのボタンや貼り付けのほか、パソコンから本文やブロックの間へドラッグ＆ドロップしてアップロードできます。" %}</li>
                     <li>{% trans "ブロックの左の ⋮⋮ で列数 (1〜3)・背景・幅などを設定、ドラッグで並べ替え。＋ か空の行で「/」でブロックを追加。" %}</li>
-                    <li>{% trans "画像はクリックで選択。四隅をドラッグでサイズ変更、画像をドラッグで移動、ダブルクリックで元のサイズ。" %}</li>
+                    <li>{% trans "画像はクリックで選択。四隅をドラッグでサイズ変更、画像をドラッグで別のブロックや列へも移動、ダブルクリックで元のサイズ。" %}</li>
+                    <li>{% trans "ブロックの左右の端・列の境目・下端をドラッグすると、幅・列の比率・高さを自由に変えられます (ダブルクリックで元に戻す)。" %}</li>
                     <li>{% trans "Markdown 記法 (# 見出し、**太字**、`コード`、--- など) がそのまま使えます。" %}</li>
                     <li>{% trans "⌘/Ctrl + S で下書き保存。" %}</li>
                 </ul>
@@ -277,6 +278,11 @@
         unsaved: "{% trans '未保存の変更があります' %}",
         saving: "{% trans '保存中…' %}",
         invalidUrl: "{% trans 'http(s):// で始まる URL を入力してください。' %}",
+        dnd: {
+            uploading: "{% trans '画像をアップロード中…' %}",
+            dropHint: "{% trans '画像をドロップしてアップロード' %}",
+            moveImage: "{% trans 'ドラッグで画像を移動' %}",
+        },
         blocks: {
             addBlock: "{% trans 'ブロックを追加' %}",
             blockMenu: "{% trans 'クリックで設定、ドラッグで移動' %}",
@@ -342,14 +348,25 @@
             demoMax: "{% trans '最大' %}",
             demoTry: "{% trans '触ってみる' %}",
             demoReset: "{% trans '元の値に戻す' %}",
+            resize: {
+                width: "{% trans 'ドラッグで幅を変更 (ダブルクリックで本文幅に戻す)' %}",
+                widthLabel: "{% trans 'ブロックの幅' %}",
+                columns: "{% trans 'ドラッグで列の幅を変更 (ダブルクリックで均等に戻す)' %}",
+                columnsLabel: "{% trans '列の境目' %}",
+                height: "{% trans 'ドラッグで高さを変更 (ダブルクリックで元に戻す)' %}",
+                heightLabel: "{% trans 'ブロックの高さ' %}",
+                text: "{% trans '本文' %}", wide: "{% trans 'ワイド' %}", full: "{% trans '全幅' %}",
+            },
             moveUp: "{% trans '上へ' %}", moveDown: "{% trans '下へ' %}", duplicate: "{% trans '複製' %}", remove: "{% trans '削除' %}",
         },
     };
 </script>
 <script src="{% static 'js/blog-editor-math.js' %}?v=2"></script>
 <script src="{% static 'js/blog-editor-markdown.js' %}?v=3"></script>
-<script src="{% static 'js/blog-editor-images.js' %}?v=3"></script>
+<script src="{% static 'js/blog-editor-images.js' %}?v=4"></script>
+<script src="{% static 'js/blog-editor-dnd.js' %}?v=1"></script>
 <script src="{% static 'js/blog-demo-kit.js' %}?v=1"></script>
-<script src="{% static 'js/blog-blocks.js' %}?v=10"></script>
-<script src="{% static 'js/blog-editor.js' %}?v=10"></script>
+<script src="{% static 'js/blog-blocks.js' %}?v=11"></script>
+<script src="{% static 'js/blog-blocks-resize.js' %}?v=1"></script>
+<script src="{% static 'js/blog-editor.js' %}?v=11"></script>
 {% endblock %}

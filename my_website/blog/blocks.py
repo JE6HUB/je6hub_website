@@ -48,6 +48,12 @@ SPACER_HEIGHTS = ('s', 'm', 'l')
 BUTTON_VARIANTS = ('primary', 'secondary')
 BUTTON_ALIGNS = ('left', 'center', 'right')
 
+# エディタでドラッグして自由に決めるサイズ。指定がなければ上の列挙値 (幅・比率・高さ) を使う
+FREE_MAX_WIDTH = (200, 2400)   # style.maxw: 本文の幅 (px)
+FREE_COLUMN_MIN = 0.1          # widths: 各列の割合の下限 (合計 1)
+SPACER_PX = (8, 800)           # spacer.px: 余白の高さ (px)
+DEMO_STAGE_HEIGHT = (160, 1200)  # demo.stage_height: プレビューの高さ (px)
+
 # HTML / CSS デモ (UI のプレビュー)。コードは sandbox 付き iframe の中だけで表示する
 DEMO_MAX_CHARS = 50_000
 DEMO_BACKGROUNDS = ('dark', 'light', 'checker')
@@ -106,12 +112,35 @@ def _card_width(value):
     return int(value) if DEMO_MIN_WIDTH <= value <= DEMO_MAX_WIDTH else None
 
 
+def _px(value, bounds):
+    """ドラッグで決めた長さ (px)。範囲外や数値でなければ None (= 列挙値の既定に従う)。"""
+    value = _number(value)
+    return int(round(value)) if value is not None and bounds[0] <= value <= bounds[1] else None
+
+
 def _clean_style(raw):
     raw = raw if isinstance(raw, dict) else {}
     style = {key: _choice(raw.get(key), choices, STYLE_DEFAULTS[key]) for key, choices in STYLE_CHOICES.items()}
     style['rule'] = raw.get('rule') is True
     style['animate'] = raw.get('animate') is True
+    maxw = _px(raw.get('maxw'), FREE_MAX_WIDTH)
+    if maxw is not None and style['width'] != 'full':
+        style['maxw'] = maxw
     return style
+
+
+def _clean_widths(raw, columns):
+    """列の割合 (ドラッグで決めた比率)。列数と合い、どれも下限以上なら合計 1 に正規化して返す。"""
+    if columns < 2 or not isinstance(raw, list) or len(raw) != columns:
+        return None
+    values = [_number(v) for v in raw]
+    if any(v is None or v <= 0 for v in values):
+        return None
+    total = sum(values)
+    values = [v / total for v in values]
+    if min(values) < FREE_COLUMN_MIN - 1e-6:
+        return None
+    return [round(v, 4) for v in values]
 
 
 def _number(value):
@@ -197,6 +226,9 @@ def _clean_block(raw, index):
         cells = [_clean_cell(c) for c in cells[:columns]]
         cells += [_clean_cell({}) for _ in range(columns - len(cells))]
         block.update(columns=columns, ratio=_choice(raw.get('ratio'), RATIOS[columns]), cells=cells)
+        widths = _clean_widths(raw.get('widths'), columns)
+        if widths:
+            block['widths'] = widths
         if block_type == 'callout':
             icon = raw.get('icon') if isinstance(raw.get('icon'), str) else ''
             block['icon'] = icon.strip()[:8] if icon.strip() and '<' not in icon else '💡'
@@ -204,6 +236,9 @@ def _clean_block(raw, index):
         block['variant'] = _choice(raw.get('variant'), DIVIDER_VARIANTS)
     elif block_type == 'spacer':
         block['height'] = _choice(raw.get('height'), SPACER_HEIGHTS, 'm')
+        px = _px(raw.get('px'), SPACER_PX)
+        if px is not None:
+            block['px'] = px
     elif block_type == 'demo':
         compare = raw.get('compare') is True
         block.update(
@@ -213,6 +248,7 @@ def _clean_block(raw, index):
             height=_choice(raw.get('height'), tuple(DEMO_HEIGHTS), 'm'),
             layout=_choice(raw.get('layout'), DEMO_LAYOUTS),
             card_width=_card_width(raw.get('card_width')),
+            stage_height=_px(raw.get('stage_height'), DEMO_STAGE_HEIGHT),
             controls=_clean_controls(raw.get('controls')),
             # Before / After 比較: before_* が「前」、html / css が「後」。before_html が空なら html を使う
             compare=compare,
@@ -264,6 +300,18 @@ def normalize_blocks(data):
     raw_blocks = data['blocks'][:MAX_BLOCKS]
     blocks = [b for b in (_clean_block(raw, i) for i, raw in enumerate(raw_blocks)) if b]
     return {'version': 1, 'blocks': blocks}
+
+
+def block_inline_style(block):
+    """ドラッグで決めたサイズを CSS 変数にした style 属性の値 (数値は検証済みなのでそのまま入れてよい)。"""
+    parts = []
+    maxw = (block.get('style') or {}).get('maxw')
+    if maxw:
+        parts.append(f'--bk-max: {int(maxw)}px')
+    widths = block.get('widths')
+    if widths:
+        parts.append('--bk-cols: ' + ' '.join(f'minmax(0, {float(w):.4f}fr)' for w in widths))
+    return '; '.join(parts)
 
 
 def blocks_to_html(data):
