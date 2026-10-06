@@ -11,6 +11,8 @@ from django.utils.translation import gettext as _
 from django.views.decorators.http import require_POST
 
 from accounts.mentions import notify_mentions
+from accounts.models import Notification
+from accounts.notifications import notify
 from accounts.ratelimit import is_rate_limited
 from photraveler.models import MapPin
 
@@ -122,14 +124,29 @@ def comment_create(request, pk):
         messages.error(request, _('コメントを入力してください。'))
         return redirect(post.get_absolute_url() + '#comments')
 
+    # 「返信」ボタンから書いたときは、返信先のコメント (同じ記事のもの) の書き手に知らせる
+    reply_to = None
+    reply_to_id = request.POST.get('reply_to', '')
+    if reply_to_id.isdigit():
+        reply_to = post.comments.select_related('author').filter(pk=reply_to_id).first()
+
     comment = form.save(commit=False)
     comment.post = post
     comment.author = request.user
     comment.save()
+
+    url = comment.get_absolute_url()
+    notified = set()
+    if reply_to:
+        notify(reply_to.author, actor=request.user, kind=Notification.KIND_REPLY, place=Notification.PLACE_BLOG,
+               title=post.title, text=comment.text, url=url, notified=notified)
     notify_mentions(
-        request, comment.text, author=request.user, url=comment.get_absolute_url(),
+        request, comment.text, author=request.user, url=url,
         where=lambda: _('ブログ記事「%(title)s」のコメント') % {'title': post.title},
+        place=Notification.PLACE_BLOG, title=post.title, notified=notified,
     )
+    notify(post.author, actor=request.user, kind=Notification.KIND_COMMENT, place=Notification.PLACE_BLOG,
+           title=post.title, text=comment.text, url=url, notified=notified)
     return redirect(comment.get_absolute_url())
 
 

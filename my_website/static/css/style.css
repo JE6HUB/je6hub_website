@@ -926,3 +926,131 @@ html[lang="ja"] body { letter-spacing: 0; }
 .jh-mention-text { display: flex; flex-direction: column; min-width: 0; line-height: 1.25; }
 .jh-mention-text strong { color: var(--jh-text); font-size: 14px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .jh-mention-text span { color: var(--jh-text-muted); font-size: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* ── 通知 (ヘッダーのベルのアイコンとドロップダウン) ── */
+.jh-notif-btn { position: relative; }
+.jh-nav-action .jh-notif-badge { top: 1px; right: -2px; }
+.jh-notif-panel {
+    position: fixed;
+    top: var(--jh-notif-top, 52px);
+    right: var(--jh-notif-right, 16px);
+    z-index: 10001;
+    display: flex;
+    flex-direction: column;
+    width: 380px;
+    max-height: min(560px, calc(100vh - var(--jh-notif-top, 52px) - 16px));
+    border: 1px solid var(--jh-glass-border);
+    border-radius: 16px;
+    background: rgba(var(--jh-glass-rgb), 0.94);
+    -webkit-backdrop-filter: saturate(180%) blur(24px);
+    backdrop-filter: saturate(180%) blur(24px);
+    box-shadow: 0 18px 48px rgba(0, 0, 0, 0.35);
+    color: var(--jh-text);
+    overflow: hidden;
+    animation: jh-menu-in 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.jh-notif-panel[hidden] { display: none; }
+.jh-notif-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    padding: 14px 18px 10px;
+    border-bottom: 1px solid var(--jh-card-border);
+}
+.jh-notif-title { margin: 0; font-size: 17px; font-weight: 600; color: var(--jh-text); }
+.jh-notif-all { font-size: 13px; color: var(--jh-accent); text-decoration: none; }
+.jh-notif-all:hover { text-decoration: underline; }
+.jh-notif-list { margin: 0; padding: 6px; list-style: none; overflow-y: auto; overscroll-behavior: contain; }
+.jh-notif-link {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 10px 12px;
+    border-radius: 12px;
+    color: var(--jh-text);
+    text-decoration: none;
+    transition: background 0.15s ease;
+}
+.jh-notif-link:hover, .jh-notif-link:focus-visible { background: rgba(var(--jh-fg-rgb), 0.08); color: var(--jh-text); }
+.jh-notif-item.is-unread .jh-notif-link { background: rgba(var(--jh-accent-rgb), 0.1); }
+.jh-notif-item.is-unread .jh-notif-link:hover { background: rgba(var(--jh-accent-rgb), 0.16); }
+.jh-notif-avatar {
+    position: relative;
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--jh-card-bg-3);
+    color: var(--jh-text);
+    font-size: 16px;
+    font-weight: 600;
+}
+.jh-notif-avatar .jh-avatar-img { border-radius: 50%; }
+.jh-notif-kind {
+    position: absolute;
+    right: -4px;
+    bottom: -4px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    border: 2px solid var(--jh-card-bg);
+    border-radius: 50%;
+    background: var(--jh-button);
+    color: #fff; /* 色付きの丸の上のアイコン (どのカラースキームでも背景はアクセント色) */
+    font-size: 9px;
+}
+.jh-notif-kind-reply { background: #30d158; }
+.jh-notif-kind-comment { background: #ff9f0a; }
+.jh-notif-body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+.jh-notif-message { font-size: 14px; line-height: 1.45; color: var(--jh-text); overflow-wrap: anywhere; }
+.jh-notif-excerpt {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    font-size: 13px;
+    line-height: 1.45;
+    color: var(--jh-text-muted);
+    overflow-wrap: anywhere;
+}
+.jh-notif-time { font-size: 12px; color: var(--jh-text-muted); }
+.jh-notif-dot { flex: none; width: 8px; height: 8px; margin-top: 6px; border-radius: 50%; background: var(--jh-accent); }
+.jh-notif-empty { padding: 28px 18px; font-size: 14px; line-height: 1.6; color: var(--jh-text-muted); text-align: center; }
+
+/* 通知の一覧ページ */
+.jh-notif-page { max-width: 640px; margin: 0 auto; text-align: left; }
+.jh-notif-page-title { margin: 0 0 16px; font-size: 32px; font-weight: 600; color: var(--jh-text); }
+.jh-notif-page .jh-notif-list { padding: 6px; border-radius: 18px; background: var(--jh-card-bg); }
+.jh-notif-page-foot { margin-top: 16px; font-size: 13px; }
+.jh-notif-page-foot a { color: var(--jh-accent); }
+
+/* スマートフォン: ヘッダーの下に画面いっぱいの一覧として出す (指で押しやすい大きさ) */
+@media (max-width: 734px) {
+    .jh-nav-icon-btn .jh-notif-badge { top: 5px; right: 3px; }
+    .jh-notif-panel {
+        top: 48px;
+        right: 0;
+        left: 0;
+        bottom: 0;
+        width: auto;
+        max-height: none;
+        border: none;
+        border-top: 1px solid var(--jh-card-border);
+        border-radius: 0;
+        background: var(--jh-bg);
+        box-shadow: none;
+    }
+    .jh-notif-head { padding: 16px 20px 12px; }
+    .jh-notif-title { font-size: 21px; }
+    .jh-notif-all { font-size: 15px; }
+    .jh-notif-list { padding: 6px 8px calc(16px + env(safe-area-inset-bottom)); }
+    .jh-notif-link { padding: 14px 12px; }
+    .jh-notif-message { font-size: 15px; }
+    .jh-notif-avatar { width: 44px; height: 44px; }
+    html.jh-notif-open, html.jh-notif-open body { overflow: hidden; }
+}

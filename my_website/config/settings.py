@@ -143,6 +143,7 @@ TEMPLATES = [
                 'django.contrib.messages.context_processors.messages',
                 'django.template.context_processors.i18n', # i18n用
                 'dashboard.context_processors.admin_badges',  # ヘッダーの未対応通報数
+                'accounts.context_processors.notifications',  # ヘッダーの未読の通知数
             ],
             **({
                 'loaders': [

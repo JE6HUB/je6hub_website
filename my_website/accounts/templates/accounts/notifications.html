@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block title %}{% trans "通知" %}{% endblock %}
+
+{% block content %}
+<div class="jh-section py-5">
+    <div class="jh-notif-page">
+        <h1 class="jh-notif-page-title">{% trans "通知" %}</h1>
+        <ul class="jh-notif-list">
+            {% include "accounts/_notification_items.html" %}
+        </ul>
+        <p class="jh-notif-page-foot"><a href="{% url 'account_settings' %}#notifications">{% trans "メール通知の設定" %}</a></p>
+    </div>
+</div>
+{% endblock %}

@@ -16,8 +16,9 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.conf import settings
 from django.template.loader import render_to_string
 from django.urls import reverse
+from django.utils import timezone
 from django.utils.encoding import force_bytes
-from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
+from django.utils.http import url_has_allowed_host_and_scheme, urlsafe_base64_decode, urlsafe_base64_encode
 from django.utils.translation import gettext_lazy as _
 
 from blog.models import BlogImage, Post
@@ -31,7 +32,7 @@ from .forms import (
     AccountDeleteForm, AccountInfoForm, ColorSchemeForm, CustomUserCreationForm, NotificationSettingsForm, OnboardingProfileForm,
     ResendVerificationForm, UserProfileForm,
 )
-from .models import CustomUser
+from .models import CustomUser, Notification
 from .onboarding import request_profile_onboarding
 from .ratelimit import ratelimit
 from .tokens import email_verification_token
@@ -382,3 +383,57 @@ def account_delete_view(request):
                              if not c.memberships.filter(status=ChannelMembership.STATUS_ACTIVE).exclude(user=user).exists()],
         'social_accounts': user.socialaccount_set.all(),
     })
+
+
+# ─── 通知 (ヘッダーのベルのアイコン) ───────────────────────────
+
+NOTIFICATIONS_IN_MENU = 20
+NOTIFICATIONS_PER_PAGE = 50
+
+
+def _unread_notifications(user):
+    return user.notifications.filter(read_at__isnull=True)
+
+
+@login_required
+def notifications_view(request):
+    """通知の一覧ページ (JavaScript が無効なときや、ドロップダウンの「すべて見る」から)。
+
+    開いた時点で、表示したものを既読にする (未読の印は今回の表示にだけ残す)。
+    """
+    items = list(request.user.notifications.select_related('actor')[:NOTIFICATIONS_PER_PAGE])
+    unread_ids = [n.pk for n in items if not n.is_read]
+    if unread_ids:
+        Notification.objects.filter(pk__in=unread_ids).update(read_at=timezone.now())
+    return render(request, 'accounts/notifications.html', {'notifications': items})
+
+
+@login_required
+def notifications_api_view(request):
+    """GET: 未読数 (と、menu=1 ならドロップダウンの中身の HTML)。POST: すべて既読にする。
+
+    notifications.js がページを開いている間に軽く問い合わせて、バッジを更新する。
+    """
+    if request.method == 'POST':
+        _unread_notifications(request.user).update(read_at=timezone.now())
+        return JsonResponse({'unread': 0})
+    data = {'unread': _unread_notifications(request.user).count()}
+    if request.GET.get('menu'):
+        items = request.user.notifications.select_related('actor')[:NOTIFICATIONS_IN_MENU]
+        data['html'] = render_to_string(
+            'accounts/_notification_items.html', {'notifications': items}, request=request,
+        )
+    return JsonResponse(data)
+
+
+@login_required
+def notification_open_view(request, pk):
+    """通知をクリックしたとき: 既読にして、その場所へ移動する。"""
+    notification = get_object_or_404(Notification, pk=pk, recipient=request.user)
+    if not notification.is_read:
+        notification.read_at = timezone.now()
+        notification.save(update_fields=['read_at'])
+    url = notification.url
+    if not url_has_allowed_host_and_scheme(url, allowed_hosts={request.get_host()}, require_https=request.is_secure()):
+        url = reverse('notifications')
+    return redirect(url)

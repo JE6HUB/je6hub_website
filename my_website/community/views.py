@@ -7,6 +7,7 @@ from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 
 from accounts.mentions import notify_mentions
+from accounts.models import Notification
 from core.uploads import sanitize_image, sanitize_video
 
 from .models import Channel, ChannelMembership, Message
@@ -137,6 +138,7 @@ def thread_view(request, channel_id):
                 where=lambda: _('Lounge のチャンネル「%(name)s」') % {'name': channel.name},
                 # 非公開チャンネルでは、メンバー以外にメッセージの内容を送らない
                 audience=None if channel.channel_type == 'public' else channel.is_member,
+                place=Notification.PLACE_LOUNGE, title=channel.name,
             )
         return redirect('community:thread', channel_id=channel.id)
 

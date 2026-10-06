@@ -3135,3 +3135,6 @@ button.bk-callout-icon:hover { background: rgba(var(--jh-fg-rgb), 0.08); }
 .blog-comment-field { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 10px; }
 .blog-comment-field textarea { box-sizing: border-box; width: 100%; max-width: 100%; resize: vertical; min-height: 88px; }
 .blog-comment-field button { align-self: flex-end; }
+.blog-comment-replying { display: flex; align-items: center; gap: 10px; margin: 0; font-size: 13px; color: var(--jh-text-muted); }
+.blog-comment-replying[hidden] { display: none; }
+.blog-comment-replying button { padding: 0; border: 0; background: none; color: var(--blog-accent); font-size: 13px; cursor: pointer; }
