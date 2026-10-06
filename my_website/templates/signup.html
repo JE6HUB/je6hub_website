@@ -18,7 +18,7 @@
             {% for field in form %}
                 <div class="mb-4 text-start">
                     {% if field.errors %}
-                        <div class="text-danger small mb-1" style="color: #ff453a!important;">{{ field.errors|striptags }}</div>
+                        <div class="text-danger small mb-1" style="color: var(--jh-red)!important;">{{ field.errors|striptags }}</div>
                     {% endif %}
                     <input type="{% if 'password' in field.name %}password{% elif field.name == 'email' %}email{% else %}text{% endif %}"
                            name="{{ field.name }}"

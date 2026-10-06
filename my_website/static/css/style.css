@@ -52,6 +52,16 @@
     --jh-nav-bg: rgba(var(--jh-bg-rgb), 0.72);
     --jh-glass: rgba(var(--jh-glass-rgb), 0.6);
     --jh-glass-border: rgba(var(--jh-fg-rgb), 0.15);
+    /* 固定の明るい色 (記事のアクセント、緑やオレンジのバッジなど) を文字に使うときに混ぜる黒の割合。
+       color-mix(in srgb, <色>, #000 var(--jh-accent-shade)) で使う。ダークでは 0% (元の色のまま) */
+    --jh-accent-shade: 0%;
+    --jh-on-tint: #fff; /* 淡い色の面 (頭文字のアバターなど) に載せる文字色 */
+    /* 文字やアイコンに使う固定の色 (エラー・注意・成功など)。ライトでは --jh-accent-shade の分だけ暗くなる */
+    --jh-red: color-mix(in srgb, #ff453a, #000 var(--jh-accent-shade));
+    --jh-orange: color-mix(in srgb, #ff9f0a, #000 var(--jh-accent-shade));
+    --jh-green: color-mix(in srgb, #30d158, #000 var(--jh-accent-shade));
+    --jh-purple: color-mix(in srgb, #bf5af2, #000 var(--jh-accent-shade));
+    --jh-pink: color-mix(in srgb, #ff375f, #000 var(--jh-accent-shade));
     color-scheme: dark; /* スクロールバーやフォーム部品もスキームに合わせる */
 }
 
@@ -159,6 +169,8 @@ html:is([data-jh-scheme="daylight"], [data-jh-scheme="sky"], [data-jh-scheme="mi
     --jh-fg-rgb: 0, 0, 0;
     --jh-glass-rgb: 255, 255, 255;
     --jh-nav-bg: rgba(var(--jh-bg-rgb), 0.78);
+    --jh-accent-shade: 45%; /* 明るい背景でも読めるよう、固定の明るい色を暗くする */
+    --jh-on-tint: var(--jh-text);
 }
 html[data-jh-scheme="daylight"] {
     --jh-bg: #f5f5f7;

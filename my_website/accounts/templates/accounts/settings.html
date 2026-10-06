@@ -17,7 +17,7 @@
                     {% csrf_token %}
 
                     {% if form.errors %}
-                    <div class="alert alert-danger" style="background: rgba(255,59,48,0.12); border: none; color: #ff453a; border-radius: 12px;">
+                    <div class="alert alert-danger" style="background: rgba(255,59,48,0.12); border: none; color: var(--jh-red); border-radius: 12px;">
                         {% trans "入力内容にエラーがあります。" %}
                         {{ form.errors }}
                     </div>
@@ -86,7 +86,7 @@
                         <label class="form-check-label text-light" for="notifyMentionsByEmail">{% trans "メンションされたらメールで知らせる" %}</label>
                     </div>
                     {% if not user_obj.email %}
-                    <p class="small mb-3" style="color: #ff9f0a;">{% trans "メールアドレスが登録されていないため、メールは届きません。" %}</p>
+                    <p class="small mb-3" style="color: var(--jh-orange);">{% trans "メールアドレスが登録されていないため、メールは届きません。" %}</p>
                     {% else %}
                     <p class="small text-muted mb-3">{% blocktrans with email=user_obj.email %}送信先: {{ email }}{% endblocktrans %}</p>
                     {% endif %}
@@ -105,9 +105,9 @@
 
                 {% if not user_obj.is_staff and not user_obj.is_superuser %}
                 <hr class="my-4" style="border-color: var(--jh-line); opacity: 1;">
-                <h3 class="mb-2 fw-semibold" style="font-size: 21px; color: #ff453a;">{% trans "退会" %}</h3>
+                <h3 class="mb-2 fw-semibold" style="font-size: 21px; color: var(--jh-red);">{% trans "退会" %}</h3>
                 <p class="small text-muted mb-3">{% trans "アカウントと、投稿・写真などのデータをすべて削除します。" %}</p>
-                <a href="{% url 'account_delete' %}" class="jh-btn jh-btn-outline" style="border-color: rgba(255,59,48,0.5); color: #ff453a;">{% trans "退会手続きへ" %}</a>
+                <a href="{% url 'account_delete' %}" class="jh-btn jh-btn-outline" style="border-color: rgba(255,59,48,0.5); color: var(--jh-red);">{% trans "退会手続きへ" %}</a>
                 {% endif %}
             </div>
         </div>

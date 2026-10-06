@@ -6,7 +6,7 @@
 {% block glass_preload %}{% include "_liquid_glass_preload.html" with hero="img/hero/home-head" %}{% endblock %}
 
 {% block extra_head %}
-<link href="{% static 'css/blog.css' %}?v=33" rel="stylesheet" />
+<link href="{% static 'css/blog.css' %}?v=34" rel="stylesheet" />
 {% endblock %}
 
 {% block extra_js %}
@@ -108,7 +108,7 @@
         <div class="landing-features">
             <article class="landing-feature landing-feature--wide">
                 <div>
-                    <span class="material-symbols-outlined landing-feature-icon" aria-hidden="true" style="color:#bf5af2;">dashboard_customize</span>
+                    <span class="material-symbols-outlined landing-feature-icon" aria-hidden="true" style="color: var(--jh-purple);">dashboard_customize</span>
                     <h3>{% trans "選ぶだけの4つのテンプレート" %}</h3>
                     <p>{% trans "全面カバーのフィーチャー、定番のクラシック、写真と並べるスプリット、文字が主役のミニマル。サイトのデザインに溶け込むレイアウトを、クリックひとつで切り替えられます。" %}</p>
                 </div>
@@ -125,17 +125,17 @@
                 <p>{% trans "見出し、左・中央・右・両端揃え、リスト、引用、コード、区切り線。見たままの画面で、思いどおりに整えられます。" %}</p>
             </article>
             <article class="landing-feature">
-                <span class="material-symbols-outlined landing-feature-icon" aria-hidden="true" style="color:#ff9f0a;">add_photo_alternate</span>
+                <span class="material-symbols-outlined landing-feature-icon" aria-hidden="true" style="color: var(--jh-orange);">add_photo_alternate</span>
                 <h3>{% trans "画像はドラッグ＆ドロップ" %}</h3>
                 <p>{% trans "本文への画像はボタン、ドラッグ＆ドロップ、貼り付けで挿入。カバー画像もその場で設定できます。" %}</p>
             </article>
             <article class="landing-feature">
-                <span class="material-symbols-outlined landing-feature-icon" aria-hidden="true" style="color:#30d158;">group</span>
+                <span class="material-symbols-outlined landing-feature-icon" aria-hidden="true" style="color: var(--jh-green);">group</span>
                 <h3>{% trans "メンバーなら誰でも" %}</h3>
                 <p>{% trans "アカウントを作れば、すぐに書き始められます。下書き保存、公開・非公開の切り替えも自由です。" %}</p>
             </article>
             <article class="landing-feature">
-                <span class="material-symbols-outlined landing-feature-icon" aria-hidden="true" style="color:#ff375f;">palette</span>
+                <span class="material-symbols-outlined landing-feature-icon" aria-hidden="true" style="color: var(--jh-pink);">palette</span>
                 <h3>{% trans "記事ごとのアクセントカラー" %}</h3>
                 <p>{% trans "6色から選んだアクセントが、見出しの装飾やリンク、カードに統一感を与えます。" %}</p>
             </article>

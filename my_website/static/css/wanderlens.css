@@ -9,8 +9,8 @@
 .wl-container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
 .wl-btn { padding: 10px 20px; font-size: 15px; }
 .wl-muted { color: var(--jh-text-muted); font-size: 13px; }
-.wl-required { color: #ff453a; }
-.wl-error { color: #ff453a; font-size: 13px; margin: 8px 0 0; }
+.wl-required { color: var(--jh-red); }
+.wl-error { color: var(--jh-red); font-size: 13px; margin: 8px 0 0; }
 
 .wl-back {
     display: inline-flex;
@@ -453,7 +453,7 @@
 }
 .wl-text-btn:hover { text-decoration: underline; }
 .wl-text-btn:disabled { color: var(--jh-text-muted); opacity: 0.5; cursor: default; text-decoration: none; }
-.wl-text-btn--danger { color: #ff453a; }
+.wl-text-btn--danger { color: var(--jh-red); }
 .wl-text-btn .material-symbols-outlined { font-size: 18px; }
 
 .wl-comments { padding-top: 16px; border-top: 1px solid var(--jh-line); }
@@ -535,7 +535,7 @@
     font-size: 10px;
     font-weight: 600;
 }
-.wl-badge { display: inline-flex; align-items: center; gap: 6px; margin: 10px 0 0; font-size: 13px; color: #30d158; }
+.wl-badge { display: inline-flex; align-items: center; gap: 6px; margin: 10px 0 0; font-size: 13px; color: var(--jh-green); }
 .wl-badge .material-symbols-outlined { font-size: 16px; }
 .wl-badge[hidden] { display: none; }
 .wl-place { position: relative; }

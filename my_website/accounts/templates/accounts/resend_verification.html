@@ -15,7 +15,7 @@
             {% csrf_token %}
             <div class="mb-4 text-start">
                 {% if form.email.errors %}
-                    <div class="text-danger small mb-1" style="color: #ff453a!important;">{{ form.email.errors|striptags }}</div>
+                    <div class="text-danger small mb-1" style="color: var(--jh-red)!important;">{{ form.email.errors|striptags }}</div>
                 {% endif %}
                 <input type="email" name="email" id="id_email"
                        class="jh-input {% if form.email.errors %}border-danger{% endif %}"

@@ -7,6 +7,7 @@
      背後に静的なアンビエント光 (.lounge-ambient) を置き、奥行きを出す
    ========================================= */
 
+/* --tint などの明るい色を文字に使うときは --jh-accent-shade で暗くする (ライトのスキームで読めるように) */
 :root {
     --lounge-public: var(--jh-accent);
     --lounge-private: #bf5af2;
@@ -80,9 +81,9 @@
 .lounge-btn--tint {
     background: color-mix(in srgb, var(--tint) 18%, transparent);
     border-color: color-mix(in srgb, var(--tint) 40%, transparent);
-    color: var(--tint);
+    color: color-mix(in srgb, var(--tint), #000 var(--jh-accent-shade));
 }
-.lounge-btn--tint:hover { background: color-mix(in srgb, var(--tint) 28%, transparent); color: var(--tint); }
+.lounge-btn--tint:hover { background: color-mix(in srgb, var(--tint) 28%, transparent); color: color-mix(in srgb, var(--tint), #000 var(--jh-accent-shade)); }
 .lounge-btn--block { width: 100%; }
 
 /* =========================================
@@ -210,7 +211,7 @@
     background: rgba(var(--jh-fg-rgb), 0.08);
     color: var(--jh-text-muted);
 }
-.lounge-section-head .material-symbols-outlined { font-size: 24px; color: var(--tint); }
+.lounge-section-head .material-symbols-outlined { font-size: 24px; color: color-mix(in srgb, var(--tint), #000 var(--jh-accent-shade)); }
 
 .lounge-grid {
     display: grid;
@@ -276,7 +277,7 @@
     padding: 11px;
     border-radius: 980px;
     font-size: 14px;
-    color: var(--lounge-warning);
+    color: var(--jh-orange);
     background: rgba(255, 159, 10, 0.12);
 }
 .lounge-pending .material-symbols-outlined { font-size: 18px; }
@@ -335,7 +336,7 @@
     background: color-mix(in srgb, var(--tint) 12%, transparent);
 }
 .lounge-type-option:has(input:focus-visible) { outline: 2px solid var(--tint); outline-offset: 2px; }
-.lounge-type-option .material-symbols-outlined { font-size: 26px; color: var(--tint); }
+.lounge-type-option .material-symbols-outlined { font-size: 26px; color: color-mix(in srgb, var(--tint), #000 var(--jh-accent-shade)); }
 .lounge-type-name { font-weight: 600; font-size: 16px; }
 .lounge-type-desc { font-size: 13px; color: var(--jh-text-muted); line-height: 1.4; }
 .lounge-form-actions { display: flex; gap: 12px; margin-top: 32px; flex-wrap: wrap; }
@@ -493,7 +494,7 @@
     color: var(--jh-text);
     background: var(--jh-card-bg-3);
 }
-.msg-time { font-size: 11px; color: rgba(var(--jh-text-rgb), 0.35); margin: 4px 8px 0; }
+.msg-time { font-size: 11px; color: var(--jh-text-muted); margin: 4px 8px 0; }
 .msg-report { font-size: 11px; color: rgba(var(--jh-text-rgb), 0.35); margin: 0 8px; text-decoration: none; opacity: 0; transition: opacity 0.2s ease; }
 .msg-row:hover .msg-report, .msg-report:focus { opacity: 1; color: rgba(var(--jh-text-rgb), 0.6); }
 @media (hover: none) { .msg-report { opacity: 1; } }
@@ -558,7 +559,7 @@
     cursor: pointer;
     transition: color 0.2s ease, background 0.2s ease;
 }
-.attach-btn:hover { color: var(--tint); background: rgba(var(--jh-fg-rgb), 0.08); }
+.attach-btn:hover { color: color-mix(in srgb, var(--tint), #000 var(--jh-accent-shade)); background: rgba(var(--jh-fg-rgb), 0.08); }
 .attach-btn .material-symbols-outlined { font-size: 22px; }
 #chatTextInput {
     flex: 1;
@@ -608,7 +609,7 @@
     overflow-y: auto;
 }
 .lounge-panel-title { display: flex; align-items: center; gap: 8px; font-size: 17px; font-weight: 700; margin: 0 0 20px; }
-.lounge-panel-title .material-symbols-outlined { color: var(--tint); }
+.lounge-panel-title .material-symbols-outlined { color: color-mix(in srgb, var(--tint), #000 var(--jh-accent-shade)); }
 .lounge-panel-section { margin-top: 24px; }
 .lounge-panel-label {
     display: flex;
@@ -640,7 +641,7 @@
     font-weight: 600;
     padding: 2px 8px;
     border-radius: 980px;
-    color: var(--lounge-warning);
+    color: var(--jh-orange);
     background: rgba(255, 159, 10, 0.18);
 }
 .lounge-icon-btn {
@@ -659,7 +660,7 @@
 .lounge-icon-btn .material-symbols-outlined { font-size: 16px; }
 .lounge-icon-btn--ok { background: var(--lounge-success); color: #fff; }
 .lounge-icon-btn--ok:hover { background: #28b84c; color: #fff; }
-.lounge-icon-btn--danger:hover { background: rgba(255, 69, 58, 0.2); color: var(--lounge-danger); }
+.lounge-icon-btn--danger:hover { background: rgba(255, 69, 58, 0.2); color: var(--jh-red); }
 
 /* Lightbox */
 #lightbox {
