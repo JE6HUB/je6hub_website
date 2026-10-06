@@ -347,6 +347,22 @@
     margin: 8px 0 28px;
 }
 
+/* 英語で読む人向けの「自動翻訳です」の注記 */
+.blog-translated-note {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    max-width: var(--blog-measure);
+    margin: 24px auto 0;
+    padding: 0 20px;
+    color: var(--jh-text-muted);
+    font-size: 14px;
+    line-height: 1.5;
+}
+.blog-translated-note .material-symbols-outlined { font-size: 18px; }
+.blog-translated-note a { color: inherit; text-decoration: underline; text-underline-offset: 2px; }
+.blog-translated-note a:hover { color: var(--jh-text-body); }
+
 /* ── 本文 (記事ページ & エディタ共通) ───────── */
 .blog-prose {
     max-width: var(--blog-measure);

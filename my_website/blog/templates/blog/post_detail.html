@@ -191,6 +191,15 @@
     </header>
     {% endif %}
 
+    {% if post.is_localized %}
+    {# 英語で開いた読者向けの自動翻訳。原文 (日本語) へのリンクを添える #}
+    <p class="blog-translated-note">
+        <span class="material-symbols-outlined" aria-hidden="true">translate</span>
+        <span>{% trans "この記事は日本語から自動翻訳されています。" %}
+        <a href="{% language 'ja' %}{% url 'blog:detail' post.pk %}{% endlanguage %}" lang="ja" hreflang="ja">{% trans "原文 (日本語) を読む" %}</a></span>
+    </p>
+    {% endif %}
+
     {% if post.uses_blocks %}
         {% include "blog/_blocks.html" %}
     {% else %}

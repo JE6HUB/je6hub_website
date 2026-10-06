@@ -7,11 +7,12 @@ from django.http import Http404, JsonResponse
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.utils import translation
-from django.utils.translation import gettext_lazy as _
+from django.utils.translation import get_language, gettext_lazy as _
 from django.views.decorators.http import require_POST
 
 from accounts.ratelimit import ratelimit
 from blog.models import Post
+from blog.translation import localize_posts
 
 from . import guide_tour
 from .forms import ContactForm
@@ -27,7 +28,7 @@ def home_view(request):
     """ホーム: Blogs の紹介と最新記事。個人のポートフォリオは resume に集約している。"""
     published = Post.objects.published()
     return render(request, 'core/home.html', {
-        'latest': list(published.select_related('author')[:LATEST_POSTS]),
+        'latest': localize_posts(list(published.select_related('author')[:LATEST_POSTS]), get_language()),
         'post_count': published.count(),
         'writer_count': published.values('author').distinct().count(),
         'guide_chapters': guide_tour.chapter_summaries(),
