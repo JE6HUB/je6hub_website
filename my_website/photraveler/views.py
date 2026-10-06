@@ -14,6 +14,8 @@ from django.views.decorators.http import require_http_methods
 import json
 
 from accounts.mentions import mention_segments, notify_mentions
+from accounts.models import Notification
+from accounts.notifications import notify
 from accounts.ratelimit import is_rate_limited
 
 from .forms import PinForm
@@ -251,13 +253,19 @@ def pin_comments(request, pin_id):
     )
 
     comment = PhotoComment.objects.create(pin=pin, author_name=author_name, text=text)
-    # 通知メールはログインしているユーザーのコメントだけ (ゲストの名前は誰でも名乗れるため)
-    if request.user.is_authenticated and pin.user_id:
-        notify_mentions(
-            request, text, author=request.user,
-            url=reverse('photraveler:user_map', args=[pin.user.username]) + f'?pin={pin.pk}',
-            where=lambda: _('WanderLens のスポット「%(title)s」のコメント') % {'title': pin.title},
-        )
+    if pin.user_id:
+        pin_url = reverse('photraveler:user_map', args=[pin.user.username]) + f'?pin={pin.pk}'
+        actor = request.user if request.user.is_authenticated else None
+        notified = set()
+        # メンションはログインしているユーザーのコメントだけ (ゲストの名前は誰でも名乗れるため)
+        if actor:
+            notify_mentions(
+                request, text, author=actor, url=pin_url,
+                where=lambda: _('WanderLens のスポット「%(title)s」のコメント') % {'title': pin.title},
+                place=Notification.PLACE_WANDERLENS, title=pin.title, notified=notified,
+            )
+        notify(pin.user, actor=actor, actor_name=author_name, kind=Notification.KIND_COMMENT,
+               place=Notification.PLACE_WANDERLENS, title=pin.title, text=text, url=pin_url, notified=notified)
     return JsonResponse({
         'id':          comment.id,
         'author_name': comment.author_name,

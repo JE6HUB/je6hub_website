@@ -16,7 +16,7 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
     <link href="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/6.4.0/mdb.min.css" rel="stylesheet" />
 
-    <link href="{% static 'css/style.css' %}?v=26" rel="stylesheet" />
+    <link href="{% static 'css/style.css' %}?v=27" rel="stylesheet" />
     <link href="{% static 'css/profile.css' %}?v=5" rel="stylesheet" />
     <link href="{% static 'css/guide-tour.css' %}?v=1" rel="stylesheet" />
 
@@ -81,6 +81,7 @@
                 </form>
 
                 {% if user.is_authenticated %}
+                    {% include "accounts/_notification_button.html" with btn_class="jh-nav-action" %}
                     <a href="{{ user.get_absolute_url }}" class="jh-globalnav-link jh-nav-action" data-nav-account data-profile="{{ user.username }}" aria-haspopup="dialog" aria-label="{{ user.public_name }}" title="{{ user.public_name }}">
                         {% if user.avatar %}<img class="jh-nav-avatar" src="{{ user.avatar.url }}" alt="">{% else %}<i class="fas fa-user"></i>{% endif %}
                     </a>
@@ -110,6 +111,7 @@
 
             <!-- スマートフォン用: アカウントとメニューボタン (734px 以下でのみ表示) -->
             <li class="jh-globalnav-item jh-globalnav-mobile-actions">
+                {% if user.is_authenticated %}{% include "accounts/_notification_button.html" with btn_class="jh-nav-icon-btn" %}{% endif %}
                 <a href="{% if user.is_authenticated %}{{ user.get_absolute_url }}{% else %}{% url 'login' %}{% endif %}"
                    class="jh-globalnav-link jh-nav-icon-btn" data-nav-account
                    {% if user.is_authenticated %}data-profile="{{ user.username }}" aria-haspopup="dialog"{% endif %}
@@ -129,6 +131,20 @@
             </li>
         </ul>
     </nav>
+
+    {% if user.is_authenticated %}
+    <!-- 通知のドロップダウン (中身は notifications.js が開いたときに読み込む。スマートフォンでは画面幅いっぱいの一覧) -->
+    <div class="jh-notif-panel" id="jh-notif-panel" role="dialog" aria-labelledby="jh-notif-title" hidden>
+        <div class="jh-notif-head">
+            <h2 class="jh-notif-title" id="jh-notif-title">{% trans "通知" %}</h2>
+            <a href="{% url 'notifications' %}" class="jh-notif-all">{% trans "すべて見る" %}</a>
+        </div>
+        <ul class="jh-notif-list" data-notif-list aria-live="polite">
+            <li class="jh-notif-empty">{% trans "読み込み中…" %}</li>
+        </ul>
+        <form method="post" action="{% url 'notifications_api' %}" data-notif-read hidden>{% csrf_token %}</form>
+    </div>
+    {% endif %}
 
     <div class="jh-mobile-menu" id="jh-mobile-menu" hidden>
         <nav aria-label="{% trans 'メニュー' %}">
@@ -234,7 +250,9 @@
     <script type="text/javascript" src="{% static 'js/main.js' %}"></script>
     <script src="{% static 'js/color-scheme.js' %}?v=1"></script>
     <script src="{% static 'js/guide-tour.js' %}?v=1" data-url="{% url 'core:guide_tour' %}"></script>
-    {% if user.is_authenticated %}<script src="{% static 'js/mentions.js' %}?v=1" data-url="{% url 'mention_search' %}"></script>{% endif %}
+    {% if user.is_authenticated %}<script src="{% static 'js/mentions.js' %}?v=1" data-url="{% url 'mention_search' %}"></script>
+    <script src="{% static 'js/notifications.js' %}?v=1" data-url="{% url 'notifications_api' %}"
+            data-label="{% trans '通知' %}" data-label-unread="{% trans '通知 (未読 %(count)s 件)' %}" data-error="{% trans '通知を読み込めませんでした。' %}"></script>{% endif %}
 
     {% block extra_js %}{% endblock %}
 

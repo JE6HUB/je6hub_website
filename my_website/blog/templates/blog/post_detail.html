@@ -8,7 +8,7 @@
 <meta property="og:title" content="{{ post.title }}">
 <meta property="og:description" content="{{ post.excerpt }}">
 {% if post.cover_image %}<meta property="og:image" content="{{ request.scheme }}://{{ request.get_host }}{{ post.cover_image.url }}">{% endif %}
-<link href="{% static 'css/blog.css' %}?v=32" rel="stylesheet" />
+<link href="{% static 'css/blog.css' %}?v=33" rel="stylesheet" />
 {% if post.has_math %}
 <link href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" rel="stylesheet" />
 {% endif %}
@@ -65,6 +65,30 @@
             btn.disabled = false;
         }
     });
+})();
+</script>
+<script>
+// コメントの「返信」: 返信先を覚えて (書き手に通知が届く)、本文の先頭に @ユーザー名 を入れる
+(() => {
+    const form = document.querySelector('.blog-comment-form');
+    if (!form) return;
+    const input = form.querySelector('[data-reply-input]');
+    const box = form.querySelector('[data-replying]');
+    const label = form.querySelector('[data-replying-label]');
+    const textarea = form.querySelector('textarea');
+    const template = "{% trans '%(name)s さんに返信' %}";
+    const cancel = () => { input.value = ''; box.hidden = true; };
+    document.querySelectorAll('[data-reply-to]').forEach((btn) => btn.addEventListener('click', () => {
+        input.value = btn.dataset.replyTo;
+        label.textContent = template.replace('%(name)s', btn.dataset.replyName);
+        box.hidden = false;
+        const mention = `@${btn.dataset.replyUsername} `;
+        if (!textarea.value.includes(mention.trim())) textarea.value = mention + textarea.value;
+        textarea.focus();
+        textarea.setSelectionRange(textarea.value.length, textarea.value.length);
+        form.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }));
+    form.querySelector('[data-reply-cancel]').addEventListener('click', () => { cancel(); textarea.focus(); });
 })();
 </script>
 {% if post.has_demo %}

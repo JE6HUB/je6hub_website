@@ -1,0 +1,15 @@
+{% load i18n profiles %}{% for n in notifications %}
+<li class="jh-notif-item{% if not n.is_read %} is-unread{% endif %}">
+    <a class="jh-notif-link" href="{% url 'notification_open' n.pk %}">
+        <span class="jh-notif-avatar" aria-hidden="true">{% if n.actor %}{% avatar n.actor %}{% else %}{{ n.actor_name|slice:":1"|upper }}{% endif %}<span class="jh-notif-kind jh-notif-kind-{{ n.kind }}"><i class="fas {% if n.kind == 'mention' %}fa-at{% elif n.kind == 'reply' %}fa-reply{% else %}fa-comment{% endif %}"></i></span></span>
+        <span class="jh-notif-body">
+            <span class="jh-notif-message">{{ n.message }}</span>
+            {% if n.excerpt %}<span class="jh-notif-excerpt">{{ n.excerpt }}</span>{% endif %}
+            <time class="jh-notif-time" datetime="{{ n.created_at|date:'c' }}">{% blocktrans with time=n.created_at|timesince %}{{ time }}前{% endblocktrans %}</time>
+        </span>
+        {% if not n.is_read %}<span class="jh-notif-dot" aria-label="{% trans '未読' %}"></span>{% endif %}
+    </a>
+</li>
+{% empty %}
+<li class="jh-notif-empty">{% trans "まだ通知はありません。メンションされたり、記事やコメントに返信が来たりすると、ここに届きます。" %}</li>
+{% endfor %}

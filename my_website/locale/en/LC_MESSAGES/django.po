@@ -2598,3 +2598,91 @@ msgstr "Completed"
 #: core/guide_tour.py
 msgid "サインインが必要な操作は、途中でサインインを案内します。サインイン後はガイドの続きから再開します。"
 msgstr "When a step needs an account, the guide asks you to sign in and then picks up where you left off."
+
+# 通知 (ヘッダーのベルのアイコン)
+msgid "メンション"
+msgstr "Mention"
+
+msgid "返信"
+msgstr "Reply"
+
+msgid "ブログ"
+msgstr "Blog"
+
+msgid "受け取る人"
+msgstr "Recipient"
+
+msgid "した人"
+msgstr "Actor"
+
+msgid "した人の名前"
+msgstr "Actor name"
+
+msgid "題名"
+msgstr "Title"
+
+msgid "抜粋"
+msgstr "Excerpt"
+
+msgid "既読日時"
+msgstr "Read at"
+
+#, python-format
+msgid "%(name)s さんが「%(title)s」であなたのコメントに返信しました"
+msgstr "%(name)s replied to your comment on “%(title)s”"
+
+#, python-format
+msgid "%(name)s さんがあなたのスポット「%(title)s」にコメントしました"
+msgstr "%(name)s commented on your spot “%(title)s”"
+
+#, python-format
+msgid "%(name)s さんがあなたの記事「%(title)s」にコメントしました"
+msgstr "%(name)s commented on your post “%(title)s”"
+
+#, python-format
+msgid "%(name)s さんが Lounge の「%(title)s」であなたをメンションしました"
+msgstr "%(name)s mentioned you in “%(title)s” on Lounge"
+
+#, python-format
+msgid "%(name)s さんが WanderLens の「%(title)s」であなたをメンションしました"
+msgstr "%(name)s mentioned you on “%(title)s” in WanderLens"
+
+#, python-format
+msgid "%(name)s さんがブログ「%(title)s」であなたをメンションしました"
+msgstr "%(name)s mentioned you on the blog post “%(title)s”"
+
+#, python-format
+msgid "%(time)s前"
+msgstr "%(time)s ago"
+
+msgid "未読"
+msgstr "Unread"
+
+msgid "まだ通知はありません。メンションされたり、記事やコメントに返信が来たりすると、ここに届きます。"
+msgstr "No notifications yet. You'll see them here when someone mentions you or responds to your posts and comments."
+
+msgid "通知を読み込めませんでした。"
+msgstr "Couldn't load notifications."
+
+#, python-format
+msgid "通知 (未読 %(count)s 件)"
+msgstr "Notifications (%(count)s unread)"
+
+msgid "メール通知の設定"
+msgstr "Email notification settings"
+
+msgid "返信をやめる"
+msgstr "Cancel reply"
+
+msgid "やめる"
+msgstr "Cancel"
+
+#, python-format
+msgid "%(name)s さんに返信"
+msgstr "Replying to %(name)s"
+
+#, python-format
+msgid "未読 %(counter)s 件"
+msgid_plural "未読 %(counter)s 件"
+msgstr[0] "%(counter)s unread"
+msgstr[1] "%(counter)s unread"

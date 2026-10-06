@@ -33,6 +33,9 @@
                 </p>
                 <p class="blog-comment-text">{{ comment.text|mentions|linebreaksbr }}</p>
                 <div class="blog-comment-actions">
+                    {% if user.is_authenticated and comment.author_id != user.id %}
+                    <button type="button" data-reply-to="{{ comment.pk }}" data-reply-username="{{ comment.author.username }}" data-reply-name="{{ comment.author.public_name }}">{% trans "返信" %}</button>
+                    {% endif %}
                     {% if comment.deletable %}
                     <form method="post" action="{% url 'blog:comment_delete' comment.pk %}" onsubmit="return confirm('{% trans "このコメントを削除しますか？" %}');">
                         {% csrf_token %}
@@ -54,6 +57,11 @@
             {% csrf_token %}
             <span class="blog-avatar" aria-hidden="true">{% avatar user %}</span>
             <div class="blog-comment-field">
+                <input type="hidden" name="reply_to" value="" data-reply-input>
+                <p class="blog-comment-replying" data-replying hidden>
+                    <span data-replying-label></span>
+                    <button type="button" data-reply-cancel aria-label="{% trans '返信をやめる' %}">{% trans "やめる" %}</button>
+                </p>
                 <textarea id="blogCommentText" name="text" class="jh-input" rows="3" maxlength="{{ comment_form.fields.text.max_length }}" required
                           aria-label="{% trans 'コメントを書く' %}" placeholder="{% trans 'コメントを書く… @ユーザー名 でメンションできます' %}" data-mention-input></textarea>
                 <button type="submit" class="jh-btn jh-btn-primary blog-btn-sm">{% trans "コメントする" %}</button>

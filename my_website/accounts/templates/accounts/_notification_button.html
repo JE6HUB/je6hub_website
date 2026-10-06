@@ -1,0 +1,4 @@
+{% load i18n %}{% with unread=notifications_unread %}<a href="{% url 'notifications' %}" class="jh-globalnav-link {{ btn_class }} jh-notif-btn" data-notif-toggle
+   aria-controls="jh-notif-panel" aria-expanded="false" aria-label="{% trans '通知' %}{% if unread %} ({% blocktrans count counter=unread %}未読 {{ counter }} 件{% plural %}未読 {{ counter }} 件{% endblocktrans %}){% endif %}" title="{% trans '通知' %}">
+    <i class="fas fa-bell"></i><span class="jh-dashboard-badge jh-notif-badge" data-notif-badge aria-hidden="true"{% if not unread %} hidden{% endif %}>{% if unread > 99 %}99+{% else %}{{ unread }}{% endif %}</span>
+</a>{% endwith %}

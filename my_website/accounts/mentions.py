@@ -108,22 +108,32 @@ def link_mentions(text):
     ))
 
 
-def notify_mentions(request, text, *, author, url, where, audience=None):
-    """メンションされたユーザーにメールで知らせる (保存が確定してから送る)。
+def notify_mentions(request, text, *, author, url, where, audience=None, place=None, title='', notified=None):
+    """メンションされたユーザーに、ヘッダーの通知とメールで知らせる (メールは保存が確定してから送る)。
 
     - author: 書いた人 (自分自身へのメンションは通知しない)
     - url: 投稿のある場所 (サイト内のパス)
     - where: 「ブログ記事「…」のコメント」のような、どこで書かれたかの説明を返す関数
       (メールの言語で訳すため、送る直前に呼ぶ)
     - audience: その投稿を見られる人だけに絞る関数 (user -> bool)。非公開チャンネルなどで使う
+    - place / title: ヘッダーの通知に出す場所 (Notification.PLACE_*) と題名。place がなければ通知は作らない
+    - notified: すでに通知を作った人の ID の set (返信などで知らせた人には重ねて作らない)
+
+    メールの送り先を返す。
     """
-    recipients = [
+    mentioned = [
         user for user in mentioned_users(text)
         if user.pk != getattr(author, 'pk', None)
-        and user.notify_mentions_by_email
-        and user.email
         and (audience is None or audience(user))
     ]
+    if place:
+        from .models import Notification
+        from .notifications import notify
+        for user in mentioned:
+            notify(user, actor=author, kind=Notification.KIND_MENTION, place=place,
+                   title=title, text=text, url=url, notified=notified)
+
+    recipients = [user for user in mentioned if user.notify_mentions_by_email and user.email]
     if not recipients:
         return []
 
