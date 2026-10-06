@@ -27,7 +27,7 @@
             <span class="blog-avatar" data-profile="{{ comment.author.username }}" aria-hidden="true">{% avatar comment.author %}</span>
             <div class="blog-comment-body">
                 <p class="blog-comment-head">
-                    <a href="{{ comment.author.get_absolute_url }}" class="blog-comment-name" {% profile_trigger comment.author link=True %}>{{ comment.author.public_name }}</a>
+                    <a href="{{ comment.author.get_absolute_url }}" class="blog-comment-name" {% profile_trigger comment.author link=True %}>{{ comment.author.public_name }}{% admin_badge comment.author %}</a>
                     {% if comment.author_id == post.author_id %}<span class="blog-comment-badge">{% trans "著者" %}</span>{% endif %}
                     <time datetime="{{ comment.created_at|date:'c' }}">{{ comment.created_at|date:"Y.m.d H:i" }}</time>
                 </p>

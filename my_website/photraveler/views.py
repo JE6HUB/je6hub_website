@@ -78,10 +78,12 @@ def map_view(request):
         cover = next((p['photos'][0]['thumb'] for p in owner_pins if p['photos']), '')
         travelers.append({'username': owner, 'cover': cover, **_stats(owner_pins)})
     travelers.sort(key=lambda t: (-t['places'], t['username']))
-    avatars = {u.username: u.avatar.url for u in
-               User.objects.filter(username__in=by_owner).exclude(avatar='').only('username', 'avatar')}
+    owners = {u.username: u for u in
+              User.objects.filter(username__in=by_owner).only('username', 'avatar', 'is_superuser')}
     for t in travelers:
-        t['avatar'] = avatars.get(t['username'], '')
+        owner = owners.get(t['username'])
+        t['avatar'] = owner.avatar.url if owner and owner.avatar else ''
+        t['is_admin'] = bool(owner and owner.is_superuser)
 
     return render(request, 'photraveler/discovery.html', {
         'pins':      pins,

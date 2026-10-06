@@ -215,6 +215,7 @@ def mention_search_view(request):
             'username': u.username,
             'name': u.public_name,
             'avatar': u.avatar.url if u.avatar else '',
+            'admin': u.is_superuser,
         }
         for u in users
     ]})

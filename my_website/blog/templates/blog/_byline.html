@@ -2,7 +2,7 @@
 <div class="blog-byline">
     <span class="blog-avatar" data-profile="{{ post.author.username }}" aria-hidden="true">{% avatar post.author %}</span>
     <span class="blog-byline-text">
-        <a href="{{ post.author.get_absolute_url }}" class="blog-byline-name" {% profile_trigger post.author link=True %}>{{ post.author.public_name }}</a>
+        <a href="{{ post.author.get_absolute_url }}" class="blog-byline-name" {% profile_trigger post.author link=True %}>{{ post.author.public_name }}{% admin_badge post.author %}</a>
         <span class="blog-byline-meta">
             {% if post.published_at %}<time datetime="{{ post.published_at|date:'c' }}">{{ post.published_at|date:"Y.m.d" }}</time>{% else %}{% trans "未公開" %}{% endif %}
             &nbsp;·&nbsp; {% blocktrans count minutes=post.reading_minutes %}{{ minutes }}分で読めます{% plural %}{{ minutes }}分で読めます{% endblocktrans %}

@@ -1066,3 +1066,34 @@ html[lang="ja"] body { letter-spacing: 0; }
     .jh-notif-avatar { width: 44px; height: 44px; }
     html.jh-notif-open, html.jh-notif-open body { overflow: hidden; }
 }
+
+/* ── 管理者バッジ (profiles の admin_badge タグ)。名前のすぐ後ろに、文字の大きさに合わせて付く ── */
+.jh-svg-defs { position: absolute; width: 0; height: 0; overflow: hidden; }
+.jh-admin-badge {
+    display: inline-block;
+    flex-shrink: 0;
+    width: 1.05em;
+    height: 1.05em;
+    margin-left: 0.25em;
+    vertical-align: -0.16em;
+    /* 明るい背景でも縁が見えるよう、ごく薄い影を付ける */
+    filter: drop-shadow(0 0 0.5px rgba(120, 80, 0, 0.55));
+}
+.jh-admin-badge use { pointer-events: none; }
+/* 大きな見出しでは文字に比べて小さめにする */
+.pf-hero-name .jh-admin-badge { width: 0.7em; height: 0.7em; margin-left: 0.18em; vertical-align: 0; }
+.pf-card-name .jh-admin-badge,
+.jh-settings-name .jh-admin-badge { width: 0.85em; height: 0.85em; vertical-align: -0.08em; }
+/* ヘッダーのアカウントアイコンでは、アイコンの右下に重ねる */
+.jh-nav-action[data-nav-account],
+.jh-nav-icon-btn[data-nav-account] { position: relative; }
+.jh-nav-action[data-nav-account] > .jh-admin-badge,
+.jh-nav-icon-btn[data-nav-account] > .jh-admin-badge {
+    position: absolute;
+    right: -1px;
+    bottom: 0;
+    width: 15px;
+    height: 15px;
+    margin: 0;
+}
+.jh-nav-icon-btn[data-nav-account] > .jh-admin-badge { right: 6px; bottom: 7px; }

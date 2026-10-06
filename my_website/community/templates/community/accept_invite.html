@@ -24,7 +24,7 @@
                 {% blocktrans with name=channel.name %}<strong>{{ name }}</strong> へ参加するよう招待されました。{% endblocktrans %}
             </p>
             {% if membership.invited_by %}
-            <span class="lounge-invite-by">{% trans "招待者" %}: <span {% profile_trigger membership.invited_by %}>{{ membership.invited_by.public_name }}</span></span>
+            <span class="lounge-invite-by">{% trans "招待者" %}: <span {% profile_trigger membership.invited_by %}>{{ membership.invited_by.public_name }}{% admin_badge membership.invited_by %}</span></span>
             {% endif %}
         </span>
     </div>

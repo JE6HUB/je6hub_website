@@ -22,6 +22,19 @@
         if (field) field.removeAttribute('aria-activedescendant');
     };
 
+    // 管理者の金色バッジ (profiles の admin_badge タグと同じもの。図形は base.html の #jh-admin-badge)
+    const SVG_NS = 'http://www.w3.org/2000/svg';
+    const adminBadge = () => {
+        const svg = document.createElementNS(SVG_NS, 'svg');
+        svg.setAttribute('class', 'jh-admin-badge');
+        svg.setAttribute('viewBox', '0 0 24 24');
+        svg.setAttribute('aria-hidden', 'true');
+        const use = document.createElementNS(SVG_NS, 'use');
+        use.setAttribute('href', '#jh-admin-badge');
+        svg.appendChild(use);
+        return svg;
+    };
+
     const ensureMenu = () => {
         if (menu) return menu;
         menu = document.createElement('ul');
@@ -74,6 +87,7 @@
             text.className = 'jh-mention-text';
             const name = document.createElement('strong');
             name.textContent = u.name;
+            if (u.admin) name.appendChild(adminBadge());
             const handle = document.createElement('span');
             handle.textContent = `@${u.username}`;
             text.append(name, handle);

@@ -740,3 +740,25 @@ class ColorSchemeTests(TestCase):
         response = self.client.get(reverse('login'))
         self.assertNotContains(response, 'data-jh-scheme="')
         self.assertContains(response, '<meta name="theme-color" content="#000000">', html=True)
+
+
+class AdminBadgeTests(TestCase):
+    """superuser の名前には金色の管理者バッジが付き、一般ユーザーには付かない。"""
+
+    def setUp(self):
+        User = get_user_model()
+        self.admin = User.objects.create_superuser('boss', 'boss@example.com', 'pw-12345678')
+        self.member = User.objects.create_user('member', 'member@example.com', 'pw-12345678')
+
+    def test_superuser_profile_shows_badge(self):
+        response = self.client.get(reverse('user_card', args=['boss']))
+        self.assertContains(response, 'class="jh-admin-badge"')
+
+    def test_regular_user_profile_has_no_badge(self):
+        response = self.client.get(reverse('user_card', args=['member']))
+        self.assertNotContains(response, 'class="jh-admin-badge"')
+
+    def test_mention_search_marks_admin(self):
+        self.client.force_login(self.member)
+        users = self.client.get(reverse('mention_search'), {'q': ''}).json()['users']
+        self.assertEqual({u['username']: u['admin'] for u in users}, {'boss': True, 'member': False})

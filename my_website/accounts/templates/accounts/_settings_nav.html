@@ -3,7 +3,7 @@
 <div class="jh-settings-head jh-reveal">
     <span class="jh-settings-avatar" aria-hidden="true">{% avatar user %}</span>
     <div class="jh-settings-names">
-        <p class="jh-settings-name">{{ user.public_name }}</p>
+        <p class="jh-settings-name">{{ user.public_name }}{% admin_badge user %}</p>
         <p class="jh-settings-handle">@{{ user.username }}</p>
     </div>
 </div>
