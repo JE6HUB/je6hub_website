@@ -30,6 +30,14 @@ MAPBOX_SATELLITE_STYLE = os.environ.get('MAPBOX_SATELLITE_STYLE', 'mapbox://styl
 # スポット編集画面の位置合わせ用 (道路や建物まで見えるスタイル)
 MAPBOX_EDITOR_STYLE = os.environ.get('MAPBOX_EDITOR_STYLE', 'mapbox://styles/mapbox/streets-v12')
 
+# Azure AI Translator (Blogs の記事を公開時に英訳する。F0 プランなら月 200 万文字まで無料)
+# キーが空なら英訳しない。リージョンはリソースを作った場所 (例: japaneast)
+AZURE_TRANSLATOR_KEY = os.environ.get('AZURE_TRANSLATOR_KEY', '')
+AZURE_TRANSLATOR_REGION = os.environ.get('AZURE_TRANSLATOR_REGION', '')
+AZURE_TRANSLATOR_ENDPOINT = os.environ.get('AZURE_TRANSLATOR_ENDPOINT', 'https://api.cognitive.microsofttranslator.com')
+# 保存のリクエストを待たせないよう、翻訳は別スレッドで行う (テストでは同期にする)
+BLOG_TRANSLATE_ASYNC = True
+
 # 未設定時は安全側（本番想定）に倒し、ローカル開発では .env や docker-compose で明示的に True にする
 DEBUG = os.environ.get('DJANGO_DEBUG', 'False') == 'True'
 

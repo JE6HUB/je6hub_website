@@ -2686,3 +2686,24 @@ msgid "未読 %(counter)s 件"
 msgid_plural "未読 %(counter)s 件"
 msgstr[0] "%(counter)s unread"
 msgstr[1] "%(counter)s unread"
+
+msgid "この記事は日本語から自動翻訳されています。"
+msgstr "This post was machine-translated from Japanese."
+
+msgid "原文 (日本語) を読む"
+msgstr "Read the original (Japanese)"
+
+msgid "タイトル (英語)"
+msgstr "Title (English)"
+
+msgid "サブタイトル (英語)"
+msgstr "Subtitle (English)"
+
+msgid "本文 (英語)"
+msgstr "Body (English)"
+
+msgid "本文 (ブロック・英語)"
+msgstr "Body (blocks, English)"
+
+msgid "英訳日時"
+msgstr "Translated at"

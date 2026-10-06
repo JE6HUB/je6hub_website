@@ -7,7 +7,7 @@ from django.db.models import Q
 from django.http import Http404, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
-from django.utils.translation import gettext as _
+from django.utils.translation import get_language, gettext as _
 from django.views.decorators.http import require_POST
 
 from accounts.mentions import notify_mentions
@@ -18,6 +18,7 @@ from photraveler.models import MapPin
 
 from .forms import CommentForm, ImageUploadForm, PostForm
 from .models import BlogImage, Comment, Post, PostLike
+from .translation import localize_posts, schedule_translation
 
 POSTS_PER_PAGE = 12
 LATEST_CAROUSEL_SIZE = 6
@@ -31,7 +32,10 @@ def post_list(request):
     query = request.GET.get('q', '').strip()
     author = request.GET.get('author', '').strip()
     if query:
-        posts = posts.filter(Q(title__icontains=query) | Q(subtitle__icontains=query) | Q(body_html__icontains=query))
+        posts = posts.filter(
+            Q(title__icontains=query) | Q(subtitle__icontains=query) | Q(body_html__icontains=query)
+            | Q(title_en__icontains=query) | Q(subtitle_en__icontains=query) | Q(body_html_en__icontains=query)
+        )
     if author:
         posts = posts.filter(author__username=author)
 
@@ -41,10 +45,12 @@ def post_list(request):
     latest = []
     if not query and not author and page.number == 1:
         latest = list(Post.objects.published().select_related('author')[:LATEST_CAROUSEL_SIZE])
+    language = get_language()
+    localize_posts(latest, language)
 
     return render(request, 'blog/post_list.html', {
         'page': page,
-        'posts': page.object_list,
+        'posts': localize_posts(list(page.object_list), language),
         'latest': latest,
         'query': query,
         'author': author,
@@ -63,10 +69,12 @@ def post_detail(request, pk):
         .exclude(pk=post.pk)
         .select_related('author')[:3]
     )
+    language = get_language()
+    post.localize(language)
     return render(request, 'blog/post_detail.html', {
         'post': post,
         'is_author': is_author,
-        'more_posts': more_posts,
+        'more_posts': localize_posts(list(more_posts), language),
         **_reactions_context(request, post),
         **_journey_context(post),
     })
@@ -302,6 +310,7 @@ def _save_post(request, post):
     elif request.POST.get('action') == 'unpublish':
         post.status = Post.STATUS_DRAFT
     post.save()
+    schedule_translation(post)
 
     if post.is_published:
         messages.success(request, _('記事を公開しました。') if publishing else _('記事を更新しました。'))

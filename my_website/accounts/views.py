@@ -19,9 +19,10 @@ from django.urls import reverse
 from django.utils import timezone
 from django.utils.encoding import force_bytes
 from django.utils.http import url_has_allowed_host_and_scheme, urlsafe_base64_decode, urlsafe_base64_encode
-from django.utils.translation import gettext_lazy as _
+from django.utils.translation import get_language, gettext_lazy as _
 
 from blog.models import BlogImage, Post
+from blog.translation import localize_posts
 from community.models import Channel, ChannelMembership, Message
 from dashboard.models import ModerationLog
 from photraveler.models import MapPin, PinPhoto
@@ -257,7 +258,7 @@ def _public_profile_context(request, username):
 
 def user_profile_view(request, username):
     context = _public_profile_context(request, username)
-    context['recent_posts'] = context.pop('posts').select_related('author')[:4]
+    context['recent_posts'] = localize_posts(list(context.pop('posts').select_related('author')[:4]), get_language())
     context['recent_pins'] = context.pop('pins').prefetch_related('photos')[:6]
     return render(request, 'accounts/user_profile.html', context)
 

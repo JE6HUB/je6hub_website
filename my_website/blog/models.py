@@ -109,6 +109,16 @@ class Post(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    # 英語版 (公開時に translation.py が Azure Translator で自動翻訳して埋める)。
+    # 英語で開いた読者には localize() でこちらを見せる。空なら原文のまま
+    title_en = models.CharField(max_length=300, blank=True, default='', verbose_name=_("タイトル (英語)"))
+    subtitle_en = models.CharField(max_length=400, blank=True, default='', verbose_name=_("サブタイトル (英語)"))
+    body_html_en = models.TextField(blank=True, default='', verbose_name=_("本文 (英語)"))
+    body_blocks_en = models.JSONField(blank=True, default=dict, verbose_name=_("本文 (ブロック・英語)"))
+    # 翻訳した時点の原文のハッシュ。原文が変わっていなければ翻訳し直さない
+    translation_hash = models.CharField(max_length=64, blank=True, default='', editable=False)
+    translated_at = models.DateTimeField(null=True, blank=True, editable=False, verbose_name=_("英訳日時"))
+
     objects = PostQuerySet.as_manager()
 
     class Meta:
@@ -120,6 +130,9 @@ class Post(models.Model):
         return self.title
 
     def save(self, *args, **kwargs):
+        # localize() で英語版に差し替えた表示用のインスタンスを保存すると、原文が英訳で上書きされてしまう
+        if getattr(self, '_localized', False):
+            raise RuntimeError('A localized Post is display-only and must not be saved.')
         # 本文は |safe で出力するため、どの経路 (管理画面含む) で保存されても必ず検証・サニタイズする
         self.body_blocks = normalize_blocks(self.body_blocks)
         if self.body_blocks:
@@ -131,6 +144,28 @@ class Post(models.Model):
 
     def get_absolute_url(self):
         return reverse('blog:detail', args=[self.pk])
+
+    @property
+    def has_translation(self):
+        return bool(self.title_en and (self.body_html_en or not self.body_html))
+
+    def localize(self, language):
+        """英語で読む人向けに、タイトル・本文をこのインスタンス上だけ英訳に差し替える (表示専用、保存不可)。"""
+        if not language or not language.startswith('en') or not self.has_translation or self._localized:
+            return self
+        self.title = self.title_en
+        self.subtitle = self.subtitle_en
+        self.body_html = self.body_html_en
+        if self.body_blocks_en:
+            self.body_blocks = self.body_blocks_en
+        self._localized = True
+        return self
+
+    _localized = False
+
+    @property
+    def is_localized(self):
+        return self._localized
 
     @property
     def has_accent(self):
