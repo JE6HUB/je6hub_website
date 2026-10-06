@@ -96,6 +96,7 @@ INSTALLED_APPS = [
     'community',   # チャット
     'blog',        # Blogs
     'dashboard',   # 管理者ダッシュボード (アクセス集計・通報・ユーザー管理)
+    'api',         # iOS アプリ用の JSON API
 ]
 
 SITE_ID = 1

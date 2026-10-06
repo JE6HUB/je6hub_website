@@ -1,0 +1,27 @@
+name: iOS
+
+on:
+  push:
+    branches: [main]
+    paths: ['ios/**', '.github/workflows/ios.yml']
+  pull_request:
+    paths: ['ios/**', '.github/workflows/ios.yml']
+
+jobs:
+  build:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Show Xcode version
+        run: xcodebuild -version
+
+      # 署名なしでシミュレーター向けにビルドし、Swift のコンパイルエラーをマージ前に止める
+      - name: Build for iOS Simulator
+        run: |
+          xcodebuild build \
+            -project ios/JE6HUB.xcodeproj \
+            -scheme JE6HUB \
+            -configuration Debug \
+            -destination 'generic/platform=iOS Simulator' \
+            CODE_SIGNING_ALLOWED=NO
