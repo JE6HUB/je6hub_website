@@ -18,6 +18,7 @@ from . import guide_tour
 from .forms import ContactForm
 from .models import Resume
 from .resume import HERO_IMAGES, ResumeError, apply_edit, localize
+from .resume_translation import schedule_translation as schedule_resume_translation
 
 logger = logging.getLogger(__name__)
 
@@ -61,12 +62,15 @@ def resume_save_view(request):
     try:
         payload = json.loads(request.body)
         resume = Resume.load()
-        resume.data = apply_edit(resume.data, payload.get('data'), payload.get('lang'))
+        old_data = resume.data
+        resume.data = apply_edit(old_data, payload.get('data'), payload.get('lang'))
     except (ValueError, AttributeError) as exc:
         message = str(exc) if isinstance(exc, ResumeError) else str(_('送信内容が不正です。'))
         return JsonResponse({'ok': False, 'error': message}, status=400)
     resume.updated_by = request.user
     resume.save()
+    # 日本語を書き換えたら、変わった欄だけ英語に訳す (注記は出さない)
+    schedule_resume_translation(old_data, resume.data, payload.get('lang'))
     messages.success(request, _('Resume を更新しました。'))
     return JsonResponse({'ok': True})
 
