@@ -2411,19 +2411,6 @@ button.bk-callout-icon:hover { background: rgba(var(--jh-fg-rgb), 0.08); }
 }
 .blog-prose a:hover { background: var(--blog-tint); text-decoration-color: var(--blog-accent); }
 
-/* 見出しの上に短いアクセントのライン */
-.blog-prose h2::before {
-    content: "";
-    display: block;
-    width: 28px;
-    height: 4px;
-    margin-bottom: 0.55em;
-    border-radius: 2px;
-    background: linear-gradient(90deg, var(--blog-accent), var(--blog-accent-soft));
-}
-.blog-prose h2.ql-align-center::before { margin-left: auto; margin-right: auto; }
-.blog-prose h2.ql-align-right::before { margin-left: auto; }
-
 .blog-prose blockquote {
     padding: 18px 24px 18px 26px;
     border-radius: 0 18px 18px 0;
