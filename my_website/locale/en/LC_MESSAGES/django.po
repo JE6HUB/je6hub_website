@@ -2711,3 +2711,47 @@ msgstr "Translated at"
 #: accounts/templatetags/profiles.py
 msgid "管理者"
 msgstr "Admin"
+
+#: blog/templates/blog/post_editor.html
+msgid "画像はツールバーのボタンや貼り付けのほか、パソコンから本文やブロックの間へドラッグ＆ドロップしてアップロードできます。"
+msgstr "Insert images with the toolbar button or by pasting, or drag & drop them from your computer into the text or between blocks to upload."
+
+#: blog/templates/blog/post_editor.html
+msgid "画像はクリックで選択。四隅をドラッグでサイズ変更、画像をドラッグで別のブロックや列へも移動、ダブルクリックで元のサイズ。"
+msgstr "Click an image to select it. Drag a corner to resize, drag the image to move it (even into another block or column), double-click to restore its size."
+
+#: blog/templates/blog/post_editor.html
+msgid "ブロックの左右の端・列の境目・下端をドラッグすると、幅・列の比率・高さを自由に変えられます (ダブルクリックで元に戻す)。"
+msgstr "Drag a block's side edges, the line between columns, or its bottom edge to freely change its width, column ratio, or height (double-click to reset)."
+
+#: blog/templates/blog/post_editor.html
+msgid "画像をドロップしてアップロード"
+msgstr "Drop images to upload"
+
+#: blog/templates/blog/post_editor.html
+msgid "ドラッグで画像を移動"
+msgstr "Drag to move the image"
+
+#: blog/templates/blog/post_editor.html
+msgid "ドラッグで幅を変更 (ダブルクリックで本文幅に戻す)"
+msgstr "Drag to change the width (double-click to reset)"
+
+#: blog/templates/blog/post_editor.html
+msgid "ブロックの幅"
+msgstr "Block width"
+
+#: blog/templates/blog/post_editor.html
+msgid "ドラッグで列の幅を変更 (ダブルクリックで均等に戻す)"
+msgstr "Drag to resize the columns (double-click to make them equal)"
+
+#: blog/templates/blog/post_editor.html
+msgid "列の境目"
+msgstr "Column divider"
+
+#: blog/templates/blog/post_editor.html
+msgid "ドラッグで高さを変更 (ダブルクリックで元に戻す)"
+msgstr "Drag to change the height (double-click to reset)"
+
+#: blog/templates/blog/post_editor.html
+msgid "ブロックの高さ"
+msgstr "Block height"

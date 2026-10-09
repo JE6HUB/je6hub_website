@@ -6,6 +6,8 @@
  * - ブロックにカーソルを合わせると左に「＋」(追加) と「⋮⋮」(設定・ドラッグで並べ替え)
  * - 空の行で「/」→ ブロックの追加メニュー (検索可)
  * - ⋮⋮ をクリック → 列数・比率・背景・幅・余白などの見た目、複製・削除
+ * - ⋮⋮ をドラッグ → 並べ替え (他のブロックは滑らかに場所を譲る)
+ * - 幅・列の比率・高さはドラッグで自由に変えられる (blog-blocks-resize.js)
  */
 window.BlogBlocks = (() => {
     const STYLE_DEFAULTS = { bg: 'none', width: 'text', space: 'm', valign: 'top', size: 'm', rule: false, animate: false };
@@ -49,6 +51,7 @@ window.BlogBlocks = (() => {
     }
     const round = (n, d = 2) => Math.round(n * 10 ** d) / 10 ** d;
     const DEMO_HEIGHTS = { s: 240, m: 380, l: 560 };
+    const REDUCED_MOTION = window.matchMedia('(prefers-reduced-motion: reduce)');
     // カード幅の下限: プレビューの中身が収まる幅と、この値の大きい方 (エディタが使える幅)
     const DEMO_MIN_WIDTH = 320;
     // 最初の見本。CSS 変数 (--radius など) を使うと、読者が触れるコントロールにできる
@@ -163,20 +166,22 @@ window.BlogBlocks = (() => {
                 version: 1,
                 blocks: this.blocks.map((b) => {
                     const out = { id: b.id, type: b.type, style: { ...b.style } };
+                    if (!out.style.maxw) delete out.style.maxw;
                     if (RICH.has(b.type)) {
                         out.columns = b.columns;
                         out.ratio = b.ratio;
+                        if (b.widths && b.widths.length === b.columns) out.widths = b.widths;
                         out.cells = b.cells.map((c) => ({ delta: c.quill.getContents(), html: cellHtml(c.quill) }));
                         if (b.type === 'callout') out.icon = b.icon;
                     } else if (b.type === 'divider') out.variant = b.variant;
-                    else if (b.type === 'spacer') out.height = b.height;
+                    else if (b.type === 'spacer') Object.assign(out, { height: b.height, ...(b.px ? { px: b.px } : {}) });
                     else if (b.type === 'button') Object.assign(out, { label: b.label, url: b.url, variant: b.variant, align: b.align });
                     else if (b.type === 'map') Object.assign(out, {
                         pin: b.pin, lat: b.lat, lng: b.lng, label: b.label, note: b.note,
                         zoom: b.zoom, pitch: b.pitch, bearing: b.bearing,
                     });
                     else if (b.type === 'demo') Object.assign(out, {
-                        html: b.html, css: b.css, bg: b.bg, height: b.height, layout: b.layout, card_width: b.cardWidth,
+                        html: b.html, css: b.css, bg: b.bg, height: b.height, stage_height: b.stageHeight, layout: b.layout, card_width: b.cardWidth,
                         controls: b.controls, compare: b.compare, before_html: b.beforeHtml, before_css: b.beforeCss,
                         before_label: b.beforeLabel, after_label: b.afterLabel,
                     });
@@ -226,8 +231,14 @@ window.BlogBlocks = (() => {
                 zoom: Number.isFinite(data.zoom) ? data.zoom : MAP_DEFAULTS.zoom,
                 pitch: Number.isFinite(data.pitch) ? data.pitch : MAP_DEFAULTS.pitch,
                 bearing: Number.isFinite(data.bearing) ? data.bearing : MAP_DEFAULTS.bearing,
+                // ドラッグで決めた自由なサイズ (なければ列挙値の比率・高さ)
+                widths: null,
+                px: Number.isFinite(data.px) ? data.px : null,
+                stageHeight: Number.isFinite(data.stage_height) ? data.stage_height : null,
                 cells: [],
             };
+            if (Array.isArray(data.widths) && data.widths.length === block.columns && block.columns > 1
+                && data.widths.every((w) => Number.isFinite(w) && w > 0)) block.widths = data.widths.slice();
             block.el = this.renderShell(block);
             if (RICH.has(type)) {
                 const cellsData = data.cells || [];
@@ -269,8 +280,15 @@ window.BlogBlocks = (() => {
             if (RICH.has(block.type)) {
                 classes.push(`bk-cols-${block.columns}`, `bk-ratio-${block.ratio}`, `bk-bg-${s.bg}`, `bk-valign-${s.valign}`, `bk-size-${s.size}`);
                 if (s.rule) classes.push('bk-rule');
+                if (block.widths) classes.push('bk-custom-cols');
             }
             bk.className = classes.join(' ');
+            // ドラッグで決めた幅・列の比率 (記事ページでは blocks.py の block_inline_style と同じ変数)
+            if (s.maxw && s.width !== 'full') bk.style.setProperty('--bk-max', `${s.maxw}px`);
+            else bk.style.removeProperty('--bk-max');
+            if (block.widths) bk.style.setProperty('--bk-cols', block.widths.map((w) => `minmax(0, ${w}fr)`).join(' '));
+            else bk.style.removeProperty('--bk-cols');
+            bk.style.height = block.type === 'spacer' && block.px ? `${block.px}px` : '';
 
             if (RICH.has(block.type)) {
                 let grid = bk.querySelector(':scope > .bk-grid');
@@ -310,6 +328,7 @@ window.BlogBlocks = (() => {
                 bk.innerHTML = `<button type="button" class="${cls}">${esc(block.label || this.t.buttonPlaceholder)}</button>`;
                 bk.querySelector('button').addEventListener('click', () => this.openMenu(block, bk.querySelector('button')));
             }
+            if (this.bindResize) this.bindResize(block, bk);
         }
 
         /** HTML / CSS デモ: 左右 (狭い画面では上下) に HTML と CSS、下にライブプレビュー。
@@ -326,7 +345,7 @@ window.BlogBlocks = (() => {
             // iframe は allow-same-origin (スクリプトは不可のまま) にして、中身の幅を測ったり変数を書き込んだりできるようにする
             const iframe = (title) => `<iframe class="bk-demo-frame" sandbox="allow-same-origin" referrerpolicy="no-referrer" title="${esc(title)}"></iframe>`;
             const stage = block.compare
-                ? `<div class="bk-demo-stage bk-demo-stage--compare" data-compare style="height: ${DEMO_HEIGHTS[block.height] || DEMO_HEIGHTS.m}px">
+                ? `<div class="bk-demo-stage bk-demo-stage--compare" data-compare style="height: ${block.stageHeight || DEMO_HEIGHTS[block.height] || DEMO_HEIGHTS.m}px">
                         ${iframe(t.demoBefore)}
                         <div class="bk-cmp-after">${iframe(t.demoPreview)}</div>
                         <span class="bk-cmp-label bk-cmp-label--before" aria-hidden="true">${esc(block.beforeLabel || 'Before')}</span>
@@ -335,7 +354,7 @@ window.BlogBlocks = (() => {
                             <span class="bk-cmp-knob" aria-hidden="true"><span class="material-symbols-outlined">code</span></span>
                         </div>
                    </div>`
-                : `<div class="bk-demo-stage" style="height: ${DEMO_HEIGHTS[block.height] || DEMO_HEIGHTS.m}px">${iframe(t.demoPreview)}</div>`;
+                : `<div class="bk-demo-stage" style="height: ${block.stageHeight || DEMO_HEIGHTS[block.height] || DEMO_HEIGHTS.m}px">${iframe(t.demoPreview)}</div>`;
             bk.innerHTML = `
                 <div class="bk-demo-sizer">
                     <div class="bk-demo bk-demo--edit">
@@ -810,6 +829,7 @@ window.BlogBlocks = (() => {
                 });
             }
             block.columns = n;
+            block.widths = null; // 列数が変わったら自由な比率は均等に戻す
             if (!['equal', ...(n === 2 ? ['wide-left', 'wide-right'] : [])].includes(block.ratio)) block.ratio = 'equal';
             this.renderBody(block);
             this.changed();
@@ -826,12 +846,25 @@ window.BlogBlocks = (() => {
         moveBlock(block, to) {
             const from = this.blocks.indexOf(block);
             if (from < 0 || to === from || to === from + 1) return;
+            const before = new Map(this.blocks.map((b) => [b, b.el.getBoundingClientRect().top]));
             this.blocks.splice(from, 1);
             const index = to > from ? to - 1 : to;
             const ref = this.blocks[index];
             this.root.insertBefore(block.el, ref ? ref.el : null);
             this.blocks.splice(index, 0, block);
+            this.animateShift(before);
             this.changed();
+        }
+
+        /** FLIP: 並べ替えの前の位置から今の位置へ、各ブロックを滑らかに動かす */
+        animateShift(before) {
+            if (REDUCED_MOTION.matches) return;
+            this.blocks.forEach((b) => {
+                const dy = before.get(b) - b.el.getBoundingClientRect().top;
+                if (!dy || Math.abs(dy) < 1) return;
+                b.el.animate([{ transform: `translateY(${dy}px)` }, { transform: 'none' }],
+                    { duration: 380, easing: 'cubic-bezier(0.2, 0.8, 0.2, 1)' });
+            });
         }
 
         duplicate(block) {
@@ -863,6 +896,19 @@ window.BlogBlocks = (() => {
         }
 
         // ── ドラッグで並べ替え (⋮⋮) / クリックで設定 ────────────
+        /** ドラッグ中に指 (マウス) についてくる札: 種類のアイコンと書き出し */
+        dragGhost(block) {
+            const item = INSERT_ITEMS.find((it) => it.type === block.type) || INSERT_ITEMS[0];
+            const text = block.cells.length ? block.cells.map((c) => c.quill.getText()).join(' ').replace(/\s+/g, ' ').trim() : '';
+            const ghost = document.createElement('div');
+            ghost.className = 'bk-drag-ghost';
+            ghost.innerHTML = `<span class="material-symbols-outlined" aria-hidden="true">${item.icon}</span>
+                <span>${esc(text.slice(0, 48) || this.t.types[block.type] || '')}</span>`;
+            document.body.append(ghost);
+            requestAnimationFrame(() => ghost.classList.add('is-lifted'));
+            return ghost;
+        }
+
         enableDrag(block, handle) {
             handle.addEventListener('pointerdown', (e) => {
                 if (e.button !== 0) return;
@@ -870,30 +916,57 @@ window.BlogBlocks = (() => {
                 const startY = e.clientY;
                 // 指は押しただけでも少し動くので、タッチではしきい値を大きめにする
                 const threshold = e.pointerType === 'mouse' ? 4 : 10;
+                const scroller = window.BlogEditorDnd ? window.BlogEditorDnd.autoScroller() : null;
                 let dragging = false;
                 let target = -1;
+                let ghost = null;
+                let last = e;
+                let frame = 0;
+                const track = () => {
+                    frame = 0;
+                    const y0 = last.clientY;
+                    // 指で操作しているときは指に隠れないよう、指の上に出す
+                    const touch = last.pointerType === 'touch';
+                    ghost.style.transform = `translate3d(${touch ? last.clientX - ghost.offsetWidth / 2 : last.clientX + 16}px, ${touch ? y0 - ghost.offsetHeight - 28 : y0 + 10}px, 0)`;
+                    target = this.blocks.length;
+                    for (let i = 0; i < this.blocks.length; i++) {
+                        const r = this.blocks[i].el.getBoundingClientRect();
+                        if (y0 < r.top + r.height / 2) { target = i; break; }
+                    }
+                    const refEl = this.blocks[target] ? this.blocks[target].el : null;
+                    const rootRect = this.root.getBoundingClientRect();
+                    const y = refEl ? refEl.getBoundingClientRect().top - 4 : rootRect.bottom + 4;
+                    const first = this.dropLine.hidden;
+                    this.dropLine.classList.toggle('is-instant', first);
+                    Object.assign(this.dropLine.style, { top: `${y + window.scrollY}px`, left: `${rootRect.left + window.scrollX}px`, width: `${rootRect.width}px` });
+                    this.dropLine.hidden = false;
+                };
                 const onMove = (ev) => {
                     if (!dragging && Math.abs(ev.clientY - startY) < threshold) return;
                     if (!dragging) {
                         dragging = true;
                         block.el.classList.add('is-dragging');
+                        document.body.classList.add('bk-block-dragging');
                         this.closePopover(this.menu);
+                        ghost = this.dragGhost(block);
                     }
-                    target = this.blocks.length;
-                    for (let i = 0; i < this.blocks.length; i++) {
-                        const r = this.blocks[i].el.getBoundingClientRect();
-                        if (ev.clientY < r.top + r.height / 2) { target = i; break; }
-                    }
-                    const refEl = this.blocks[target] ? this.blocks[target].el : null;
-                    const rootRect = this.root.getBoundingClientRect();
-                    const y = refEl ? refEl.getBoundingClientRect().top - 4 : rootRect.bottom + 4;
-                    Object.assign(this.dropLine.style, { top: `${y + window.scrollY}px`, left: `${rootRect.left + window.scrollX}px`, width: `${rootRect.width}px` });
-                    this.dropLine.hidden = false;
+                    last = ev;
+                    if (!frame) frame = requestAnimationFrame(track);
+                    if (scroller) scroller.update(ev.clientY, track);
                 };
                 const onUp = (ev) => {
                     document.removeEventListener('pointermove', onMove);
                     document.removeEventListener('pointerup', onUp);
                     document.removeEventListener('pointercancel', onUp);
+                    if (frame) cancelAnimationFrame(frame);
+                    if (scroller) scroller.stop();
+                    if (ghost) {
+                        const g = ghost;
+                        g.classList.remove('is-lifted');
+                        g.classList.add('is-dropped');
+                        setTimeout(() => g.remove(), 200);
+                    }
+                    document.body.classList.remove('bk-block-dragging');
                     this.dropLine.hidden = true;
                     block.el.classList.remove('is-dragging');
                     if (ev.type === 'pointercancel') return;
@@ -1023,14 +1096,16 @@ window.BlogBlocks = (() => {
                         <label title="${esc(t.bg[v])}"><input type="radio" name="bk-bg" value="${v}"${s.bg === v ? ' checked' : ''} aria-label="${esc(t.bg[v])}"><span class="bk-swatch bk-swatch--${v}"></span></label>`).join('')}
                 </div>`;
 
+            // ドラッグで自由なサイズにしているときは、決まった値のどれにも印を付けない
+            const widthValue = s.maxw ? null : s.width;
             const parts = [`<p class="bk-menu-title">${esc(t.types[block.type === 'text' ? 'text' : block.type])}</p>`];
             if (RICH.has(block.type)) {
                 parts.push(row(t.kind, seg('type', block.type, [['text', t.types.text], ['callout', t.types.callout], ['quote', t.types.quote]])));
                 if (block.type !== 'quote') parts.push(row(t.columns, seg('columns', block.columns, [[1, '1'], [2, '2'], [3, '3']])));
-                if (block.columns === 2) parts.push(row(t.ratio, seg('ratio', block.ratio, [['equal', '1 : 1'], ['wide-left', '2 : 1'], ['wide-right', '1 : 2']])));
+                if (block.columns === 2) parts.push(row(t.ratio, seg('ratio', block.widths ? null : block.ratio, [['equal', '1 : 1'], ['wide-left', '2 : 1'], ['wide-right', '1 : 2']])));
                 if (block.type === 'callout') parts.push(row(t.icon, `<input type="text" class="bk-menu-input bk-menu-input--icon" data-set="icon" value="${esc(block.icon)}" maxlength="8">`));
                 parts.push(row(t.background, bgSwatches));
-                parts.push(row(t.width, seg('width', s.width, [['text', t.widths.text], ['wide', t.widths.wide], ['full', t.widths.full]])));
+                parts.push(row(t.width, seg('width', widthValue, [['text', t.widths.text], ['wide', t.widths.wide], ['full', t.widths.full]])));
                 parts.push(row(t.spacing, seg('space', s.space, [['none', t.none], ['s', 'S'], ['m', 'M'], ['l', 'L']])));
                 if (block.columns > 1) parts.push(row(t.valign, seg('valign', s.valign, [['top', t.valigns.top], ['center', t.valigns.center], ['bottom', t.valigns.bottom]])));
                 parts.push(row(t.textSize, seg('size', s.size, [['s', t.sizes.s], ['m', t.sizes.m], ['l', t.sizes.l]])));
@@ -1040,22 +1115,22 @@ window.BlogBlocks = (() => {
                 parts.push(`<div class="bk-menu-toggles">${toggles.join('')}</div>`);
             } else if (block.type === 'divider') {
                 parts.push(row(t.kind, seg('variant', block.variant, [['line', t.dividers.line], ['dots', t.dividers.dots]])));
-                parts.push(row(t.width, seg('width', s.width, [['text', t.widths.text], ['wide', t.widths.wide], ['full', t.widths.full]])));
+                parts.push(row(t.width, seg('width', widthValue, [['text', t.widths.text], ['wide', t.widths.wide], ['full', t.widths.full]])));
                 parts.push(row(t.spacing, seg('space', s.space, [['none', t.none], ['s', 'S'], ['m', 'M'], ['l', 'L']])));
             } else if (block.type === 'spacer') {
-                parts.push(row(t.height, seg('height', block.height, [['s', 'S'], ['m', 'M'], ['l', 'L']])));
+                parts.push(row(t.height, seg('height', block.px ? null : block.height, [['s', 'S'], ['m', 'M'], ['l', 'L']])));
             } else if (block.type === 'map') {
                 parts.push(row(t.spacing, seg('space', s.space, [['none', t.none], ['s', 'S'], ['m', 'M'], ['l', 'L']])));
             } else if (block.type === 'demo') {
                 parts.push(row(t.background, seg('bg', block.bg, [['dark', t.demoBg.dark], ['light', t.demoBg.light], ['checker', t.demoBg.checker]])));
-                parts.push(row(t.height, seg('height', block.height, [['s', 'S'], ['m', 'M'], ['l', 'L']])));
+                parts.push(row(t.height, seg('height', block.stageHeight ? null : block.height, [['s', 'S'], ['m', 'M'], ['l', 'L']])));
                 parts.push(row(t.align, seg('layout', block.layout, [['center', t.aligns.center], ['top', t.demoTop]])));
                 parts.push(`<div class="bk-menu-toggles">${toggle('compare', block.compare, t.demoCompare)}</div>`);
                 if (block.compare) {
                     parts.push(row(t.demoBeforeShort, `<input type="text" class="bk-menu-input" data-set="beforeLabel" value="${esc(block.beforeLabel)}" maxlength="24" placeholder="Before">`));
                     parts.push(row(t.demoAfterShort, `<input type="text" class="bk-menu-input" data-set="afterLabel" value="${esc(block.afterLabel)}" maxlength="24" placeholder="After">`));
                 }
-                parts.push(row(t.width, seg('width', s.width, [['text', t.widths.text], ['wide', t.widths.wide], ['full', t.widths.full]])));
+                parts.push(row(t.width, seg('width', widthValue, [['text', t.widths.text], ['wide', t.widths.wide], ['full', t.widths.full]])));
                 parts.push(row(t.spacing, seg('space', s.space, [['none', t.none], ['s', 'S'], ['m', 'M'], ['l', 'L']])));
             } else if (block.type === 'button') {
                 parts.push(row(t.buttonLabel, `<input type="text" class="bk-menu-input" data-set="label" value="${esc(block.label)}" maxlength="80" placeholder="${esc(t.buttonPlaceholder)}">`));
@@ -1100,8 +1175,12 @@ window.BlogBlocks = (() => {
                     return;
                 } else if (['ratio', 'variant', 'height', 'align', 'label', 'url', 'icon', 'layout'].includes(key)) {
                     block[key] = key === 'icon' ? (value.trim() || '💡') : value.trim();
+                    // 決まった値を選んだら、ドラッグで決めた自由なサイズは解除する
+                    if (key === 'ratio') block.widths = null;
+                    if (key === 'height') { block.px = null; block.stageHeight = null; }
                 } else {
                     block.style[key] = value;
+                    if (key === 'width') block.style.maxw = null;
                 }
                 this.renderBody(block);
                 this.changed();

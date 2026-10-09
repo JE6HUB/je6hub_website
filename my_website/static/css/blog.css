@@ -1383,14 +1383,6 @@
     transition: opacity 0.15s ease;
 }
 .blog-img-overlay.is-resizing .blog-img-size { opacity: 1; }
-.blog-img-drop-caret {
-    position: absolute;
-    z-index: 21;
-    height: 3px;
-    border-radius: 2px;
-    background: var(--blog-accent);
-    pointer-events: none;
-}
 
 /* =========================================
    数式 (KaTeX) — エディタと記事ページ共通
@@ -1495,6 +1487,8 @@
 .bk-cols-2.bk-ratio-wide-left .bk-grid { grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); }
 .bk-cols-2.bk-ratio-wide-right .bk-grid { grid-template-columns: minmax(0, 1fr) minmax(0, 2fr); }
 .bk-cols-3 .bk-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 28px; }
+/* エディタで列の境界をドラッグして決めた比率 (blocks.py の widths → --bk-cols) */
+.blog-blocks .bk.bk-custom-cols > .bk-grid { grid-template-columns: var(--bk-cols); }
 .bk-valign-top .bk-grid { align-items: start; }
 .bk-valign-center .bk-grid { align-items: center; }
 .bk-valign-bottom .bk-grid { align-items: end; }
@@ -1600,6 +1594,7 @@ button.bk-callout-icon:hover { background: rgba(var(--jh-fg-rgb), 0.08); }
 @media (max-width: 734px) {
     .bk-cols-2 .bk-grid, .bk-cols-3 .bk-grid,
     .bk-cols-2.bk-ratio-wide-left .bk-grid, .bk-cols-2.bk-ratio-wide-right .bk-grid { grid-template-columns: minmax(0, 1fr); }
+    .blog-blocks .bk.bk-custom-cols > .bk-grid { grid-template-columns: minmax(0, 1fr); }
     .bk-rule .bk-cell + .bk-cell { border-left: none; padding-left: 0; border-top: 1px solid var(--jh-line); padding-top: 24px; }
     .blog-blocks .bk-bg-gray, .blog-blocks .bk-bg-tint, .blog-blocks .bk-bg-accent, .blog-blocks .bk-bg-light { padding-inline: 24px; border-radius: 22px; }
     .bk-size-l { font-size: 20px; }
@@ -3159,3 +3154,279 @@ button.bk-callout-icon:hover { background: rgba(var(--jh-fg-rgb), 0.08); }
 .blog-comment-replying { display: flex; align-items: center; gap: 10px; margin: 0; font-size: 13px; color: var(--jh-text-muted); }
 .blog-comment-replying[hidden] { display: none; }
 .blog-comment-replying button { padding: 0; border: 0; background: none; color: var(--blog-accent); font-size: 13px; cursor: pointer; }
+
+/* =========================================
+   エディタ: ドラッグ＆ドロップとサイズの自由な変更
+   (blog-editor-dnd.js / blog-blocks-resize.js)
+   ========================================= */
+.blog-blocks-editor .bk {
+    position: relative;
+    transition: max-width 0.42s cubic-bezier(0.2, 0.8, 0.2, 1), padding 0.3s ease;
+}
+.blog-blocks-editor .bk-grid { position: relative; transition: grid-template-columns 0.42s cubic-bezier(0.2, 0.8, 0.2, 1); }
+.blog-blocks-editor .bk.is-resizing,
+.blog-blocks-editor .bk.is-resizing > .bk-grid { transition: none; }
+.blog-blocks-editor .bk.is-resizing { user-select: none; }
+.blog-blocks-editor .bk.is-resizing iframe { pointer-events: none; }
+.bk-resizing-x, .bk-resizing-x * { cursor: ew-resize !important; }
+.bk-resizing-y, .bk-resizing-y * { cursor: ns-resize !important; }
+.blog-blocks-editor .bk-spacer { transition: height 0.42s cubic-bezier(0.2, 0.8, 0.2, 1); }
+.blog-blocks-editor .bk-spacer.is-resizing { transition: none; }
+.blog-blocks-editor .bk-demo-stage { resize: none; transition: height 0.42s cubic-bezier(0.2, 0.8, 0.2, 1); }
+.blog-blocks-editor .is-height-resizing .bk-demo-stage { transition: none; }
+
+/* つまみ共通: ブロックにホバー (タッチではブロックにフォーカス) したときだけ現れる */
+.bk-rs { position: absolute; z-index: 6; touch-action: none; outline: none; }
+.bk-rs-width, .bk-rs-col, .bk-rs-height { opacity: 0; transition: opacity 0.2s ease; }
+.bk-edit:hover .bk-rs-width, .bk-edit:hover .bk-rs-col, .bk-edit:hover .bk-rs-height,
+.bk-edit:focus-within .bk-rs-width, .bk-edit:focus-within .bk-rs-col, .bk-edit:focus-within .bk-rs-height,
+.bk.is-resizing .bk-rs, .bk-rs:focus-visible { opacity: 1; }
+.bk-block-dragging .bk-rs, .blog-img-dragging .bk-rs { opacity: 0 !important; }
+
+/* 幅: 左右の端の縦長のピル */
+.bk-rs-width { top: 0; bottom: 0; width: 18px; cursor: ew-resize; }
+.bk-rs-width--left { left: -9px; }
+.bk-rs-width--right { right: -9px; }
+.bk-rs-width::after, .bk-rs-height > i, .bk-rs-col > i {
+    content: "";
+    position: absolute;
+    border-radius: 3px;
+    background: rgba(var(--jh-fg-rgb), 0.28);
+    box-shadow: 0 0 0 1px rgba(var(--jh-bg-rgb, 0, 0, 0), 0.25);
+    transition: background-color 0.2s ease, transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.bk-rs-width::after { top: 50%; left: 50%; width: 5px; height: min(44px, 60%); min-height: 18px; transform: translate(-50%, -50%) scaleY(0.85); }
+.bk-rs-width:hover::after, .bk-rs-width:focus-visible::after,
+.is-resizing > .bk-rs-width::after { background: var(--blog-accent); transform: translate(-50%, -50%) scaleY(1.15); }
+
+/* 列の境目: 列の間の縦線 */
+.bk-rs-col { top: -6px; bottom: -6px; width: 20px; margin-left: -10px; cursor: col-resize; }
+.bk-rs-col > i { top: 0; bottom: 0; left: 50%; width: 3px; transform: translateX(-50%) scaleY(0.6); opacity: 0.6; }
+.bk-rs-col:hover > i, .bk-rs-col:focus-visible > i,
+.is-col-resizing .bk-rs-col > i { background: var(--blog-accent); transform: translateX(-50%); opacity: 1; }
+.is-col-resizing .bk-cell { outline-color: color-mix(in srgb, var(--blog-accent) 60%, transparent) !important; }
+
+/* 高さ: 下端の横長のピル */
+.bk-rs-height { left: 0; right: 0; bottom: 0; height: 16px; cursor: ns-resize; }
+.bk-rs-height > i { left: 50%; top: 50%; width: 44px; height: 5px; transform: translate(-50%, -50%) scaleX(0.85); }
+.bk-rs-height:hover > i, .bk-rs-height:focus-visible > i,
+.is-height-resizing .bk-rs-height > i { background: var(--blog-accent); transform: translate(-50%, -50%) scaleX(1.15); }
+.bk-demo-stage > .bk-rs-height > i { background: rgba(255, 255, 255, 0.4); }
+
+/* 吸い付いたときの合図: つまみが少し脈打つ */
+.bk.is-snapped .bk-rs > i, .bk.is-snapped > .bk-rs-width::after { animation: bk-rs-snap 0.28s cubic-bezier(0.2, 0.8, 0.2, 1); }
+@keyframes bk-rs-snap { 50% { filter: brightness(1.6); } }
+
+/* ドラッグ中のサイズ表示 */
+.bk-rs-badge {
+    top: 8px;
+    left: 50%;
+    padding: 4px 11px;
+    border-radius: 980px;
+    background: rgba(var(--jh-glass-rgb), 0.82);
+    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px);
+    color: var(--jh-text);
+    font-size: 12px;
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+    pointer-events: none;
+    opacity: 0;
+    transform: translate(-50%, -4px);
+    transition: opacity 0.18s ease, transform 0.18s ease;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+}
+.is-resizing > .bk-rs-badge, .is-height-resizing .bk-demo-stage > .bk-rs-badge { opacity: 1; transform: translate(-50%, 0); }
+.is-snapped .bk-rs-badge { color: var(--blog-accent-text, var(--jh-accent)); }
+
+/* ── 並べ替え: 指についてくる札 ─────────────── */
+.bk-drag-ghost {
+    position: fixed;
+    left: 0;
+    top: 0;
+    z-index: 10060;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    max-width: 280px;
+    padding: 8px 14px 8px 10px;
+    border-radius: 12px;
+    background: rgba(var(--jh-glass-rgb), 0.9);
+    -webkit-backdrop-filter: blur(14px);
+    backdrop-filter: blur(14px);
+    color: var(--jh-text);
+    font-size: 13px;
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.35), 0 0 0 1px rgba(var(--jh-fg-rgb), 0.08);
+    pointer-events: none;
+    opacity: 0;
+    scale: 0.9;
+    transition: opacity 0.16s ease, scale 0.22s cubic-bezier(0.2, 0.8, 0.2, 1);
+    will-change: transform;
+}
+.bk-drag-ghost > span:last-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.bk-drag-ghost .material-symbols-outlined { font-size: 18px; color: var(--blog-accent-text, var(--jh-accent)); }
+.bk-drag-ghost.is-lifted { opacity: 1; scale: 1; }
+.bk-drag-ghost.is-dropped { opacity: 0; scale: 0.92; }
+.bk-block-dragging, .bk-block-dragging * { cursor: grabbing !important; user-select: none; }
+.blog-blocks-editor .bk-edit.is-dragging { opacity: 0.3; transition: opacity 0.2s ease; }
+/* 並べ替えの線は滑らかに次の位置へ (現れた瞬間だけは跳ぶ) */
+.bk-drop-line { transition: top 0.14s cubic-bezier(0.2, 0.8, 0.2, 1); }
+.bk-drop-line.is-instant { transition: none; }
+
+/* ── 画像の移動・ドロップの落とし先 ─────────── */
+.bk-drop-caret {
+    position: fixed;
+    left: 0;
+    top: 0;
+    z-index: 10050;
+    height: 3px;
+    border-radius: 2px;
+    background: var(--blog-accent, var(--jh-accent));
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--blog-accent, var(--jh-accent)) 22%, transparent);
+    pointer-events: none;
+    transition: transform 0.12s cubic-bezier(0.2, 0.8, 0.2, 1), width 0.12s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.bk-drop-caret.is-instant { transition: none; }
+.bk-drop-caret[hidden] { display: none; }
+/* ブロックの間 (新しいブロックになる) は太めにして、左端に丸 */
+.bk-drop-caret.is-block { height: 4px; }
+.bk-drop-caret.is-block::before {
+    content: "";
+    position: absolute;
+    left: -6px;
+    top: 50%;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    border: 2px solid var(--blog-accent, var(--jh-accent));
+    background: var(--jh-surface, #111);
+    transform: translateY(-50%);
+}
+.blog-img-ghost {
+    position: fixed;
+    left: 0;
+    top: 0;
+    z-index: 10060;
+    border-radius: 10px;
+    background: center / cover no-repeat;
+    box-shadow: 0 14px 36px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.12);
+    pointer-events: none;
+    opacity: 0;
+    scale: 0.85;
+    rotate: -2deg;
+    transition: opacity 0.16s ease, scale 0.22s cubic-bezier(0.2, 0.8, 0.2, 1), rotate 0.22s ease;
+    will-change: transform;
+}
+.blog-img-ghost.is-lifted { opacity: 0.92; scale: 1; rotate: 2deg; }
+.blog-img-ghost.is-dropped { opacity: 0; scale: 0.9; }
+.blog-img-overlay.is-moving { opacity: 0.25; }
+.blog-img-overlay.is-snapped { outline: 2px solid var(--blog-accent); outline-offset: 2px; }
+.blog-img-overlay.is-snapped .blog-img-size { color: #fff; background: var(--blog-accent); }
+/* 移動つまみ (タッチでは画像に触れてもスクロールできるよう、移動はここから) */
+.blog-img-move {
+    position: absolute;
+    left: 50%;
+    top: -16px;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    border: 2px solid var(--blog-accent);
+    border-radius: 50%;
+    background: #fff;
+    color: #1d1d1f;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transform: translateX(-50%);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
+    pointer-events: auto;
+    touch-action: none;
+    cursor: grab;
+}
+.blog-img-move .material-symbols-outlined { font-size: 18px; }
+.blog-img-overlay.is-resizing .blog-img-move { opacity: 0; }
+@media (pointer: coarse) {
+    /* 指で掴みやすいよう、四隅のハンドルの当たり判定を広げる */
+    .blog-img-handle { width: 18px; height: 18px; }
+    .blog-img-handle::before { content: ""; position: absolute; inset: -12px; }
+    .blog-img-handle[data-corner="nw"] { left: -9px; top: -9px; }
+    .blog-img-handle[data-corner="ne"] { right: -9px; top: -9px; }
+    .blog-img-handle[data-corner="sw"] { left: -9px; bottom: -9px; }
+    .blog-img-handle[data-corner="se"] { right: -9px; bottom: -9px; }
+    .bk-rs-height { height: 28px; }
+    .bk-rs-height > i { width: 56px; height: 6px; }
+}
+
+/* ── ファイルを持ってきたとき ───────────────── */
+.blog-editor-canvas.is-file-dragging .blog-blocks-editor {
+    border-radius: 18px;
+    box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--blog-accent, var(--jh-accent)) 55%, transparent);
+    background: color-mix(in srgb, var(--blog-accent, var(--jh-accent)) 5%, transparent);
+    transition: box-shadow 0.2s ease, background-color 0.2s ease;
+}
+.bk-drop-hint {
+    position: fixed;
+    top: 132px;
+    left: 0;
+    z-index: 10055;
+    padding: 8px 16px;
+    border-radius: 980px;
+    background: var(--blog-accent, var(--jh-accent));
+    color: var(--blog-accent-ink, #fff);
+    font-size: 13px;
+    font-weight: 600;
+    white-space: nowrap;
+    pointer-events: none;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+    transform: translateX(-50%);
+    animation: bk-toast-in 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.bk-drop-hint[hidden] { display: none; }
+.blog-editor-canvas.is-file-dragging .ql-editor { pointer-events: none; } /* ブラウザ自身の挿入カーソルを出さない */
+
+/* アップロードの進み具合 */
+.bk-upload-toast {
+    position: fixed;
+    left: 50%;
+    bottom: calc(104px + env(safe-area-inset-bottom)); /* 保存バーの上 */
+    z-index: 10070;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    align-items: center;
+    gap: 6px 10px;
+    min-width: 220px;
+    padding: 12px 16px;
+    border-radius: 16px;
+    background: rgba(var(--jh-glass-rgb), 0.9);
+    -webkit-backdrop-filter: blur(16px);
+    backdrop-filter: blur(16px);
+    color: var(--jh-text);
+    font-size: 13px;
+    font-variant-numeric: tabular-nums;
+    box-shadow: 0 12px 36px rgba(0, 0, 0, 0.35), 0 0 0 1px rgba(var(--jh-fg-rgb), 0.08);
+    transform: translateX(-50%);
+    animation: bk-toast-in 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.bk-upload-toast[hidden] { display: none; }
+@keyframes bk-toast-in { from { opacity: 0; transform: translate(-50%, 12px); } }
+.bk-upload-spinner {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    border: 2px solid rgba(var(--jh-fg-rgb), 0.2);
+    border-top-color: var(--blog-accent, var(--jh-accent));
+    animation: bk-spin 0.8s linear infinite;
+}
+@keyframes bk-spin { to { transform: rotate(360deg); } }
+.bk-upload-bar { grid-column: 1 / -1; height: 3px; border-radius: 2px; background: rgba(var(--jh-fg-rgb), 0.12); overflow: hidden; }
+.bk-upload-bar i { display: block; height: 100%; background: var(--blog-accent, var(--jh-accent)); transform-origin: left; transform: scaleX(0); transition: transform 0.2s ease; }
+
+@media (max-width: 734px) {
+    /* 狭い画面では列は縦に並び、ブロックも画面いっぱいなので、幅と列のつまみは出さない */
+    .bk-rs-width, .bk-rs-col { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+    .blog-blocks-editor .bk, .blog-blocks-editor .bk-grid, .blog-blocks-editor .bk-spacer,
+    .blog-blocks-editor .bk-demo-stage, .bk-drop-caret, .bk-drop-line { transition: none; }
+}

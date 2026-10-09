@@ -25,12 +25,12 @@
 {% for b in post.body_blocks.blocks %}
     {% with s=b.style %}
     {% if b.type == 'divider' %}
-        <div class="bk bk-divider bk-divider--{{ b.variant }} bk-w-{{ s.width }} bk-space-{{ s.space }}"><hr></div>
+        <div class="bk bk-divider bk-divider--{{ b.variant }} bk-w-{{ s.width }} bk-space-{{ s.space }}"{% if s.maxw %} style="{{ b|bk_style }}"{% endif %}><hr></div>
     {% elif b.type == 'spacer' %}
-        <div class="bk bk-spacer bk-spacer--{{ b.height }}" aria-hidden="true"></div>
+        <div class="bk bk-spacer bk-spacer--{{ b.height }}"{% if b.px %} style="height: {{ b.px }}px;"{% endif %} aria-hidden="true"></div>
     {% elif b.type == 'demo' %}
         {# HTML / CSS デモ: プレビューは sandbox 付き iframe (スクリプト不可・ページと分離)、コードはエスケープして表示 #}
-        <section class="bk bk-demo-block bk-w-{{ s.width }} bk-space-{{ s.space }}">
+        <section class="bk bk-demo-block bk-w-{{ s.width }} bk-space-{{ s.space }}"{% if s.maxw %} style="{{ b|bk_style }}"{% endif %}>
             <div class="bk-demo" data-demo{% if b.card_width %} style="max-width: {{ b.card_width }}px;"{% endif %}>
                 {# 表示切り替え・コピーは、カードにホバーすると現れる丸いメニューボタンにまとめる #}
                 <div class="bk-demo-menu">
@@ -121,12 +121,12 @@
         {% endwith %}{% endif %}
     {% elif b.type == 'button' %}
         {% if b.url and b.label %}
-        <div class="bk bk-button bk-align-{{ b.align }} bk-w-{{ s.width }} bk-space-{{ s.space }}">
+        <div class="bk bk-button bk-align-{{ b.align }} bk-w-{{ s.width }} bk-space-{{ s.space }}"{% if s.maxw %} style="{{ b|bk_style }}"{% endif %}>
             <a href="{{ b.url }}" class="jh-btn {% if b.variant == 'secondary' %}jh-btn-outline{% else %}jh-btn-primary{% endif %}"{% if '://' in b.url %} target="_blank" rel="noopener noreferrer"{% endif %}>{{ b.label }}</a>
         </div>
         {% endif %}
     {% else %}
-        <section class="bk bk-{{ b.type }} bk-cols-{{ b.columns }} bk-ratio-{{ b.ratio }} bk-bg-{{ s.bg }} bk-w-{{ s.width }} bk-space-{{ s.space }} bk-valign-{{ s.valign }} bk-size-{{ s.size }}{% if s.rule %} bk-rule{% endif %}{% if s.animate %} jh-reveal{% endif %}">
+        <section class="bk bk-{{ b.type }} bk-cols-{{ b.columns }} bk-ratio-{{ b.ratio }} bk-bg-{{ s.bg }} bk-w-{{ s.width }} bk-space-{{ s.space }} bk-valign-{{ s.valign }} bk-size-{{ s.size }}{% if s.rule %} bk-rule{% endif %}{% if s.animate %} jh-reveal{% endif %}{% if b.widths %} bk-custom-cols{% endif %}"{% if s.maxw or b.widths %} style="{{ b|bk_style }}"{% endif %}>
             {% if b.type == 'callout' %}<span class="bk-callout-icon" aria-hidden="true">{{ b.icon }}</span>{% endif %}
             <div class="bk-grid">
                 {% for cell in b.cells %}<div class="bk-cell">{{ cell.html|safe }}</div>{% endfor %}

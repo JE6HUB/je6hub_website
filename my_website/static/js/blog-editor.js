@@ -4,6 +4,7 @@
  * カバー画像、テンプレート/アクセントの即時反映、未保存警告を扱う。
  * 本文はブロックエディタ (blog-blocks.js)。各列の Quill に、数式・Markdown・画像の
  * サイズ変更/移動 (blog-editor-{math,markdown,images}.js) を組み込む。
+ * 画像ファイルのドロップと、ブロックをまたぐ画像の移動は blog-editor-dnd.js。
  */
 (() => {
     const form = document.getElementById('blog-post-form');
@@ -31,7 +32,7 @@
     Quill.register(DividerBlot);
 
     // ── 数式ブロット (Quill 生成前に登録) ──────────────
-    const { BlogEditorMath, BlogEditorMarkdown, BlogEditorImages, BlogBlocks } = window;
+    const { BlogEditorMath, BlogEditorMarkdown, BlogEditorImages, BlogEditorDnd, BlogBlocks } = window;
     BlogEditorMath.register(Quill);
 
     // ── 画像アップロード ──────────────────────────────
@@ -47,6 +48,26 @@
         const json = await res.json().catch(() => ({}));
         if (!res.ok || !json.url) throw new Error(json.error || t.uploadFailed);
         return json.url;
+    }
+
+    /** 進み具合 (送った bytes) を知らせながらアップロードする (ドロップ用) */
+    function uploadWithProgress(file, onProgress) {
+        return new Promise((resolve, reject) => {
+            const xhr = new XMLHttpRequest();
+            const data = new FormData();
+            data.append('image', file);
+            xhr.open('POST', uploadUrl);
+            xhr.setRequestHeader('X-CSRFToken', csrfToken);
+            xhr.responseType = 'json';
+            xhr.upload.addEventListener('progress', (e) => { if (e.lengthComputable) onProgress(e.loaded * (file.size / e.total)); });
+            xhr.addEventListener('load', () => {
+                const json = xhr.response || {};
+                if (xhr.status >= 200 && xhr.status < 300 && json.url) resolve(json.url);
+                else reject(new Error(json.error || t.uploadFailed));
+            });
+            xhr.addEventListener('error', () => reject(new Error(t.uploadFailed)));
+            xhr.send(data);
+        });
     }
 
     async function insertImages(quill, files, index) {
@@ -83,7 +104,17 @@
     const math = BlogEditorMath.setup(getActive, Quill);
     const markdownImport = BlogEditorMarkdown.setupImport(getActive, Quill);
 
-    const blocks = new BlogBlocks.BlockEditor(document.getElementById('blog-blocks'), {
+    const blocksRoot = document.getElementById('blog-blocks');
+    // ブロックより先に作る (各列の Quill を作るときに画像の移動へ渡すため)。ブロックの一覧は使うときに参照する
+    const dnd = BlogEditorDnd.create({
+        Quill,
+        root: blocksRoot,
+        getBlocks: () => blocks,
+        upload: uploadWithProgress,
+        t: { ...(t.dnd || {}), uploadFailed: t.uploadFailed },
+    });
+
+    const blocks = new BlogBlocks.BlockEditor(blocksRoot, {
         Quill,
         t: t.blocks,
         quillOptions: () => ({
@@ -100,7 +131,7 @@
             },
         }),
         onQuill(quill) {
-            BlogEditorImages.setup(quill, Quill);
+            quill.__images = BlogEditorImages.setup(quill, Quill, dnd);
             math.attach(quill);
             quill.on('selection-change', () => toolbar.refresh());
             quill.on('text-change', () => toolbar.refresh());
