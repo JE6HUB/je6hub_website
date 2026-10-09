@@ -158,6 +158,8 @@ window.BlogBlocks = (() => {
                 }
                 q.history.clear();
             }
+            // 本文の中にある区切り線 (以前の記事) も、動かせるブロックにする
+            this.blocks.slice().forEach((b) => this.liftDividers(b, { silent: true }));
         }
 
         serialize() {
@@ -754,7 +756,13 @@ window.BlogBlocks = (() => {
             }
             quill.history.clear();
             quill.on('selection-change', (range) => { if (range) this.active = quill; });
-            quill.on('text-change', () => this.changed());
+            quill.on('text-change', (delta, _old, source) => {
+                this.changed();
+                // 「---」・貼り付け・Markdown の読み込みで入った区切り線は、独立したブロックへ切り出す
+                if (source !== this.Quill.sources.SILENT && delta.ops.some((op) => op.insert && op.insert.divider)) {
+                    queueMicrotask(() => this.liftDividers(block, { focus: true }));
+                }
+            });
             quill.root.addEventListener('focus', () => { this.active = quill; });
             quill.__block = block;
             block.cells.push({ el, quill });
@@ -881,6 +889,58 @@ window.BlogBlocks = (() => {
             if (this.active && this.active.__block === block) this.active = null;
             if (!this.blocks.length) this.insertBlock({ type: 'text' }, 0, { focus: true });
             this.changed();
+        }
+
+        /**
+         * 1 列のテキストブロックに入った区切り線を、区切り線ブロックとして切り出す。
+         * 前後の文章はそれぞれ同じ見た目のテキストブロックになり、ほかのブロックと同じように動かせる。
+         * 列・コールアウト・引用の中の区切り線は、その中の飾りとしてそのまま残す。
+         */
+        liftDividers(block, { silent = false, focus = false } = {}) {
+            if (block.type !== 'text' || block.columns !== 1 || !this.blocks.includes(block)) return;
+            const Delta = this.Quill.import('delta');
+            const quill = block.cells[0].quill;
+            const ops = quill.getContents().ops;
+            if (!ops.some((op) => op.insert && op.insert.divider)) return;
+
+            // 区切り線の位置で中身を分ける: [文章, 'divider', 文章, ...]
+            const parts = [];
+            let cur = [];
+            ops.forEach((op) => {
+                if (op.insert && op.insert.divider) {
+                    parts.push(new Delta(cur), 'divider');
+                    cur = [];
+                } else cur.push(op);
+            });
+            parts.push(new Delta(cur));
+            const hasText = (d) => d !== 'divider' && d.length() > 0 && d.ops.some((op) => typeof op.insert !== 'string' || op.insert.trim());
+            const items = parts.filter((d) => d === 'divider' || hasText(d));
+            // 入力中なら、区切り線の下に続きを書けるよう空のテキストブロックを置く
+            if (focus && items[items.length - 1] === 'divider') items.push(new Delta());
+
+            const style = { ...block.style };
+            const src = silent ? this.Quill.sources.SILENT : this.Quill.sources.USER;
+            let index = this.blocks.indexOf(block);
+            // 先頭が文章なら元のブロックに残す (id・見た目をそのまま)。区切り線で始まるなら元のブロックは消す
+            const keep = items[0] !== 'divider';
+            let last = null;
+            items.forEach((item, i) => {
+                if (item === 'divider') {
+                    this.insertBlock({ type: 'divider' }, ++index, { silent: true });
+                } else if (i === 0) {
+                    quill.setContents(item, src);
+                    last = block;
+                } else {
+                    last = this.insertBlock({ type: 'text', style, cells: [{ delta: item }] }, ++index, { silent: true });
+                }
+            });
+            if (!keep) {
+                this.blocks.splice(this.blocks.indexOf(block), 1);
+                block.el.remove();
+                if (this.active === quill) this.active = null;
+            }
+            if (focus && last && last !== block) this.focusBlock(last);
+            if (!silent) this.changed();
         }
 
         /** 追加メニューから選んだ種類のブロックを index に作る */

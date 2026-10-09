@@ -1646,6 +1646,8 @@ button.bk-callout-icon:hover { background: rgba(var(--jh-fg-rgb), 0.08); }
     min-height: 3em;
 }
 .blog-blocks-editor .bk-bg-light .bk-cell { outline-color: rgba(0, 0, 0, 0.15); }
+/* 区切り線ブロックは線の上下の余白も含めてつかめるようにする (余白が外へ抜けると 1px の高さになり、⋮⋮ が隣のブロックに隠れる) */
+.blog-blocks-editor .bk-divider { display: flow-root; }
 .blog-blocks-editor .bk-spacer { border: 1px dashed rgba(var(--jh-fg-rgb), 0.12); border-radius: 10px; display: flex; align-items: center; justify-content: center; }
 .bk-spacer-label { font-size: 12px; color: var(--jh-text-muted); }
 .blog-blocks-editor .bk-button button { pointer-events: auto; }
