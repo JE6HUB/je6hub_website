@@ -2755,3 +2755,33 @@ msgstr "Drag to change the height (double-click to reset)"
 #: blog/templates/blog/post_editor.html
 msgid "ブロックの高さ"
 msgstr "Block height"
+
+#: templates/_seo.html
+msgid "JE6HUB.com は、テンプレートを選んで書くだけで洗練されたブログを公開できるサイトです。旅の記録を写真と地図で残す WanderLens や、メンバー同士の Community Lounge もあります。"
+msgstr "JE6HUB.com lets you publish a polished blog just by picking a template and writing. Keep travel memories on a photo map with WanderLens, and chat with other members in the Community Lounge."
+
+#: blog/templates/blog/post_list.html
+msgid "JE6HUB.com のメンバーが書いたブログ記事の一覧。旅の記録、技術のメモ、日々の気づきなど。"
+msgstr "Blog posts by JE6HUB.com members: travel journals, tech notes, everyday discoveries and more."
+
+#: photraveler/templates/photraveler/discovery.html
+msgid "WanderLens: メンバーが旅先で撮った写真を、世界地図の上でたどれます。"
+msgstr "WanderLens: follow the photos members took on their travels across a world map."
+
+#: core/templates/core/contact.html
+msgid "JE6HUB.com へのお問い合わせはこちらから。"
+msgstr "Get in touch with JE6HUB.com."
+
+#: accounts/templates/accounts/user_profile.html
+#, python-format
+msgid "%(name)s さんのプロフィール。JE6HUB.com で書いたブログや WanderLens の写真を見られます。"
+msgstr "%(name)s's profile on JE6HUB.com, with their blog posts and WanderLens photos."
+
+#: photraveler/templates/photraveler/map.html
+#, python-format
+msgid "%(name)s さんが旅先で撮った写真を、地図の上でたどれます。"
+msgstr "Follow the photos %(name)s took on their travels, on a map."
+
+#: blog/feeds.py
+msgid "JE6HUB.com のメンバーが書いた最新のブログ記事"
+msgstr "The latest blog posts by JE6HUB.com members"

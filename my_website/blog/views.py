@@ -75,6 +75,9 @@ def post_detail(request, pk):
         'post': post,
         'is_author': is_author,
         'more_posts': localize_posts(list(more_posts), language),
+        # 下書きは検索結果に出さない。英訳がまだない記事は /en/ も日本語なので、検索エンジンには日本語版だけを伝える
+        'seo_noindex': not post.is_published,
+        'seo_language': None if post.has_translation else 'ja',
         **_reactions_context(request, post),
         **_journey_context(post),
     })

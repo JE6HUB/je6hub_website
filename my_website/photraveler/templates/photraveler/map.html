@@ -3,6 +3,8 @@
 
 {% block title %}{{ profile_user.username }} — WanderLens{% endblock %}
 
+{% block seo %}{% blocktrans with name=profile_user.public_name asvar wl_description %}{{ name }} さんが旅先で撮った写真を、地図の上でたどれます。{% endblocktrans %}{% include "_seo.html" with seo_title=profile_user.public_name|add:" — WanderLens" seo_description=wl_description %}{% endblock %}
+
 {% block extra_head %}
 {% include "photraveler/_map_assets.html" %}
 {% endblock %}

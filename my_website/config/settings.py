@@ -90,6 +90,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.sites',          # allauth が必要
+    'django.contrib.sitemaps',       # sitemap.xml のテンプレート
 
     # django-allauth (Sign in with Apple)
     'allauth',

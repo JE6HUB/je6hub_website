@@ -7,6 +7,7 @@ from django.contrib.auth.views import LogoutView, LoginView
 from accounts import views as accounts_views
 from accounts.forms import LoginForm
 from accounts.ratelimit import ratelimit
+from core import seo_views
 
 # パスワードの総当たり対策: 同じ IP からのログイン送信は 5 分間に 10 回まで (管理画面も同じ)
 _login_ratelimit = ratelimit('login', limit=10, period=300, methods=('POST',))
@@ -15,6 +16,9 @@ admin.site.login = _login_ratelimit(admin.site.login)
 # 言語切り替え用のエンドポイント（言語選択フォームからPOSTされる先）
 urlpatterns = [
     path('i18n/', include('django.conf.urls.i18n')),
+    # 検索エンジン向け (言語の接頭辞なしの決まった場所に置く)
+    path('robots.txt', seo_views.robots_txt, name='robots_txt'),
+    path('sitemap.xml', seo_views.sitemap_xml, name='sitemap'),
 ]
 
 # 多言語対応のURLパターン（URLの先頭に /ja/ や /en/ が付与されます）

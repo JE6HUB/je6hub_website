@@ -3,6 +3,8 @@
 
 {% block title %}Contact{% endblock %}
 
+{% block seo %}{% trans "JE6HUB.com へのお問い合わせはこちらから。" as contact_description %}{% include "_seo.html" with seo_title="Contact — JE6HUB.com" seo_description=contact_description %}{% endblock %}
+
 {% block extra_head %}
 <style>
     .contact-page { max-width: 1000px; margin: 0 auto; }
