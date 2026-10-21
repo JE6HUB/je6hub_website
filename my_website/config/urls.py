@@ -15,6 +15,8 @@ admin.site.login = _login_ratelimit(admin.site.login)
 # 言語切り替え用のエンドポイント（言語選択フォームからPOSTされる先）
 urlpatterns = [
     path('i18n/', include('django.conf.urls.i18n')),
+    # iOS アプリ用の JSON API (言語の接頭辞なし。トークン認証)
+    path('api/v1/', include('api.urls')),
 ]
 
 # 多言語対応のURLパターン（URLの先頭に /ja/ や /en/ が付与されます）
