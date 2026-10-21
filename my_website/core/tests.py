@@ -7,6 +7,7 @@ from unittest import mock
 from django.core import mail
 from django.test import TestCase, override_settings
 from django.urls import reverse
+from django.utils import translation as dj_translation
 
 from .models import ContactMessage
 
@@ -320,6 +321,128 @@ class ResumeEditTests(TestCase):
         response = self.client.get('/ja/resume/')
         self.assertNotContains(response, '<script>x</script>')
         self.assertContains(response, '&lt;script&gt;x&lt;/script&gt;')
+
+
+def _fake_translate(texts, text_type):
+    return [f'EN[{text}]' for text in texts]
+
+
+@override_settings(AZURE_TRANSLATOR_KEY='test-key', BLOG_TRANSLATE_ASYNC=False)
+class ResumeTranslationTests(TestCase):
+    """日本語ページで保存すると、変わった欄 (と英語が空の欄) だけ英語に自動翻訳される。"""
+
+    def setUp(self):
+        from blog import translation
+        from django.contrib.auth import get_user_model
+        self.admin = get_user_model().objects.create_superuser(username='boss', email='b@example.com', password='pass12345')
+        self.client.force_login(self.admin)
+        patcher = mock.patch.object(translation, '_call_api', side_effect=_fake_translate)
+        self.api = patcher.start()
+        self.addCleanup(patcher.stop)
+        # /en/ を開いたあと英語が有効なまま残り、ほかのテストの reverse() が /en/ になるのを防ぐ
+        self.addCleanup(dj_translation.deactivate)
+        # 英語が空の欄を埋めておき、「変わった欄だけ訳す」を確かめやすくする
+        self.save_en_everywhere()
+        self.api.reset_mock()
+
+    payload = ResumeEditTests._payload
+    save = ResumeEditTests._save
+
+    def save_en_everywhere(self):
+        from .models import Resume
+        from .resume_translation import _slots
+        resume = Resume.load()
+        for _path, value, kind, _max in _slots(resume.data):
+            if not value.get('en'):
+                value['en'] = ['x'] if kind == 'lines' else 'x'
+        resume.save()
+
+    def sent_texts(self):
+        return [text for call in self.api.call_args_list for text in call.args[0]]
+
+    def test_only_changed_japanese_fields_are_translated(self):
+        from .models import Resume
+        payload = self.payload(tagline='東京のAIアーキテクト')
+        payload['data']['experience'][0]['bullets'] = ['設計を担当', '運用を改善']
+        with self.captureOnCommitCallbacks(execute=True):
+            self.assertEqual(self.save(payload).status_code, 200)
+        self.assertEqual(sorted(self.sent_texts()), sorted(['東京のAIアーキテクト', '設計を担当', '運用を改善']))
+        data = Resume.load().data
+        self.assertEqual(data['tagline'], {'ja': '東京のAIアーキテクト', 'en': 'EN[東京のAIアーキテクト]'})
+        self.assertEqual(data['experience'][0]['bullets']['en'], ['EN[設計を担当]', 'EN[運用を改善]'])
+        en = self.client.get('/en/resume/')
+        self.assertContains(en, 'EN[東京のAIアーキテクト]')
+        # ブログと違い、自動翻訳の注記は出さない
+        self.assertNotContains(en, 'machine')
+        self.assertNotContains(en, 'translated', status_code=200)
+
+    def test_unchanged_save_calls_nothing(self):
+        with self.captureOnCommitCallbacks(execute=True):
+            self.save(self.payload())
+        self.api.assert_not_called()
+
+    def test_new_item_is_translated(self):
+        from .models import Resume
+        payload = self.payload()
+        payload['data']['skills'].append({'id': '', 'title': '写真', 'items': 'ポートレート、風景'})
+        with self.captureOnCommitCallbacks(execute=True):
+            self.save(payload)
+        skill = Resume.load().data['skills'][-1]
+        self.assertEqual(skill['title']['en'], 'EN[写真]')
+        self.assertEqual(skill['items']['en'], 'EN[ポートレート、風景]')
+
+    def test_english_edits_are_not_translated_or_overwritten(self):
+        from .models import Resume
+        with self.captureOnCommitCallbacks(execute=True):
+            self.save(self.payload('en', tagline='Hand-written English'))
+        self.api.assert_not_called()
+        with self.captureOnCommitCallbacks(execute=True):
+            self.save(self.payload(summary='要約を書き直した'))
+        self.assertEqual(Resume.load().data['tagline']['en'], 'Hand-written English')
+
+    def test_cleared_japanese_clears_english(self):
+        from .models import Resume
+        payload = self.payload()
+        payload['data']['focus'][0]['body'] = ''
+        with self.captureOnCommitCallbacks(execute=True):
+            self.save(payload)
+        self.assertEqual(Resume.load().data['focus'][0]['body'], {'ja': '', 'en': ''})
+
+    def test_edit_during_translation_is_kept(self):
+        from .models import Resume
+        from .resume_translation import pending_translations, translate_pending
+        old = Resume.load().data
+        resume = Resume.load()
+        resume.data['tagline']['ja'] = '一回目'
+        resume.save()
+        pending = pending_translations(old, resume.data)
+        resume.data['tagline']['ja'] = '二回目'  # 翻訳中にもう一度編集された
+        resume.save()
+        self.assertEqual(translate_pending(pending), 0)
+        self.assertEqual(Resume.load().data['tagline']['en'], 'AI Architect & Photographer. Tokyo.')
+
+    def test_no_key_does_nothing(self):
+        with override_settings(AZURE_TRANSLATOR_KEY=''), self.captureOnCommitCallbacks(execute=True):
+            self.save(self.payload(tagline='変更'))
+        self.api.assert_not_called()
+
+    def test_api_failure_keeps_saved_japanese(self):
+        from blog.translation import TranslationError
+        from .models import Resume
+        self.api.side_effect = TranslationError('down')
+        with self.assertLogs('core.resume_translation', 'ERROR'), self.captureOnCommitCallbacks(execute=True):
+            self.assertEqual(self.save(self.payload(tagline='変更')).status_code, 200)
+        self.assertEqual(Resume.load().data['tagline']['ja'], '変更')
+
+    def test_command_fills_empty_english(self):
+        from django.core.management import call_command
+        from .models import Resume
+        resume = Resume.load()
+        resume.data['focus'][0]['title'] = {'ja': '生成AI', 'en': ''}
+        resume.save()
+        call_command('translate_resume', stdout=StringIO())
+        self.assertEqual(self.sent_texts(), ['生成AI'])
+        self.assertEqual(Resume.load().data['focus'][0]['title']['en'], 'EN[生成AI]')
 
 
 class GuideTourTests(TestCase):
