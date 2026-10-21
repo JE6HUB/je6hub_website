@@ -1,0 +1,16 @@
+{% load i18n static seo %}{% comment %}
+SNS でシェアされたとき・検索結果に出るときの説明と画像。base.html の {% block seo %} の既定値。
+ページごとに変えるときは {% block seo %}{% include "_seo.html" with seo_title=… seo_description=… seo_image=… seo_type="article" %}{% endblock %}
+seo_image はサイト内の URL (/media/… や /static/…) でよい。絶対 URL にしてから出す。
+{% endcomment %}{% trans "JE6HUB.com は、テンプレートを選んで書くだけで洗練されたブログを公開できるサイトです。旅の記録を写真と地図で残す WanderLens や、メンバー同士の Community Lounge もあります。" as default_description %}{% firstof seo_description default_description as description %}{% static 'img/og-default.jpg' as default_image %}
+    <meta name="description" content="{{ description|truncatechars:200 }}">
+    {% seo_links %}
+    <meta property="og:site_name" content="JE6HUB.com">
+    <meta property="og:type" content="{{ seo_type|default:'website' }}">
+    <meta property="og:title" content="{{ seo_title|default:'JE6HUB.com' }}">
+    <meta property="og:description" content="{{ description|truncatechars:200 }}">
+    <meta property="og:image" content="{% absolute_url seo_image|default:default_image %}">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="{{ seo_title|default:'JE6HUB.com' }}">
+    <meta name="twitter:description" content="{{ description|truncatechars:200 }}">
+    <meta name="twitter:image" content="{% absolute_url seo_image|default:default_image %}">

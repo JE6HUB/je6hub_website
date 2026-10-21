@@ -3,11 +3,13 @@
 
 {% block title %}{{ post.title }} — Blogs{% endblock %}
 
+{% block seo %}{% include "_seo.html" with seo_title=post.title seo_description=post.excerpt seo_image=post.cover_image seo_type="article" %}
+{% if post.published_at %}<meta property="article:published_time" content="{{ post.published_at|date:'c' }}">{% endif %}
+<meta property="article:modified_time" content="{{ post.updated_at|date:'c' }}">
+<meta property="article:author" content="{{ post.author.public_name }}">{% endblock %}
+{% block structured_data %}{% if post.is_published %}{% load seo %}{% blog_posting_ld post %}{% endif %}{% endblock %}
+
 {% block extra_head %}
-<meta name="description" content="{{ post.excerpt }}">
-<meta property="og:title" content="{{ post.title }}">
-<meta property="og:description" content="{{ post.excerpt }}">
-{% if post.cover_image %}<meta property="og:image" content="{{ request.scheme }}://{{ request.get_host }}{{ post.cover_image.url }}">{% endif %}
 <link href="{% static 'css/blog.css' %}?v=35" rel="stylesheet" />
 {% if post.has_math %}
 <link href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" rel="stylesheet" />

@@ -3,6 +3,8 @@
 
 {% block title %}Blogs{% endblock %}
 
+{% block seo %}{% trans "JE6HUB.com のメンバーが書いたブログ記事の一覧。旅の記録、技術のメモ、日々の気づきなど。" as list_description %}{% include "_seo.html" with seo_title="Blogs — JE6HUB.com" seo_description=list_description %}{% endblock %}
+
 {% block extra_head %}
 <link href="{% static 'css/blog.css' %}?v=35" rel="stylesheet" />
 {% endblock %}

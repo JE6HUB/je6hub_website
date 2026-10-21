@@ -3,6 +3,9 @@
 
 {% block title %}JE6HUB.com — Blogs{% endblock %}{% block title_suffix %}{% endblock %}
 
+{% block seo %}{% trans "テンプレートを選んで書くだけ。登録メンバーなら誰でも、洗練されたブログをすぐに公開できます。" as hero_description %}{% include "_seo.html" with seo_title="JE6HUB.com — Draw your story." seo_description=hero_description %}{% endblock %}
+{% block structured_data %}{% load seo %}{% website_ld %}{% endblock %}
+
 {% block glass_preload %}{% include "_liquid_glass_preload.html" with hero="img/hero/home-head" %}{% endblock %}
 
 {% block extra_head %}

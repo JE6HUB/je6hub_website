@@ -3,6 +3,9 @@
 
 {% block title %}Resume — {{ resume.name }}{% endblock %}
 
+{% block seo %}{% include "_seo.html" with seo_title="Resume — "|add:resume.name seo_description=resume.summary|default:resume.tagline %}{% endblock %}
+{% block structured_data %}{% load seo %}{% resume_ld resume %}{% endblock %}
+
 {% block glass_preload %}{% include "_liquid_glass_preload.html" with hero="img/hero/resume-marble" %}{% endblock %}
 
 {% block extra_head %}
