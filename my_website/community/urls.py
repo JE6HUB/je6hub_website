@@ -13,4 +13,5 @@ urlpatterns = [
     path('<int:channel_id>/accept/',                views.accept_invite,   name='accept_invite'),
     path('<int:channel_id>/approve/<int:user_id>/', views.approve_member,  name='approve'),
     path('<int:channel_id>/decline/<int:user_id>/', views.decline_member,  name='decline'),
+    path('media/<int:message_id>/',                 views.message_media,   name='media'),
 ]

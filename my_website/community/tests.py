@@ -249,3 +249,61 @@ class MessageMediaTests(TestCase):
             data = f.read()
         self.assertNotIn(b'+35.6812', data)
         self.assertNotIn(b'\xa9xyz', data)
+
+
+@override_settings(MEDIA_ROOT=TEMP_MEDIA)
+class MessageMediaAccessTests(TestCase):
+    """非公開チャンネルの添付は、URL を知っていてもメンバー以外は見られないこと。"""
+
+    def setUp(self):
+        from django.core.files.base import ContentFile
+        self.owner = make_user('owner')
+        self.priv = Channel.objects.create(name='Secret', channel_type='private', created_by=self.owner)
+        ChannelMembership.objects.create(channel=self.priv, user=self.owner, role='owner', status='active')
+        self.msg = Message(channel=self.priv, sender=self.owner, media_type='image')
+        self.msg.media.save('a.jpg', ContentFile(TINY_JPEG), save=True)
+        self.url = reverse('community:media', args=[self.msg.id])
+
+    def test_thread_uses_protected_url(self):
+        self.client.force_login(self.owner)
+        response = self.client.get(reverse('community:thread', args=[self.priv.id]))
+        self.assertContains(response, self.url)
+        self.assertNotContains(response, self.msg.media.url)
+
+    def test_member_can_view(self):
+        self.client.force_login(self.owner)
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(b''.join(response.streaming_content), TINY_JPEG)
+        self.assertIn('private', response['Cache-Control'])
+
+    def test_non_member_gets_404(self):
+        self.client.force_login(make_user('stranger'))
+        self.assertEqual(self.client.get(self.url).status_code, 404)
+
+    def test_pending_member_gets_404(self):
+        pending = make_user('pending')
+        ChannelMembership.objects.create(channel=self.priv, user=pending, status='pending')
+        self.client.force_login(pending)
+        self.assertEqual(self.client.get(self.url).status_code, 404)
+
+    def test_anonymous_redirected_to_login(self):
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 302)
+        self.assertIn('login', response['Location'])
+
+    def test_public_channel_media_visible_to_logged_in_users(self):
+        from django.core.files.base import ContentFile
+        pub = make_channel(self.owner, 'Open')
+        msg = Message(channel=pub, sender=self.owner, media_type='image')
+        msg.media.save('b.jpg', ContentFile(TINY_JPEG), save=True)
+        self.client.force_login(make_user('visitor'))
+        self.assertEqual(self.client.get(reverse('community:media', args=[msg.id])).status_code, 200)
+
+    @override_settings(MEDIA_ACCEL_REDIRECT=True)
+    def test_production_hands_file_to_caddy(self):
+        self.client.force_login(self.owner)
+        response = self.client.get(self.url)
+        self.assertEqual(response['X-Accel-Redirect'], '/' + self.msg.media.name)
+        self.assertEqual(response['Content-Type'], 'image/jpeg')
+        self.assertEqual(response.content, b'')
