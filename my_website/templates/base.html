@@ -18,7 +18,7 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
     <link href="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/6.4.0/mdb.min.css" rel="stylesheet" />
 
-    <link href="{% static 'css/style.css' %}?v=29" rel="stylesheet" />
+    <link href="{% static 'css/style.css' %}?v=30" rel="stylesheet" />
     <link href="{% static 'css/profile.css' %}?v=6" rel="stylesheet" />
     <link href="{% static 'css/guide-tour.css' %}?v=1" rel="stylesheet" />
 
@@ -261,20 +261,11 @@
         {% endif %}
     </div>
 
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/6.4.0/mdb.min.js"></script>
-    <script src="https://js-cdn.music.apple.com/musickit/v1/musickit.js"></script>
-    <script type="text/javascript" src="{% static 'js/main.js' %}"></script>
-    <script src="{% static 'js/color-scheme.js' %}?v=1"></script>
-    <script src="{% static 'js/glass-motion.js' %}?v=1"></script>
-    <script src="{% static 'js/guide-tour.js' %}?v=1" data-url="{% url 'core:guide_tour' %}"></script>
-    {% if user.is_authenticated %}<script src="{% static 'js/mentions.js' %}?v=1" data-url="{% url 'mention_search' %}"></script>
-    <script src="{% static 'js/notifications.js' %}?v=1" data-url="{% url 'notifications_api' %}"
-            data-label="{% trans '通知' %}" data-label-unread="{% trans '通知 (未読 %(count)s 件)' %}" data-error="{% trans '通知を読み込めませんでした。' %}"></script>{% endif %}
-
-    {% block extra_js %}{% endblock %}
-
-    <script type="module">
+    {# ガラスのボタンの動き。LiquidGlass.init より前に data-config を整えるので、下の module より先に読む #}
+    <script src="{% static 'js/glass-motion.js' %}?v=2"></script>
+    <script type="module" async>
         // LiquidGlass はガラスのあるページでのみ読み込む (バージョン固定で長期キャッシュ可能)
+        // async: 後ろの外部スクリプト (mdb / MusicKit) の読み込みを待たずに、ここまで解析できた時点で始める
         const roots = [...document.querySelectorAll('.liquid-glass-root')];
         if (roots.length) {
             const { LiquidGlass } = await import('https://cdn.jsdelivr.net/npm/@ybouane/liquidglass@1.0.3/dist/index.js');
@@ -314,6 +305,18 @@
             }));
         }
     </script>
+
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/6.4.0/mdb.min.js"></script>
+    <script src="https://js-cdn.music.apple.com/musickit/v1/musickit.js" async></script>
+    <script type="text/javascript" src="{% static 'js/main.js' %}"></script>
+    <script src="{% static 'js/color-scheme.js' %}?v=1"></script>
+    <script src="{% static 'js/guide-tour.js' %}?v=1" data-url="{% url 'core:guide_tour' %}"></script>
+    {% if user.is_authenticated %}<script src="{% static 'js/mentions.js' %}?v=1" data-url="{% url 'mention_search' %}"></script>
+    <script src="{% static 'js/notifications.js' %}?v=1" data-url="{% url 'notifications_api' %}"
+            data-label="{% trans '通知' %}" data-label-unread="{% trans '通知 (未読 %(count)s 件)' %}" data-error="{% trans '通知を読み込めませんでした。' %}"></script>{% endif %}
+
+    {% block extra_js %}{% endblock %}
+
 
 </body>
 </html>
