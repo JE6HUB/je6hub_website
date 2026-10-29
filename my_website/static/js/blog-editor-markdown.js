@@ -130,8 +130,11 @@ window.BlogEditorMarkdown = (() => {
         return bindings;
     }
 
-    /** Markdown → HTML (見出しは本文の見出しレベルに合わせ、数式は数式ブロットの形で出力) */
-    function toHtml(markdown) {
+    /**
+     * Markdown → HTML (見出しは本文の見出しレベルに合わせ、数式は数式ブロットの形で出力)
+     * headings: 'raw' なら見出しは h1〜h6 のまま (貼り付けで、文書の中の大きさの順に合わせ直すため)
+     */
+    function toHtml(markdown, { headings } = {}) {
         const esc = window.BlogEditorMath.escapeHtml;
         const md = new window.marked.Marked({
             gfm: true,
@@ -160,7 +163,7 @@ window.BlogEditorMarkdown = (() => {
                     renderer(tok) { return `<span class="ql-formula" data-value="${esc(tok.text)}"></span>`; },
                 },
             ],
-            renderer: {
+            renderer: headings === 'raw' ? {} : {
                 heading(text, level) {
                     const l = Math.min(level + 1, 3); // # → 見出し(h2), ## 以降 → 小見出し(h3)
                     return `<h${l}>${text}</h${l}>\n`;
