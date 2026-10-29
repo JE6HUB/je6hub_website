@@ -1,8 +1,6 @@
 import functools
-import mimetypes
 from datetime import timedelta
 
-from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
@@ -11,7 +9,7 @@ from django.core.paginator import Paginator
 from django.db import transaction
 from django.db.models import Count, Max, Q, Sum
 from django.forms import modelform_factory
-from django.http import FileResponse, Http404, HttpResponse
+from django.http import Http404, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 from django.utils.translation import gettext as _
@@ -21,6 +19,7 @@ from accounts.ratelimit import is_rate_limited
 from blog.models import Post
 from community.models import Message
 from core.models import ContactMessage
+from core.uploads import private_media_response
 from photraveler.models import MapPin, PhotoComment
 
 from .geo import database_info as geoip_database_info
@@ -303,15 +302,7 @@ def message_media(request, object_id):
     msg = get_object_or_404(Message, pk=object_id)
     if not msg.media:
         raise Http404
-    if getattr(settings, 'MEDIA_ACCEL_REDIRECT', False):
-        response = HttpResponse()
-        response['X-Accel-Redirect'] = '/' + msg.media.name
-        response['Content-Type'] = mimetypes.guess_type(msg.media.name)[0] or 'application/octet-stream'
-    else:
-        try:
-            response = FileResponse(msg.media.open('rb'))
-        except FileNotFoundError:
-            raise Http404
+    response = private_media_response(request, msg.media)
     response['Cache-Control'] = 'private, no-store'
     response['X-Content-Type-Options'] = 'nosniff'
     response['Content-Security-Policy'] = "default-src 'none'; img-src 'self' data:; media-src 'self'; style-src 'unsafe-inline'; sandbox"

@@ -111,6 +111,14 @@ docker compose -f docker-compose.prod.yml up -d --build
 
 `migrate` と `collectstatic` はコンテナ起動時に自動で実行される。
 
+`Caddyfile` が変わった更新では、続けて Caddy を作り直す。`Caddyfile` はファイル単位でコンテナに渡しているため、`git pull` で書き換わっても動いている Caddy は古い内容を読んだままになり、`up -d --build` だけでは反映されない（Caddy のイメージと compose の設定が変わらないので作り直されない）。
+
+```bash
+docker compose -f docker-compose.prod.yml up -d --force-recreate caddy
+```
+
+迷ったら毎回実行してよい（数秒の再起動で、証明書は `caddy_data` に残る）。
+
 ## 7. バックアップ
 
 データは Docker ボリュームにある。`postgres_data`（DB）と `media_data`（アップロード写真）が消えると復元できないので、毎日バックアップを取る。

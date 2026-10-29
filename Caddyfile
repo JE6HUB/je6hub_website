@@ -58,6 +58,10 @@ www.{$SITE_DOMAIN} {
 		# 訪問者 IP 1つだけに置き換えて偽装を防ぐ
 		reverse_proxy web:8000 {
 			header_up X-Forwarded-For {client_ip}
+			# 下の handle_response があることを Django に知らせる (core.uploads.private_media_response)。
+			# これが付かない要求 (Caddyfile を変えたのに Caddy を作り直していない等) には Django が自分でファイルを返す。
+			# 訪問者が付けてきた値は上書きされる
+			header_up X-Media-Accel 1
 
 			# Django が権限を確認して X-Accel-Redirect を返したときだけ、そのファイルを送る
 			# (Range 要求にも対応するので、動画のシークができる)
