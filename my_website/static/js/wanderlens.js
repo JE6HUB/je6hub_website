@@ -480,6 +480,8 @@
         let existing = []; // { id, thumb, removed }
         let placeTouched = false; // 場所名を手入力したら逆ジオコーディングで上書きしない
         let locationSource = null; // 'manual' | 'exif'
+        let photoGps = null; // 位置が決まった後に追加した写真の撮影位置 (ボタンで移動できる)
+        const exifUse = $('#wl-exif-use');
 
         // 小さな地図 (位置の確認・調整)。地図の読み込みは課金対象なので、初めて編集画面を開いたときに作る
         let mini = null;
@@ -512,6 +514,7 @@
             }
             if (fly) mini.jumpTo({ center: [lng, lat], zoom: Math.max(mini.getZoom(), 13) });
             $('#wl-exif-badge').hidden = source !== 'exif';
+            if (source === 'exif') { photoGps = null; exifUse.hidden = true; }
             if (lookup) reverseLookup(lat, lng);
         }
         async function reverseLookup(lat, lng) {
@@ -542,7 +545,11 @@
                         onclick: () => { ph.removed = !ph.removed; renderThumbs(); },
                     }, icon(ph.removed ? 'undo' : 'close')))),
                 ...newFiles.map((file, i) => h('div', { class: 'wl-thumb' },
-                    h('img', { src: file.__preview, alt: '' }),
+                    h('img', {
+                        src: file.__preview, alt: '',
+                        // Safari 以外は HEIC を表示できないので、アイコンに置き換える (送信・位置の読み取りはできる)
+                        onerror: (e) => e.target.replaceWith(h('span', { class: 'wl-thumb-ph' }, icon('image'))),
+                    }),
                     h('button', {
                         type: 'button', class: 'wl-thumb-x', 'aria-label': t.remove,
                         onclick: () => { newFiles.splice(i, 1); renderThumbs(); },
@@ -553,7 +560,8 @@
             thumbs.replaceChildren(...items);
         }
         async function addFiles(files) {
-            const imgs = [...files].filter((file) => /^image\/(jpeg|png|webp)$/.test(file.type));
+            // HEIC は、ブラウザによって種類 (MIME) が空になるので拡張子でも判定する
+            const imgs = [...files].filter((file) => /^image\/(jpeg|png|webp|heic|heif)$/.test(file.type) || /\.hei[cf]$/i.test(file.name));
             const room = cfg.maxPhotos - existing.filter((ph) => !ph.removed).length - newFiles.length;
             if (imgs.length > room) toast(t.tooManyPhotos);
             const accepted = imgs.slice(0, Math.max(0, room));
@@ -566,8 +574,15 @@
                     // exifr の lite 版はタグ名の指定 (pick) に対応しないため、既定の parse で位置と日付をまとめて読む
                     const meta = await window.exifr.parse(file);
                     if (!meta) continue;
-                    if ((!f.lat.value || locationSource === 'exif') && Number.isFinite(meta.latitude) && Number.isFinite(meta.longitude)) {
-                        setLocation(meta.latitude, meta.longitude, { source: 'exif' });
+                    if (Number.isFinite(meta.latitude) && Number.isFinite(meta.longitude)) {
+                        if (!f.lat.value) {
+                            // 位置が未設定なら、最初の位置情報付きの写真の撮影位置にピンを置く (サーバー側と同じ)
+                            setLocation(meta.latitude, meta.longitude, { source: 'exif' });
+                        } else if (locationSource !== 'exif' && !photoGps) {
+                            // すでに位置がある (編集中・地図で選んだ) ときは上書きせず、移動ボタンを出す
+                            photoGps = { lat: meta.latitude, lng: meta.longitude };
+                            exifUse.hidden = false;
+                        }
                     }
                     // 撮影日時 → 作成日時 → 更新日時 の順に使う (機種やアプリで入るタグが違う)
                     const d = meta.DateTimeOriginal || meta.CreateDate || meta.ModifyDate;
@@ -579,6 +594,12 @@
                 } catch (e) { /* 位置情報のない写真 */ }
             }
         }
+        exifUse.addEventListener('click', () => {
+            if (!photoGps) return;
+            // 場所名も撮影位置のものにする
+            placeTouched = false;
+            setLocation(photoGps.lat, photoGps.lng, { source: 'exif' });
+        });
         const drop = $('#wl-drop');
         drop.addEventListener('click', () => fileInput.click());
         drop.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); fileInput.click(); } });
@@ -593,6 +614,8 @@
             existing = [];
             placeTouched = false;
             locationSource = null;
+            photoGps = null;
+            exifUse.hidden = true;
             f.lat.value = f.lng.value = f.country.value = '';
             $('#wl-coords').textContent = '';
             $('#wl-exif-badge').hidden = true;

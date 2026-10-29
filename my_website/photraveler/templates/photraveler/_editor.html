@@ -17,11 +17,14 @@
                     <span>{% trans "クリックまたはドラッグ＆ドロップ" %}</span>
                     <small>{% trans "位置情報付きの写真なら、場所と日付が自動で入ります" %}</small>
                 </div>
-                <input type="file" name="photos" id="wl-photos-input" accept="image/jpeg,image/png,image/webp" multiple hidden>
+                <input type="file" name="photos" id="wl-photos-input" accept="image/jpeg,image/png,image/webp,image/heic,image/heif,.heic,.heif" multiple hidden>
                 <div class="wl-thumbs" id="wl-thumbs"></div>
                 <p class="wl-badge" id="wl-exif-badge" hidden>
                     <span class="material-symbols-outlined" aria-hidden="true">my_location</span>{% trans "写真の位置情報を使用しました" %}
                 </p>
+                <button type="button" class="wl-exif-use" id="wl-exif-use" hidden>
+                    <span class="material-symbols-outlined" aria-hidden="true">my_location</span>{% trans "写真の撮影位置にピンを移動" %}
+                </button>
 
                 <label class="jh-label" for="wl-title">{% trans "タイトル" %} <span class="wl-required">*</span></label>
                 <input type="text" name="title" id="wl-title" class="jh-input" maxlength="200" required placeholder="{% trans '例: 夕暮れの清水寺' %}">

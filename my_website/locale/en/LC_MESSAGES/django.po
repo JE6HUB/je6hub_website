@@ -1574,8 +1574,8 @@ msgstr "Each photo must be 25 MB or smaller."
 msgid "画像として読み込めないファイルです (JPEG / PNG / WebP に対応)。"
 msgstr "This file could not be read as an image (JPEG / PNG / WebP supported)."
 
-msgid "JPEG / PNG / WebP の写真を選択してください。"
-msgstr "Please choose a JPEG, PNG, or WebP photo."
+msgid "JPEG / PNG / WebP / HEIC の写真を選択してください。"
+msgstr "Please choose a JPEG, PNG, WebP, or HEIC photo."
 
 msgid "by"
 msgstr ""
@@ -1643,6 +1643,9 @@ msgstr "Photos with location data fill in the place and date automatically"
 
 msgid "写真の位置情報を使用しました"
 msgstr "Used the photo's location data"
+
+msgid "写真の撮影位置にピンを移動"
+msgstr "Move the pin to where the photo was taken"
 
 msgid "例: 夕暮れの清水寺"
 msgstr "e.g. Kiyomizu-dera at dusk"
