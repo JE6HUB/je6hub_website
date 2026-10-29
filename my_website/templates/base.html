@@ -18,7 +18,7 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
     <link href="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/6.4.0/mdb.min.css" rel="stylesheet" />
 
-    <link href="{% static 'css/style.css' %}?v=28" rel="stylesheet" />
+    <link href="{% static 'css/style.css' %}?v=29" rel="stylesheet" />
     <link href="{% static 'css/profile.css' %}?v=6" rel="stylesheet" />
     <link href="{% static 'css/guide-tour.css' %}?v=1" rel="stylesheet" />
 
@@ -265,6 +265,7 @@
     <script src="https://js-cdn.music.apple.com/musickit/v1/musickit.js"></script>
     <script type="text/javascript" src="{% static 'js/main.js' %}"></script>
     <script src="{% static 'js/color-scheme.js' %}?v=1"></script>
+    <script src="{% static 'js/glass-motion.js' %}?v=1"></script>
     <script src="{% static 'js/guide-tour.js' %}?v=1" data-url="{% url 'core:guide_tour' %}"></script>
     {% if user.is_authenticated %}<script src="{% static 'js/mentions.js' %}?v=1" data-url="{% url 'mention_search' %}"></script>
     <script src="{% static 'js/notifications.js' %}?v=1" data-url="{% url 'notifications_api' %}"
@@ -300,6 +301,7 @@
                 try {
                     const instance = await LiquidGlass.init({ root, glassElements: glassEls });
                     root.classList.add('liquid-glass-ready');
+                    window.jhGlassMotion?.bind(instance, glassEls);
                     // タイムアウト後に読み込まれた画像は、届いた時点で再キャプチャさせる
                     images.filter((img) => !img.complete).forEach((img) => {
                         img.addEventListener('load', () => instance.markChanged(img), { once: true });
