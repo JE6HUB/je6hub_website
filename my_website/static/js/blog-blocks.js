@@ -764,6 +764,9 @@ window.BlogBlocks = (() => {
                 }
             });
             quill.root.addEventListener('focus', () => { this.active = quill; });
+            // AI の回答などを貼り付けたら、見出し・段落・リストごとのブロックに分ける (blog-blocks-paste.js)。
+            // Quill の貼り付けより先に受けるためキャプチャで
+            quill.root.addEventListener('paste', (e) => { if (this.pasteBlocks) this.pasteBlocks(e, block, quill); }, true);
             quill.__block = block;
             block.cells.push({ el, quill });
             this.options.onQuill(quill);
