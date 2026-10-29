@@ -21,8 +21,8 @@ def make_user(username='traveler'):
     return User.objects.create_user(username=username, password='pass12345')
 
 
-def jpeg(name='photo.jpg', size=(64, 48), gps=None, taken=None):
-    """テスト用 JPEG。gps=(lat, lng) / taken='YYYY:MM:DD HH:MM:SS' で EXIF を付ける。"""
+def jpeg(name='photo.jpg', size=(64, 48), gps=None, taken=None, fmt='JPEG', content_type='image/jpeg'):
+    """テスト用 JPEG (fmt='HEIF' なら HEIC)。gps=(lat, lng) / taken='YYYY:MM:DD HH:MM:SS' で EXIF を付ける。"""
     img = Image.new('RGB', size, (41, 151, 255))
     exif = Image.Exif()
     if gps:
@@ -37,8 +37,8 @@ def jpeg(name='photo.jpg', size=(64, 48), gps=None, taken=None):
     if taken:
         exif[306] = taken
     buf = BytesIO()
-    img.save(buf, 'JPEG', exif=exif.tobytes())
-    return SimpleUploadedFile(name, buf.getvalue(), content_type='image/jpeg')
+    img.save(buf, fmt, exif=exif.tobytes())
+    return SimpleUploadedFile(name, buf.getvalue(), content_type=content_type)
 
 
 def make_pin(owner=None, photos=1, **kwargs):
@@ -163,6 +163,37 @@ class PinCRUDTests(WanderLensTestCase):
         self.assertEqual(str(pin.visited_on), '2024-05-02')
         with Image.open(pin.photos.get().image.path) as saved:
             self.assertFalse(saved.getexif().get_ifd(0x8825))  # 保存した写真に GPS は残さない
+
+    def test_heic_photo_location_used_and_saved_as_jpeg_without_gps(self):
+        # iPhone の HEIC 写真: 撮影位置・日付を読み取り、JPEG に変換して位置情報を消して保存する
+        self.client.force_login(self.alice)
+        heic = jpeg('IMG_0001.HEIC', gps=(-33.856784, 151.215297), taken='2025:01:03 07:08:09',
+                    fmt='HEIF', content_type='image/heic')
+        self.client.post(self.add_url, {'title': 'Sydney', 'photos': [heic]})
+        pin = MapPin.objects.get()
+        self.assertAlmostEqual(float(pin.latitude), -33.856784, places=4)
+        self.assertAlmostEqual(float(pin.longitude), 151.215297, places=4)
+        self.assertEqual(str(pin.visited_on), '2025-01-03')
+        with Image.open(pin.photos.get().image.path) as saved:
+            self.assertEqual(saved.format, 'JPEG')
+            self.assertFalse(saved.getexif().get_ifd(0x8825))
+
+    def test_chosen_location_wins_over_photo_gps(self):
+        # 地図で選んだ位置があれば、写真の撮影位置で上書きしない
+        self.client.force_login(self.alice)
+        self.client.post(self.add_url, {
+            'title': 'Chosen', 'latitude': '34.985849', 'longitude': '135.758767',
+            'photos': [jpeg(gps=(35.658581, 139.745433))],
+        })
+        pin = MapPin.objects.get()
+        self.assertAlmostEqual(float(pin.latitude), 34.985849, places=4)
+
+    def test_heif_still_rejected_for_other_uploads(self):
+        # HEIF を開けるようにしても、アイコンなど他のアップロードは今までどおり HEIF を受け付けない
+        from django.core.exceptions import ValidationError
+        from core.uploads import sanitize_image
+        with self.assertRaises(ValidationError):
+            sanitize_image(jpeg('a.heic', fmt='HEIF', content_type='image/heic'))
 
     def test_requires_location_or_gps_photo(self):
         self.client.force_login(self.alice)

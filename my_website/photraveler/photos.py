@@ -2,6 +2,7 @@
 WanderLens の写真アップロード処理。
 
 - Pillow で実際に画像として読めるものだけを受け付ける (拡張子や Content-Type は信用しない)
+- iPhone の HEIC / HEIF も受け付ける (pillow-heif)。保存時は JPEG に変換する
 - EXIF から撮影位置 (GPS) と撮影日を読み取る (ピンの位置・日付の自動入力に使う)
 - 向きを補正し、長辺 2560px に縮小、サムネイル (長辺 720px) を作る
 - 保存する画像からはメタデータ (GPS・カメラ情報など) をすべて取り除く
@@ -16,14 +17,19 @@ from django.core.exceptions import ValidationError
 from django.core.files.base import ContentFile
 from django.utils.translation import gettext as _
 from PIL import Image, ImageOps
+from pillow_heif import register_heif_opener
 
 from core.uploads import open_image
+
+# Pillow で HEIC / HEIF を開けるようにする (iPhone の写真。撮影位置の EXIF もここから読める)。
+# ほかのアップロード (アイコン・Lounge など) は形式の一覧に HEIF がないので、これまでどおり受け付けない
+register_heif_opener()
 
 MAX_UPLOAD_BYTES = 25 * 1024 * 1024
 MAX_PHOTOS_PER_PIN = 10
 FULL_SIZE = 2560
 THUMB_SIZE = 720
-ALLOWED_FORMATS = {'JPEG', 'PNG', 'WEBP', 'GIF', 'MPO'}  # MPO = 一部カメラの JPEG
+ALLOWED_FORMATS = {'JPEG', 'PNG', 'WEBP', 'GIF', 'MPO', 'HEIF'}  # MPO = 一部カメラの JPEG, HEIF = iPhone の HEIC
 
 # EXIF タグ番号
 _EXIF_IFD = 0x8769
@@ -85,7 +91,7 @@ def process_photo(uploaded):
     # 実際に画像として読めるか・巨大すぎないか (展開するとメモリを使い切る画像) を確認する
     image = open_image(uploaded)
     if image.format not in ALLOWED_FORMATS:
-        raise ValidationError(_('JPEG / PNG / WebP の写真を選択してください。'))
+        raise ValidationError(_('JPEG / PNG / WebP / HEIC の写真を選択してください。'))
 
     lat, lng, taken = _read_exif(image)
     image = ImageOps.exif_transpose(image)
