@@ -705,6 +705,108 @@ html[lang="ja"] body { letter-spacing: 0; }
     color: #fff;
 }
 
+/* ── Glass motion (static/js/glass-motion.js) ──
+   ばねで動くガラスボタン。transform と CSS 変数は JS が毎フレーム書き換える。
+   ::after はポインタを追う光、::before は押した位置から広がる波紋。
+   どちらも border-radius: inherit の内側だけに描くので、WebGL の影 (canvas) は切らない。 */
+@property --jh-ripple-r {
+    syntax: '<length>';
+    inherits: false;
+    initial-value: 0px;
+}
+.jh-glass-motion {
+    --jh-glass-shine-rgb: 255, 255, 255;
+    --jh-glass-shine-blend: plus-lighter;
+    position: relative;
+    isolation: isolate;
+    border-radius: 999px;
+    transform-origin: 50% 50%;
+    will-change: transform;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+    -webkit-user-select: none;
+    user-select: none;
+}
+.jh-glass-motion::after,
+.jh-glass-motion::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    border-radius: inherit;
+    pointer-events: none;
+}
+.jh-glass-motion::after {
+    background:
+        radial-gradient(circle at var(--jh-glass-x, 50%) var(--jh-glass-y, 20%),
+            rgba(var(--jh-glass-shine-rgb), 0.42) 0%,
+            rgba(var(--jh-glass-shine-rgb), 0.12) 32%,
+            transparent 62%);
+    mix-blend-mode: var(--jh-glass-shine-blend);
+    opacity: var(--jh-glass-glow, 0);
+}
+.jh-glass-motion::before {
+    opacity: 0;
+    background: radial-gradient(circle at var(--jh-ripple-x, 50%) var(--jh-ripple-y, 50%),
+        transparent calc(var(--jh-ripple-r) - 18px),
+        rgba(var(--jh-glass-shine-rgb), 0.5) calc(var(--jh-ripple-r) - 6px),
+        transparent var(--jh-ripple-r));
+    mix-blend-mode: var(--jh-glass-shine-blend);
+}
+.jh-glass-motion.jh-glass-rippling::before {
+    animation: jh-glass-ripple 0.65s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+@keyframes jh-glass-ripple {
+    from { --jh-ripple-r: 0px; opacity: 1; }
+    to { --jh-ripple-r: 220px; opacity: 0; }
+}
+.jh-glass-motion .label,
+.jh-glass-motion > :not(canvas) { position: relative; z-index: 2; }
+.liquid-glass-btn.jh-glass-motion:focus-visible,
+.lounge-btn--glass.jh-glass-motion:focus-visible {
+    outline: 2px solid rgba(255, 255, 255, 0.9);
+    outline-offset: 4px;
+}
+/* 画面の色に乗るガラス (ラウンジのボタン・縮小ナビ): 明るいスキームでは白い光が見えないので、アクセント色で照らす */
+html:is([data-jh-scheme="daylight"], [data-jh-scheme="sky"], [data-jh-scheme="mint"],
+        [data-jh-scheme="sand"], [data-jh-scheme="blossom"], [data-jh-scheme="lavender"])
+    :is(.lounge-btn--glass, .jh-glass-navbar-link).jh-glass-motion {
+    --jh-glass-shine-rgb: var(--jh-accent-rgb);
+    --jh-glass-shine-blend: normal;
+}
+html:is([data-jh-scheme="daylight"], [data-jh-scheme="sky"], [data-jh-scheme="mint"],
+        [data-jh-scheme="sand"], [data-jh-scheme="blossom"], [data-jh-scheme="lavender"])
+    .lounge-btn--glass.jh-glass-motion:focus-visible {
+    outline-color: var(--jh-accent);
+}
+/* JS が transform を受け持つので、CSS の :active 縮小は重ねない */
+.lounge-btn--glass.jh-glass-motion { transition: background 0.2s ease, border-color 0.2s ease; }
+.lounge-btn--glass.jh-glass-motion:active { transform: none; }
+
+/* 縮小ナビのしずく: ホバー中のリンクの下へ滑っていくガラス */
+.jh-glass-navbar-drop {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    height: 32px;
+    width: 0;
+    border-radius: 999px;
+    background: rgba(var(--jh-fg-rgb), 0.12);
+    border: 1px solid rgba(var(--jh-fg-rgb), 0.14);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.22), 0 4px 14px rgba(0, 0, 0, 0.18);
+    pointer-events: none;
+    opacity: 0;
+    transform: translate(0, -50%);
+    transform-origin: 50% 50%;
+    will-change: transform, width;
+}
+.jh-glass-navbar--drop .jh-glass-navbar-link:hover { background: none; }
+
+@media (prefers-reduced-motion: reduce) {
+    .jh-glass-motion { will-change: auto; }
+    .jh-glass-motion.jh-glass-rippling::before { animation: none; }
+}
+
 /* ── Mobile menu (スマートフォン用ヘッダー) ──
    734px 以下ではナビ項目を並べきれないため、ロゴ + アカウント + メニューボタンだけを
    表示し、残りは全画面メニューにまとめる。 */
