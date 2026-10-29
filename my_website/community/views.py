@@ -1,18 +1,16 @@
 from django.contrib import messages
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
-import mimetypes
 
-from django.conf import settings
 from django.core.exceptions import PermissionDenied, ValidationError
-from django.http import FileResponse, Http404, HttpResponse
+from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 
 from accounts.mentions import notify_mentions
 from accounts.models import Notification
-from core.uploads import sanitize_image, sanitize_video
+from core.uploads import private_media_response, sanitize_image, sanitize_video
 
 from .models import Channel, ChannelMembership, Message
 
@@ -321,15 +319,7 @@ def message_media(request, message_id):
         # 存在も分からないよう、権限がないときも 404 にする
         raise Http404
 
-    if settings.MEDIA_ACCEL_REDIRECT:
-        response = HttpResponse()
-        response['X-Accel-Redirect'] = '/' + msg.media.name
-        response['Content-Type'] = mimetypes.guess_type(msg.media.name)[0] or 'application/octet-stream'
-    else:
-        try:
-            response = FileResponse(msg.media.open('rb'))
-        except FileNotFoundError:
-            raise Http404
+    response = private_media_response(request, msg.media)
     response['Cache-Control'] = 'private, max-age=3600'
     response['X-Content-Type-Options'] = 'nosniff'
     response['Content-Security-Policy'] = "default-src 'none'; img-src 'self' data:; media-src 'self'; style-src 'unsafe-inline'; sandbox"

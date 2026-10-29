@@ -8,13 +8,16 @@
 - 動画 (MP4 / MOV) は撮影位置のメタデータ (©xyz / ISO 6709 / XMP) を無効化する
 """
 import io
+import mimetypes
 import re
 import struct
 import uuid
 import warnings
 
 from django.core.exceptions import ValidationError
+from django.conf import settings
 from django.core.files.base import ContentFile
+from django.http import FileResponse, Http404, HttpResponse
 from django.utils.translation import gettext as _
 from PIL import Image, ImageOps, UnidentifiedImageError
 
@@ -220,3 +223,30 @@ def sanitize_video(uploaded):
     f.seek(0)
     uploaded.name = random_name(kind)
     return uploaded
+
+
+# ─── 権限を確認したあとの配信 ──────────────────────────────────
+
+# Caddy が Django への要求に付けるヘッダー (Caddyfile の header_up)。
+# 「この Caddy は X-Accel-Redirect を受け取ってファイルを送れる」という合図。
+# Caddyfile を変えたあと Caddy を作り直していない (古い設定のまま動いている) と付かないので、
+# そのときは Django が自分でファイルを返す。X-Accel-Redirect を理解しない Caddy に渡すと
+# 中身が空の応答がそのままブラウザに届き、画像が「?」になる (2026-10 の不具合)。
+ACCEL_REQUEST_HEADER = 'X-Media-Accel'
+
+
+def private_media_response(request, field_file):
+    """閲覧権限を確認済みのファイルを返す。
+
+    本番 (MEDIA_ACCEL_REDIRECT) で、前段の Caddy が対応していると合図したときだけ
+    X-Accel-Redirect で送信を Caddy に任せる (大きな動画でも Gunicorn を占有せず、Range にも対応)。
+    """
+    if settings.MEDIA_ACCEL_REDIRECT and request.headers.get(ACCEL_REQUEST_HEADER) == '1':
+        response = HttpResponse()
+        response['X-Accel-Redirect'] = '/' + field_file.name
+        response['Content-Type'] = mimetypes.guess_type(field_file.name)[0] or 'application/octet-stream'
+        return response
+    try:
+        return FileResponse(field_file.open('rb'))
+    except FileNotFoundError:
+        raise Http404

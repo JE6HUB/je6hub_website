@@ -303,7 +303,16 @@ class MessageMediaAccessTests(TestCase):
     @override_settings(MEDIA_ACCEL_REDIRECT=True)
     def test_production_hands_file_to_caddy(self):
         self.client.force_login(self.owner)
-        response = self.client.get(self.url)
+        response = self.client.get(self.url, headers={'X-Media-Accel': '1'})
         self.assertEqual(response['X-Accel-Redirect'], '/' + self.msg.media.name)
         self.assertEqual(response['Content-Type'], 'image/jpeg')
         self.assertEqual(response.content, b'')
+
+    @override_settings(MEDIA_ACCEL_REDIRECT=True)
+    def test_production_serves_file_itself_when_caddy_has_old_config(self):
+        # Caddyfile を更新しても Caddy を作り直していないと X-Media-Accel が付かない。
+        # そのとき X-Accel-Redirect を返すと空の応答が届き、画像が「?」になっていた
+        self.client.force_login(self.owner)
+        response = self.client.get(self.url)
+        self.assertNotIn('X-Accel-Redirect', response)
+        self.assertEqual(b''.join(response.streaming_content), TINY_JPEG)
