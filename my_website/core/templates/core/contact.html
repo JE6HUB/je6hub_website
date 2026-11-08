@@ -20,6 +20,11 @@
     .contact-icons a:hover { background: #3a3a3c; color: #fff; }
     .contact-icons a:focus-visible { outline: 2px solid var(--jh-accent); outline-offset: 3px; }
     @media (max-width: 767px) { .contact-grid { grid-template-columns: 1fr; } }
+    /* ハニーポット: 画面にも読み上げにも出さない (display:none だと見抜くボットがいるので画面外に置く) */
+    .contact-hp { position: absolute !important; left: -10000px; top: auto; width: 1px; height: 1px; overflow: hidden; }
+    .contact-errors { color: #ff6961; font-size: 14px; list-style: none; padding: 0; margin: 0 0 16px; }
+    .contact-field-error { color: #ff6961; font-size: 13px; margin-top: 4px; }
+    .contact-turnstile { min-height: 65px; margin-bottom: 16px; }
 </style>
 {% endblock %}
 
@@ -51,21 +56,38 @@
 
             <form method="post" action="{% url 'core:contact' %}" id="contactForm" novalidate>
                 {% csrf_token %}
+                {% if form.non_field_errors or form.form_ts.errors %}
+                <ul class="contact-errors" role="alert">
+                    {% for error in form.non_field_errors %}<li>{{ error }}</li>{% endfor %}
+                    {% for error in form.form_ts.errors %}<li>{{ error }}</li>{% endfor %}
+                </ul>
+                {% endif %}
+                {{ form.form_ts }}
+                <div class="contact-hp" aria-hidden="true">
+                    <label for="{{ form.website.id_for_label }}">Website</label>
+                    {{ form.website }}
+                </div>
                 <div class="row g-3 mb-3">
                     <div class="col-sm-6">
                         <label class="jh-label" for="{{ form.name.id_for_label }}">{% trans "お名前" %}</label>
                         {{ form.name }}
+                        {% for error in form.name.errors %}<div class="contact-field-error">{{ error }}</div>{% endfor %}
                     </div>
                     <div class="col-sm-6">
                         <label class="jh-label" for="{{ form.email.id_for_label }}">{% trans "メールアドレス" %}</label>
                         {{ form.email }}
+                        {% for error in form.email.errors %}<div class="contact-field-error">{{ error }}</div>{% endfor %}
                     </div>
                 </div>
                 <div class="mb-4">
                     <label class="jh-label" for="{{ form.message.id_for_label }}">{% trans "メッセージ" %}</label>
                     {{ form.message }}
+                    {% for error in form.message.errors %}<div class="contact-field-error">{{ error }}</div>{% endfor %}
                     <div class="text-end mt-1 text-muted" id="msgCounter" style="font-size: 12px;"></div>
                 </div>
+                {% if turnstile_site_key %}
+                <div class="contact-turnstile" id="contactTurnstile" data-sitekey="{{ turnstile_site_key }}" data-action="{{ turnstile_action }}" data-language="{{ LANGUAGE_CODE }}"></div>
+                {% endif %}
                 <button type="submit" class="jh-btn jh-btn-primary w-100">{% trans "送信" %}</button>
             </form>
         </div>
@@ -75,6 +97,31 @@
 {% endblock %}
 
 {% block extra_js %}
+{% if turnstile_site_key %}
+<script>
+/* Cloudflare Turnstile: 確認が済むまで送信ボタンを押せないようにする。
+   スクリプトが読めなかったとき (広告ブロッカー等) にボタンが押せないままにならないよう、描画するときに初めて止める。
+   テーマはこのサイトのカラースキーム (ライト/ダーク) に合わせるため、明示的に描画する。 */
+window.jhContactTurnstileLoad = function () {
+    var box = document.getElementById('contactTurnstile');
+    var btn = document.querySelector('#contactForm button[type="submit"]');
+    if (!box || !window.turnstile) return;
+    var mode = getComputedStyle(document.documentElement).colorScheme;
+    var setReady = function (ready) { if (btn) btn.disabled = !ready; };
+    setReady(false);
+    window.turnstile.render(box, {
+        sitekey: box.dataset.sitekey,
+        action: box.dataset.action,
+        language: box.dataset.language || 'auto',
+        theme: mode === 'light' ? 'light' : (mode === 'dark' ? 'dark' : 'auto'),
+        callback: function () { setReady(true); },
+        'expired-callback': function () { setReady(false); },
+        'error-callback': function () { setReady(false); },
+    });
+};
+</script>
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit&amp;onload=jhContactTurnstileLoad" async defer></script>
+{% endif %}
 <script>
 (function () {
     /* Style django form fields */

@@ -10,11 +10,11 @@ from django.utils import translation
 from django.utils.translation import get_language, gettext_lazy as _
 from django.views.decorators.http import require_POST
 
-from accounts.ratelimit import ratelimit
+from accounts.ratelimit import get_client_ip, ratelimit
 from blog.models import Post
 from blog.translation import localize_posts
 
-from . import guide_tour
+from . import guide_tour, turnstile
 from .forms import ContactForm
 from .models import Resume
 from .resume import HERO_IMAGES, ResumeError, apply_edit, localize
@@ -74,10 +74,21 @@ def resume_save_view(request):
     messages.success(request, _('Resume を更新しました。'))
     return JsonResponse({'ok': True})
 
+CONTACT_TURNSTILE_ACTION = 'contact'
+
+
 @ratelimit('contact', limit=5, period=3600, methods=('POST',))
 def contact_view(request):
     if request.method == 'POST':
         form = ContactForm(request.POST)
+        if form.is_valid() and (bot := form.bot_reason()):
+            # ボットには成功したように見せ、保存も通知もしない (別の手を試させないため)
+            logger.info('Dropped contact form submission (%s) from %s', bot, get_client_ip(request))
+            messages.success(request, _('メッセージが正常に送信されました。お問い合わせありがとうございます。'))
+            return redirect('core:contact')
+        if form.is_valid() and turnstile.is_enabled() and not turnstile.verify(
+                request.POST.get(turnstile.RESPONSE_FIELD), CONTACT_TURNSTILE_ACTION, get_client_ip(request)):
+            form.add_error(None, _('ボットではないことを確認できませんでした。もう一度お試しください。'))
         if form.is_valid():
             contact_message = form.save()
             notify_email = getattr(settings, 'CONTACT_NOTIFY_EMAIL', '')
@@ -101,4 +112,8 @@ def contact_view(request):
     else:
         form = ContactForm()
 
-    return render(request, 'core/contact.html', {'form': form})
+    return render(request, 'core/contact.html', {
+        'form': form,
+        'turnstile_site_key': settings.TURNSTILE_SITE_KEY if turnstile.is_enabled() else '',
+        'turnstile_action': CONTACT_TURNSTILE_ACTION,
+    })
