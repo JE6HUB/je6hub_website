@@ -12,6 +12,20 @@ from django.utils import translation as dj_translation
 from .models import ContactMessage
 
 
+def contact_data(seconds_ago=60, **extra):
+    """お問い合わせフォームの送信内容。フォームを seconds_ago 秒前に開いたことにする。"""
+    import time
+    from django.core import signing
+    from .forms import _TS_SALT
+    data = {
+        'name': 'Taro', 'email': 'taro@example.com', 'message': 'Hello there',
+        'website': '',
+        'form_ts': signing.Signer(salt=_TS_SALT).sign(str(int(time.time() - seconds_ago))),
+    }
+    data.update(extra)
+    return data
+
+
 class CoreViewsTests(TestCase):
     def test_home_page_loads(self):
         response = self.client.get(reverse('core:home'))
@@ -66,21 +80,13 @@ class CoreViewsTests(TestCase):
             self.assertContains(response, f'href="{url}"')
 
     def test_contact_form_submission_saves_message(self):
-        response = self.client.post(reverse('core:contact'), {
-            'name': 'Taro',
-            'email': 'taro@example.com',
-            'message': 'Hello there',
-        })
+        response = self.client.post(reverse('core:contact'), contact_data())
         self.assertEqual(response.status_code, 302)
         self.assertEqual(ContactMessage.objects.count(), 1)
 
     @override_settings(CONTACT_NOTIFY_EMAIL='admin@example.com', DEFAULT_FROM_EMAIL='noreply@example.com')
     def test_contact_form_submission_sends_notification(self):
-        self.client.post(reverse('core:contact'), {
-            'name': 'Taro',
-            'email': 'taro@example.com',
-            'message': 'Hello there',
-        })
+        self.client.post(reverse('core:contact'), contact_data())
         self.assertEqual(len(mail.outbox), 1)
         self.assertIn('Taro', mail.outbox[0].subject)
 
@@ -88,11 +94,7 @@ class CoreViewsTests(TestCase):
     def test_contact_notification_failure_is_logged_and_message_still_saved(self):
         with mock.patch('core.views.send_mail', side_effect=OSError('smtp down')), \
                 self.assertLogs('core.views', level='ERROR') as logs:
-            response = self.client.post(reverse('core:contact'), {
-                'name': 'Taro',
-                'email': 'taro@example.com',
-                'message': 'Hello there',
-            })
+            response = self.client.post(reverse('core:contact'), contact_data())
         self.assertEqual(response.status_code, 302)
         self.assertEqual(ContactMessage.objects.count(), 1)
         self.assertIn('smtp down', '\n'.join(logs.output))
@@ -191,7 +193,7 @@ class ContactRateLimitTests(TestCase):
     def test_contact_form_rate_limited(self):
         from django.core.cache import cache
         cache.clear()
-        data = {'name': 'a', 'email': 'a@example.com', 'message': 'hi'}
+        data = contact_data()
         for _ in range(5):
             self.client.post(reverse('core:contact'), data)
         self.assertEqual(self.client.post(reverse('core:contact'), data).status_code, 429)
@@ -506,3 +508,118 @@ class GuideTourTests(TestCase):
         self.assertEqual(data['labels']['skip_step'], 'Skip this step')
         start = next(c for c in data['chapters'] if c['id'] == 'start')
         self.assertTrue(start['steps'][0]['page'].startswith('^/en/'))
+
+
+class ContactBotProtectionTests(TestCase):
+    def setUp(self):
+        from django.core.cache import cache
+        cache.clear()
+
+    def test_form_has_hidden_honeypot_and_timestamp(self):
+        response = self.client.get(reverse('core:contact'))
+        self.assertContains(response, 'name="website"')
+        self.assertContains(response, 'name="form_ts"')
+        self.assertContains(response, 'class="contact-hp" aria-hidden="true"')
+
+    def test_honeypot_submission_is_dropped_but_looks_successful(self):
+        response = self.client.post(reverse('core:contact'), contact_data(website='http://spam.example'), follow=True)
+        self.assertEqual(ContactMessage.objects.count(), 0)
+        self.assertContains(response, 'メッセージが正常に送信されました')
+
+    def test_too_fast_submission_is_dropped(self):
+        response = self.client.post(reverse('core:contact'), contact_data(seconds_ago=0))
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(ContactMessage.objects.count(), 0)
+
+    @override_settings(CONTACT_NOTIFY_EMAIL='admin@example.com')
+    def test_dropped_submission_sends_no_mail(self):
+        self.client.post(reverse('core:contact'), contact_data(website='x'))
+        self.assertEqual(len(mail.outbox), 0)
+
+    def test_missing_or_forged_timestamp_is_rejected(self):
+        for ts in ('', '1700000000', '1700000000:forged'):
+            response = self.client.post(reverse('core:contact'), contact_data(form_ts=ts))
+            self.assertEqual(response.status_code, 200)
+            self.assertContains(response, 'ページの有効期限が切れました')
+        self.assertEqual(ContactMessage.objects.count(), 0)
+
+    def test_expired_timestamp_is_rejected(self):
+        response = self.client.post(reverse('core:contact'), contact_data(seconds_ago=60 * 60 * 25))
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(ContactMessage.objects.count(), 0)
+
+    def test_turnstile_off_without_secret(self):
+        with override_settings(TURNSTILE_SECRET_KEY=''):
+            response = self.client.get(reverse('core:contact'))
+        self.assertNotContains(response, 'challenges.cloudflare.com')
+
+
+@override_settings(TURNSTILE_SECRET_KEY='test-secret', TURNSTILE_SITE_KEY='0xSITEKEY',
+                   TURNSTILE_HOSTNAMES=['je6hub.com'])
+class ContactTurnstileTests(TestCase):
+    def setUp(self):
+        from django.core.cache import cache
+        cache.clear()
+
+    def _siteverify(self, payload):
+        import json
+        response = mock.MagicMock()
+        response.read.return_value = json.dumps(payload).encode()
+        response.__enter__.return_value = response
+        return mock.patch('core.turnstile.urllib.request.urlopen', return_value=response)
+
+    def test_widget_rendered_with_site_key_and_action(self):
+        response = self.client.get(reverse('core:contact'))
+        self.assertContains(response, 'data-sitekey="0xSITEKEY"')
+        self.assertContains(response, 'data-action="contact"')
+        self.assertContains(response, 'https://challenges.cloudflare.com/turnstile/v0/api.js')
+        self.assertNotContains(response, 'test-secret')
+
+    def test_valid_token_saves_message(self):
+        ok = {'success': True, 'action': 'contact', 'hostname': 'je6hub.com'}
+        with self._siteverify(ok) as urlopen:
+            response = self.client.post(reverse('core:contact'),
+                                        contact_data(**{'cf-turnstile-response': 'tok'}),
+                                        HTTP_X_FORWARDED_FOR='203.0.113.9')
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(ContactMessage.objects.count(), 1)
+        request = urlopen.call_args[0][0]
+        self.assertEqual(request.full_url, 'https://challenges.cloudflare.com/turnstile/v0/siteverify')
+        body = request.data.decode()
+        self.assertIn('secret=test-secret', body)
+        self.assertIn('response=tok', body)
+        self.assertIn('remoteip=203.0.113.9', body)
+
+    def test_missing_token_is_rejected_without_calling_cloudflare(self):
+        with self._siteverify({'success': True}) as urlopen:
+            response = self.client.post(reverse('core:contact'), contact_data())
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'ボットではないことを確認できませんでした')
+        self.assertEqual(ContactMessage.objects.count(), 0)
+        urlopen.assert_not_called()
+
+    def test_rejected_wrong_action_or_hostname_token(self):
+        for payload in (
+            {'success': False, 'error-codes': ['invalid-input-response']},
+            {'success': False, 'error-codes': ['timeout-or-duplicate']},  # 使い回し
+            {'success': True, 'action': 'signup', 'hostname': 'je6hub.com'},
+            {'success': True, 'action': 'contact', 'hostname': 'evil.example'},
+        ):
+            with self._siteverify(payload):
+                response = self.client.post(reverse('core:contact'),
+                                            contact_data(**{'cf-turnstile-response': 'tok'}))
+            self.assertEqual(response.status_code, 200, payload)
+        self.assertEqual(ContactMessage.objects.count(), 0)
+
+    def test_network_error_fails_closed(self):
+        import urllib.error
+        with mock.patch('core.turnstile.urllib.request.urlopen', side_effect=urllib.error.URLError('down')), \
+                self.assertLogs('core.turnstile', level='ERROR'):
+            response = self.client.post(reverse('core:contact'), contact_data(**{'cf-turnstile-response': 'tok'}))
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(ContactMessage.objects.count(), 0)
+
+    def test_honeypot_checked_before_turnstile(self):
+        with self._siteverify({'success': True}) as urlopen:
+            self.client.post(reverse('core:contact'), contact_data(website='x'))
+        urlopen.assert_not_called()

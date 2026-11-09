@@ -2788,3 +2788,11 @@ msgstr "Follow the photos %(name)s took on their travels, on a map."
 #: blog/feeds.py
 msgid "JE6HUB.com のメンバーが書いた最新のブログ記事"
 msgstr "The latest blog posts by JE6HUB.com members"
+
+#: core/forms.py
+msgid "ページの有効期限が切れました。再読み込みしてからもう一度送信してください。"
+msgstr "This page has expired. Please reload it and send your message again."
+
+#: core/views.py
+msgid "ボットではないことを確認できませんでした。もう一度お試しください。"
+msgstr "We couldn't verify that you're not a bot. Please try again."

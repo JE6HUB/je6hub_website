@@ -35,6 +35,13 @@ MAPBOX_EDITOR_STYLE = os.environ.get('MAPBOX_EDITOR_STYLE', 'mapbox://styles/map
 AZURE_TRANSLATOR_KEY = os.environ.get('AZURE_TRANSLATOR_KEY', '')
 AZURE_TRANSLATOR_REGION = os.environ.get('AZURE_TRANSLATOR_REGION', '')
 AZURE_TRANSLATOR_ENDPOINT = os.environ.get('AZURE_TRANSLATOR_ENDPOINT', 'https://api.cognitive.microsofttranslator.com')
+# Cloudflare Turnstile (お問い合わせフォームのボット対策)
+# シークレットキーが空なら Turnstile を使わない (開発・テスト用)。ハニーポットと送信時間の確認は常に有効。
+# サイトキーはページに載る公開値なので既定値に入れてある。シークレットキーは .env にだけ置く。
+TURNSTILE_SITE_KEY = os.environ.get('TURNSTILE_SITE_KEY', '0x4AAAAAAF4sxAlzT_4YRRpi')
+TURNSTILE_SECRET_KEY = os.environ.get('TURNSTILE_SECRET_KEY', '')
+# siteverify が返す hostname の許可リスト。空なら ALLOWED_HOSTS を使う
+TURNSTILE_HOSTNAMES = [h.strip() for h in os.environ.get('TURNSTILE_HOSTNAMES', '').split(',') if h.strip()]
 # 保存のリクエストを待たせないよう、翻訳は別スレッドで行う (テストでは同期にする)
 BLOG_TRANSLATE_ASYNC = True
 
